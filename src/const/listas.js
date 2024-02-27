@@ -1,0 +1,186 @@
+const url =
+  "https://img.freepik.com/vector-gratis/comida-bebida-logo-comida-sana-plana-dibujada-mano_23-2149632256.jpg?w=2000";
+const url2 =
+  "https://dcassetcdn.com/design_img/6165/17990/17990_139608_6165_image.jpg";
+export const datacards = [
+  {
+    id: 1,
+    urlImage: url,
+    title: "Tacos el pariente",
+    emails: ["bryantsamuel.jaramillo@bbva.com", "bryantjz95@gmail.com"],
+    phones: ["7223983673"],
+    social: {
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      web: "",
+    },
+    tags: [
+      { label: "A 500m", color: "info" },
+      { label: "Comida Italiana", color: "warning" },
+      { label: "$70.00 - $500.00", color: "secondary" },
+    ],
+  },
+  // {
+  //   id: 2,
+  //   urlImage: url2,
+  //   title: "Tamales Sully ",
+  //   emails: ["tamalitos@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 200m", color: "info" },
+  //     { label: "Comida Ambulante", color: "warning" },
+  //     { label: "$10.00 - $50.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 3,
+  //   urlImage: url,
+  //   title: "Tacos el pariente",
+  //   emails: ["bryantsamuel.jaramillo@bbva.com", "bryantjz95@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 500m", color: "info" },
+  //     { label: "Comida Italiana", color: "warning" },
+  //     { label: "$70.00 - $500.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 4,
+  //   urlImage: url2,
+  //   title: "Tamales Sully ",
+  //   emails: ["tamalitos@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 200m", color: "info" },
+  //     { label: "Comida Ambulante", color: "warning" },
+  //     { label: "$10.00 - $50.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 5,
+  //   urlImage: url,
+  //   title: "Tacos el pariente",
+  //   emails: ["bryantsamuel.jaramillo@bbva.com", "bryantjz95@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 500m", color: "info" },
+  //     { label: "Comida Italiana", color: "warning" },
+  //     { label: "$70.00 - $500.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 6,
+  //   urlImage: url2,
+  //   title: "Tamales Sully ",
+  //   emails: ["tamalitos@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 200m", color: "info" },
+  //     { label: "Comida Ambulante", color: "warning" },
+  //     { label: "$10.00 - $50.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 7,
+  //   urlImage: url,
+  //   title: "Tacos el pariente",
+  //   emails: ["bryantsamuel.jaramillo@bbva.com", "bryantjz95@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 500m", color: "info" },
+  //     { label: "Comida Italiana", color: "warning" },
+  //     { label: "$70.00 - $500.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 8,
+  //   urlImage: url2,
+  //   title: "Tamales Sully ",
+  //   emails: ["tamalitos@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 200m", color: "info" },
+  //     { label: "Comida Ambulante", color: "warning" },
+  //     { label: "$10.00 - $50.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 9,
+  //   urlImage: url,
+  //   title: "Tacos el pariente",
+  //   emails: ["bryantsamuel.jaramillo@bbva.com", "bryantjz95@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 500m", color: "info" },
+  //     { label: "Comida Italiana", color: "warning" },
+  //     { label: "$70.00 - $500.00", color: "secondary" },
+  //   ],
+  // },
+  // {
+  //   id: 10,
+  //   urlImage: url2,
+  //   title: "Tamales Sully ",
+  //   emails: ["tamalitos@gmail.com"],
+  //   phones: ["7223983673"],
+  //   social: {
+  //     facebook: "",
+  //     instagram: "",
+  //     twitter: "",
+  //     web: "",
+  //   },
+  //   tags: [
+  //     { label: "A 200m", color: "info" },
+  //     { label: "Comida Ambulante", color: "warning" },
+  //     { label: "$10.00 - $50.00", color: "secondary" },
+  //   ],
+  // },
+];
