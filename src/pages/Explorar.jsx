@@ -7,10 +7,10 @@ import PlayForWorkIcon from "@mui/icons-material/PlayForWork";
 import { Result, Typography } from "antd";
 import useExplorar from "@Hooks/generales/useExplorar";
 import LocationOffIcon from "@mui/icons-material/LocationOff";
+import { namePage } from "@Utils/listMessages";
 
 const Explorar = () => {
-  const { datacards, geolocation, seccionDestinoRef, scrollToSection } =
-    useExplorar();
+  const { datacards, geolocation, seccionDestinoRef, scrollToSection } = useExplorar();
 
   if (geolocation.error) {
     return (
@@ -31,22 +31,7 @@ const Explorar = () => {
       </Box>
     );
   }
-  if (!geolocation.location) {
-    return (
-      <Backdrop
-        sx={{
-          color: "#fff",
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          backdropFilter: "blur(4px)",
-        }}
-        open={!geolocation.location}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    );
-  }
   
-
   return (
     <GeneralContent >
       <Parallax bg={Bg5}>
@@ -68,7 +53,7 @@ const Explorar = () => {
               justifyContent: "center",
             }}
           >
-            <Typography className="titlePrimary title">kComer</Typography>
+            <Typography className="titlePrimary title">{namePage}</Typography>
 
             <Box className="bg" onClick={scrollToSection}></Box>
             <Box className="button" onClick={scrollToSection}>

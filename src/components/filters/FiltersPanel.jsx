@@ -10,17 +10,16 @@ import {
   TextField,
 } from "@mui/material";
 import { Card, Drawer } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { axiosGet } from "@Config/axios/methodRequest";
 
 const options = ["Option 1", "Option 2"];
 
 const FiltersPanel = () => {
-  const { location } = useGeolocation();
+  const { address } = useGeolocation();
   const { visible } = useFilterMenu();
   const [open, setOpen] = useState(false);
-  const [formatAddress, setFormatAddress] = useState(null);
+
   const [value, setValue] = useState();
 
   const showDrawer = () => {
@@ -30,20 +29,6 @@ const FiltersPanel = () => {
     setOpen(false);
   };
 
-  const getAddress = async () => {
-    const data = await axiosGet({
-      url: `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location?.latitude},${location?.longitude}&location_type=ROOFTOP&result_type=street_address&key=AIzaSyBiGoKFBRAGYJlOGYP0cUdxZXxE3qCIeV0`,
-    });
-    const results = data?.results[0];
-    const splitAddress = results?.formatted_address.split(",");
-    setFormatAddress(`${splitAddress[1]}, ${splitAddress[2]} `);
-  };
-
-  useEffect(() => {
-    if (location) {
-      getAddress();
-    }
-  }, [location]);
 
   return (
     <>
@@ -51,7 +36,7 @@ const FiltersPanel = () => {
         sx={{
           zIndex: 1000,
           position: "fixed",
-          top: { xs: "56px", sm: "56px", md: "64px" },
+          top: { xs: "0px", sm: "56px", md: "64px" },
           width: "100%",
           padding: "3px",
           // backgroundColor: "rgba(150,30,173,0.5)",
@@ -70,7 +55,7 @@ const FiltersPanel = () => {
           // borderBottom: "1px solid rgb(255, 64, 59)"
         }}
       >
-        <p>{formatAddress}</p>
+        <p>{address}</p>
         <IconButton onClick={() => showDrawer(true)}>
           <Search />
         </IconButton>

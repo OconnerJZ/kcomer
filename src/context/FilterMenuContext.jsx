@@ -1,23 +1,28 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
-const FilterMenuContext = createContext(null);
+// Inicializamos el contexto como undefined para poder validar
+const FilterMenuContext = createContext(undefined);
 
+// Proveedor que envuelve los componentes que necesitan acceder al contexto
 const FilterMenuProvider = ({ children }) => {
   const [visible, setVisible] = useState(false);
-
+  const value = useMemo(() => ({ visible, setVisible }), [visible]);
   return (
-    <FilterMenuContext.Provider value={{ visible, setVisible }}>
+    <FilterMenuContext.Provider value={value}>
       {children}
     </FilterMenuContext.Provider>
   );
 };
 
-export default FilterMenuProvider;
-
+// Hook personalizado para usar el contexto
 export const useFilterMenu = () => {
   const context = useContext(FilterMenuContext);
-  if (context === undefined) {
-    throw new Error("Error de aplicacion en creacion de context.");
+  if (!context) {
+    throw new Error(
+      "useFilterMenu debe usarse dentro de un FilterMenuProvider"
+    );
   }
   return context;
 };
+
+export default FilterMenuProvider;

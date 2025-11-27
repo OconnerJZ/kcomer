@@ -51,14 +51,14 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => {
           aria-label="radius button group"
           sx={{ "--ButtonGroup-radius": "40px" }}
         >
-          <Button onClick={() => onMovement({ movement: "photo" })}>
-            <PhotoLibraryIcon sx={{ fontSize: "36px" }} />
+          <Button onClick={() => onMovement({ movement: "menu" })}>
+            <MenuBook sx={{ fontSize: "36px" }} />
           </Button>
           <Button onClick={() => onMovement({ movement: "location" })}>
             <LocationOn sx={{ fontSize: "36px" }} />
           </Button>
-          <Button onClick={() => onMovement({ movement: "menu" })}>
-            <MenuBook sx={{ fontSize: "36px" }} />
+          <Button onClick={() => onMovement({ movement: "photo" })}>
+            <PhotoLibraryIcon sx={{ fontSize: "36px" }} />
           </Button>
           <Button onClick={() => onMovement({ movement: "review" })}>
             <Reviews sx={{ fontSize: "36px" }} />

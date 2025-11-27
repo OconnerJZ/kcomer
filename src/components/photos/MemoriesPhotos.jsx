@@ -1,8 +1,7 @@
-import React from "react";
 
 const MemoriesPhotos = ({ imgs = [] }) => {
   const [img1, img2, img3, img4] = imgs;
-  console.log(img4);
+
   return (
     <div className="card-container">
       {img3 !== undefined && (

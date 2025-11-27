@@ -1,4 +1,6 @@
+import { axiosGet } from "@Config/axios/methodRequest";
 import { notification } from "antd";
+import { API_KEY_MAPS } from "./enviroments";
 
 const openNotification = () => {
   notification.info({
@@ -7,21 +9,24 @@ const openNotification = () => {
   });
 };
 
-export const calls = (numeroTelefono) => {
+export const isMobile = () => {
   const esDispositivoMovil =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
+    return esDispositivoMovil
+}
 
-  if (esDispositivoMovil) {
-    window.location.href = `tel:${numeroTelefono}`;
-  } else {
-    openNotification();
+export const calls = (numeroTelefono) => {
+  if (isMobile()) {
+    globalThis.location.href = `tel:${numeroTelefono}`;
+    return;
   }
+  openNotification();
 };
 
 export const sendEmail = (direccionCorreo) => {
-  window.location.href = `mailto:${direccionCorreo}`;
+  globalThis.location.href = `mailto:${direccionCorreo}`;
 };
 
 export const separateByGroups = ({ lista = [], limited = 3 }) => {
@@ -32,3 +37,4 @@ export const separateByGroups = ({ lista = [], limited = 3 }) => {
   }
   return groups;
 };
+

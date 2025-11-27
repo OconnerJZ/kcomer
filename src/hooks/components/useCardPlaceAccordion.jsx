@@ -76,10 +76,10 @@ const phones = (phones) => {
 const useCardPlaceAccordion = ({ datacard }) => {
   const data = [
     {
-      label: "Correo electrónico",
-      icon: <Email style={{ fontSize: "23px" }} />,
+      label: "Redes Sociales",
+      icon: <Diversity3 style={{ fontSize: "23px" }} />,
       color: "primary",
-      details: emails(datacard?.emails),
+      details: <CardPlaceRedes />,
       defaultExpanded: false,
     },
     {
@@ -90,12 +90,12 @@ const useCardPlaceAccordion = ({ datacard }) => {
       defaultExpanded: false,
     },
     {
-      label: "Redes Sociales",
-      icon: <Diversity3 style={{ fontSize: "23px" }} />,
+      label: "Correo electrónico",
+      icon: <Email style={{ fontSize: "23px" }} />,
       color: "danger",
-      details: <CardPlaceRedes />,
+      details: emails(datacard?.emails),
       defaultExpanded: false,
-    },
+    }
   ];
   return { data };
 };

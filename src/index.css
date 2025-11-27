@@ -1,8 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Megrim&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Pacifico&display=swap");
 
-*{
-  font-family: 'Quicksand', sans-serif !important;
+:root {
+  --red: #ff4b45; /* hero */
+  --accent: #ffd447; /* logo accent */
+  --dark: #222;
+  --muted: #f6f6f6;
+  --card-bg: #ffffff;
+}
+
+* {
+  font-family: "Quicksand", sans-serif !important;
 }
 
 .title {
@@ -28,8 +37,6 @@
 }
 
 .bg-card-explore {
-  /* background: linear-gradient(rgba(255, 64, 59, 0.2), rgba(255, 255, 255, 0.6)),
-    url(./assets/images/qscome-bg-6.png); */
   background: linear-gradient(
       rgba(255, 255, 255, 0.75),
       rgba(255, 255, 255, 0.8)
@@ -138,7 +145,7 @@
   text-align: center;
 }
 
-.ant-notification{
+.ant-notification {
   z-index: 9999;
 }
 .sticky-button-container {
@@ -162,19 +169,21 @@
   }
 }
 
-.filterPanel .ant-card-head{
+.filterPanel .ant-card-head {
   text-align: center;
 }
 
-.panelFilter .ant-drawer-body{
-  background-color: rgba(230,81,62,1);
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(255,255,255,0.4)), url(./assets/images/qscome-header-1.png);
+.panelFilter .ant-drawer-body {
+  background-color: rgba(230, 81, 62, 1);
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.2),
+      rgba(255, 255, 255, 0.4)
+    ),
+    url(./assets/images/qscome-header-1.png);
   background-repeat: repeat-x;
   background-position: top;
   background-size: auto;
-
 }
-
 
 @media only screen and (max-device-width: 1366px) {
   .parallax {
@@ -189,5 +198,217 @@
   .bg,
   .button {
     margin-top: 250px;
+  }
+}
+
+.hero {
+  background: var(--red);
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 1)
+    ),
+    url(./assets/images/qsome-bg-4.jpg);
+  background-repeat: repeat-x;
+  background-position: top;
+  background-attachment: scroll;
+  background-size: cover;
+  position: relative;
+  text-align: center;
+  padding: 110px 20px ;
+  overflow: hidden;
+}
+
+.logo {
+  font-family: "Pacifico", cursive !important;
+  font-size: 80px;
+  color: var(--red);
+  -webkit-text-stroke: 1px white;
+  letter-spacing: 2px;
+  margin: 0 0 18px 0;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
+}
+
+.hero-sub {
+  display: none;
+  color: rgba(255, 255, 255, 1);
+  font-weight: 900;
+  margin: 0 auto;
+  max-width: 90%;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.pkg {
+  background: var(--card-bg);
+  border-radius: 16px;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 14px 40px rgba(20, 20, 20, 0.15);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  padding: 26px 20px 24px;
+  min-height: auto;
+  max-width: 300px;
+}
+.pkg:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 50px rgba(20, 20, 20, 0.25);
+}
+.pkg .box-art {
+  will-change: transform, opacity;
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center top;
+  opacity: 0.15;
+  pointer-events: none;
+  height: 80px;
+  inset: 10px 18px auto 18px;
+  top: -10px;
+} 
+.pkg h3 {
+  margin: 72px 0 10px 0;
+  color: var(--dark);
+  font-size: 18px;
+}
+.pkg p {
+  font-size: 14px;
+  margin: 0;
+  color: #555;
+}
+
+.pkg .sticker-1 {
+   background-image: url(./assets/images/sticker-1.png);
+}
+.pkg .sticker-2 {
+   background-image: url(./assets/images/sticker-2.png);
+}
+.pkg .sticker-3 {
+   background-image: url(./assets/images/sticker-3.png);
+}
+.pkg .sticker-4 {
+   background-image: url(./assets/images/sticker-4.png);
+}
+.pkg .sticker-5 {
+   background-image: url(./assets/images/sticker-5.png);
+}
+.pkg .sticker-6 {
+   background-image: url(./assets/images/sticker-6.png);
+}
+.pkg .sticker-7 {
+   background-image: url(./assets/images/sticker-7.png);
+}
+.pkg .sticker-8 {
+   background-image: url(./assets/images/sticker-8.png);
+}
+
+@keyframes sprayPulse {
+  0% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(-4px) scale(1.03);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(0) scale(1.03);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(0) scale(1.03);
+  }
+  0% {
+    opacity: 0.9;
+    transform: translateY(0) scale(1.03);
+  }
+}
+.pkg:hover .box-art {
+  animation: sprayPulse 1.8s ease-in-out;
+} /* etiqueta/pegatina superior derecha */
+.pkg .sticker-tag {
+  position: absolute;
+  background: #ffefc5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--red);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  transform: rotate(-8deg);
+    width: 64px;
+  height: 64px;
+  right: -8px;
+  top: -18px;
+  font-size: 14px;
+}
+
+@media (min-width: 375px) {
+  .pkg {
+    width: 335px !important;
+    max-width: 375px;
+  }
+  .footer{
+    font-size: 11px;
+  }
+}
+/* ----- TABLET (>= 600px) ----- */
+@media (min-width: 600px) {
+  .hero {
+    padding: 90px 20px;
+  }
+
+  .logo {
+    font-size: 105px;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    max-width: 600px;
+  }
+
+  .pkg {
+    padding: 30px 24px 26px;
+    max-width: 350px;
+  }
+
+  .pkg h3 {
+    font-size: 19px;
+  }
+}
+
+/* ----- DESKTOP (>= 900px) ----- */
+@media (min-width: 900px) {
+  .hero {
+    padding: 110px 20px;
+    background-attachment: fixed; /* vuelve a activarse en desktop */
+  }
+
+  .logo {
+    font-size: 135px;
+    letter-spacing: 4px;
+  }
+
+  .hero-sub {
+    display: block;
+    font-size: 18px;
+    max-width: 760px;
+  }
+
+  .pkg {
+    max-width: 350px;
+    min-height: 220px;
+  }
+
+  .pkg .sticker-tag {
+    width: 84px;
+    height: 84px;
+    font-size: 16px;
+  }
+
+  .pkg .box-art {
+    height: 110px;
+    top: -15px;
   }
 }

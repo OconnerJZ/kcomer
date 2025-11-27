@@ -1,84 +1,105 @@
 import GeneralContent from "@Components/layout/GeneralContent";
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
+import { namePage, nosotros } from "@Utils/listMessages";
 
 const Nosotros = () => {
   return (
-    <GeneralContent>
-      <Box component="article" sx={{ margin: "5%", textAlign:"justify" }}>
-        <h1>Nosotros</h1>
-
-        <hr />
-
-        <p style={{ fontSize: "18px" }}>
-          Bienvenido a kComer, tu destino para descubrir y disfrutar de una
-          amplia variedad de experiencias culinarias excepcionales.
+    <GeneralContent >
+      <Box component="header" className="hero">
+        <div className="logo">{namePage}</div>
+        <p className="hero-sub">
+          {nosotros.spot}
         </p>
-        <br />
-        <p style={{ fontSize: "18px" }}>
-          Nuestra Misión en kComer, nos apasiona conectar a los amantes de la
-          comida con los mejores establecimientos gastronómicos. Nuestra misión
-          es proporcionar una plataforma intuitiva y versátil que permita a los
-          usuarios explorar, descubrir y compartir sus experiencias culinarias
-          en una comunidad vibrante.
-        </p>
-        <br />
-        <p style={{ fontSize: "18px" }}> ¿Qué Ofrecemos? </p>
-        <br />
-        <p style={{ fontSize: "18px" }}>
-          <ol style={{listStyle: "square"}}>
-            <li>
-              <b>Exploración Sin Límites: </b> Descubre una diversidad de
-              restaurantes, cafés, y lugares de comida de todo tipo, ya sea que
-              busques cocina local, platos internacionales o experiencias
-              gastronómicas únicas.
-            </li>
-            <li>
-              <b>Interacción y Comunidad: </b> Comparte tus opiniones, reseñas y
-              recomendaciones, y conecta con otros entusiastas de la comida.
-            </li>
-            <li>
-              <b>Facilidad y Comodidad: </b> Explora menús, conoce horarios,
-              reserva mesas y ordena comida desde la comodidad de tu hogar.
-            </li>
-          </ol>
-        </p>
-        <br />
-        <p style={{ fontSize: "18px" }}>¿Cómo Funciona? </p>
-        <br />
-        <p style={{ fontSize: "18px" }}>
-          En kComer, hemos creado una plataforma multifacética que ofrece
-          múltiples servicios para hacer tu experiencia culinaria más
-          placentera:
-          <ol style={{listStyle: "square"}}>
-            <li>
-              <b>Exploración de Negocios: </b> Descubre una amplia gama de
-              negocios de comida, desde restaurantes familiares hasta lugares
-              especializados en cocinas específicas.
-            </li>
-            <li>
-              <b>Exploración de Menús: </b> Explora los menús detallados con
-              fotos y precios, y ordena tus platos favoritos.
-            </li>
-            <li>
-              <b>Reseñas y Recomendaciones: </b> Comparte tus experiencias, vota
-              por tus lugares favoritos y encuentra las recomendaciones de otros
-              usuarios.
-            </li>
-            <li>
-              <b>Reservas y Pedidos: </b> Reserva una mesa o realiza pedidos
-              para llevar, todo desde una plataforma conveniente.
-            </li>
-          </ol>
-        </p>
-        <br />
-        <p style={{ fontSize: "18px" }}>
-          Nuestro Compromiso En kComer, estamos comprometidos a ofrecer una
-          experiencia excepcional, garantizando la calidad, la autenticidad y la
-          conveniencia en cada interacción. Valoramos tus opiniones y trabajamos
-          continuamente para mejorar y enriquecer tu experiencia culinaria.
-          <br />
-          ¡Únete a kComer y sumérgete en el emocionante mundo de la comida!
-        </p>
+      </Box>
+      <Box component="main" sx={{ display: "flex !important", flexDirection:"column" }} mt={1} mb={1}>
+        <Box mb={2}>
+          <Grid
+            container
+            spacing={{ xs: 2, md: 3 }}
+            columns={{ xs: 4, sm: 8, md: 12 }}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-7" aria-hidden></div>
+                <div className="sticker-tag">Fresh</div>
+                <h3>Explora negocios</h3>
+                <p>
+                  Encuentra lugares nuevos según tu humor y tus antojos del día.
+                </p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-2" aria-hidden></div>
+                <div className="sticker-tag">Top</div>
+                <h3>Habla con la comunidad</h3>
+                <p>
+                  Califica, deja tus reseñas, comparte tus fotos y mira qué
+                  recomiendan otros comelones como tú.
+                </p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-3" aria-hidden></div>
+                <div className="sticker-tag">Easy</div>
+                <h3>Todo desde tu cel o compu</h3>
+                <p>
+                  Revisa menús, checa horarios, reserva o pide para llevar sin
+                  complicarte la vida.
+                </p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+          </Grid>
+        </Box>
+        <Box mt={2}>
+          <Grid
+            container
+            spacing={{ xs: 2, md: 4 }}
+            columns={{ xs: 4, sm: 8, md: 12 }}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-1" aria-hidden></div>
+                <div className="sticker-tag">1</div>
+                <h3>Descubre</h3>
+                <p>Explora según barrio, estilo o antojo del día.</p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-8" aria-hidden></div>
+                <div className="sticker-tag">2</div>
+                <h3>Explora menús</h3>
+                <p>Mira fotos, precios y todo lo que necesitas para decidir.</p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+              <div className="pkg">
+                <div className="box-art sticker-4" aria-hidden></div>
+                <div className="sticker-tag">3</div>
+                <h3>Reseñas reales</h3>
+                <p>
+                  Comparte tu experiencia y descubre qué lugares valen la pena.
+                </p>
+                <div className="corner-sticker" aria-hidden></div>
+              </div>
+            </Grid>
+          </Grid>
+        </Box>
       </Box>
     </GeneralContent>
   );

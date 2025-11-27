@@ -1,10 +1,8 @@
 import AspectRatio from "@mui/joy/AspectRatio";
-import Link from "@mui/joy/Link";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";
 import Chip from "@mui/joy/Chip";
 import Typography from "@mui/joy/Typography";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 const CardMenuList = () => {
   return (

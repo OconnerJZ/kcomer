@@ -16,10 +16,12 @@
     "@mui/icons-material": "^5.14.7",
     "@mui/joy": "^5.0.0-beta.4",
     "@mui/material": "^5.14.7",
+    "@mui/x-date-pickers": "^5.0.15",
     "@reduxjs/toolkit": "^1.9.7",
     "antd": "^5.8.5",
     "antd-mobile": "^5.32.2",
     "axios": "^1.5.1",
+    "dayjs": "^1.11.19",
     "iconify": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -29,11 +31,13 @@
   "devDependencies": {
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^4.0.3",
     "eslint": "^8.45.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "vite": "^4.4.5"
+    "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.1.0"
   }
 }

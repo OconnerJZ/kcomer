@@ -20,14 +20,18 @@ export const StyledCardContent = styled(CardContent)`
   height: auto;
 `;
 
-export const StyledFront = styled(StyledCardContent)`
+export const StyledFront = styled(StyledCardContent, {
+  shouldForwardProp: (props) => props !== "flipped",
+})`
   transform: ${(props) => (props.flipped ? "rotateY(180deg)" : "rotateY(0)")};
   backface-visibility: hidden;
   transition: transform 0.5s;
   position: ${(props) => (props.flipped ? "absolute" : "relative")};
 `;
 
-export const StyledBack = styled(StyledCardContent)`
+export const StyledBack = styled(StyledCardContent, {
+  shouldForwardProp: (props) => props !== "flipped",
+})`
   transform: ${(props) => (props.flipped ? "rotateY(0)" : "rotateY(-180deg)")};
   backface-visibility: hidden;
   transition: transform 0.5s; 

@@ -4,6 +4,7 @@ import { Box, Toolbar } from "@mui/material";
 import Content from "./Content";
 import Bg from "@Assets/images/qscome-bg-6.png";
 import FiltersPanel from "@Components/filters/FiltersPanel";
+import { namePage } from "@Utils/listMessages";
 
 const {
   Header: AntdHeader,
@@ -24,7 +25,12 @@ const Layout = () => {
           <FiltersPanel />
         </AntdHeader>
       </Box>
-      <Toolbar sx={{ backgroundImage: `url(${Bg})` }} />
+      <Toolbar
+        sx={{
+          backgroundImage: `url(${Bg})`,
+          display: { xs: "none", sm: "block" },
+        }}
+      />
       <AntdContent
         style={{
           position: "relative",
@@ -42,7 +48,11 @@ const Layout = () => {
           letterSpacing: "3.2px",
         }}
       >
-        COPYRIGHT © 2023 kComer - TODOS LOS DERECHOS RESERVADOS
+        <Box component="span" className="footer">
+          {" "}
+          COPYRIGHT © {new Date().getFullYear()} {namePage} - TODOS LOS DERECHOS
+          RESERVADOS
+        </Box>
       </AntdFooter>
     </AntdLayout>
   );
