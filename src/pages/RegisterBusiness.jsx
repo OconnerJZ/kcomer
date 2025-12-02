@@ -12,6 +12,7 @@ import "antd/dist/reset.css"; // Importar estilos de AntD
 import FormField from "@Components/FormField";
 import { useNavigate } from "react-router-dom";
 import GoogleMapCanvas from "./GoogleMapCanvas";
+import GeneralContent from "@Components/layout/GeneralContent";
 
 const RegisterBusiness = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -106,7 +107,7 @@ const RegisterBusiness = () => {
           required: true,
         },
       ],
-    }
+    },
   ];
 
   const validateForm = () => {
@@ -169,105 +170,120 @@ const RegisterBusiness = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
-      <Card sx={{ width: "100%", maxWidth: 500, overflow: "hidden" }}>
-        <CardContent>
-          <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
-            Register
-          </Typography>
+    <GeneralContent title={"Registro"}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+        <Card sx={{ width: "100%", maxWidth: 500, overflow: "hidden" }}>
+          <CardContent>
+            <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
+              Register
+            </Typography>
 
-          <Box sx={{ width: "100%", overflow: "hidden", position: "relative" }}>
+            <Box
+              sx={{ width: "100%", overflow: "hidden", position: "relative" }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  width: `${steps.length * 100}%`,
+                  transform: `translateX(-${
+                    (currentTab * 100) / steps.length
+                  }%)`,
+                  transition: "transform 0.5s ease",
+                }}
+              >
+                {steps.map((step, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      width: `${100 / steps.length}%`,
+                      flexShrink: 0,
+                      boxSizing: "border-box",
+                      paddingRight: 2,
+                    }}
+                  >
+                    <Fade in={index === currentTab} timeout={500} unmountOnExit>
+                      <Box>
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                          {step.label}:
+                        </Typography>
+
+                        {step.fields.map((field) => (
+                          <FormField
+                            key={field.name}
+                            field={field}
+                            formValues={formValues}
+                            setFormValues={setFormValues}
+                            error={errors[field.name]}
+                            helperText={
+                              errors[field.name]
+                                ? "Este campo es requerido"
+                                : ""
+                            }
+                            validate={field.validate}
+                          />
+                        ))}
+                      </Box>
+                    </Fade>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
             <Box
               sx={{
                 display: "flex",
-                width: `${steps.length * 100}%`,
-                transform: `translateX(-${(currentTab * 100) / steps.length}%)`,
-                transition: "transform 0.5s ease",
+                justifyContent: "flex-end",
+                gap: 1,
+                mt: 3,
               }}
             >
-              {steps.map((step, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    width: `${100 / steps.length}%`,
-                    flexShrink: 0,
-                    boxSizing: "border-box",
-                    paddingRight: 2,
-                  }}
-                >
-                  <Fade in={index === currentTab} timeout={500} unmountOnExit>
-                    <Box>
-                      <Typography variant="h6" sx={{ mb: 2 }}>
-                        {step.label}:
-                      </Typography>
-
-                      {step.fields.map((field) => (
-                        <FormField
-                          key={field.name}
-                          field={field}
-                          formValues={formValues}
-                          setFormValues={setFormValues}
-                          error={errors[field.name]}
-                          helperText={
-                            errors[field.name] ? "Este campo es requerido" : ""
-                          }
-                          validate={field.validate}
-                        />
-                      ))}
-                    </Box>
-                  </Fade>
-                </Box>
-              ))}
+              {currentTab > 0 && (
+                <Button onClick={() => nextPrev(-1)}>Previous</Button>
+              )}
+              <Button onClick={() => nextPrev(1)}>
+                {currentTab === steps.length - 1 ? "Submit" : "Next"}
+              </Button>
             </Box>
-          </Box>
 
-          <Box
-            sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 3 }}
-          >
-            {currentTab > 0 && (
-              <Button onClick={() => nextPrev(-1)}>Previous</Button>
-            )}
-            <Button onClick={() => nextPrev(1)}>
-              {currentTab === steps.length - 1 ? "Submit" : "Next"}
-            </Button>
-          </Box>
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              {steps.map((_, index) => {
+                const isFinished =
+                  index < currentTab &&
+                  steps[index].fields.every(
+                    (f) =>
+                      formValues[f.name] &&
+                      formValues[f.name].toString().trim() !== ""
+                  );
 
-          <Box sx={{ textAlign: "center", mt: 4 }}>
-            {steps.map((_, index) => {
-              const isFinished =
-                index < currentTab &&
-                steps[index].fields.every(
-                  (f) =>
-                    formValues[f.name] &&
-                    formValues[f.name].toString().trim() !== ""
+                let stepColor;
+                if (index === currentTab) stepColor = "#1976d2";
+                else if (isFinished) stepColor = "#04AA6D";
+                else stepColor = "#bbbbbb";
+
+                return (
+                  <Box
+                    key={index}
+                    component="span"
+                    sx={{
+                      height: 15,
+                      width: 15,
+                      margin: "0 2px",
+                      borderRadius: "50%",
+                      display: "inline-block",
+                      opacity: index === currentTab ? 1 : 0.5,
+                      backgroundColor: stepColor,
+                    }}
+                  />
                 );
-
-              let stepColor;
-              if (index === currentTab) stepColor = "#1976d2";
-              else if (isFinished) stepColor = "#04AA6D";
-              else stepColor = "#bbbbbb";
-
-              return (
-                <Box
-                  key={index}
-                  component="span"
-                  sx={{
-                    height: 15,
-                    width: 15,
-                    margin: "0 2px",
-                    borderRadius: "50%",
-                    display: "inline-block",
-                    opacity: index === currentTab ? 1 : 0.5,
-                    backgroundColor: stepColor,
-                  }}
-                />
-              );
-            })}
-          </Box>
-          <GoogleMapCanvas apiKey={"AIzaSyBiGoKFBRAGYJlOGYP0cUdxZXxE3qCIeV0"} />
-        </CardContent>
-      </Card>
-    </Box>
+              })}
+            </Box>
+            <GoogleMapCanvas
+              apiKey={"AIzaSyBiGoKFBRAGYJlOGYP0cUdxZXxE3qCIeV0"}
+            />
+          </CardContent>
+        </Card>
+      </Box>
+    </GeneralContent>
   );
 };
 

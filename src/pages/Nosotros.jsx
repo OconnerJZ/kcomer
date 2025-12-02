@@ -4,7 +4,7 @@ import { namePage, nosotros } from "@Utils/listMessages";
 
 const Nosotros = () => {
   return (
-    <GeneralContent >
+    <GeneralContent title={"Nosotros"} >
       <Box component="header" className="hero">
         <div className="logo">{namePage}</div>
         <p className="hero-sub">

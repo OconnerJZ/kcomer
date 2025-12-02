@@ -1,4 +1,4 @@
-import { Backdrop, Box, CircularProgress, Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import CardPlace from "@Components/card/CardPlace";
 import GeneralContent from "@Components/layout/GeneralContent";
 import Parallax from "@Components/parallax/Parallax";
@@ -33,7 +33,7 @@ const Explorar = () => {
   }
   
   return (
-    <GeneralContent >
+    <GeneralContent title={"Explorar"} >
       <Parallax bg={Bg5}>
         <Box
           style={{
