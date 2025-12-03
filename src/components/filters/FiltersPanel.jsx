@@ -55,7 +55,7 @@ const FiltersPanel = () => {
           // borderBottom: "1px solid rgb(255, 64, 59)"
         }}
       >
-        <p>{address}</p>
+        <article>{address}</article>
         <IconButton onClick={() => showDrawer(true)}>
           <Search />
         </IconButton>

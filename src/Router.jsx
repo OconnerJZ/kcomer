@@ -1,5 +1,4 @@
-
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import Layout from "@Components/layout/Layout";
 import Explorar from "@Pages/Explorar";
 import Nosotros from "@Pages/Nosotros";
@@ -9,9 +8,10 @@ import ScrollToTop from "@Components/ScrollToTop";
 const Router = () => {
   return (
     <BrowserRouter>
-    <ScrollToTop />
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/explorar" replace />} />
           <Route path="explorar" element={<Explorar />} />
           <Route path="nosotros" element={<Nosotros />} />
           <Route path="registro" element={<RegisterBusiness />} />
