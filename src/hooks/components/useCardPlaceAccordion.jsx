@@ -79,7 +79,7 @@ const useCardPlaceAccordion = ({ datacard }) => {
       label: "Redes Sociales",
       icon: <Diversity3 style={{ fontSize: "23px" }} />,
       color: "primary",
-      details: <CardPlaceRedes />,
+      details: <CardPlaceRedes datacard={datacard} />,
       defaultExpanded: false,
     },
     {

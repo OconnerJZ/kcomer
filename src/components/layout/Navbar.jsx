@@ -10,13 +10,16 @@ import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import InfoIcon from "@mui/icons-material/Info";
 import StoreIcon from "@mui/icons-material/Store";
-import LogoClassic from "@Assets/images/qscome-logo-classic.png";
+import LogoClassic from "@Assets/images/qscomeLogo.png";
 import { useNavigate } from "react-router-dom";
+import { ReceiptLong, Ballot } from "@mui/icons-material";
 
 const navItems = [
   { title: "Explorar", icon: <FastfoodIcon />, link: "explorar" },
   { title: "Nosotros", icon: <InfoIcon />, link: "nosotros" },
   { title: "Negocio", icon: <StoreIcon />, link: "registro" },
+  { title: "Pedido", icon: <ReceiptLong />, link: "orden" },
+  
 ];
 
 const Navbar = () => {
@@ -61,6 +64,7 @@ const Navbar = () => {
       <Box
         sx={{
           width: "100%",
+          height: "9%",
           position: "fixed",
           bottom: 0,
           left: 0,

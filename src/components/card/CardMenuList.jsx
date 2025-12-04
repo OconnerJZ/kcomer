@@ -1,5 +1,4 @@
 import Stpper from "@Components/Stpper";
-import { AccessTime } from "@mui/icons-material";
 import AspectRatio from "@mui/joy/AspectRatio";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";

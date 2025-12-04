@@ -10,8 +10,13 @@ import {
   CardPlaceReviews,
 } from "./CardPlaceMovements";
 import CardPlaceFront from "./CardPlaceFront";
-import { Collapse, Box, Stack } from "@mui/material";
-import { ThumbUp, ThumbDown, DeliveryDining } from "@mui/icons-material";
+import { Collapse, Box, Stack, IconButton } from "@mui/material";
+import {
+  ThumbUp,
+  ThumbDown,
+  DeliveryDining,
+  AccessTime,
+} from "@mui/icons-material";
 
 const TitlePlace = ({ text = "Tacos el pariente" }) => {
   return (
@@ -36,10 +41,9 @@ const CardPlace = ({ data }) => {
           <Avatar
             className="card-avatar"
             sx={{
-              width: 120,
-              height: 120,
-              //border: "2px solid rgb(255,64,59)",
-              border: "2px solid rgba(13, 158, 61, 1)",
+              width: 110,
+              height: 110,
+              border: data?.isOpen ? "2px solid rgba(13, 158, 61, 1)": "2px solid rgb(255,64,59)",
               borderStyle: "dashed",
               padding: "2px",
             }}
@@ -53,7 +57,7 @@ const CardPlace = ({ data }) => {
             <Stack direction="row" spacing={1}>
               <ThumbUp sx={{ fontSize: "23px", color: "#efb810" }} />
               <span>3</span>
-              <DeliveryDining sx={{ fontSize: "27px" }} />           
+              <DeliveryDining sx={{ fontSize: "27px" }} />
             </Stack>
           </Box>
         }
@@ -64,6 +68,19 @@ const CardPlace = ({ data }) => {
           textAlign: "center",
         }}
       />
+      <IconButton
+        color="default"
+        aria-label="decrement"
+        sx={{
+          fontSize: "18px",
+          position: "absolute",
+          top:0,
+          right:0,
+
+        }}
+      >
+        <AccessTime />
+      </IconButton>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardPlaceFront flipped={flipped} onMovement={onMovement} data={data} />
         {movement === "location" && (

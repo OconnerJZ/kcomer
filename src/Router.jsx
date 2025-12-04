@@ -4,6 +4,7 @@ import Explorar from "@Pages/Explorar";
 import Nosotros from "@Pages/Nosotros";
 import RegisterBusiness from "@Pages/RegisterBusiness";
 import ScrollToTop from "@Components/ScrollToTop";
+import Pedidos from "@Pages/Pedidos";
 
 const Router = () => {
   return (
@@ -15,6 +16,7 @@ const Router = () => {
           <Route path="explorar" element={<Explorar />} />
           <Route path="nosotros" element={<Nosotros />} />
           <Route path="registro" element={<RegisterBusiness />} />
+          <Route path="orden" element={<Pedidos />} />
           {/* <Route path="todos" element={<TodoApp />} /> */}
           {/* <Route
             path="*"

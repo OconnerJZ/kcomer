@@ -1,6 +1,4 @@
-import { axiosGet } from "@Config/axios/methodRequest";
 import { notification } from "antd";
-import { API_KEY_MAPS } from "./enviroments";
 
 const openNotification = () => {
   notification.info({
@@ -38,3 +36,6 @@ export const separateByGroups = ({ lista = [], limited = 3 }) => {
   return groups;
 };
 
+export const isEmpty = () =>{
+  
+}
