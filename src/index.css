@@ -32,8 +32,12 @@
   line-height: unset;
 }
 
-.card-avatar .css-1pqm26d-MuiAvatar-img {
-  border-radius: 50%;
+.card-avatar .css-1pqm26d-MuiAvatar-img{
+  border-radius: 50% !important;
+}
+
+.css-1su80sj-MuiAvatar-img{
+  border-radius: 50% !important;
 }
 
 .bg-card-explore {

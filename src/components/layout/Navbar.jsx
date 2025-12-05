@@ -1,66 +1,172 @@
+// src/components/layout/Navbar.jsx
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import BottomNavigation from "@mui/material/BottomNavigation";
-import BottomNavigationAction from "@mui/material/BottomNavigationAction";
-import FastfoodIcon from "@mui/icons-material/Fastfood";
-import InfoIcon from "@mui/icons-material/Info";
-import StoreIcon from "@mui/icons-material/Store";
+import {
+  AppBar,
+  Box,
+  CssBaseline,
+  Toolbar,
+  Typography,
+  Button,
+  BottomNavigation,
+  BottomNavigationAction,
+  Badge,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider,
+} from "@mui/material";
+import {
+  Fastfood,
+  Info,
+  Store,
+  ReceiptLong,
+  Login as LoginIcon,
+  Logout,
+  Dashboard,
+} from "@mui/icons-material";
 import LogoClassic from "@Assets/images/qscomeLogo.png";
-import { useNavigate } from "react-router-dom";
-import { ReceiptLong, Ballot } from "@mui/icons-material";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "@Hooks/components/useCart";
+import { useAuth } from "@Context/AuthContext";
 
 const navItems = [
-  { title: "Explorar", icon: <FastfoodIcon />, link: "explorar" },
-  { title: "Nosotros", icon: <InfoIcon />, link: "nosotros" },
-  { title: "Negocio", icon: <StoreIcon />, link: "registro" },
-  { title: "Pedido", icon: <ReceiptLong />, link: "orden" },
-  
+  { title: "Explorar", icon: <Fastfood />, link: "explorar" },
+  { title: "Nosotros", icon: <Info />, link: "nosotros" },
+  { title: "Negocio", icon: <Store />, link: "registro" },
+  { title: "Pedido", icon: <ReceiptLong />, link: "orden" }
 ];
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [value, setValue] = React.useState(0);
+  const location = useLocation();
+  const { getCartCount } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
+  
+  const [value, setValue] = React.useState(() => {
+    const currentPath = location.pathname.split('/')[1];
+    return navItems.findIndex(item => item.link === currentPath);
+  });
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const cartCount = getCartCount();
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+    navigate('/explorar');
+  };
 
   return (
     <Box>
       <CssBaseline />
+      
+      {/* Desktop Navbar */}
       <AppBar
         component="nav"
         sx={{
           backgroundColor: "rgba(255,255,255, 0.7)",
           backdropFilter: "blur(5px)",
           color: "#3a3b3d",
-          display: { xs: "none", sm: "block" }, // solo desktop
+          display: { xs: "none", sm: "block" },
         }}
       >
         <Toolbar>
-          <img src={LogoClassic} alt="logo" width={50} style={{ marginRight: 20 }} />
+          <img 
+            src={LogoClassic} 
+            alt="logo" 
+            width={50} 
+            style={{ marginRight: 20, cursor: 'pointer' }} 
+            onClick={() => navigate('/explorar')}
+          />
 
-          <Typography
-            variant="h6"
-            sx={{ flexGrow: 1 }}
-          ></Typography>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}></Typography>
 
-          <Box>
+          {/* Nav Items */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {navItems.map((item) => (
-              <Button
+              <Badge 
                 key={item.title}
-                sx={{ color: "#000", textTransform: "none" }}
-                startIcon={item.icon}
-                onClick={() => navigate(item.link)}
+                badgeContent={item.link === 'orden' ? cartCount : 0}
+                color="error"
+                sx={{ '& .MuiBadge-badge': { right: -3, top: 2 } }}
               >
-                {item.title}
-              </Button>
+                <Button
+                  sx={{ color: "#000", textTransform: "none" }}
+                  startIcon={item.icon}
+                  onClick={() => navigate(item.link)}
+                >
+                  {item.title}
+                </Button>
+              </Badge>
             ))}
+
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <>
+                <IconButton onClick={handleMenuOpen}>
+                  <Avatar 
+                    src={user?.avatar} 
+                    sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
+                  >
+                    {user?.name?.charAt(0)}
+                  </Avatar>
+                </IconButton>
+                
+                <Menu
+                  anchorEl={anchorEl}
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  onClick={handleMenuClose}
+                >
+                  <MenuItem disabled>
+                    <Typography variant="body2" color="text.secondary">
+                      {user?.email}
+                    </Typography>
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem onClick={() => navigate('/mis-ordenes')}>
+                    <ReceiptLong fontSize="small" sx={{ mr: 1 }} />
+                    Mis Órdenes
+                  </MenuItem>
+                  {user?.role === 'business' && (
+                    <MenuItem onClick={() => navigate('/business-dashboard')}>
+                      <Dashboard fontSize="small" sx={{ mr: 1 }} />
+                      Panel de Negocio
+                    </MenuItem>
+                  )}
+                  <Divider />
+                  <MenuItem onClick={handleLogout}>
+                    <Logout fontSize="small" sx={{ mr: 1 }} />
+                    Cerrar Sesión
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<LoginIcon />}
+                onClick={() => navigate('/login')}
+                sx={{ ml: 1 }}
+              >
+                Entrar
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
 
+      {/* Mobile Bottom Navigation */}
       <Box
         sx={{
           width: "100%",
@@ -69,7 +175,7 @@ const Navbar = () => {
           bottom: 0,
           left: 0,
           zIndex: 1000,
-          display: { xs: "flex", sm: "none" }, // solo mobile
+          display: { xs: "flex", sm: "none" },
           borderTop: "1px solid #e0e0e0",
           backgroundColor: "#fff",
         }}
@@ -88,13 +194,44 @@ const Navbar = () => {
             },
           }}
         >
-          {navItems.map((item) => (
+          {navItems.map((item, idx) => (
             <BottomNavigationAction
               key={item.title}
               label={item.title}
-              icon={item.icon}
+              icon={
+                <Badge 
+                  badgeContent={item.link === 'orden' ? cartCount : 0}
+                  color="error"
+                >
+                  {item.icon}
+                </Badge>
+              }
             />
           ))}
+          
+          {/* User icon for mobile */}
+          <BottomNavigationAction
+            label={isAuthenticated ? "Perfil" : "Entrar"}
+            icon={
+              isAuthenticated ? (
+                <Avatar 
+                  src={user?.avatar} 
+                  sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}
+                >
+                  {user?.name?.charAt(0)}
+                </Avatar>
+              ) : (
+                <LoginIcon />
+              )
+            }
+            onClick={(e) => {
+              if (isAuthenticated) {
+                handleMenuOpen(e);
+              } else {
+                navigate('/login');
+              }
+            }}
+          />
         </BottomNavigation>
       </Box>
     </Box>

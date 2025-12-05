@@ -1,3 +1,4 @@
+// src/Router.jsx
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import Layout from "@Components/layout/Layout";
 import Explorar from "@Pages/Explorar";
@@ -5,6 +6,25 @@ import Nosotros from "@Pages/Nosotros";
 import RegisterBusiness from "@Pages/RegisterBusiness";
 import ScrollToTop from "@Components/ScrollToTop";
 import Pedidos from "@Pages/Pedidos";
+import Login from "@Pages/Login";
+import MisOrdenes from "@Pages/MisOrdenes";
+import BusinessDashboard from "@Pages/BusinessDashboard";
+import { useAuth } from "@Context/AuthContext";
+
+// Componente para rutas protegidas
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
 const Router = () => {
   return (
@@ -16,18 +36,35 @@ const Router = () => {
           <Route path="explorar" element={<Explorar />} />
           <Route path="nosotros" element={<Nosotros />} />
           <Route path="registro" element={<RegisterBusiness />} />
-          <Route path="orden" element={<Pedidos />} />
-          {/* <Route path="todos" element={<TodoApp />} /> */}
-          {/* <Route
-            path="*"
+          <Route path="login" element={<Login />} />
+          
+          {/* Rutas protegidas */}
+          <Route 
+            path="orden" 
             element={
-              <ResultAntd
-                status={404}
-                title="404"
-                subTitle="No se ha encontrado el recurso"
-              />
-            }
-          /> */}
+              <ProtectedRoute>
+                <Pedidos />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="mis-ordenes" 
+            element={
+              <ProtectedRoute>
+                <MisOrdenes />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="business-dashboard" 
+            element={
+              <ProtectedRoute>
+                <BusinessDashboard />
+              </ProtectedRoute>
+            } 
+          />
         </Route>
       </Routes>
     </BrowserRouter>

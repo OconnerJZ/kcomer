@@ -1,9 +1,14 @@
+// src/components/card/CardPlaceMovements.jsx
 import CardMenuList from "./CardMenuList";
 import CardPlaceBack from "./CardPlaceBack";
 import { Swiper } from "antd-mobile";
 import MemoriesPhotos from "@Components/photos/MemoriesPhotos";
 import { Avatar, List } from "antd";
+import { Box, Typography } from "@mui/material";
 import { separateByGroups } from "@Utils/commons";
+
+import PropTypes from 'prop-types';
+import useCart from "@Hooks/components/useCart";
 
 export const CardPlaceLocation = ({ flipped, onMovement }) => {
   return (
@@ -34,16 +39,48 @@ export const CardPlacePhotos = ({ flipped, onMovement }) => {
   );
 };
 
-export const CardPlaceMenu = ({ flipped, onMovement }) => {
-  const lista = [1, 2, 3, 4, 5, 6, 7, 8];
-  const groups = separateByGroups({ lista });
+export const CardPlaceMenu = ({ flipped, onMovement, businessId, businessName, menu = [] }) => {
+  const { addToCart } = useCart();
+
+  // Si no hay menú, mostrar mensaje
+  if (!menu || menu.length === 0) {
+    return (
+      <CardPlaceBack flipped={flipped} onMovement={onMovement}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 200,
+          p: 3 
+        }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Menú no disponible
+          </Typography>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Este negocio aún no ha cargado su menú
+          </Typography>
+        </Box>
+      </CardPlaceBack>
+    );
+  }
+
+  const groups = separateByGroups({ lista: menu, limited: 3 });
+
   const getSwiperItems = ({ items = [] }) => (
-    <Swiper.Item>
+    <Swiper.Item key={items[0]?.id}>
       {items.map((item) => (
-        <CardMenuList key={item} />
+        <CardMenuList 
+          key={item.id} 
+          item={item}
+          businessId={businessId}
+          businessName={businessName}
+          onAddToCart={addToCart}
+        />
       ))}
     </Swiper.Item>
   );
+
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
       <Swiper>{groups.map((group) => getSwiperItems({ items: group }))}</Swiper>
@@ -52,15 +89,14 @@ export const CardPlaceMenu = ({ flipped, onMovement }) => {
 };
 
 export const CardPlaceReviews = ({ flipped, onMovement }) => {
-  const data = Array.from({
-    length: 23,
-  }).map((_, i) => ({
+  const data = Array.from({ length: 23 }).map((_, i) => ({
     href: "https://ant.design",
-    title: `ant design part ${i}`,
+    title: `Usuario ${i + 1}`,
     avatar: `https://xsgames.co/randomusers/avatar.php?g=pixel&key=${i}`,
     content:
-      "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
+      "Excelente lugar, la comida está deliciosa y el servicio es muy bueno. Totalmente recomendado para pasar un buen rato con familia o amigos.",
   }));
+
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
       <List
@@ -86,4 +122,28 @@ export const CardPlaceReviews = ({ flipped, onMovement }) => {
       />
     </CardPlaceBack>
   );
+};
+
+// PropTypes
+CardPlaceLocation.propTypes = {
+  flipped: PropTypes.bool.isRequired,
+  onMovement: PropTypes.func.isRequired,
+};
+
+CardPlacePhotos.propTypes = {
+  flipped: PropTypes.bool.isRequired,
+  onMovement: PropTypes.func.isRequired,
+};
+
+CardPlaceMenu.propTypes = {
+  flipped: PropTypes.bool.isRequired,
+  onMovement: PropTypes.func.isRequired,
+  businessId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  businessName: PropTypes.string.isRequired,
+  menu: PropTypes.arrayOf(PropTypes.object),
+};
+
+CardPlaceReviews.propTypes = {
+  flipped: PropTypes.bool.isRequired,
+  onMovement: PropTypes.func.isRequired,
 };

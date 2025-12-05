@@ -9,9 +9,8 @@ import {
 } from "@mui/material";
 import { Result } from "antd";
 import "antd/dist/reset.css"; // Importar estilos de AntD
-import FormField from "@Components/FormField";
+import FormField from "@Components/forms/FormField";
 import { useNavigate } from "react-router-dom";
-import GoogleMapCanvas from "./GoogleMapCanvas";
 import GeneralContent from "@Components/layout/GeneralContent";
 
 const RegisterBusiness = () => {
@@ -35,7 +34,7 @@ const RegisterBusiness = () => {
         {
           name: "owner_email",
           label: "Correo electrónico",
-          type: "text",
+          type: "email",
           required: true,
         },
         {
@@ -47,7 +46,6 @@ const RegisterBusiness = () => {
         },
       ],
     },
-
     {
       label: "Datos del negocio",
       fields: [
@@ -56,6 +54,7 @@ const RegisterBusiness = () => {
           label: "Nombre del negocio",
           type: "text",
           required: true,
+          validate: "alphanumeric",
         },
         {
           name: "business_description",
@@ -67,8 +66,42 @@ const RegisterBusiness = () => {
           name: "food_type",
           label: "Tipo de comida",
           type: "autocomplete",
-          options: ["Tacos", "Hamburguesas", "Pizza", "Postres", "Café"],
+          options: [
+            "Tacos",
+            "Hamburguesas",
+            "Pizza",
+            "Postres",
+            "Café",
+            "Comida Mexicana",
+            "Comida Italiana",
+            "Comida China",
+            "Mariscos",
+            "Vegetariana",
+            "Panadería",
+            "Tortas",
+          ],
           required: true,
+        },
+        {
+          name: "services",
+          label: "Servicios disponibles",
+          type: "autocomplete-multiple",
+          options: [
+            "Para llevar",
+            "Entrega a domicilio",
+            "Comer en el lugar",
+            "Reservaciones",
+            "Pago con tarjeta",
+            "WiFi gratis",
+            "Estacionamiento",
+          ],
+          required: false,
+        },
+        {
+          name: "has_delivery",
+          label: "¿Ofrece servicio a domicilio?",
+          type: "switch",
+          required: false,
         },
         {
           name: "business_photo",
@@ -92,13 +125,25 @@ const RegisterBusiness = () => {
     {
       label: "Ubicación",
       fields: [
-        { name: "address", label: "Dirección", type: "text", required: true },
-        { name: "city", label: "Ciudad", type: "text", required: true },
+        {
+          name: "address",
+          label: "Dirección completa",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "city",
+          label: "Ciudad",
+          type: "text",
+          required: true,
+          validate: "alphabetic",
+        },
         {
           name: "postal_code",
           label: "Código postal",
           type: "text",
           required: true,
+          validate: "numeric",
         },
         {
           name: "map_location",
@@ -170,12 +215,12 @@ const RegisterBusiness = () => {
   }
 
   return (
-    <GeneralContent title={"Registro"}>
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+    <GeneralContent title={"Negocio"}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Card sx={{ width: "100%", maxWidth: 500, overflow: "hidden" }}>
           <CardContent>
             <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
-              Register
+              Registrate
             </Typography>
 
             <Box
@@ -213,13 +258,6 @@ const RegisterBusiness = () => {
                             field={field}
                             formValues={formValues}
                             setFormValues={setFormValues}
-                            error={errors[field.name]}
-                            helperText={
-                              errors[field.name]
-                                ? "Este campo es requerido"
-                                : ""
-                            }
-                            validate={field.validate}
                           />
                         ))}
                       </Box>
@@ -238,10 +276,10 @@ const RegisterBusiness = () => {
               }}
             >
               {currentTab > 0 && (
-                <Button onClick={() => nextPrev(-1)}>Previous</Button>
+                <Button onClick={() => nextPrev(-1)}>Anterior</Button>
               )}
               <Button onClick={() => nextPrev(1)}>
-                {currentTab === steps.length - 1 ? "Submit" : "Next"}
+                {currentTab === steps.length - 1 ? "Enviar" : "Siguiente"}
               </Button>
             </Box>
 
@@ -277,9 +315,6 @@ const RegisterBusiness = () => {
                 );
               })}
             </Box>
-            <GoogleMapCanvas
-              apiKey={"AIzaSyBiGoKFBRAGYJlOGYP0cUdxZXxE3qCIeV0"}
-            />
           </CardContent>
         </Card>
       </Box>

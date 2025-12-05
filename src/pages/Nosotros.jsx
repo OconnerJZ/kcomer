@@ -4,25 +4,29 @@ import { namePage, nosotros } from "@Utils/listMessages";
 
 const Nosotros = () => {
   return (
-    <GeneralContent title={"Nosotros"} >
+    <GeneralContent title={"Nosotros"}>
       <Box component="header" className="hero">
         <div className="logo">{namePage}</div>
-        <p className="hero-sub">
-          {nosotros.spot}
-        </p>
+        <p className="hero-sub">{nosotros.spot}</p>
       </Box>
-      <Box component="main" sx={{ display: "flex !important", flexDirection:"column" }} mt={1} mb={1}>
+
+      <Box
+        component="main"
+        sx={{ display: "flex", flexDirection: "column" }}
+        mt={1}
+        mb={1}
+      >
+        {/* PRIMER GRID */}
         <Box mb={2}>
           <Grid
             container
             spacing={{ xs: 2, md: 3 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
             sx={{
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-7" aria-hidden></div>
                 <div className="sticker-tag">Fresh</div>
@@ -33,19 +37,21 @@ const Nosotros = () => {
                 <div className="corner-sticker" aria-hidden></div>
               </div>
             </Grid>
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-2" aria-hidden></div>
                 <div className="sticker-tag">Top</div>
                 <h3>Habla con la comunidad</h3>
                 <p>
                   Califica, deja tus reseñas, comparte tus fotos y mira qué
-                  recomiendan otros comelones como tú.
+                  recomiendan otros comelones.
                 </p>
                 <div className="corner-sticker" aria-hidden></div>
               </div>
             </Grid>
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-3" aria-hidden></div>
                 <div className="sticker-tag">Easy</div>
@@ -59,17 +65,18 @@ const Nosotros = () => {
             </Grid>
           </Grid>
         </Box>
+
+        {/* SEGUNDO GRID */}
         <Box mt={2}>
           <Grid
             container
             spacing={{ xs: 2, md: 4 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
             sx={{
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-1" aria-hidden></div>
                 <div className="sticker-tag">1</div>
@@ -78,7 +85,8 @@ const Nosotros = () => {
                 <div className="corner-sticker" aria-hidden></div>
               </div>
             </Grid>
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-8" aria-hidden></div>
                 <div className="sticker-tag">2</div>
@@ -87,7 +95,8 @@ const Nosotros = () => {
                 <div className="corner-sticker" aria-hidden></div>
               </div>
             </Grid>
-            <Grid item size={{ xs: 2, sm: 4, md: 4 }}>
+
+            <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-4" aria-hidden></div>
                 <div className="sticker-tag">3</div>
