@@ -10,19 +10,20 @@ import Login from "@Pages/Login";
 import MisOrdenes from "@Pages/MisOrdenes";
 import BusinessDashboard from "@Pages/BusinessDashboard";
 import { useAuth } from "@Context/AuthContext";
+import Register from "@Pages/Register";
 
 // Componente para rutas protegidas
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <div>Cargando...</div>;
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 };
 
@@ -35,35 +36,35 @@ const Router = () => {
           <Route index element={<Navigate to="/explorar" replace />} />
           <Route path="explorar" element={<Explorar />} />
           <Route path="nosotros" element={<Nosotros />} />
-          <Route path="registro" element={<RegisterBusiness />} />
+          <Route path="registro" element={<Register />} />
           <Route path="login" element={<Login />} />
-          
+
           {/* Rutas protegidas */}
-          <Route 
-            path="orden" 
+          <Route
+            path="orden"
             element={
               <ProtectedRoute>
                 <Pedidos />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="mis-ordenes" 
+
+          <Route
+            path="mis-ordenes"
             element={
               <ProtectedRoute>
                 <MisOrdenes />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="business-dashboard" 
+
+          <Route
+            path="business-dashboard"
             element={
               <ProtectedRoute>
                 <BusinessDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
         </Route>
       </Routes>

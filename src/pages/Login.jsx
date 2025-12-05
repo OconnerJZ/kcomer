@@ -94,12 +94,12 @@ const Login = () => {
     <GeneralContent title={isRegister ? 'Registro' : 'Iniciar Sesión'}>
       <Box
         sx={{
-          minHeight: '100vh',
+          mt: 2,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           px: 2,
-          py: 4,
+          py: 0,
         }}
       >
         <Paper

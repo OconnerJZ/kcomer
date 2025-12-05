@@ -3,6 +3,8 @@ import { useState } from "react";
 import RegisterBusiness from "./RegisterBusiness";
 import GeneralContent from "@Components/layout/GeneralContent";
 import { Box } from "@mui/material";
+import Login from "./Login";
+
 
 const Register = () => {
   const [option, setOption] = useState("user");
@@ -21,7 +23,7 @@ const Register = () => {
             { label: "Negocio", value: "business" },
           ]}
         />
-        {option == "user" && null}
+        {option == "user" && <Login />}
         {option == "business" && <RegisterBusiness />}
       </Box>
     </GeneralContent>

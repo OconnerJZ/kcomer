@@ -33,7 +33,7 @@ import { useAuth } from "@Context/AuthContext";
 const navItems = [
   { title: "Explorar", icon: <Fastfood />, link: "explorar" },
   { title: "Nosotros", icon: <Info />, link: "nosotros" },
-  { title: "Negocio", icon: <Store />, link: "registro" },
+  { title: "Registro", icon: <Store />, link: "registro" },
   { title: "Pedido", icon: <ReceiptLong />, link: "orden" }
 ];
 
