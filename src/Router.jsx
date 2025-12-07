@@ -10,7 +10,6 @@ import Login from "@Pages/Login";
 import MisOrdenes from "@Pages/MisOrdenes";
 import BusinessDashboard from "@Pages/BusinessDashboard";
 import { useAuth } from "@Context/AuthContext";
-import Register from "@Pages/Register";
 
 // Componente para rutas protegidas
 const ProtectedRoute = ({ children }) => {
@@ -36,7 +35,7 @@ const Router = () => {
           <Route index element={<Navigate to="/explorar" replace />} />
           <Route path="explorar" element={<Explorar />} />
           <Route path="nosotros" element={<Nosotros />} />
-          <Route path="registro" element={<Register />} />
+          <Route path="registro" element={<RegisterBusiness />} />
           <Route path="login" element={<Login />} />
 
           {/* Rutas protegidas */}

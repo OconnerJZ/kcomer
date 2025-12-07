@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.jsx
 import * as React from "react";
 import {
   AppBar,
@@ -11,21 +10,16 @@ import {
   BottomNavigationAction,
   Badge,
   Avatar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Divider,
+  IconButton
 } from "@mui/material";
 import {
   Fastfood,
   Info,
   Store,
   ReceiptLong,
-  Login as LoginIcon,
-  Logout,
-  Dashboard,
+  Login as LoginIcon
 } from "@mui/icons-material";
-import LogoClassic from "@Assets/images/qscomeLogo.png";
+import LogoClassic from "../../../public/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@Hooks/components/useCart";
 import { useAuth } from "@Context/AuthContext";
@@ -48,23 +42,10 @@ const Navbar = () => {
     return navItems.findIndex(item => item.link === currentPath);
   });
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const menuOpen = Boolean(anchorEl);
-
   const cartCount = getCartCount();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    logout();
-    handleMenuClose();
-    navigate('/explorar');
   };
 
   return (
@@ -113,45 +94,14 @@ const Navbar = () => {
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <>
-                <IconButton onClick={handleMenuOpen}>
+                <IconButton>
                   <Avatar 
                     src={user?.avatar} 
-                    sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
+                    sx={{ width: 32, height: 32, bgcolor: 'purple' }}
                   >
                     {user?.name?.charAt(0)}
                   </Avatar>
-                </IconButton>
-                
-                <Menu
-                  anchorEl={anchorEl}
-                  open={menuOpen}
-                  onClose={handleMenuClose}
-                  onClick={handleMenuClose}
-                >
-                  <MenuItem disabled>
-                    <Typography variant="body2" color="text.secondary">
-                      {user?.email}
-                    </Typography>
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={() => navigate('/mis-ordenes')}>
-                    <ReceiptLong fontSize="small" sx={{ mr: 1 }} />
-                    Mis Órdenes
-                  </MenuItem>
-                  {user?.role === 'business' && (
-                    <MenuItem onClick={() => navigate('/business-dashboard')}>
-                      <Dashboard fontSize="small" sx={{ mr: 1 }} />
-                      Panel de Negocio
-                    </MenuItem>
-                  )}
-                  <Divider />
-                  <MenuItem onClick={handleLogout}>
-                    <Logout fontSize="small" sx={{ mr: 1 }} />
-                    Cerrar Sesión
-                  </MenuItem>
-                </Menu>
-              </>
+                </IconButton>  
             ) : (
               <Button
                 variant="outlined"
@@ -226,7 +176,7 @@ const Navbar = () => {
             }
             onClick={(e) => {
               if (isAuthenticated) {
-                handleMenuOpen(e);
+                
               } else {
                 navigate('/login');
               }

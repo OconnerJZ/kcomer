@@ -1,18 +1,18 @@
 // src/context/OrdersContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { orderAPI } from '@Services/apiService';
 
 const OrdersContext = createContext();
 
-// Estados posibles de una orden
 export const ORDER_STATUS = {
-  PENDING: 'pending',           // Pendiente de aceptación
-  ACCEPTED: 'accepted',         // Aceptada por el negocio
-  PREPARING: 'preparing',       // En preparación
-  READY: 'ready',              // Lista para recoger/entregar
-  IN_DELIVERY: 'in_delivery',  // En camino (si es delivery)
-  COMPLETED: 'completed',       // Completada
-  CANCELLED: 'cancelled',       // Cancelada
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  PREPARING: 'preparing',
+  READY: 'ready',
+  IN_DELIVERY: 'in_delivery',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
 };
 
 export const STATUS_LABELS = {
@@ -27,65 +27,143 @@ export const STATUS_LABELS = {
 
 export const OrdersProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Cargar órdenes al montar
   useEffect(() => {
-    // Cargar órdenes del localStorage
-    const savedOrders = localStorage.getItem('qscome_orders');
-    if (savedOrders) {
-      try {
-        setOrders(JSON.parse(savedOrders));
-      } catch (error) {
-        console.error('Error loading orders:', error);
-      }
-    }
+    loadOrders();
   }, []);
 
-  useEffect(() => {
-    // Guardar órdenes en localStorage
-    localStorage.setItem('qscome_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  const createOrder = (orderData) => {
-    const newOrder = {
-      id: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-      ...orderData,
-      status: ORDER_STATUS.PENDING,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      statusHistory: [
-        {
-          status: ORDER_STATUS.PENDING,
-          timestamp: new Date().toISOString(),
-          note: 'Orden creada',
-        },
-      ],
-    };
-
-    setOrders((prev) => [newOrder, ...prev]);
-    return newOrder;
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await orderAPI.getAll();
+      setOrders(response.data);
+    } catch (err) {
+      console.error('Error loading orders:', err);
+      setError(err.message);
+      // Fallback a localStorage si falla la API
+      const savedOrders = localStorage.getItem('qscome_orders');
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateOrderStatus = (orderId, newStatus, note = '') => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id === orderId) {
-          return {
-            ...order,
-            status: newStatus,
-            updatedAt: new Date().toISOString(),
-            statusHistory: [
-              ...order.statusHistory,
-              {
-                status: newStatus,
-                timestamp: new Date().toISOString(),
-                note,
-              },
-            ],
-          };
-        }
-        return order;
-      })
-    );
+  const createOrder = async (orderData) => {
+    try {
+      setLoading(true);
+      const response = await orderAPI.create({
+        ...orderData,
+        status: ORDER_STATUS.PENDING,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        statusHistory: [
+          {
+            status: ORDER_STATUS.PENDING,
+            timestamp: new Date().toISOString(),
+            note: 'Orden creada',
+          },
+        ],
+      });
+
+      const newOrder = response.data;
+      setOrders((prev) => [newOrder, ...prev]);
+      
+      // Backup en localStorage
+      localStorage.setItem('qscome_orders', JSON.stringify([newOrder, ...orders]));
+      
+      return newOrder;
+    } catch (err) {
+      console.error('Error creating order:', err);
+      
+      // Fallback: crear orden localmente
+      const newOrder = {
+        id: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        ...orderData,
+        status: ORDER_STATUS.PENDING,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        statusHistory: [
+          {
+            status: ORDER_STATUS.PENDING,
+            timestamp: new Date().toISOString(),
+            note: 'Orden creada (offline)',
+          },
+        ],
+      };
+      
+      setOrders((prev) => [newOrder, ...prev]);
+      localStorage.setItem('qscome_orders', JSON.stringify([newOrder, ...orders]));
+      
+      return newOrder;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus, note = '') => {
+    try {
+      setLoading(true);
+      await orderAPI.updateStatus(orderId, newStatus);
+      
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id === orderId) {
+            return {
+              ...order,
+              status: newStatus,
+              updatedAt: new Date().toISOString(),
+              statusHistory: [
+                ...order.statusHistory,
+                {
+                  status: newStatus,
+                  timestamp: new Date().toISOString(),
+                  note,
+                },
+              ],
+            };
+          }
+          return order;
+        })
+      );
+      
+      // Backup en localStorage
+      const updatedOrders = orders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      );
+      localStorage.setItem('qscome_orders', JSON.stringify(updatedOrders));
+      
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      
+      // Fallback: actualizar localmente
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id === orderId) {
+            return {
+              ...order,
+              status: newStatus,
+              updatedAt: new Date().toISOString(),
+              statusHistory: [
+                ...order.statusHistory,
+                {
+                  status: newStatus,
+                  timestamp: new Date().toISOString(),
+                  note: note || '(actualización offline)',
+                },
+              ],
+            };
+          }
+          return order;
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getOrdersByUser = (userId) => {
@@ -106,12 +184,15 @@ export const OrdersProvider = ({ children }) => {
 
   const value = {
     orders,
+    loading,
+    error,
     createOrder,
     updateOrderStatus,
     getOrdersByUser,
     getOrdersByBusiness,
     getOrdersByStatus,
     cancelOrder,
+    loadOrders,
     ORDER_STATUS,
     STATUS_LABELS,
   };

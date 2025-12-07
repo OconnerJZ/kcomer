@@ -109,9 +109,6 @@ const MisOrdenes = () => {
       <Box sx={{ maxWidth: 900, mx: 'auto', mt: { xs: 2, sm: 4 }, px: 2 }}>
         {/* Header */}
         <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            Mis Órdenes
-          </Typography>
           <Typography color="text.secondary">
             Sigue el estado de tus pedidos
           </Typography>
