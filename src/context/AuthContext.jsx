@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { authAPI, handleApiError } from '@Services/apiService';
 
 const AuthContext = createContext();
 
@@ -13,7 +14,10 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem('qscome_user');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        // Opcionalmente validar el token con el backend
+        validateToken(userData.token);
       } catch (error) {
         console.error('Error parsing user data:', error);
         localStorage.removeItem('qscome_user');
@@ -22,92 +26,119 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const validateToken = async (token) => {
+    try {
+      const response = await authAPI.getMe();
+      if (response.data.success) {
+        // Token válido, actualizar datos del usuario
+        const userData = {
+          ...response.data.data,
+          token
+        };
+        setUser(userData);
+        localStorage.setItem('qscome_user', JSON.stringify(userData));
+      }
+    } catch (error) {
+      // Token inválido, limpiar sesión
+      console.error('Token validation failed:', error);
+      logout();
+    }
+  };
+
   const login = async (credentials) => {
     try {
-      // Aquí irá tu lógica de login con backend
-      // Por ahora, simulamos una respuesta
-      const userData = {
-        id: Date.now(),
-        email: credentials.email,
-        name: credentials.name || credentials.email.split('@')[0],
-        provider: credentials.provider || 'email',
-        avatar: credentials.avatar || null,
-        role: 'customer', // 'customer' | 'business' | 'admin'
-      };
-
-      localStorage.setItem('qscome_user', JSON.stringify(userData));
-      setUser(userData);
-      return { success: true, user: userData };
+      const response = await authAPI.login(credentials);
+      
+      if (response.data.success) {
+        const userData = {
+          ...response.data.data.user,
+          token: response.data.data.token
+        };
+        
+        localStorage.setItem('qscome_user', JSON.stringify(userData));
+        setUser(userData);
+        
+        return { success: true, user: userData };
+      } else {
+        return { success: false, error: response.data.message };
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Login error:', error);
+      return handleApiError(error);
     }
   };
 
   const loginWithGoogle = async () => {
     try {
-      // Aquí implementarás la autenticación con Google
-      // https://developers.google.com/identity/gsi/web/guides/overview
-      console.log('Login with Google - To implement');
+      const response = await authAPI.loginGoogle();
       
-      // Simulación
-      const userData = {
-        id: 'google_' + Date.now(),
-        email: 'usuario@gmail.com',
-        name: 'Usuario Google',
-        provider: 'google',
-        avatar: 'https://via.placeholder.com/100',
-        role: 'customer',
-      };
-
-      localStorage.setItem('qscome_user', JSON.stringify(userData));
-      setUser(userData);
-      return { success: true, user: userData };
+      if (response.data.success) {
+        const userData = {
+          ...response.data.data.user,
+          token: response.data.data.token
+        };
+        
+        localStorage.setItem('qscome_user', JSON.stringify(userData));
+        setUser(userData);
+        
+        return { success: true, user: userData };
+      } else {
+        return { success: false, error: response.data.message };
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Google login error:', error);
+      return handleApiError(error);
     }
   };
 
   const loginWithFacebook = async () => {
     try {
-      // Aquí implementarás la autenticación con Facebook
-      // https://developers.facebook.com/docs/facebook-login/web
-      console.log('Login with Facebook - To implement');
+      const response = await authAPI.loginFacebook();
       
-      // Simulación
-      const userData = {
-        id: 'fb_' + Date.now(),
-        email: 'usuario@facebook.com',
-        name: 'Usuario Facebook',
-        provider: 'facebook',
-        avatar: 'https://via.placeholder.com/100',
-        role: 'customer',
-      };
-
-      localStorage.setItem('qscome_user', JSON.stringify(userData));
-      setUser(userData);
-      return { success: true, user: userData };
+      if (response.data.success) {
+        const userData = {
+          ...response.data.data.user,
+          token: response.data.data.token
+        };
+        
+        localStorage.setItem('qscome_user', JSON.stringify(userData));
+        setUser(userData);
+        
+        return { success: true, user: userData };
+      } else {
+        return { success: false, error: response.data.message };
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Facebook login error:', error);
+      return handleApiError(error);
     }
   };
 
   const register = async (userData) => {
     try {
-      // Aquí irá tu lógica de registro con backend
-      const newUser = {
-        id: Date.now(),
+      const response = await authAPI.register({
+        user_name: userData.name,
         email: userData.email,
-        name: userData.name,
-        provider: 'email',
-        avatar: null,
-        role: 'customer',
-      };
+        password: userData.password,
+        phone: userData.phone
+      });
 
-      localStorage.setItem('qscome_user', JSON.stringify(newUser));
-      setUser(newUser);
-      return { success: true, user: newUser };
+      if (response.data.success) {
+        const newUserData = {
+          ...response.data.data.user,
+          token: response.data.data.token
+        };
+        
+        localStorage.setItem('qscome_user', JSON.stringify(newUserData));
+        setUser(newUserData);
+        
+        return { success: true, user: newUserData };
+      } else {
+        return { success: false, error: response.data.message };
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Register error:', error);
+      return handleApiError(error);
     }
   };
 
@@ -116,10 +147,25 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const updateUser = (updates) => {
-    const updatedUser = { ...user, ...updates };
-    localStorage.setItem('qscome_user', JSON.stringify(updatedUser));
-    setUser(updatedUser);
+  const updateUser = async (updates) => {
+    try {
+      const response = await authAPI.getMe();
+      
+      if (response.data.success) {
+        const updatedUser = {
+          ...user,
+          ...response.data.data
+        };
+        
+        localStorage.setItem('qscome_user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        
+        return { success: true };
+      }
+    } catch (error) {
+      console.error('Update user error:', error);
+      return handleApiError(error);
+    }
   };
 
   const value = {

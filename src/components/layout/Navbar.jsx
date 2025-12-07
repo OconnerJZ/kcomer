@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.jsx
 import * as React from "react";
 import {
   AppBar,
@@ -10,16 +11,25 @@ import {
   BottomNavigationAction,
   Badge,
   Avatar,
-  IconButton
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import {
   Fastfood,
   Info,
   Store,
   ReceiptLong,
-  Login as LoginIcon
+  Login as LoginIcon,
+  Person,
+  ShoppingBag,
+  Logout,
+  Dashboard,
 } from "@mui/icons-material";
-import LogoClassic from "../../../public/pwa-512x512.png";
+import LogoClassic from "/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@Hooks/components/useCart";
 import { useAuth } from "@Context/AuthContext";
@@ -42,10 +52,38 @@ const Navbar = () => {
     return navItems.findIndex(item => item.link === currentPath);
   });
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
+
   const cartCount = getCartCount();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    handleMenuClose();
+    navigate('/perfil');
+  };
+
+  const handleMyOrdersClick = () => {
+    handleMenuClose();
+    navigate('/mis-ordenes');
+  };
+
+  const handleDashboardClick = () => {
+    handleMenuClose();
+    navigate('/business-dashboard');
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -94,14 +132,69 @@ const Navbar = () => {
 
             {/* User Menu */}
             {isAuthenticated ? (
-                <IconButton>
+              <>
+                <IconButton onClick={handleMenuOpen}>
                   <Avatar 
                     src={user?.avatar} 
-                    sx={{ width: 32, height: 32, bgcolor: 'purple' }}
+                    sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
                   >
                     {user?.name?.charAt(0)}
                   </Avatar>
-                </IconButton>  
+                </IconButton>
+                
+                <Menu
+                  anchorEl={anchorEl}
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                  PaperProps={{
+                    sx: { minWidth: 200, mt: 1 }
+                  }}
+                >
+                  <MenuItem disabled>
+                    <ListItemText 
+                      primary={user?.name}
+                      secondary={user?.email}
+                      primaryTypographyProps={{ fontWeight: 600, fontSize: '0.9rem' }}
+                      secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                    />
+                  </MenuItem>
+                  <Divider />
+                  
+                  <MenuItem onClick={handleProfileClick}>
+                    <ListItemIcon>
+                      <Person fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Mi Perfil</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem onClick={handleMyOrdersClick}>
+                    <ListItemIcon>
+                      <ShoppingBag fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Mis Órdenes</ListItemText>
+                  </MenuItem>
+
+                  {user?.role === 'owner' && (
+                    <MenuItem onClick={handleDashboardClick}>
+                      <ListItemIcon>
+                        <Dashboard fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Panel de Negocio</ListItemText>
+                    </MenuItem>
+                  )}
+
+                  <Divider />
+
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    <ListItemIcon>
+                      <Logout fontSize="small" color="error" />
+                    </ListItemIcon>
+                    <ListItemText>Cerrar Sesión</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </>
             ) : (
               <Button
                 variant="outlined"
@@ -134,8 +227,9 @@ const Navbar = () => {
           showLabels
           value={value}
           onChange={(event, newValue) => {
+            const toGo = navItems[newValue]?.link == undefined ? "/perfil" : navItems[newValue].link 
             setValue(newValue);
-            navigate(navItems[newValue].link);
+            navigate(toGo);
           }}
           sx={{
             width: "100%",
@@ -174,9 +268,9 @@ const Navbar = () => {
                 <LoginIcon />
               )
             }
-            onClick={(e) => {
+            onClick={() => {
               if (isAuthenticated) {
-                
+                navigate('/perfil');
               } else {
                 navigate('/login');
               }

@@ -12,6 +12,7 @@ import {
 import { Card, Drawer } from "antd";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import { useLocation } from "react-router-dom";
 
 const options = ["Option 1", "Option 2"];
 
@@ -22,6 +23,8 @@ const FiltersPanel = () => {
 
   const [value, setValue] = useState();
 
+  const { pathname } = useLocation();
+
   const showDrawer = () => {
     setOpen(true);
   };
@@ -29,6 +32,9 @@ const FiltersPanel = () => {
     setOpen(false);
   };
 
+  if (pathname !== "/explorar") {
+    return null;
+  }
 
   return (
     <>
@@ -41,7 +47,8 @@ const FiltersPanel = () => {
           padding: "3px",
           // backgroundColor: "rgba(150,30,173,0.5)",
           // backgroundColor: "rgba(237,167,33,0.7)",
-          backgroundImage: "radial-gradient(circle at 56.6% 38.56%, #fffbae 5%, #ffe9a6 15%, #d8b46c 50%, #c99f54 75%, #bd8c40 100%)",
+          backgroundImage:
+            "radial-gradient(circle at 56.6% 38.56%, #fffbae 5%, #ffe9a6 15%, #d8b46c 50%, #c99f54 75%, #bd8c40 100%)",
           // backgroundImage: "radial-gradient(circle at 50% 50%, #f8e3a4 0, #eacd8a 25%, #d8b46c 50%, #c79b50 75%, #b98638 100%)",
           // backgroundImage: "radial-gradient(circle at 50% 50%, #f4dc9b 0, #e7c985 25%, #d8b46c 50%, #c99f54 75%, #bd8c40 100%)",
           color: "#000",
@@ -51,7 +58,7 @@ const FiltersPanel = () => {
           alignItems: "center",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.5s",
-          letterSpacing: "0.5px"
+          letterSpacing: "0.5px",
           // borderBottom: "1px solid rgb(255, 64, 59)"
         }}
       >

@@ -9,6 +9,7 @@ import Pedidos from "@Pages/Pedidos";
 import Login from "@Pages/Login";
 import MisOrdenes from "@Pages/MisOrdenes";
 import BusinessDashboard from "@Pages/BusinessDashboard";
+import Perfil from "@Pages/Perfil";
 import { useAuth } from "@Context/AuthContext";
 
 // Componente para rutas protegidas
@@ -39,6 +40,15 @@ const Router = () => {
           <Route path="login" element={<Login />} />
 
           {/* Rutas protegidas */}
+          <Route
+            path="perfil"
+            element={
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="orden"
             element={

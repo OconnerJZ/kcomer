@@ -30,8 +30,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    name: '',
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,10 +51,9 @@ const Login = () => {
     try {
       const result = await login({
         email: formData.email,
-        password: formData.password,
-        name: formData.name,
+        password: formData.password
       });
-
+      console.log("result login: ",result)
       if (result.success) {
         navigate('/explorar');
       } else {
