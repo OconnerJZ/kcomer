@@ -43,6 +43,7 @@ const Login = () => {
 
   useEffect(() => {
     /* global google */
+    console.log("GOOGLE:", GOOGLE_CLIENT_ID);
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin,
