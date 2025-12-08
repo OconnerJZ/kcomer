@@ -2,10 +2,8 @@
 import { API_URL_SERVER } from "@Utils/enviroments";
 import axios from "axios";
 
-const API_URL = API_URL_SERVER || "http://localhost:3000";
-
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_SERVER,
   headers: {
     "Content-Type": "application/json",
   },
@@ -59,7 +57,7 @@ export const authAPI = {
   login: (credentials) => apiClient.post("/api/auth/login", credentials),
   register: (data) => apiClient.post("/api/auth/register", data),
   getMe: () => apiClient.get("/api/auth/me"),
-  loginGoogle: () => apiClient.post("/api/auth/google"),
+  loginGoogle: (idToken) => apiClient.post("/api/auth/google", idToken),
   loginFacebook: () => apiClient.post("/api/auth/facebook"),
 };
 

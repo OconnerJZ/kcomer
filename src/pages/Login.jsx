@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -11,68 +11,89 @@ import {
   IconButton,
   InputAdornment,
   Alert,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Google,
   Facebook,
   Visibility,
   VisibilityOff,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@Context/AuthContext';
-import GeneralContent from '@Components/layout/GeneralContent';
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@Context/AuthContext";
+import GeneralContent from "@Components/layout/GeneralContent";
+import { jwtDecode } from "jwt-decode";
+import { GOOGLE_CLIENT_ID } from "@Utils/enviroments";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle, loginWithFacebook } = useAuth();
-  
+  const { login, register, loginWithGoogle, loginWithFacebook } = useAuth();
+
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleCustomGoogleLogin = () => {
+    google.accounts.id.prompt();
+  };
+
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleLogin,
+    });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-
+    setError("");
+    const data = {
+      email: formData.email,
+      password: formData.password,
+      ...(isRegister ? { name: formData.name } : {} ),
+    };
+  
     try {
-      const result = await login({
-        email: formData.email,
-        password: formData.password
-      });
-      console.log("result login: ",result)
+      const result = await (isRegister ? register : login)(data);
       if (result.success) {
-        navigate('/explorar');
+        navigate("/explorar");
       } else {
-        setError(result.error || 'Error al iniciar sesión');
+        setError(result.error || "Error al iniciar sesión");
       }
     } catch (err) {
-      setError('Error de conexión. Intenta de nuevo.');
+      setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (credential) => {
+    const token = credential.credential;
+    // Opcional: ver datos del usuario
+    const user = jwtDecode(token);
+    console.log("Usuario Google:", user);
     setLoading(true);
-    const result = await loginWithGoogle();
+    const idToken = { idToken: token };
+    console.log(idToken);
+    const result = await loginWithGoogle(idToken);
     if (result.success) {
-      navigate('/explorar');
+      navigate("/explorar");
     } else {
-      setError('Error al conectar con Google');
+      setError("Error al conectar con Google");
     }
     setLoading(false);
   };
@@ -81,21 +102,21 @@ const Login = () => {
     setLoading(true);
     const result = await loginWithFacebook();
     if (result.success) {
-      navigate('/explorar');
+      navigate("/explorar");
     } else {
-      setError('Error al conectar con Facebook');
+      setError("Error al conectar con Facebook");
     }
     setLoading(false);
   };
 
   return (
-    <GeneralContent title={isRegister ? 'Registro' : 'Iniciar Sesión'}>
+    <GeneralContent title={isRegister ? "Registro" : "Iniciar Sesión"}>
       <Box
         sx={{
           mt: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           px: 2,
           py: 0,
         }}
@@ -103,19 +124,26 @@ const Login = () => {
         <Paper
           sx={{
             maxWidth: 450,
-            width: '100%',
+            width: "100%",
             p: 4,
             borderRadius: 3,
           }}
           elevation={6}
         >
-          <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, textAlign: 'center' }}>
-            {isRegister ? 'Crear Cuenta' : 'Bienvenido'}
+          <Typography
+            variant="h4"
+            sx={{ mb: 1, fontWeight: 700, textAlign: "center" }}
+          >
+            {isRegister ? "Crear Cuenta" : "Bienvenido"}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-            {isRegister 
-              ? 'Regístrate para realizar pedidos' 
-              : 'Inicia sesión para continuar'}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3, textAlign: "center" }}
+          >
+            {isRegister
+              ? "Regístrate para realizar pedidos"
+              : "Inicia sesión para continuar"}
           </Typography>
 
           {error && (
@@ -130,21 +158,20 @@ const Login = () => {
               variant="outlined"
               fullWidth
               startIcon={<Google />}
-              onClick={handleGoogleLogin}
+              onClick={handleCustomGoogleLogin}
               disabled={loading}
               sx={{
                 py: 1.2,
-                borderColor: '#db4437',
-                color: '#db4437',
-                '&:hover': {
-                  borderColor: '#c23321',
-                  bgcolor: 'rgba(219, 68, 55, 0.04)',
+                borderColor: "#db4437",
+                color: "#db4437",
+                "&:hover": {
+                  borderColor: "#c23321",
+                  bgcolor: "rgba(219, 68, 55, 0.04)",
                 },
               }}
             >
               Continuar con Google
             </Button>
-
             <Button
               variant="outlined"
               fullWidth
@@ -153,11 +180,11 @@ const Login = () => {
               disabled={loading}
               sx={{
                 py: 1.2,
-                borderColor: '#4267B2',
-                color: '#4267B2',
-                '&:hover': {
-                  borderColor: '#365899',
-                  bgcolor: 'rgba(66, 103, 178, 0.04)',
+                borderColor: "#4267B2",
+                color: "#4267B2",
+                "&:hover": {
+                  borderColor: "#365899",
+                  bgcolor: "rgba(66, 103, 178, 0.04)",
                 },
               }}
             >
@@ -198,7 +225,7 @@ const Login = () => {
               <TextField
                 name="password"
                 label="Contraseña"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -224,24 +251,24 @@ const Login = () => {
                 disabled={loading}
                 sx={{ py: 1.5, mt: 2 }}
               >
-                {loading 
-                  ? 'Cargando...' 
-                  : isRegister 
-                    ? 'Crear Cuenta' 
-                    : 'Iniciar Sesión'}
+                {loading
+                  ? "Cargando..."
+                  : isRegister
+                  ? "Crear Cuenta"
+                  : "Iniciar Sesión"}
               </Button>
             </Stack>
           </form>
 
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Box sx={{ mt: 3, textAlign: "center" }}>
             <Button
               variant="text"
               onClick={() => setIsRegister(!isRegister)}
-              sx={{ textTransform: 'none' }}
+              sx={{ textTransform: "none" }}
             >
-              {isRegister 
-                ? '¿Ya tienes cuenta? Inicia sesión' 
-                : '¿No tienes cuenta? Regístrate'}
+              {isRegister
+                ? "¿Ya tienes cuenta? Inicia sesión"
+                : "¿No tienes cuenta? Regístrate"}
             </Button>
           </Box>
         </Paper>

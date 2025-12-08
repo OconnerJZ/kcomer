@@ -68,9 +68,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (idToken) => {
     try {
-      const response = await authAPI.loginGoogle();
+      const response = await authAPI.loginGoogle(idToken);
       
       if (response.data.success) {
         const userData = {
@@ -119,8 +119,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register({
         user_name: userData.name,
         email: userData.email,
-        password: userData.password,
-        phone: userData.phone
+        password: userData.password
       });
 
       if (response.data.success) {
