@@ -5,7 +5,6 @@ import Content from "./Content";
 import Bg from "@Assets/images/qscome-bg-6.png";
 import FiltersPanel from "@Components/filters/FiltersPanel";
 import { namePage } from "@Utils/listMessages";
-
 const {
   Header: AntdHeader,
   Content: AntdContent,
@@ -16,7 +15,7 @@ const Layout = () => {
   return (
     <AntdLayout
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
       }}
     >
       <Box className="header-navbar">
@@ -36,6 +35,9 @@ const Layout = () => {
           position: "relative",
           overflow: "hidden",
           padding: "0 0px",
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
+          backgroundSize: "contain",
+          backgroundPosition: "center",
         }}
       >
         <Content />
@@ -46,6 +48,7 @@ const Layout = () => {
           color: "#f5f5f5",
           textAlign: "center",
           letterSpacing: "3.2px",
+          display: { xs: "none", sm: "block" },
         }}
       >
         <Box component="span" className="footer">

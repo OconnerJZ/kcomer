@@ -8,12 +8,11 @@ const openNotification = () => {
 };
 
 export const isMobile = () => {
-  const esDispositivoMovil =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-    return esDispositivoMovil
-}
+  if (typeof navigator === "undefined") return false; // Previene errores en SSR
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
 
 export const calls = (numeroTelefono) => {
   if (isMobile()) {
@@ -36,6 +35,4 @@ export const separateByGroups = ({ lista = [], limited = 3 }) => {
   return groups;
 };
 
-export const isEmpty = () =>{
-  
-}
+export const isEmpty = () => {};

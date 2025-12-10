@@ -1,4 +1,3 @@
-// src/components/forms/FormField.jsx
 import {
   TextField,
   FormControlLabel,
@@ -12,14 +11,13 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
-import dayjs from "dayjs";
 import { Image, Upload } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import PropTypes from 'prop-types';
-import GoogleMapField from './GoogleMapField';
+import PropTypes from "prop-types";
+import GoogleMapField from "./GoogleMapField";
 import { API_KEY_MAPS } from "@Utils/enviroments";
+import ScheduleField from "./ScheduleField";
 
 // Validadores centralizados
 const validators = {
@@ -42,13 +40,15 @@ const handleChange = (e, setFormValues, validate, field) => {
 const ImageField = ({ field, formValues, setFormValues }) => {
   const [fileList, setFileList] = useState(
     formValues[field.name]
-      ? [{
-          uid: "-1",
-          name: "image.png",
-          status: "done",
-          originFileObj: formValues[field.name],
-          url: URL.createObjectURL(formValues[field.name]),
-        }]
+      ? [
+          {
+            uid: "-1",
+            name: "image.png",
+            status: "done",
+            originFileObj: formValues[field.name],
+            url: URL.createObjectURL(formValues[field.name]),
+          },
+        ]
       : []
   );
   const [previewImage, setPreviewImage] = useState("");
@@ -109,71 +109,6 @@ const ImageField = ({ field, formValues, setFormValues }) => {
   );
 };
 
-// Componente de horarios mejorado
-const ScheduleField = ({ field, formValues, setFormValues }) => {
-  const days = [
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-    "Domingo",
-  ];
-
-  return (
-    <Box sx={{ my: 2 }}>
-      <Typography variant="subtitle1" sx={{ mb: 2 }}>{field.label}</Typography>
-      {days.map((day) => (
-        <Box
-          key={day}
-          sx={{ 
-            display: "flex", 
-            gap: 2, 
-            alignItems: "center", 
-            mb: 2,
-            flexWrap: 'wrap'
-          }}
-        >
-          <Typography sx={{ width: 100, fontWeight: 600 }}>{day}</Typography>
-
-          <MobileTimePicker
-            label="Apertura"
-            value={
-              formValues[`${day}_open`]
-                ? dayjs(formValues[`${day}_open`], "HH:mm")
-                : null
-            }
-            onChange={(newValue) =>
-              setFormValues((prev) => ({
-                ...prev,
-                [`${day}_open`]: newValue ? newValue.format("HH:mm") : "",
-              }))
-            }
-            slotProps={{ textField: { size: "small" } }}
-          />
-
-          <MobileTimePicker
-            label="Cierre"
-            value={
-              formValues[`${day}_close`]
-                ? dayjs(formValues[`${day}_close`], "HH:mm")
-                : null
-            }
-            onChange={(newValue) =>
-              setFormValues((prev) => ({
-                ...prev,
-                [`${day}_close`]: newValue ? newValue.format("HH:mm") : "",
-              }))
-            }
-            slotProps={{ textField: { size: "small" } }}
-          />
-        </Box>
-      ))}
-    </Box>
-  );
-};
-
 // Mapa de componentes
 const fieldComponents = {
   text: ({ field, formValues, setFormValues, error, helperText, validate }) => (
@@ -197,7 +132,7 @@ const fieldComponents = {
       label={field.label}
       type="email"
       value={formValues[field.name] || ""}
-      onChange={(e) => handleChange(e, setFormValues, 'email', field)}
+      onChange={(e) => handleChange(e, setFormValues, "email", field)}
       fullWidth
       margin="normal"
       error={!!error}
@@ -260,8 +195,15 @@ const fieldComponents = {
   ),
 
   radio: ({ field, formValues, setFormValues, error, helperText }) => (
-    <FormControl component="fieldset" error={!!error} sx={{ mb: 2 }} key={field.name}>
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>{field.label}</Typography>
+    <FormControl
+      component="fieldset"
+      error={!!error}
+      sx={{ mb: 2 }}
+      key={field.name}
+    >
+      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+        {field.label}
+      </Typography>
       <RadioGroup
         value={formValues[field.name] || ""}
         onChange={(e) =>
@@ -281,59 +223,90 @@ const fieldComponents = {
     </FormControl>
   ),
 
-  autocomplete: ({ field, formValues, setFormValues, error, helperText }) => (
-    <Autocomplete
-      key={field.name}
-      options={field.options || []}
-      value={formValues[field.name] || null}
-      onChange={(e, newValue) =>
-        setFormValues((prev) => ({ ...prev, [field.name]: newValue }))
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={field.label}
-          margin="normal"
-          fullWidth
-          error={!!error}
-          helperText={helperText}
-          required={field.required}
-        />
-      )}
-    />
-  ),
+  autocomplete: ({ field, formValues, setFormValues, error, helperText }) => {
+    const options = field.options || [];
+    // console.log(options)
+    // Buscar opción seleccionada por ID
+    const selectedOption =
+      options.find((opt) => opt.id === formValues[field.name]) || null;
 
-  "autocomplete-multiple": ({ field, formValues, setFormValues, error, helperText }) => (
-    <Autocomplete
-      key={field.name}
-      multiple
-      options={field.options || []}
-      value={formValues[field.name] || []}
-      onChange={(e, newValue) =>
-        setFormValues((prev) => ({ ...prev, [field.name]: newValue }))
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={field.label}
-          margin="normal"
-          fullWidth
-          error={!!error}
-          helperText={helperText}
-          required={field.required}
-        />
-      )}
-    />
-  ),
+    return (
+      <Autocomplete
+        key={field.name}
+        options={options}
+        getOptionLabel={(option) => option.value || ""}
+        value={selectedOption}
+        onChange={(e, newValue) =>
+          setFormValues((prev) => ({
+            ...prev,
+            [field.name]: newValue?.id || null, // Guardar SOLO el ID
+          }))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={field.label}
+            margin="normal"
+            fullWidth
+            error={!!error}
+            helperText={helperText}
+            required={field.required}
+          />
+        )}
+      />
+    );
+  },
 
+  "autocomplete-multiple": ({
+    field,
+    formValues,
+    setFormValues,
+    error,
+    helperText,
+  }) => {
+    const options = field.options || [];
+
+    const selectedOptions = options.filter(
+      (opt) =>
+        Array.isArray(formValues[field.name]) &&
+        formValues[field.name].includes(opt.id)
+    );
+
+    return (
+      <Autocomplete
+        key={field.name}
+        multiple
+        options={options}
+        getOptionLabel={(option) => option.value}
+        value={selectedOptions}
+        onChange={(e, newValue) =>
+          setFormValues((prev) => ({
+            ...prev,
+            [field.name]: newValue.map((v) => v.id),
+          }))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={field.label}
+            margin="normal"
+            fullWidth
+            error={!!error}
+            helperText={helperText}
+            required={field.required}
+          />
+        )}
+      />
+    );
+  },
   image: ImageField,
   schedule: ScheduleField,
-  
+
   map: ({ field, formValues, setFormValues }) => (
     <GoogleMapField
       key={field.name}
       value={formValues[field.name]}
-      onChange={(coords) => 
+      onChange={(coords) =>
         setFormValues((prev) => ({ ...prev, [field.name]: coords }))
       }
       label={field.label}

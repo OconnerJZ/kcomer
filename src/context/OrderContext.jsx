@@ -111,12 +111,12 @@ export const OrdersProvider = ({ children }) => {
         id: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         ...orderData,
         userId: user.id,
-        status: ORDER_STATUS.PENDING,
+        status: ORDER_STATUS.ACCEPTED,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         statusHistory: [
           {
-            status: ORDER_STATUS.PENDING,
+            status: ORDER_STATUS.ACCEPTED,
             timestamp: new Date().toISOString(),
             note: 'Orden creada (offline)',
           },

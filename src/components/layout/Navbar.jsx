@@ -272,7 +272,7 @@ const Navbar = () => {
               if (isAuthenticated) {
                 navigate('/perfil');
               } else {
-                navigate('/login');
+                navigate('/login/perfil');
               }
             }}
           />

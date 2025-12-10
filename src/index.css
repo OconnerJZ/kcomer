@@ -32,13 +32,10 @@
   line-height: unset;
 }
 
-.card-avatar .css-1pqm26d-MuiAvatar-img{
+.MuiAvatar-img{
   border-radius: 50% !important;
 }
 
-.css-1su80sj-MuiAvatar-img{
-  border-radius: 50% !important;
-}
 
 .bg-card-explore {
   background: linear-gradient(
@@ -46,6 +43,7 @@
       rgba(255, 255, 255, 0.8)
     ),
     url(./assets/images/qscome-bg-6.png);
+  background-size: contain;
   width: 100%;
   height: auto;
   padding: 70px 0px;
@@ -55,7 +53,7 @@
 
 .parallax {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

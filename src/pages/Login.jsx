@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -12,23 +11,24 @@ import {
   InputAdornment,
   Alert,
 } from "@mui/material";
-import {
-  Google,
-  Facebook,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { Google, Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@Context/AuthContext";
 import GeneralContent from "@Components/layout/GeneralContent";
-import { jwtDecode } from "jwt-decode";
 import { GOOGLE_CLIENT_ID } from "@Utils/enviroments";
+import { isMobile } from "@Utils/commons";
+
+const TITLE_REGISTER_CLIENT = "Regístrate para realizar pedidos";
+const TITLE_REGISTER_BUSINESS = "Regístrate para dar de alta tu negocio";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, register, loginWithGoogle, loginWithFacebook } = useAuth();
+  const { from } = useParams();
+  const { login, register, loginWithGoogle } = useAuth();
 
   const [isRegister, setIsRegister] = useState(false);
+  const [isRegisterBusiness, setIsRegisterBusiness] = useState(false);
+  const [titleRegister, setTitleRegister] = useState(TITLE_REGISTER_CLIENT);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -42,8 +42,18 @@ const Login = () => {
   };
 
   useEffect(() => {
+    if (from === "registro") {
+      setTitleRegister(TITLE_REGISTER_BUSINESS);
+      setIsRegister(true);
+      setIsRegisterBusiness(true);
+    } else {
+      setTitleRegister(TITLE_REGISTER_CLIENT);
+      setIsRegister(false);
+      setIsRegisterBusiness(false);
+    }
+  }, []);
+  useEffect(() => {
     /* global google */
-    console.log("GOOGLE:", GOOGLE_CLIENT_ID);
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin,
@@ -65,13 +75,15 @@ const Login = () => {
     const data = {
       email: formData.email,
       password: formData.password,
-      ...(isRegister ? { name: formData.name } : {} ),
+      ...(isRegister ? { name: formData.name } : {}),
+      ...(isRegisterBusiness ? { isBusiness: true } : {}),
     };
-  
+
     try {
       const result = await (isRegister ? register : login)(data);
       if (result.success) {
-        navigate("/explorar");
+        const path = `/${from}` || "/explorar";
+        navigate(path);
       } else {
         setError(result.error || "Error al iniciar sesión");
       }
@@ -84,28 +96,17 @@ const Login = () => {
 
   const handleGoogleLogin = async (credential) => {
     const token = credential.credential;
-    // Opcional: ver datos del usuario
-    const user = jwtDecode(token);
-    console.log("Usuario Google:", user);
     setLoading(true);
-    const idToken = { idToken: token };
-    console.log(idToken);
+    const idToken = {
+      idToken: token,
+      ...(isRegisterBusiness ? { isBusiness: true } : {}),
+    };
     const result = await loginWithGoogle(idToken);
+    const path = `/${from}` || "/explorar";
     if (result.success) {
-      navigate("/explorar");
+      navigate(path);
     } else {
       setError("Error al conectar con Google");
-    }
-    setLoading(false);
-  };
-
-  const handleFacebookLogin = async () => {
-    setLoading(true);
-    const result = await loginWithFacebook();
-    if (result.success) {
-      navigate("/explorar");
-    } else {
-      setError("Error al conectar con Facebook");
     }
     setLoading(false);
   };
@@ -114,16 +115,16 @@ const Login = () => {
     <GeneralContent title={isRegister ? "Registro" : "Iniciar Sesión"}>
       <Box
         sx={{
-          mt: 2,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: "center", // centra verticalmente
+          justifyContent: "center", // centra horizontalmente
           px: 2,
           py: 0,
         }}
       >
         <Paper
           sx={{
+            mt: isMobile() ? 2 : 10,
             maxWidth: 450,
             width: "100%",
             p: 4,
@@ -142,9 +143,7 @@ const Login = () => {
             color="text.secondary"
             sx={{ mb: 3, textAlign: "center" }}
           >
-            {isRegister
-              ? "Regístrate para realizar pedidos"
-              : "Inicia sesión para continuar"}
+            {isRegister ? titleRegister : "Inicia sesión para continuar"}
           </Typography>
 
           {error && (
@@ -172,24 +171,6 @@ const Login = () => {
               }}
             >
               Continuar con Google
-            </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Facebook />}
-              onClick={handleFacebookLogin}
-              disabled={loading}
-              sx={{
-                py: 1.2,
-                borderColor: "#4267B2",
-                color: "#4267B2",
-                "&:hover": {
-                  borderColor: "#365899",
-                  bgcolor: "rgba(66, 103, 178, 0.04)",
-                },
-              }}
-            >
-              Continuar con Facebook
             </Button>
           </Stack>
 

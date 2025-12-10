@@ -126,35 +126,10 @@ const Perfil = () => {
                 <Typography variant="h4" sx={{ fontWeight: 700 }}>
                   {user?.name || "Usuario"}
                 </Typography>
-                {user?.role && (
-                  <Chip
-                    label={getRoleLabel(user.role)}
-                    color={getRoleColor(user.role)}
-                    size="small"
-                  />
-                )}
+                
               </Stack>
               <Typography color="text.secondary">{user?.email}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                Proveedor:{" "}
-                {user?.provider === "google"
-                  ? "🔵 Google"
-                  : user?.provider === "facebook"
-                  ? "🔵 Facebook"
-                  : "📧 Email"}
-              </Typography>
             </Box>
-
-            <IconButton
-              color="error"
-              onClick={() => setLogoutDialogOpen(true)}
-              sx={{
-                bgcolor: "error.light",
-                "&:hover": { bgcolor: "error.main", color: "white" },
-              }}
-            >
-              <Logout />
-            </IconButton>
           </Stack>
         </Paper>
 
@@ -318,14 +293,14 @@ const Perfil = () => {
           open={logoutDialogOpen}
           onClose={() => setLogoutDialogOpen(false)}
         >
-          <DialogTitle>¿Cerrar sesión?</DialogTitle>
+          <DialogTitle>Cerrar sesión</DialogTitle>
           <DialogContent>
             <Typography>¿Estás seguro de que deseas cerrar sesión?</Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setLogoutDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={() => setLogoutDialogOpen(false)}>No</Button>
             <Button onClick={handleLogout} color="error" variant="contained">
-              Cerrar Sesión
+              Si, estoy seguro
             </Button>
           </DialogActions>
         </Dialog>

@@ -1,13 +1,14 @@
 import { Box } from "@mui/material";
 import PropTypes from "prop-types";
 
-const Parallax = ({ bg, children }) => {
+const Parallax = ({ bg, children, stx }) => {
   return (
     <Box
       component="div"
       className="parallax"
       sx={{
         backgroundImage: `url(${bg})`,
+        ...stx
       }}
     >
       {children}

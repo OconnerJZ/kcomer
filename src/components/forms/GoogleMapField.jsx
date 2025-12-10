@@ -1,63 +1,108 @@
 // src/components/forms/GoogleMapField.jsx
-import { useEffect, useRef, useState } from 'react';
-import { Box, Typography, TextField, Paper, CircularProgress, Alert } from '@mui/material';
-import { MyLocation } from '@mui/icons-material';
-import PropTypes from 'prop-types';
+import { useEffect, useRef, useState } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Paper,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import { MyLocation } from "@mui/icons-material";
+import PropTypes from "prop-types";
+
+const parseAddressComponents = (addressComponents) => {
+  if (!addressComponents || !Array.isArray(addressComponents)) {
+    return {
+      address: "",
+      city: "",
+      postalCode: "",
+      state: "",
+      country: "",
+    };
+  }
+  
+  const findComponent = (types) => {
+    return addressComponents.find((component) =>
+      types.some((type) => component.types.includes(type))
+    );
+  };
+
+  const route = findComponent(["route"]);
+  const streetNumber = findComponent(["street_number"]);
+  const locality = findComponent(["locality"]);
+  const postalCode = findComponent(["postal_code"]);
+  const state = findComponent(["administrative_area_level_1"]);
+  const country = findComponent(["country"]);
+  const sublocality = findComponent(["sublocality", "sublocality_level_1"]);
+
+  const addressParts = [];
+  if (route?.long_name) addressParts.push(route.long_name);
+  if (streetNumber?.long_name) addressParts.push(streetNumber.long_name);
+
+  return {
+    address: addressParts.join(" ") || "",
+    city: locality?.long_name || sublocality?.long_name || "",
+    postalCode: postalCode?.long_name || "",
+    state: state?.long_name || "",
+    stateShort: state?.short_name || "",
+    country: country?.long_name || "",
+    countryShort: country?.short_name || "",
+  };
+};
 
 const GoogleMapField = ({ value, onChange, label, apiKey }) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const googleMapInstanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Validar API key
-    if (!apiKey || apiKey === '' || apiKey === 'undefined') {
-      setError('API Key de Google Maps no configurada. Revisa tu archivo .env');
+    if (!apiKey || apiKey === "" || apiKey === "undefined") {
+      setError("API Key de Google Maps no configurada");
       setLoading(false);
       return;
     }
 
     const loadGoogleMaps = () => {
       try {
-        // Verificar si ya está cargado
         if (window.google?.maps) {
           initMap();
           return;
         }
 
-        // Verificar si el script ya está en el DOM
         const existingScript = document.querySelector(
           'script[src*="maps.googleapis.com"]'
         );
-        
+
         if (existingScript) {
-          existingScript.addEventListener('load', initMap);
+          existingScript.addEventListener("load", initMap);
           return;
         }
 
-        // Cargar script
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
         script.async = true;
         script.defer = true;
-        
+
         script.onload = () => {
-          console.log('✅ Google Maps cargado correctamente');
+          console.log("✅ Google Maps cargado correctamente");
           initMap();
         };
-        
+
         script.onerror = (e) => {
-          console.error('❌ Error al cargar Google Maps:', e);
-          setError('Error al cargar Google Maps. Verifica tu API key y conexión.');
+          console.error("❌ Error al cargar Google Maps:", e);
+          setError(
+            "Error al cargar Google Maps. Verifica tu API key y conexión."
+          );
           setLoading(false);
         };
-        
+
         document.head.appendChild(script);
       } catch (err) {
-        console.error('❌ Error en loadGoogleMaps:', err);
+        console.error("❌ Error en loadGoogleMaps:", err);
         setError(err.message);
         setLoading(false);
       }
@@ -66,18 +111,18 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
     const initMap = () => {
       try {
         if (!window.google?.maps) {
-          setError('Google Maps no está disponible');
+          setError("Google Maps no está disponible");
           setLoading(false);
           return;
         }
 
         if (!mapRef.current) {
-          setError('Referencia del mapa no disponible');
+          setError("Referencia del mapa no disponible");
           setLoading(false);
           return;
         }
 
-        const defaultCenter = value || { lat: 19.4326, lng: -99.1332 }; // CDMX
+        const defaultCenter = value || { lat: 19.4326, lng: -99.1332 };
 
         const mapOptions = {
           center: defaultCenter,
@@ -95,31 +140,47 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
           map,
           draggable: true,
           animation: window.google.maps.Animation.DROP,
-          title: 'Arrastra para cambiar ubicación'
+          title: "Arrastra para cambiar ubicación",
         });
 
         markerRef.current = marker;
 
-        // Evento drag end
-        marker.addListener('dragend', () => {
+        // ✅ CORRECCIÓN: Evento drag end - ahora es async
+        marker.addListener("dragend", async () => {
           const position = marker.getPosition();
           const coords = {
             lat: position.lat(),
             lng: position.lng(),
           };
-          onChange(coords);
-          reverseGeocode(coords);
+
+          // Primero obtenemos la data del geocoding
+          const geocodeData = await reverseGeocode(coords);
+          
+          // Luego llamamos onChange con TODO junto
+          onChange({
+            latitude: coords.lat,
+            longitude: coords.lng,
+            ...geocodeData, // Incluye address, city, postalCode, state, etc.
+          });
         });
 
-        // Click en el mapa
-        map.addListener('click', (e) => {
+        // ✅ CORRECCIÓN: Click en el mapa - ahora es async
+        map.addListener("click", async (e) => {
           const coords = {
             lat: e.latLng.lat(),
             lng: e.latLng.lng(),
           };
           marker.setPosition(e.latLng);
-          onChange(coords);
-          reverseGeocode(coords);
+
+          // Primero obtenemos la data del geocoding
+          const geocodeData = await reverseGeocode(coords);
+          
+          // Luego llamamos onChange con TODO junto
+          onChange({
+            latitude: coords.lat,
+            longitude: coords.lng,
+            ...geocodeData,
+          });
         });
 
         // Geocode inicial
@@ -128,93 +189,122 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
         }
 
         setLoading(false);
-        console.log('✅ Mapa inicializado correctamente');
+        console.log("✅ Mapa inicializado correctamente");
       } catch (err) {
-        console.error('❌ Error al inicializar mapa:', err);
-        setError('Error al inicializar el mapa: ' + err.message);
+        console.error("❌ Error al inicializar mapa:", err);
+        setError("Error al inicializar el mapa: " + err.message);
         setLoading(false);
       }
     };
 
+    // ✅ CORRECCIÓN: reverseGeocode ahora RETORNA los datos parseados
     const reverseGeocode = async (coords) => {
       try {
-        if (!window.google?.maps) return;
+        if (!window.google?.maps) return null;
 
         const geocoder = new window.google.maps.Geocoder();
         const response = await geocoder.geocode({ location: coords });
         
         if (response.results[0]) {
-          setAddress(response.results[0].formatted_address);
+          const result = response.results[0];
+          setAddress(result.formatted_address);
+          
+          // Parsear y RETORNAR los componentes
+          const parsedAddress = parseAddressComponents(result.address_components);
+          
+          return {
+            formatted_address: result.formatted_address,
+            ...parsedAddress,
+          };
         }
+        
+        return null;
       } catch (err) {
-        console.error('❌ Error en geocoding:', err);
-        setAddress('No se pudo obtener la dirección');
+        console.error("❌ Error en geocoding:", err);
+        setAddress("No se pudo obtener la dirección");
+        return null;
       }
     };
 
     loadGoogleMaps();
 
-    // Cleanup
     return () => {
       if (markerRef.current) {
         markerRef.current.setMap(null);
       }
     };
-  }, [apiKey]); // Solo depende de apiKey
+  }, [apiKey]);
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError('Geolocalización no disponible en tu navegador');
+      setError("Geolocalización no disponible en tu navegador");
       return;
     }
 
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        
-        // Actualizar mapa y marker
+
         if (googleMapInstanceRef.current && markerRef.current) {
           googleMapInstanceRef.current.setCenter(coords);
           markerRef.current.setPosition(coords);
-          onChange(coords);
-          
-          // Geocode para obtener dirección
+
+          // ✅ CORRECCIÓN: Primero geocode, luego onChange
           const geocoder = new window.google.maps.Geocoder();
-          geocoder.geocode({ location: coords }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-              setAddress(results[0].formatted_address);
+          
+          try {
+            const response = await geocoder.geocode({ location: coords });
+            
+            if (response.results[0]) {
+              const result = response.results[0];
+              setAddress(result.formatted_address);
+              
+              const parsedAddress = parseAddressComponents(
+                result.address_components
+              );
+              
+              // Llamar onChange con TODO junto
+              onChange({
+                latitude: coords.lat,
+                longitude: coords.lng,
+                formatted_address: result.formatted_address,
+                ...parsedAddress,
+              });
             }
+          } catch (err) {
+            console.error("Error en geocoding:", err);
+          } finally {
             setLoading(false);
-          });
+          }
         }
       },
       (error) => {
-        console.error('❌ Error de geolocalización:', error);
-        let errorMsg = 'No se pudo obtener la ubicación';
-        
-        switch(error.code) {
+        console.error("❌ Error de geolocalización:", error);
+        let errorMsg = "No se pudo obtener la ubicación";
+
+        switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMsg = 'Permiso de ubicación denegado';
+            errorMsg = "Permiso de ubicación denegado";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMsg = 'Ubicación no disponible';
+            errorMsg = "Ubicación no disponible";
             break;
           case error.TIMEOUT:
-            errorMsg = 'Tiempo de espera agotado';
+            errorMsg = "Tiempo de espera agotado";
             break;
         }
-        
+
         setError(errorMsg);
         setLoading(false);
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0
+        maximumAge: 0,
       }
     );
   };
@@ -229,8 +319,8 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             {error}
           </Typography>
-          {error.includes('API Key') && (
-            <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+          {error.includes("API Key") && (
+            <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
               Solución:
               <br />
               1. Crea un archivo <code>.env</code> en la raíz del proyecto
@@ -251,7 +341,6 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
         {label}
       </Typography>
 
-      {/* Campo de dirección */}
       <TextField
         fullWidth
         value={address}
@@ -262,9 +351,9 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
             <CircularProgress size={20} />
           ) : (
             <MyLocation
-              sx={{ 
-                cursor: 'pointer',
-                '&:hover': { color: 'primary.main' }
+              sx={{
+                cursor: "pointer",
+                "&:hover": { color: "primary.main" },
               }}
               onClick={handleGetCurrentLocation}
               titleAccess="Obtener mi ubicación actual"
@@ -274,64 +363,60 @@ const GoogleMapField = ({ value, onChange, label, apiKey }) => {
         sx={{ mb: 2 }}
       />
 
-      {/* Coordenadas */}
       {value && (
-        <Typography 
-          variant="caption" 
-          color="text.secondary" 
-          sx={{ mb: 1, display: 'block' }}
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mb: 1, display: "block" }}
         >
-          📍 Lat: {value.lat.toFixed(6)}, Lng: {value.lng.toFixed(6)}
+          Lat: {value.lat?.toFixed(6)}, Lng: {value.lng?.toFixed(6)}
         </Typography>
       )}
 
-      {/* Mapa */}
       <Paper
         elevation={3}
         sx={{
-          width: '100%',
+          width: "100%",
           height: 400,
           borderRadius: 2,
-          overflow: 'hidden',
-          position: 'relative',
-          bgcolor: loading ? 'grey.100' : 'transparent'
+          overflow: "hidden",
+          position: "relative",
+          bgcolor: loading ? "grey.100" : "transparent",
         }}
       >
         <Box
           ref={mapRef}
           sx={{
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
           }}
         />
-        
+
         {loading && (
           <Box
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-              bgcolor: 'rgba(255,255,255,0.9)',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              textAlign: "center",
+              bgcolor: "rgba(255,255,255,0.9)",
               p: 3,
               borderRadius: 2,
             }}
           >
             <CircularProgress sx={{ mb: 2 }} />
-            <Typography variant="body2">
-              Cargando mapa...
-            </Typography>
+            <Typography variant="body2">Cargando mapa...</Typography>
           </Box>
         )}
       </Paper>
 
-      <Typography 
-        variant="caption" 
-        color="text.secondary" 
-        sx={{ mt: 1, display: 'block' }}
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mt: 1, display: "block" }}
       >
-        💡 Arrastra el marcador o haz clic en el mapa para seleccionar ubicación
+        Arrastra el marcador o haz clic en el mapa para seleccionar ubicación
       </Typography>
     </Box>
   );
@@ -348,7 +433,7 @@ GoogleMapField.propTypes = {
 };
 
 GoogleMapField.defaultProps = {
-  label: 'Ubicación en mapa',
+  label: "Ubicación en mapa",
   value: null,
 };
 

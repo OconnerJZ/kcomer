@@ -103,12 +103,17 @@ export const paymentAPI = {
 export const uploadAPI = {
   uploadImage: async (file) => {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("file", file);
     return apiClient.post("/api/upload/image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
 };
+
+// ============== CATALOGOS ==============
+export const foodTypeAPI = {
+    getAll: () => apiClient.get("/api/catalogs/food-types"),
+}
 
 // Helper para manejar errores de API
 export const handleApiError = (error) => {

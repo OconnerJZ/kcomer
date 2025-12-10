@@ -27,6 +27,7 @@ import {
   DeleteSweep,
   Add,
   Remove,
+  Ballot,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import GeneralContent from "@Components/layout/GeneralContent";
@@ -35,6 +36,7 @@ import { useAuth } from "@Context/AuthContext";
 import { useOrders } from "@Context/OrderContext";
 import { Segmented } from "antd";
 import MisOrdenes from "./MisOrdenes";
+import CicularProgressTracker from "@Components/CicularProgressTracker";
 
 const Pedidos = () => {
   const navigate = useNavigate();
@@ -91,7 +93,7 @@ const Pedidos = () => {
   const handleOpenCheckout = () => {
     if (!isAuthenticated) {
       alert("Debes iniciar sesión para realizar un pedido");
-      navigate("/login");
+      navigate("/login/orden");
       return;
     }
     setCheckoutDialogOpen(true);
@@ -150,14 +152,14 @@ const Pedidos = () => {
                 px: 3,
               }}
             >
-              <ShoppingCart
+              <Ballot
                 sx={{ fontSize: 80, color: "text.disabled", mb: 2 }}
               />
               <Typography variant="h5" gutterBottom>
-                Tu carrito está vacío
+                Parece que no hay pedidos todavía
               </Typography>
               <Typography color="text.secondary">
-                Explora negocios y agrega productos para empezar
+                Descubre negocios cercanos y empieza a pedir 
               </Typography>
             </Box>
           )}
