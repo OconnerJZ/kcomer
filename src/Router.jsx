@@ -12,6 +12,9 @@ import BusinessDashboard from "@Pages/BusinessDashboard";
 import Perfil from "@Pages/Perfil";
 import { useAuth } from "@Context/AuthContext";
 import LandingRegister from "@Pages/LandingRegister";
+import OwnerDashboard from "@Pages/OwnerDashboard";
+import OwnerMenu from "@Pages/OwnerMenu";
+import OwnerReports from "@Pages/OwnerReports";
 
 // Componente para rutas protegidas
 const ProtectedRoute = ({ children }) => {
@@ -70,9 +73,33 @@ const Router = () => {
           <Route
             path="business-dashboard"
             element={
-              <ProtectedRoute>
+              
                 <BusinessDashboard />
-              </ProtectedRoute>
+              
+            }
+          />
+          <Route
+            path="owner"
+            element={
+          
+                <OwnerDashboard />
+              
+            }
+          />
+          <Route
+            path="owner-menu"
+            element={
+          
+                <OwnerMenu />
+              
+            }
+          />
+          <Route
+            path="owner-r"
+            element={
+          
+                <OwnerReports />
+              
             }
           />
         </Route>
