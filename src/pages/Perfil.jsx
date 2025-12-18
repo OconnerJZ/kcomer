@@ -268,7 +268,7 @@ const Perfil = () => {
                 variant="outlined"
                 startIcon={<Store />}
                 fullWidth
-                onClick={() => navigate("/business-dashboard")}
+                onClick={() => navigate("/owner")}
                 sx={{ justifyContent: "flex-start", py: 1.5 }}
               >
                 Panel de Negocio

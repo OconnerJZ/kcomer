@@ -77,7 +77,7 @@ const Navbar = () => {
 
   const handleDashboardClick = () => {
     handleMenuClose();
-    navigate('/business-dashboard');
+    navigate('/owner');
   };
 
   const handleLogout = () => {

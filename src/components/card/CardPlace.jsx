@@ -52,6 +52,8 @@ const CardPlace = ({ data }) => {
     { day: 'Domingo', open: '10:00', close: '21:00' }
   ];
 
+  const pathMedia = "http://localhost:3000/uploads/"
+
   return (
     <>
       <StyledCard sx={{ width: 340, borderRadius: "20px", position: 'relative' }} elevation={7}>
@@ -71,7 +73,7 @@ const CardPlace = ({ data }) => {
                 cursor: 'pointer'
               }}
               aria-label="recipe"
-              src={data?.urlImage}
+              src={pathMedia+data?.urlImage}
             >
               {data?.title?.charAt(0) || 'T'}
             </Avatar>

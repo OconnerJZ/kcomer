@@ -1,4 +1,4 @@
-// src/context/OrderContext.jsx
+// src/context/OrderContext.jsx - VERSIÓN MEJORADA
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { orderAPI, handleApiError } from '@Services/apiService';
@@ -32,7 +32,6 @@ export const OrdersProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Cargar órdenes del usuario al montar
   useEffect(() => {
     if (user?.id) {
       loadUserOrders(user.id);
@@ -47,6 +46,8 @@ export const OrdersProvider = ({ children }) => {
       
       if (response.data.success) {
         setOrders(response.data.data);
+        // Guardar en localStorage como backup
+        localStorage.setItem('qscome_orders', JSON.stringify(response.data.data));
       } else {
         console.error('Error loading orders:', response.data.message);
         setError(response.data.message);
@@ -75,10 +76,14 @@ export const OrdersProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      // Validar datos mínimos
+      if (!orderData.businessId || !orderData.items || orderData.items.length === 0) {
+        throw new Error('Datos de orden incompletos');
+      }
+
       const payload = {
         userId: user.id,
         businessId: orderData.businessId,
-        businessName: orderData.businessName,
         items: orderData.items,
         total: orderData.total,
         customerName: orderData.customerName || user.name,
@@ -93,7 +98,7 @@ export const OrdersProvider = ({ children }) => {
         const newOrder = response.data.data;
         setOrders((prev) => [newOrder, ...prev]);
         
-        // Backup en localStorage
+        // Actualizar localStorage
         const updatedOrders = [newOrder, ...orders];
         localStorage.setItem('qscome_orders', JSON.stringify(updatedOrders));
         
@@ -111,12 +116,12 @@ export const OrdersProvider = ({ children }) => {
         id: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         ...orderData,
         userId: user.id,
-        status: ORDER_STATUS.ACCEPTED,
+        status: ORDER_STATUS.PENDING,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         statusHistory: [
           {
-            status: ORDER_STATUS.ACCEPTED,
+            status: ORDER_STATUS.PENDING,
             timestamp: new Date().toISOString(),
             note: 'Orden creada (offline)',
           },
@@ -137,7 +142,7 @@ export const OrdersProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      const response = await orderAPI.updateStatus(orderId, newStatus);
+      const response = await orderAPI.updateStatus(orderId, newStatus, note);
       
       if (response.data.success) {
         setOrders((prev) =>
@@ -161,7 +166,7 @@ export const OrdersProvider = ({ children }) => {
           })
         );
         
-        // Backup en localStorage
+        // Actualizar localStorage
         const updatedOrders = orders.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order
         );

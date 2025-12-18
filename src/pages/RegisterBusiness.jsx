@@ -17,7 +17,7 @@ import FormField from "@Components/forms/FormField";
 import { useNavigate } from "react-router-dom";
 import GeneralContent from "@Components/layout/GeneralContent";
 import { isMobile } from "@Utils/commons";
-import { businessAPI, foodTypeAPI, uploadAPI } from "@Services/apiService";
+import { businessAPI, catalogAPI, uploadAPI } from "@Services/apiService";
 import useAuth from "@Context/AuthContext";
 
 const RegisterBusiness = () => {
@@ -31,7 +31,7 @@ const RegisterBusiness = () => {
 
   const getFoodTypes = async () => {
     try {
-      const response = await foodTypeAPI.getAll();
+      const response = await catalogAPI.getFoodTypes();
       if (response.data.success) {
         const foodData = response.data.data;
         setFoodTypes(foodData);
@@ -217,7 +217,7 @@ const RegisterBusiness = () => {
                 <Button
                   key="dashboard"
                   type="primary"
-                  onClick={() => navigate("/business-dashboard")}
+                  onClick={() => navigate("/owner")}
                 >
                   Administrar mi negocio
                 </Button>,
