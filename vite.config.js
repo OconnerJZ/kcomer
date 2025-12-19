@@ -10,31 +10,66 @@ const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), viteBasicSslPlugin(), VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['logo.png'], 
+  plugins: [
+    react(),
+    viteBasicSslPlugin(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["logo.png"],
+      workbox: {
+        runtimeCaching: [
+          // Cache API de negocios
+          {
+            urlPattern: /^https:\/\/api\.qscome\.com\.mx\/api\/business$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-business",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 24 * 60 * 60, // 24 horas
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Cache de imágenes
+          {
+            urlPattern: /^https:\/\/api\.qscome\.com\.mx\/uploads\/.*/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 días
+              },
+            },
+          },
+        ],
+      },
       manifest: {
-        name: 'qsCome',
-        short_name: 'qsCome',
-        description: 'Mi app para encontra mi comida de hoy',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        start_url: '/',
+        name: "qsCome",
+        short_name: "qsCome",
+        description: "Mi app para encontra mi comida de hoy",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: "/",
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          }
-        ]
-      }
-    })],
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
+    }),
+  ],
   server: {
     https: true,
     host: true,

@@ -98,8 +98,37 @@ const Pedidos = () => {
     }
     setCheckoutDialogOpen(true);
   };
+  const validateCheckout = () => {
+    const errors = [];
 
+    if (!deliveryAddress || deliveryAddress.trim().length < 10) {
+      errors.push("La dirección debe tener al menos 10 caracteres");
+    }
+
+    if (!phoneNumber || !/^\d{10}$/.test(phoneNumber.replace(/\D/g, ""))) {
+      errors.push("El teléfono debe tener 10 dígitos");
+    }
+
+    if (
+      !currentBusiness.items ||
+      Object.keys(currentBusiness.items).length === 0
+    ) {
+      errors.push("El carrito está vacío");
+    }
+
+    if (currentBusiness.total <= 0) {
+      errors.push("El total debe ser mayor a $0");
+    }
+
+    return errors;
+  };
   const handleConfirmCheckout = () => {
+    const errors = validateCheckout();
+
+    if (errors.length > 0) {
+      alert("Por favor corrige:\n" + errors.join("\n"));
+      return;
+    }
     const currentBusinessId = businesses[activeTab];
     const currentBusiness = cart[currentBusinessId];
 
@@ -152,14 +181,12 @@ const Pedidos = () => {
                 px: 3,
               }}
             >
-              <Ballot
-                sx={{ fontSize: 80, color: "text.disabled", mb: 2 }}
-              />
+              <Ballot sx={{ fontSize: 80, color: "text.disabled", mb: 2 }} />
               <Typography variant="h5" gutterBottom>
                 Parece que no hay pedidos todavía
               </Typography>
               <Typography color="text.secondary">
-                Descubre negocios cercanos y empieza a pedir 
+                Descubre negocios cercanos y empieza a pedir
               </Typography>
             </Box>
           )}
@@ -184,7 +211,6 @@ const Pedidos = () => {
         {option == "pedidos" && (
           <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
             {/* Header */}
-            
 
             {/* Tabs */}
             <Paper sx={{ mb: 2, borderRadius: 0 }} elevation={0}>
@@ -200,8 +226,9 @@ const Pedidos = () => {
                     key={businessId}
                     label={
                       <Stack direction="row" spacing={1} alignItems="center">
-                        
-                        <Typography variant="h7" >{cart[businessId].businessName}</Typography>
+                        <Typography variant="h7">
+                          {cart[businessId].businessName}
+                        </Typography>
                         <Chip
                           label={Object.keys(cart[businessId].items).length}
                           size="small"

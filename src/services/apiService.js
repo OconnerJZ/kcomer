@@ -32,16 +32,40 @@ apiClient.interceptors.response.use(
   (error) => {
     const originalUrl = error?.config?.url;
     const status = error?.response?.status;
-    
+
+    // Errores de red (sin respuesta)
+    if (!error.response) {
+      console.error("Network error:", error.message);
+      // Mostrar notificación al usuario
+      if (window.showNetworkError) {
+        window.showNetworkError("No hay conexión a internet");
+      }
+      return Promise.reject({
+        message: "Error de conexión. Verifica tu internet.",
+        type: "network",
+      });
+    }
+
+    // 401 - Token expirado
     if (status === 401 && originalUrl?.includes("/login")) {
       return Promise.reject(error);
     }
-    
+
     if (status === 401) {
       localStorage.removeItem("qscome_user");
       window.location.href = "/login";
     }
-    
+
+    // 403 - Forbidden
+    if (status === 403) {
+      console.error("Forbidden:", originalUrl);
+    }
+
+    // 500 - Server error
+    if (status >= 500) {
+      console.error("Server error:", status, originalUrl);
+    }
+
     return Promise.reject(error);
   }
 );
@@ -70,7 +94,7 @@ export const businessAPI = {
   create: (data) => apiClient.post("/api/business", data),
   update: (id, data) => apiClient.put(`/api/business/${id}`, data),
   getMenu: (id) => apiClient.get(`/api/business/${id}/menu`),
-  
+
   // Nuevo: Obtener negocios por owner
   getByOwner: (ownerId) => apiClient.get(`/api/business/owner/${ownerId}`),
 };
@@ -80,19 +104,20 @@ export const orderAPI = {
   getAll: () => apiClient.get("/api/orders"),
   getById: (id) => apiClient.get(`/api/orders/${id}`),
   getByUser: (userId) => apiClient.get(`/api/orders/user/${userId}`),
-  getByBusiness: (businessId) => apiClient.get(`/api/orders/business/${businessId}`),
-  
+  getByBusiness: (businessId) =>
+    apiClient.get(`/api/orders/business/${businessId}`),
+
   create: (data) => apiClient.post("/api/orders", data),
-  
+
   // CORREGIDO: Enviar status en el body
-  updateStatus: (id, status, note = '') => 
+  updateStatus: (id, status, note = "") =>
     apiClient.patch(`/api/orders/${id}/status`, { status, note }),
-  
+
   // Nuevo: Cancelar orden
-  cancel: (id, reason = '') => 
-    apiClient.patch(`/api/orders/${id}/status`, { 
-      status: 'cancelled', 
-      note: reason 
+  cancel: (id, reason = "") =>
+    apiClient.patch(`/api/orders/${id}/status`, {
+      status: "cancelled",
+      note: reason,
     }),
 };
 
@@ -100,14 +125,15 @@ export const orderAPI = {
 export const menuAPI = {
   getAll: () => apiClient.get("/api/menus"),
   getById: (id) => apiClient.get(`/api/menus/${id}`),
-  getByBusiness: (businessId) => apiClient.get(`/api/menus/business/${businessId}`),
-  
+  getByBusiness: (businessId) =>
+    apiClient.get(`/api/menus/business/${businessId}`),
+
   create: (data) => apiClient.post("/api/menus", data),
   update: (id, data) => apiClient.put(`/api/menus/${id}`, data),
   delete: (id) => apiClient.delete(`/api/menus/${id}`),
-  
+
   // Nuevo: Toggle disponibilidad
-  toggleAvailability: (id) => 
+  toggleAvailability: (id) =>
     apiClient.patch(`/api/menus/${id}/toggle-availability`),
 };
 
@@ -115,37 +141,52 @@ export const menuAPI = {
 export const paymentAPI = {
   create: (data) => apiClient.post("/api/payments", data),
   verify: (id) => apiClient.get(`/api/payments/${id}/verify`),
-  
+
   // Nuevos métodos para pasarela real (cuando se integre)
   createPaymentIntent: (data) => apiClient.post("/api/payments/intent", data),
-  confirmPayment: (id, data) => apiClient.post(`/api/payments/${id}/confirm`, data),
+  confirmPayment: (id, data) =>
+    apiClient.post(`/api/payments/${id}/confirm`, data),
 };
 
 // ============== ESTADÍSTICAS ==============
 export const statsAPI = {
-  getBusinessStats: (businessId, period = 7) => 
+  getBusinessStats: (businessId, period = 7) =>
     apiClient.get(`/api/stats/business/${businessId}`, { params: { period } }),
-  
+
   // Nuevos endpoints útiles
-  getDashboardSummary: (businessId) => 
+  getDashboardSummary: (businessId) =>
     apiClient.get(`/api/stats/business/${businessId}/summary`),
-  
+
   getRevenueByPeriod: (businessId, startDate, endDate) =>
     apiClient.get(`/api/stats/business/${businessId}/revenue`, {
-      params: { startDate, endDate }
+      params: { startDate, endDate },
     }),
 };
+
+// apiService.js
+const MAX_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 // ============== UPLOAD DE ARCHIVOS ==============
 export const uploadAPI = {
   uploadImage: async (file) => {
+    // Validar tamaño
+    if (file.size > MAX_SIZE) {
+      throw new Error("La imagen debe pesar menos de 5MB");
+    }
+
+    // Validar tipo
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new Error("Solo se permiten imágenes JPG, PNG, WebP o GIF");
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     return apiClient.post("/api/upload/image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  
+
   // Nuevo: Upload múltiple
   uploadMultiple: async (files) => {
     const formData = new FormData();
@@ -156,7 +197,7 @@ export const uploadAPI = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  
+
   // Nuevo: Eliminar imagen
   deleteImage: (filename) => apiClient.delete(`/api/upload/image/${filename}`),
 };
@@ -164,7 +205,7 @@ export const uploadAPI = {
 // ============== CATÁLOGOS ==============
 export const catalogAPI = {
   getFoodTypes: () => apiClient.get("/api/catalogs/food-types"),
-  
+
   // Nuevos catálogos útiles
   getCategories: () => apiClient.get("/api/catalogs/categories"),
   getPaymentMethods: () => apiClient.get("/api/catalogs/payment-methods"),
@@ -175,17 +216,18 @@ export const notificationAPI = {
   getUnread: () => apiClient.get("/api/notifications/unread"),
   markAsRead: (id) => apiClient.patch(`/api/notifications/${id}/read`),
   markAllAsRead: () => apiClient.post("/api/notifications/mark-all-read"),
-  
+
   // WebSocket connection (implementar después)
   connect: (userId) => {
     // TODO: Implementar Socket.io
-    console.log('Connecting to WebSocket for user:', userId);
+    console.log("Connecting to WebSocket for user:", userId);
   },
 };
 
 // ============== RESEÑAS (para futuro) ==============
 export const reviewAPI = {
-  getByBusiness: (businessId) => apiClient.get(`/api/reviews/business/${businessId}`),
+  getByBusiness: (businessId) =>
+    apiClient.get(`/api/reviews/business/${businessId}`),
   create: (data) => apiClient.post("/api/reviews", data),
   update: (id, data) => apiClient.put(`/api/reviews/${id}`, data),
   delete: (id) => apiClient.delete(`/api/reviews/${id}`),
@@ -218,18 +260,18 @@ export const handleApiError = (error) => {
 // Helper para retry automático
 export const apiWithRetry = async (apiCall, maxRetries = 3) => {
   let lastError;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await apiCall();
     } catch (error) {
       lastError = error;
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
       }
     }
   }
-  
+
   throw lastError;
 };
 

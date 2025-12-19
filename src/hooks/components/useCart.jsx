@@ -19,41 +19,33 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('qscome_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = ({ itemId, businessId, businessName, item }) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      
-      // Si el negocio no existe, crearlo
-      if (!newCart[businessId]) {
-        newCart[businessId] = {
-          businessName,
-          items: {},
-          total: 0,
-        };
-      }
-
-      // Actualizar o agregar item
-      if (item.quantity === 0) {
-        // Eliminar item si cantidad es 0
-        delete newCart[businessId].items[itemId];
-        
-        // Si no quedan items, eliminar negocio
-        if (Object.keys(newCart[businessId].items).length === 0) {
-          delete newCart[businessId];
-        }
-      } else {
-        newCart[businessId].items[itemId] = item;
-      }
-
-      // Recalcular total del negocio
-      if (newCart[businessId]) {
-        newCart[businessId].total = Object.values(newCart[businessId].items)
-          .reduce((sum, i) => sum + (i.price * i.quantity), 0);
-      }
-
-      return newCart;
-    });
+// useCart.jsx
+const addToCart = ({ itemId, businessId, businessName, item }) => {
+  const completeItem = {
+    id: item.id,
+    name: item.name || '',
+    description: item.description || '',
+    price: Number(item.price) || 0,
+    quantity: item.quantity || 0,
+    note: item.note || '',
+    image: item.image || ''
   };
+  
+  setCart((prev) => {
+    const newCart = { ...prev };
+    if (!newCart[businessId]) {
+      newCart[businessId] = {
+        businessName,
+        items: {},
+        total: 0,
+      };
+    }
+    newCart[businessId].items[itemId] = completeItem;
+    newCart[businessId].total = Object.values(newCart[businessId].items)
+      .reduce((sum, i) => sum + (i.price * i.quantity), 0);
+    return newCart;
+  });
+};
 
   const removeFromCart = (businessId, itemId) => {
     setCart((prev) => {

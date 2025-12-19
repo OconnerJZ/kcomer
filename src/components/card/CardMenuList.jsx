@@ -1,28 +1,34 @@
 // src/components/card/CardMenuList.jsx
-import { useState } from 'react';
-import AspectRatio from '@mui/joy/AspectRatio';
-import Card from '@mui/joy/Card';
-import CardContent from '@mui/joy/CardContent';
-import Chip from '@mui/joy/Chip';
-import Typography from '@mui/joy/Typography';
-import { 
-  Stack, 
-  IconButton, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
+import { useState } from "react";
+import AspectRatio from "@mui/joy/AspectRatio";
+import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
+import Chip from "@mui/joy/Chip";
+import Typography from "@mui/joy/Typography";
+import {
+  Stack,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
   DialogActions,
   Button,
-  TextField 
-} from '@mui/material';
-import { Add, Remove, NoteAdd } from '@mui/icons-material';
-import PropTypes from 'prop-types';
+  TextField,
+} from "@mui/material";
+import { Add, Remove, NoteAdd } from "@mui/icons-material";
+import PropTypes from "prop-types";
 
 const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
   const [quantity, setQuantity] = useState(0);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState("");
   const [hasNote, setHasNote] = useState(false);
+
+  useEffect(() => {
+    if (cart[businessId]?.items[item.id]) {
+      setQuantity(cart[businessId].items[item.id].quantity);
+    }
+  }, [cart, businessId, item.id]);
 
   const handleIncrement = () => {
     const newQty = quantity + 1;
@@ -34,14 +40,14 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
     if (quantity > 0) {
       const newQty = quantity - 1;
       setQuantity(newQty);
-      
+
       // Si llega a 0, eliminar completamente
       if (newQty === 0) {
-        setNote('');
+        setNote("");
         setHasNote(false);
       }
-      
-      updateCart(newQty, newQty === 0 ? '' : note);
+
+      updateCart(newQty, newQty === 0 ? "" : note);
     }
   };
 
@@ -53,13 +59,13 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
       item: {
         ...item,
         quantity: qty,
-        note: itemNote || ''
-      }
+        note: itemNote || "",
+      },
     });
   };
 
   const handleSaveNote = () => {
-    setHasNote(note.trim() !== '');
+    setHasNote(note.trim() !== "");
     updateCart(quantity, note);
     setNoteDialogOpen(false);
   };
@@ -70,13 +76,13 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
         variant="outlined"
         orientation="horizontal"
         sx={{
-          width: '100%',
-          padding: '5px 2px',
-          alignItems: 'center',
+          width: "100%",
+          padding: "5px 2px",
+          alignItems: "center",
           mb: 0.5,
-          '&:hover': {
-            boxShadow: 'md',
-            borderColor: 'neutral.outlinedHoverBorder',
+          "&:hover": {
+            boxShadow: "md",
+            borderColor: "neutral.outlinedHoverBorder",
           },
         }}
       >
@@ -84,8 +90,8 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
           ratio="1"
           sx={{
             width: 90,
-            borderTopLeftRadius: '10px',
-            borderBottomLeftRadius: '10px',
+            borderTopLeftRadius: "10px",
+            borderBottomLeftRadius: "10px",
           }}
         >
           <img
@@ -101,7 +107,7 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
             {item.name}
           </Typography>
           <Typography
-            sx={{ fontSize: '11px', mb: '3px' }}
+            sx={{ fontSize: "11px", mb: "3px" }}
             aria-describedby="card-description"
           >
             {item.description}
@@ -113,9 +119,9 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               size="sm"
               variant="soft"
               color="warning"
-              sx={{ mt: 0.5, fontSize: '10px' }}
+              sx={{ mt: 0.5, fontSize: "10px" }}
             >
-              📝 {note.length > 20 ? note.substring(0, 20) + '...' : note}
+              📝 {note.length > 20 ? note.substring(0, 20) + "..." : note}
             </Chip>
           )}
 
@@ -125,10 +131,10 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               color="success"
               size="sm"
               sx={{
-                pointerEvents: 'none',
-                minHeight: '0px',
-                height: '23px',
-                fontSize: '13px',
+                pointerEvents: "none",
+                minHeight: "0px",
+                height: "23px",
+                fontSize: "13px",
               }}
               startDecorator="$"
             >
@@ -141,9 +147,9 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
                 size="small"
                 color={hasNote ? "warning" : "default"}
                 onClick={() => setNoteDialogOpen(true)}
-                sx={{ 
-                  border: '1px solid',
-                  borderColor: hasNote ? 'warning.main' : 'divider'
+                sx={{
+                  border: "1px solid",
+                  borderColor: hasNote ? "warning.main" : "divider",
                 }}
               >
                 <NoteAdd fontSize="small" />
@@ -151,14 +157,14 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
             )}
 
             {/* Stepper */}
-            <Stack 
-              direction="row" 
+            <Stack
+              direction="row"
               alignItems="center"
               sx={{
-                bgcolor: 'background.paper',
+                bgcolor: "background.paper",
                 borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider'
+                border: "1px solid",
+                borderColor: "divider",
               }}
             >
               <IconButton
@@ -170,11 +176,11 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               </IconButton>
 
               <Typography
-                sx={{ 
-                  fontWeight: 600, 
-                  minWidth: 20, 
-                  textAlign: 'center',
-                  mx: 0.5
+                sx={{
+                  fontWeight: 600,
+                  minWidth: 20,
+                  textAlign: "center",
+                  mx: 0.5,
                 }}
               >
                 {quantity}
@@ -193,8 +199,8 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
       </Card>
 
       {/* Dialog para agregar nota */}
-      <Dialog 
-        open={noteDialogOpen} 
+      <Dialog
+        open={noteDialogOpen}
         onClose={() => setNoteDialogOpen(false)}
         maxWidth="xs"
         fullWidth
@@ -217,13 +223,8 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNoteDialogOpen(false)}>
-            Cancelar
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSaveNote}
-          >
+          <Button onClick={() => setNoteDialogOpen(false)}>Cancelar</Button>
+          <Button variant="contained" onClick={handleSaveNote}>
             Guardar
           </Button>
         </DialogActions>
@@ -240,7 +241,8 @@ CardMenuList.propTypes = {
     price: PropTypes.number.isRequired,
     image: PropTypes.string,
   }).isRequired,
-  businessId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  businessId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
   businessName: PropTypes.string.isRequired,
   onAddToCart: PropTypes.func.isRequired,
 };
