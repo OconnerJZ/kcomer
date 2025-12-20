@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -19,8 +19,8 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  Snackbar
-} from '@mui/material';
+  Snackbar,
+} from "@mui/material";
 import {
   Visibility,
   CheckCircle,
@@ -28,26 +28,32 @@ import {
   HourglassEmpty,
   Restaurant,
   LocalShipping,
-  Refresh
-} from '@mui/icons-material';
-import { orderAPI, handleApiError } from '@Services/apiService';
+  Refresh,
+} from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import socketService from "@Services/socketService";
+import { orderAPI, handleApiError } from "@Services/apiService";
 
 const ORDER_STATUS = {
-  pending: { label: 'Pendiente', color: 'warning', icon: HourglassEmpty },
-  accepted: { label: 'Aceptada', color: 'info', icon: CheckCircle },
-  preparing: { label: 'Preparando', color: 'primary', icon: Restaurant },
-  ready: { label: 'Lista', color: 'success', icon: CheckCircle },
-  in_delivery: { label: 'En camino', color: 'success', icon: LocalShipping },
-  completed: { label: 'Completada', color: 'default', icon: CheckCircle },
-  cancelled: { label: 'Cancelada', color: 'error', icon: Cancel },
+  pending: { label: "Pendiente", color: "warning", icon: HourglassEmpty },
+  accepted: { label: "Aceptada", color: "info", icon: CheckCircle },
+  preparing: { label: "Preparando", color: "primary", icon: Restaurant },
+  ready: { label: "Lista", color: "success", icon: CheckCircle },
+  in_delivery: { label: "En camino", color: "success", icon: LocalShipping },
+  completed: { label: "Completada", color: "default", icon: CheckCircle },
+  cancelled: { label: "Cancelada", color: "error", icon: Cancel },
 };
 
 const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
-    const [orders, setOrders] = useState(initialOrders || []);
+  const [orders, setOrders] = useState(initialOrders || []);
   const [loading, setLoading] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState("all");
   const [orderDialog, setOrderDialog] = useState({ open: false, order: null });
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   useEffect(() => {
     if (initialOrders) {
@@ -55,32 +61,37 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
     }
   }, [initialOrders]);
 
-  // Auto-refresh cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(() => {
-      loadOrders(true); // silent refresh
-    }, 30000);
+    socketService.onNewOrder((newOrder) => {
+      console.log("🔔 Nueva orden recibida:", newOrder);
 
-    return () => clearInterval(interval);
-  }, [businessId]);
+      // Agregar a la lista
+      setOrders((prev) => [newOrder, ...prev]);
+
+      // Refrescar datos completos
+      if (onRefresh) {
+        setTimeout(() => onRefresh(), 500);
+      }
+    });
+  }, [onRefresh]);
 
   const loadOrders = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      
+
       const response = await orderAPI.getByBusiness(businessId);
-      
+
       if (response.data.success) {
         setOrders(response.data.data);
       }
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.error("Error loading orders:", error);
       if (!silent) {
         const errorData = handleApiError(error);
-        setSnackbar({ 
-          open: true, 
-          message: errorData.message, 
-          severity: 'error' 
+        setSnackbar({
+          open: true,
+          message: errorData.message,
+          severity: "error",
         });
       }
     } finally {
@@ -91,72 +102,73 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       setLoading(true);
-      
+
       const response = await orderAPI.updateStatus(orderId, newStatus);
-      
+
       if (response.data.success) {
         // Actualizar localmente
-        setOrders(prev => prev.map(o => 
-          o.id === orderId ? { ...o, status: newStatus } : o
-        ));
-        
-        setSnackbar({ 
-          open: true, 
-          message: `Orden actualizada a ${ORDER_STATUS[newStatus].label}`, 
-          severity: 'success' 
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+        );
+
+        setSnackbar({
+          open: true,
+          message: `Orden actualizada a ${ORDER_STATUS[newStatus].label}`,
+          severity: "success",
         });
-        
+
         setOrderDialog({ open: false, order: null });
-        
+
         // Notificar al padre para refrescar estadísticas
         if (onRefresh) onRefresh();
       }
     } catch (error) {
-      console.error('Error updating order:', error);
+      console.error("Error updating order:", error);
       const errorData = handleApiError(error);
-      setSnackbar({ 
-        open: true, 
-        message: errorData.message, 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: errorData.message,
+        severity: "error",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
-    : orders.filter(o => o.status === filterStatus);
+  const filteredOrders =
+    filterStatus === "all"
+      ? orders
+      : orders.filter((o) => o.status === filterStatus);
 
   const getNextStatus = (currentStatus) => {
     const flow = {
-      'pending': 'accepted',
-      'accepted': 'preparing',
-      'preparing': 'ready',
-      'ready': 'in_delivery',
-      'in_delivery': 'completed'
+      pending: "accepted",
+      accepted: "preparing",
+      preparing: "ready",
+      ready: "in_delivery",
+      in_delivery: "completed",
     };
     return flow[currentStatus];
   };
 
   const getActionButton = (order) => {
     const nextStatus = getNextStatus(order.status);
-    
+
     if (!nextStatus) return null;
 
     const labels = {
-      'accepted': 'Aceptar',
-      'preparing': 'Iniciar preparación',
-      'ready': 'Marcar como lista',
-      'in_delivery': 'En camino',
-      'completed': 'Completar'
+      accepted: "Aceptar",
+      preparing: "Iniciar preparación",
+      ready: "Marcar como lista",
+      in_delivery: "En camino",
+      completed: "Completar",
     };
 
     return (
       <Button
         size="small"
         variant="contained"
-        color={order.status === 'pending' ? 'primary' : 'success'}
+        color={order.status === "pending" ? "primary" : "success"}
         onClick={() => updateOrderStatus(order.id, nextStatus)}
       >
         {labels[nextStatus]}
@@ -166,7 +178,7 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
 
   if (loading && orders.length === 0) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
         <CircularProgress />
       </Box>
     );
@@ -176,7 +188,13 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
     <Box>
       {/* Filtros y Refresh */}
       <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" flexWrap="wrap">
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+        >
           <Stack direction="row" spacing={2} alignItems="center">
             <Typography variant="subtitle2">Filtrar por:</Typography>
             <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -191,13 +209,13 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
                 <MenuItem value="completed">Completadas</MenuItem>
               </Select>
             </FormControl>
-            <Chip 
-              label={`${filteredOrders.length} órdenes`} 
-              color="primary" 
+            <Chip
+              label={`${filteredOrders.length} órdenes`}
+              color="primary"
               size="small"
             />
           </Stack>
-          
+
           <IconButton onClick={() => loadOrders()} disabled={loading}>
             <Refresh />
           </IconButton>
@@ -206,21 +224,28 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
 
       {/* Lista de Órdenes */}
       {filteredOrders.length === 0 ? (
-        <Paper sx={{ p: 5, textAlign: 'center' }}>
+        <Paper sx={{ p: 5, textAlign: "center" }}>
           <Typography color="text.secondary">
-            No hay órdenes {filterStatus !== 'all' ? `en estado "${ORDER_STATUS[filterStatus]?.label}"` : ''}
+            No hay órdenes{" "}
+            {filterStatus !== "all"
+              ? `en estado "${ORDER_STATUS[filterStatus]?.label}"`
+              : ""}
           </Typography>
         </Paper>
       ) : (
         <Stack spacing={2}>
-          {filteredOrders.map(order => {
+          {filteredOrders.map((order) => {
             const StatusIcon = ORDER_STATUS[order.status].icon;
             return (
               <Card key={order.id} elevation={2}>
                 <CardContent>
                   <Stack spacing={2}>
                     {/* Header */}
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
                       <Stack spacing={1}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Typography variant="h6">#{order.id}</Typography>
@@ -232,7 +257,8 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
                           />
                         </Stack>
                         <Typography variant="body2" color="text.secondary">
-                          {order.customerName} • {new Date(order.createdAt).toLocaleString('es-MX')}
+                          {order.customerName} •{" "}
+                          {new Date(order.createdAt).toLocaleString("es-MX")}
                         </Typography>
                       </Stack>
                       <Typography variant="h6" color="success.main">
@@ -246,7 +272,8 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
                     <Box>
                       {order.items.slice(0, 2).map((item, idx) => (
                         <Typography key={idx} variant="body2">
-                          {item.quantity}x {item.name} - ${(item.price * item.quantity).toFixed(2)}
+                          {item.quantity}x {item.name} - $
+                          {(item.price * item.quantity).toFixed(2)}
                         </Typography>
                       ))}
                       {order.items.length > 2 && (
@@ -277,8 +304,8 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
       )}
 
       {/* Dialog de Detalles */}
-      <Dialog 
-        open={orderDialog.open} 
+      <Dialog
+        open={orderDialog.open}
         onClose={() => setOrderDialog({ open: false, order: null })}
         maxWidth="sm"
         fullWidth
@@ -307,23 +334,40 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
                 {orderDialog.order.notes && (
                   <Box>
                     <Typography variant="subtitle2">Notas:</Typography>
-                    <Typography color="text.secondary">{orderDialog.order.notes}</Typography>
+                    <Typography color="text.secondary">
+                      {orderDialog.order.notes}
+                    </Typography>
                   </Box>
                 )}
                 <Divider />
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>Items:</Typography>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Items:
+                  </Typography>
                   {orderDialog.order.items.map((item, idx) => (
-                    <Stack key={idx} direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                    <Stack
+                      key={idx}
+                      direction="row"
+                      justifyContent="space-between"
+                      sx={{ mb: 1 }}
+                    >
                       <Box>
-                        <Typography>{item.quantity}x {item.name}</Typography>
+                        <Typography>
+                          {item.quantity}x {item.name}
+                        </Typography>
                         {item.note && (
-                          <Typography variant="caption" color="primary" sx={{ fontStyle: 'italic' }}>
+                          <Typography
+                            variant="caption"
+                            color="primary"
+                            sx={{ fontStyle: "italic" }}
+                          >
                             📝 {item.note}
                           </Typography>
                         )}
                       </Box>
-                      <Typography>${(item.price * item.quantity).toFixed(2)}</Typography>
+                      <Typography>
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </Typography>
                     </Stack>
                   ))}
                 </Box>
@@ -337,7 +381,9 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
               </Stack>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOrderDialog({ open: false, order: null })}>
+              <Button
+                onClick={() => setOrderDialog({ open: false, order: null })}
+              >
                 Cerrar
               </Button>
             </DialogActions>
@@ -351,12 +397,15 @@ const OwnerOrders = ({ businessId, orders: initialOrders, onRefresh }) => {
         autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
   );
-}
- 
+};
+
 export default OwnerOrders;

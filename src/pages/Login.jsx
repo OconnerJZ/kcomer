@@ -17,6 +17,7 @@ import { useAuth } from "@Context/AuthContext";
 import GeneralContent from "@Components/layout/GeneralContent";
 import { GOOGLE_CLIENT_ID } from "@Utils/enviroments";
 import { isMobile } from "@Utils/commons";
+import GoogleLoginButton from "@Components/GoogleLoginButton";
 
 const TITLE_REGISTER_CLIENT = "Regístrate para realizar pedidos";
 const TITLE_REGISTER_BUSINESS = "Regístrate para dar de alta tu negocio";
@@ -37,10 +38,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleCustomGoogleLogin = () => {
-    google.accounts.id.prompt();
-  };
-
+ 
   useEffect(() => {
     if (from === "registro") {
       setTitleRegister(TITLE_REGISTER_BUSINESS);
@@ -51,13 +49,6 @@ const Login = () => {
       setIsRegister(false);
       setIsRegisterBusiness(false);
     }
-  }, []);
-  useEffect(() => {
-    /* global google */
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleLogin,
-    });
   }, []);
 
   const handleChange = (e) => {
@@ -94,22 +85,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async (credential) => {
-    const token = credential.credential;
-    setLoading(true);
-    const idToken = {
-      idToken: token,
-      ...(isRegisterBusiness ? { isBusiness: true } : {}),
-    };
-    const result = await loginWithGoogle(idToken);
-    const path = `/${from}` || "/explorar";
-    if (result.success) {
-      navigate(path);
-    } else {
-      setError("Error al conectar con Google");
-    }
-    setLoading(false);
-  };
 
   return (
     <GeneralContent title={isRegister ? "Registro" : "Iniciar Sesión"}>
@@ -154,24 +129,12 @@ const Login = () => {
 
           {/* Botones sociales */}
           <Stack spacing={2} sx={{ mb: 3 }}>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Google />}
-              onClick={handleCustomGoogleLogin}
-              disabled={loading}
-              sx={{
-                py: 1.2,
-                borderColor: "#db4437",
-                color: "#db4437",
-                "&:hover": {
-                  borderColor: "#c23321",
-                  bgcolor: "rgba(219, 68, 55, 0.04)",
-                },
-              }}
-            >
-              Continuar con Google
-            </Button>
+            <GoogleLoginButton
+              theme="filled_blue"
+              size="large"
+              text="signin_with"
+              width={320}
+            />
           </Stack>
 
           <Divider sx={{ my: 3 }}>
