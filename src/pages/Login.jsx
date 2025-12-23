@@ -17,7 +17,6 @@ import { useAuth } from "@Context/AuthContext";
 import GeneralContent from "@Components/layout/GeneralContent";
 import { GOOGLE_CLIENT_ID } from "@Utils/enviroments";
 import { isMobile } from "@Utils/commons";
-import GoogleLoginButton from "@Components/GoogleLoginButton";
 
 const TITLE_REGISTER_CLIENT = "Regístrate para realizar pedidos";
 const TITLE_REGISTER_BUSINESS = "Regístrate para dar de alta tu negocio";
@@ -25,8 +24,12 @@ const TITLE_REGISTER_BUSINESS = "Regístrate para dar de alta tu negocio";
 const Login = () => {
   const navigate = useNavigate();
   const { from } = useParams();
+  const pathLogin =
+    from === undefined || from === "" ? "/explorar" : `/${from}`;
   const { login, register, loginWithGoogle } = useAuth();
-
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
   const [isRegister, setIsRegister] = useState(false);
   const [isRegisterBusiness, setIsRegisterBusiness] = useState(false);
   const [titleRegister, setTitleRegister] = useState(TITLE_REGISTER_CLIENT);
@@ -38,7 +41,12 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
- 
+  const handleCustomGoogleLogin = () => {
+    if (!isLocalhost) {
+      google.accounts.id.prompt();
+    }
+  };
+
   useEffect(() => {
     if (from === "registro") {
       setTitleRegister(TITLE_REGISTER_BUSINESS);
@@ -48,6 +56,29 @@ const Login = () => {
       setTitleRegister(TITLE_REGISTER_CLIENT);
       setIsRegister(false);
       setIsRegisterBusiness(false);
+    }
+  }, []);
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleLogin,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    });
+    if (isLocalhost) {
+      const container = document.getElementById("google-btn");
+
+      if (container) {
+        container.innerHTML = "";
+        google.accounts.id.renderButton(container, {
+          theme: "outline",
+          size: "medium",
+          text: "continue_with",
+          shape: "pill",
+          logo_alignment: "left",
+        });
+      }
     }
   }, []);
 
@@ -73,18 +104,34 @@ const Login = () => {
     try {
       const result = await (isRegister ? register : login)(data);
       if (result.success) {
-        const path = `/${from}` || "/explorar";
+        const path = pathLogin;
         navigate(path);
       } else {
         setError(result.error || "Error al iniciar sesión");
       }
     } catch (err) {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError("Error de conexión. Intenta de nuevo: " + err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleLogin = async (credential) => {
+    const token = credential.credential;
+    setLoading(true);
+    const idToken = {
+      idToken: token,
+      ...(isRegisterBusiness ? { isBusiness: true } : {}),
+    };
+    const result = await loginWithGoogle(idToken);
+    const path = pathLogin;
+    if (result.success) {
+      navigate(path);
+    } else {
+      setError("Error al conectar con Google");
+    }
+    setLoading(false);
+  };
 
   return (
     <GeneralContent title={isRegister ? "Registro" : "Iniciar Sesión"}>
@@ -127,14 +174,41 @@ const Login = () => {
             </Alert>
           )}
 
-          {/* Botones sociales */}
           <Stack spacing={2} sx={{ mb: 3 }}>
-            <GoogleLoginButton
-              theme="filled_blue"
-              size="large"
-              text="signin_with"
-              width={320}
-            />
+            {isLocalhost ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Box
+                  id="google-btn"
+                  sx={{
+                    maxWidth: "100%",
+                  }}
+                />
+              </Box>
+            ) : (
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<Google />}
+                onClick={handleCustomGoogleLogin}
+                disabled={loading}
+                sx={{
+                  py: 1.2,
+                  borderColor: "#db4437",
+                  color: "#db4437",
+                  "&:hover": {
+                    borderColor: "#c23321",
+                    bgcolor: "rgba(219, 68, 55, 0.04)",
+                  },
+                }}
+              >
+                Continuar con Google
+              </Button>
+            )}
           </Stack>
 
           <Divider sx={{ my: 3 }}>

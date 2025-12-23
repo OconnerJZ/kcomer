@@ -37,8 +37,8 @@ TitlePlace.propTypes = {
   text: PropTypes.string
 };
 
-const CardPlace = ({ data }) => {
-  const { flipped, movement, expanded, onMovement, expandCard } = useCardPlace();
+const CardPlace = ({ data, loadBusinessMenu }) => {
+  const { flipped, movement, expanded, onMovement, expandCard } = useCardPlace({ data, loadBusinessMenu });
   const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Horarios de ejemplo - reemplazar con data.schedule
@@ -52,7 +52,7 @@ const CardPlace = ({ data }) => {
     { day: 'Domingo', open: '10:00', close: '21:00' }
   ];
 
-  const pathMedia = "http://localhost:3000/uploads/"
+  const pathMedia = "http://192.168.100.9:3000/uploads/"
 
   return (
     <>

@@ -46,7 +46,7 @@ const DashboardMobileNav = ({ activeTab, onTabChange, pendingOrders = 0 }) => {
           bottom: 0,
           left: 0,
           zIndex: 1000,
-          display: { xs: "flex", sm: "none" },
+          display: { xs: "flex", sm: "flex", md:'none' },
           borderTop: "1px solid #e0e0e0",
           backgroundColor: "#fff",
       }}

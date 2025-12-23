@@ -1,292 +1,381 @@
-// src/services/mapsService.js - SERVICIO CENTRALIZADO CON CACHE
-import { API_KEY_MAPS } from "@Utils/enviroments";
+// src/services/mapsService.js - VERSIÓN COMPLETA CON TODAS LAS FUNCIONES
 
 class MapsService {
   constructor() {
     this.cache = new Map();
-    this.geocodeCache = new Map();
-    this.loadPromise = null;
-    this.isLoaded = false;
-    this.cleanOldCache();
-  }
-
-  /**
-   * Carga Google Maps una sola vez (Singleton)
-   * Evita múltiples cargas = AHORRO MASIVO
-   */
-  async loadGoogleMaps() {
-    // Si ya está cargado, retornar inmediatamente
-    if (this.isLoaded && window.google?.maps) {
-      console.log("✅ Google Maps ya estaba cargado");
-      return window.google.maps;
-    }
-
-    // Si ya hay una carga en proceso, esperar a que termine
-    if (this.loadPromise) {
-      console.log("⏳ Esperando carga de Google Maps en proceso...");
-      return this.loadPromise;
-    }
-
-    console.log("🔄 Iniciando carga de Google Maps...");
-
-    this.loadPromise = new Promise((resolve, reject) => {
-      // Verificar si ya existe el script
-      const existingScript = document.querySelector(
-        'script[src*="maps.googleapis.com"]'
-      );
-
-      if (existingScript) {
-        console.log("📜 Script de Google Maps ya existe, esperando carga...");
-
-        // Si el script ya existe pero window.google no está listo
-        if (window.google?.maps) {
-          this.isLoaded = true;
-          resolve(window.google.maps);
-          return;
-        }
-
-        existingScript.addEventListener("load", () => {
-          this.isLoaded = true;
-          console.log("✅ Google Maps cargado desde script existente");
-          resolve(window.google.maps);
-        });
-
-        existingScript.addEventListener("error", () => {
-          this.loadPromise = null;
-          reject(new Error("Error al cargar Google Maps"));
-        });
-
-        return;
-      }
-
-      // Crear script solo si no existe
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY_MAPS}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-
-      script.onload = () => {
-        // Esperar a que window.google esté disponible
-        const checkGoogleMaps = () => {
-          if (window.google?.maps) {
-            this.isLoaded = true;
-            console.log(
-              "✅ Google Maps cargado correctamente (nueva instancia)"
-            );
-            resolve(window.google.maps);
-          } else {
-            setTimeout(checkGoogleMaps, 100);
-          }
-        };
-        checkGoogleMaps();
-      };
-
-      script.onerror = (error) => {
-        this.loadPromise = null;
-        console.error("❌ Error cargando Google Maps:", error);
-        reject(new Error("Error al cargar Google Maps. Verifica tu API Key."));
-      };
-
-      document.head.appendChild(script);
-    });
-
-    return this.loadPromise;
-  }
-
-  /**
-   * Geocoding Inverso con CACHE PERSISTENTE
-   * Evita llamadas repetidas a la API = AHORRO GRANDE
-   */
-  async reverseGeocode(coords) {
-    const cacheKey = `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
-
-    // 1. Verificar cache en memoria
-    if (this.geocodeCache.has(cacheKey)) {
-      console.log("📦 Geocode desde cache (memoria)");
-      return this.geocodeCache.get(cacheKey);
-    }
-
-    // 2. Verificar localStorage (persiste entre sesiones)
-    const localStorageKey = `geocode_${cacheKey}`;
-    const cached = localStorage.getItem(localStorageKey);
-
-    if (cached) {
-      try {
-        const data = JSON.parse(cached);
-        // Cache válido por 7 días
-        if (Date.now() - data.timestamp < 7 * 24 * 60 * 60 * 1000) {
-          console.log("💾 Geocode desde cache (localStorage)");
-          this.geocodeCache.set(cacheKey, data.result);
-          return data.result;
-        }
-      } catch (e) {
-        console.error("Error parsing cached geocode:", e);
-      }
-    }
-
-    // 3. Solo si no hay cache, hacer llamada a la API
-    try {
-      await this.loadGoogleMaps();
-      const geocoder = new window.google.maps.Geocoder();
-
-      const response = await geocoder.geocode({ location: coords });
-
-      if (response.results[0]) {
-        const result = this.parseAddressComponents(response.results[0]);
-
-        // Guardar en memoria
-        this.geocodeCache.set(cacheKey, result);
-
-        // Guardar en localStorage
-        localStorage.setItem(
-          localStorageKey,
-          JSON.stringify({
-            result,
-            timestamp: Date.now(),
-          })
-        );
-
-        console.log("🌐 Geocode desde API (guardado en cache)");
-        return result;
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Error en geocoding:", error);
-      return null;
-    }
-  }
-
-  /**
-   * Parsear componentes de dirección
-   */
-  parseAddressComponents(result) {
-    const components = result.address_components || [];
-
-    const findComponent = (types) => {
-      return components.find((component) =>
-        types.some((type) => component.types.includes(type))
-      );
-    };
-
-    const route = findComponent(["route"]);
-    const streetNumber = findComponent(["street_number"]);
-    const locality = findComponent(["locality"]);
-    const postalCode = findComponent(["postal_code"]);
-    const state = findComponent(["administrative_area_level_1"]);
-    const country = findComponent(["country"]);
-    const sublocality = findComponent(["sublocality", "sublocality_level_1"]);
-
-    const addressParts = [];
-    if (route?.long_name) addressParts.push(route.long_name);
-    if (streetNumber?.long_name) addressParts.push(streetNumber.long_name);
-
-    return {
-      formatted_address: result.formatted_address,
-      address: addressParts.join(" ") || "",
-      city: locality?.long_name || sublocality?.long_name || "",
-      postalCode: postalCode?.long_name || "",
-      state: state?.long_name || "",
-      stateShort: state?.short_name || "",
-      country: country?.long_name || "",
-      countryShort: country?.short_name || "",
+    this.geocoder = null;
+    this.defaultLocation = { 
+      lat: 19.4326, 
+      lng: -99.1332  // CDMX
     };
   }
 
   /**
-   * Obtener ubicación actual con THROTTLING
-   * Evita múltiples llamadas seguidas
+   * Obtener ubicación del usuario - MEJORADO
    */
-  async getCurrentLocation() {
-    const cacheKey = "current_location";
-    const cached = this.cache.get(cacheKey);
-
-    // Cache válido por 5 minutos
-    if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
-      console.log("📍 Ubicación desde cache");
-      return cached.coords;
-    }
+  async getUserLocation(options = {}) {
+    const {
+      timeout = 10000,
+      maximumAge = 300000,
+      enableHighAccuracy = false,
+      fallbackToIP = true,
+      showProgress = null
+    } = options;
 
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error("Geolocalización no disponible"));
-        return;
+        console.warn('❌ Geolocalización no soportada');
+        if (fallbackToIP) {
+          return this.getUserLocationByIP()
+            .then(resolve)
+            .catch(() => resolve(this.defaultLocation));
+        }
+        return resolve(this.defaultLocation);
       }
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const coords = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
+      const geoOptions = { enableHighAccuracy, timeout, maximumAge };
+      let resolved = false;
 
-          // Guardar en cache
-          this.cache.set(cacheKey, {
-            coords,
-            timestamp: Date.now(),
-          });
-
-          console.log("🌍 Ubicación desde GPS");
-          resolve(coords);
-        },
-        (error) => {
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000, // Aceptar posiciones de hasta 5 minutos
+      const safetyTimeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          console.warn('⏱️ Timeout de seguridad alcanzado');
+          if (fallbackToIP) {
+            this.getUserLocationByIP()
+              .then(resolve)
+              .catch(() => resolve(this.defaultLocation));
+          } else {
+            resolve(this.defaultLocation);
+          }
         }
-      );
+      }, timeout + 2000);
+
+      const onSuccess = (position) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(safetyTimeout);
+
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: position.timestamp,
+          source: 'gps'
+        };
+
+        console.log('✅ Ubicación GPS obtenida:', location);
+        resolve(location);
+      };
+
+      const onError = (error) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(safetyTimeout);
+
+        console.error('❌ Error geolocalización:', {
+          code: error.code,
+          message: error.message,
+          type: { 1: 'PERMISSION_DENIED', 2: 'POSITION_UNAVAILABLE', 3: 'TIMEOUT' }[error.code]
+        });
+
+        switch (error.code) {
+          case 1: // PERMISSION_DENIED
+          case 2: // POSITION_UNAVAILABLE
+            if (fallbackToIP) {
+              this.getUserLocationByIP()
+                .then(resolve)
+                .catch(() => resolve(this.defaultLocation));
+            } else {
+              resolve(this.defaultLocation);
+            }
+            break;
+
+          case 3: // TIMEOUT
+            if (enableHighAccuracy && !resolved) {
+              console.log('🔄 Reintentando sin high accuracy...');
+              navigator.geolocation.getCurrentPosition(
+                onSuccess,
+                () => {
+                  if (fallbackToIP) {
+                    this.getUserLocationByIP()
+                      .then(resolve)
+                      .catch(() => resolve(this.defaultLocation));
+                  } else {
+                    resolve(this.defaultLocation);
+                  }
+                },
+                { enableHighAccuracy: false, timeout: 5000, maximumAge }
+              );
+            } else {
+              if (fallbackToIP) {
+                this.getUserLocationByIP()
+                  .then(resolve)
+                  .catch(() => resolve(this.defaultLocation));
+              } else {
+                resolve(this.defaultLocation);
+              }
+            }
+            break;
+
+          default:
+            if (fallbackToIP) {
+              this.getUserLocationByIP()
+                .then(resolve)
+                .catch(() => resolve(this.defaultLocation));
+            } else {
+              resolve(this.defaultLocation);
+            }
+        }
+      };
+
+      try {
+        if (showProgress) showProgress('Obteniendo ubicación GPS...');
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
+      } catch (error) {
+        console.error('❌ Error solicitando ubicación:', error);
+        clearTimeout(safetyTimeout);
+        if (fallbackToIP) {
+          this.getUserLocationByIP()
+            .then(resolve)
+            .catch(() => resolve(this.defaultLocation));
+        } else {
+          resolve(this.defaultLocation);
+        }
+      }
     });
+  }
+
+  /**
+   * NUEVO: Obtener ubicación por IP
+   */
+  async getUserLocationByIP() {
+    try {
+      console.log('🌐 Obteniendo ubicación por IP...');
+      const response = await fetch('https://ipapi.co/json/', {
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (!response.ok) throw new Error(`IP geolocation falló: ${response.status}`);
+      const data = await response.json();
+      
+      const location = {
+        lat: data.latitude,
+        lng: data.longitude,
+        city: data.city,
+        region: data.region,
+        country: data.country_name,
+        postal: data.postal,
+        accuracy: 5000,
+        source: 'ip'
+      };
+      
+      console.log('✅ Ubicación por IP obtenida:', location);
+      return location;
+    } catch (error) {
+      console.error('❌ Error ubicación por IP:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * NUEVO: Verificar permisos
+   */
+  async checkGeolocationPermission() {
+    if (!navigator.permissions) return 'unavailable';
+    try {
+      const permission = await navigator.permissions.query({ name: 'geolocation' });
+      return permission.state; // 'granted', 'denied', 'prompt'
+    } catch (error) {
+      console.error('❌ Error verificando permisos:', error);
+      return 'unavailable';
+    }
+  }
+
+  /**
+   * Geocoding inverso: Coordenadas → Dirección
+   */
+  async reverseGeocode(lat, lng) {
+    const cacheKey = `reverse_${lat.toFixed(4)}_${lng.toFixed(4)}`;
+    
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey);
+      const age = Date.now() - cached.timestamp;
+      if (age < 30 * 24 * 60 * 60 * 1000) {
+        console.log('📦 Usando dirección en cache');
+        return cached.data;
+      }
+    }
+
+    try {
+      if (!this.geocoder) {
+        if (!window.google) throw new Error('Google Maps no está cargado');
+        this.geocoder = new google.maps.Geocoder();
+      }
+
+      const result = await new Promise((resolve, reject) => {
+        this.geocoder.geocode(
+          { location: { lat, lng } },
+          (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+              const addressData = {
+                formatted: results[0].formatted_address,
+                components: this.parseAddressComponents(results[0].address_components)
+              };
+              resolve(addressData);
+            } else {
+              reject(new Error(`Geocoding failed: ${status}`));
+            }
+          }
+        );
+      });
+
+      this.cache.set(cacheKey, { data: result, timestamp: Date.now() });
+      this.cleanOldCache();
+      return result;
+    } catch (error) {
+      console.error('❌ Error reverse geocode:', error);
+      return {
+        formatted: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        components: {
+          street: '', number: '', neighborhood: '',
+          city: '', state: '', country: '', postal: '', lat, lng
+        }
+      };
+    }
+  }
+
+  /**
+   * CRÍTICO: parseAddressComponents (la que faltaba)
+   */
+  parseAddressComponents(addressComponents) {
+    if (!addressComponents || !Array.isArray(addressComponents)) {
+      return {
+        street: '', number: '', neighborhood: '',
+        city: '', state: '', country: '', postal: ''
+      };
+    }
+
+    const components = {
+      street: '', number: '', neighborhood: '',
+      city: '', municipality: '', state: '', country: '', postal: ''
+    };
+
+    addressComponents.forEach(component => {
+      const types = component.types;
+      const value = component.long_name;
+      const shortValue = component.short_name;
+
+      if (types.includes('street_number')) components.number = value;
+      if (types.includes('route')) components.street = value;
+      if (types.includes('sublocality_level_1') || types.includes('neighborhood')) {
+        components.neighborhood = value;
+      }
+      if (types.includes('locality')) components.city = value;
+      if (types.includes('administrative_area_level_2')) {
+        components.municipality = value;
+        if (!components.city) components.city = value;
+      }
+      if (types.includes('administrative_area_level_1')) components.state = shortValue;
+      if (types.includes('country')) components.country = value;
+      if (types.includes('postal_code')) components.postal = value;
+    });
+
+    return components;
+  }
+
+  /**
+   * Geocoding normal: Dirección → Coordenadas
+   */
+  async geocode(address) {
+    const cacheKey = `geocode_${address}`;
+    
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey);
+      const age = Date.now() - cached.timestamp;
+      if (age < 30 * 24 * 60 * 60 * 1000) {
+        console.log('📦 Usando coordenadas en cache');
+        return cached.data;
+      }
+    }
+
+    try {
+      if (!this.geocoder) {
+        if (!window.google) throw new Error('Google Maps no está cargado');
+        this.geocoder = new google.maps.Geocoder();
+      }
+
+      const result = await new Promise((resolve, reject) => {
+        this.geocoder.geocode({ address }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            resolve({
+              lat: location.lat(),
+              lng: location.lng(),
+              formatted: results[0].formatted_address,
+              components: this.parseAddressComponents(results[0].address_components)
+            });
+          } else {
+            reject(new Error(`Geocoding failed: ${status}`));
+          }
+        });
+      });
+
+      this.cache.set(cacheKey, { data: result, timestamp: Date.now() });
+      this.cleanOldCache();
+      return result;
+    } catch (error) {
+      console.error('❌ Error geocode:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calcular distancia (Haversine)
+   */
+  calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+  }
+
+  formatDistance(km) {
+    if (km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(1)} km`;
+  }
+
+  isWithinRadius(centerLat, centerLng, pointLat, pointLng, radiusKm) {
+    const distance = this.calculateDistance(centerLat, centerLng, pointLat, pointLng);
+    return distance <= radiusKm;
   }
 
   cleanOldCache() {
     const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
     const now = Date.now();
-
-    // Limpiar geocoding viejo de localStorage
-    const keys = Object.keys(localStorage);
-    keys.forEach((key) => {
-      if (key.startsWith("geocode_")) {
-        try {
-          const data = JSON.parse(localStorage.getItem(key));
-          if (now - data.timestamp > ONE_MONTH) {
-            localStorage.removeItem(key);
-            console.log(`🧹 Limpiado cache viejo: ${key}`);
-          }
-        } catch (e) {
-          localStorage.removeItem(key);
-        }
+    let cleaned = 0;
+    for (const [key, value] of this.cache.entries()) {
+      if (now - value.timestamp > ONE_MONTH) {
+        this.cache.delete(key);
+        cleaned++;
       }
-    });
+    }
+    if (cleaned > 0) console.log(`🧹 Cache limpiado: ${cleaned} entradas`);
   }
 
-  /**
-   * Limpiar cache (útil para testing)
-   */
   clearCache() {
     this.cache.clear();
-    this.geocodeCache.clear();
-
-    // Limpiar localStorage de geocoding
-    const keys = Object.keys(localStorage);
-    keys.forEach((key) => {
-      if (key.startsWith("geocode_")) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    console.log("🧹 Cache de Maps limpiado");
+    console.log('🧹 Cache completamente limpiado');
   }
 }
 
-// Exportar instancia única (Singleton)
 export const mapsService = new MapsService();
-
-// Hook para usar en componentes
-export const useMaps = () => {
-  return mapsService;
-};
-
 export default mapsService;

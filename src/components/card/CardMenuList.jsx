@@ -1,5 +1,5 @@
 // src/components/card/CardMenuList.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AspectRatio from "@mui/joy/AspectRatio";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";
@@ -24,11 +24,7 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
   const [note, setNote] = useState("");
   const [hasNote, setHasNote] = useState(false);
 
-  useEffect(() => {
-    if (cart[businessId]?.items[item.id]) {
-      setQuantity(cart[businessId].items[item.id].quantity);
-    }
-  }, [cart, businessId, item.id]);
+
 
   const handleIncrement = () => {
     const newQty = quantity + 1;
@@ -163,17 +159,10 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               sx={{
                 bgcolor: "background.paper",
                 borderRadius: 2,
-                border: "1px solid",
                 borderColor: "divider",
               }}
             >
-              <IconButton
-                size="small"
-                onClick={handleDecrement}
-                disabled={quantity === 0}
-              >
-                <Remove fontSize="small" />
-              </IconButton>
+             <Chip onClick={handleIncrement} variant="solid" color="primary" > Si quiero </Chip>
 
               <Typography
                 sx={{
@@ -185,14 +174,6 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               >
                 {quantity}
               </Typography>
-
-              <IconButton
-                size="small"
-                onClick={handleIncrement}
-                color="primary"
-              >
-                <Add fontSize="small" />
-              </IconButton>
             </Stack>
           </Stack>
         </CardContent>

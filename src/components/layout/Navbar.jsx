@@ -125,7 +125,7 @@ const Navbar = () => {
                   startIcon={item.icon}
                   onClick={() => navigate(item.link)}
                 >
-                  {item.title}
+                  {item.title === 'Registro' && isAuthenticated ? 'Negocio':item.title}
                 </Button>
               </Badge>
             ))}
@@ -227,7 +227,7 @@ const Navbar = () => {
           showLabels
           value={value}
           onChange={(event, newValue) => {
-            const toGo = navItems[newValue]?.link == undefined ? "/perfil" : navItems[newValue].link 
+            const toGo = navItems[newValue]?.link == undefined ? "/perfil" : navItems[newValue]?.link  
             setValue(newValue);
             navigate(toGo);
           }}
@@ -241,7 +241,7 @@ const Navbar = () => {
           {navItems.map((item, idx) => (
             <BottomNavigationAction
               key={item.title}
-              label={item.title}
+              label={item.title === 'Registro' && isAuthenticated ? 'Negocio':item.title}
               icon={
                 <Badge 
                   badgeContent={item.link === 'orden' ? cartCount : 0}
