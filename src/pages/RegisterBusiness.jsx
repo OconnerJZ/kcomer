@@ -17,7 +17,7 @@ import FormField from "@Components/forms/FormField";
 import { useNavigate } from "react-router-dom";
 import GeneralContent from "@Components/layout/GeneralContent";
 import { isMobile } from "@Utils/commons";
-import { businessAPI, catalogAPI, uploadAPI } from "@Services/apiService";
+import { businessAPI, catalogsAPI, uploadAPI } from '@Api';
 import useAuth from "@Context/AuthContext";
 
 const RegisterBusiness = () => {
@@ -31,7 +31,7 @@ const RegisterBusiness = () => {
 
   const getFoodTypes = async () => {
     try {
-      const response = await catalogAPI.getFoodTypes();
+      const response = await catalogsAPI.getFoodTypes();
       if (response.data.success) {
         const foodData = response.data.data;
         setFoodTypes(foodData);

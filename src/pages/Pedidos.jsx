@@ -271,7 +271,7 @@ const Pedidos = () => {
     navigate("/mis-ordenes");
 
     // Notificación de éxito
-    alert(`¡Orden realizada con éxito! #${order.id.slice(-8)}`);
+    alert(`¡Orden realizada con éxito! #${order.id}`);
   };
 
   if (businesses.length === 0) {

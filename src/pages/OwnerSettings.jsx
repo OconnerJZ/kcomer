@@ -39,7 +39,7 @@ import {
 import axios from "axios";
 import { API_URL_SERVER } from "@Utils/enviroments";
 import { useAuth } from "@Context/AuthContext";
-import { uploadAPI, catalogAPI, handleApiError } from "@Services/apiService";
+import { businessAPI, uploadAPI, catalogsAPI, handleApiError } from '@Api';
 import ScheduleField from "@Components/forms/ScheduleField";
 
 const OwnerSettings = ({ businessData, onRefresh }) => {
@@ -108,12 +108,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   const loadBusinessSettings = async () => {
     try {
       // Cargar datos completos del negocio
-      const response = await axios.get(
-        `${API_URL_SERVER}/api/business/${businessData.id}`,
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      const response = await businessAPI.getById(businessData.id);
 
       if (response.data.success) {
         const data = response.data.data;
@@ -178,7 +173,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
   const loadFoodTypes = async () => {
     try {
-      const response = await catalogAPI.getFoodTypes();
+      const response = await catalogsAPI.getFoodTypes();
       if (response.data.success) {
         setAvailableFoodTypes(response.data.data);
       }
@@ -192,13 +187,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     try {
       setLoading(true);
 
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}`,
-        basicInfo,
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      const response = await businessAPI.update(businessData.id, data);
 
       if (response.data.success) {
         setSnackbar({
@@ -366,13 +355,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     try {
       setLoading(true);
 
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}/location`,
-        locationInfo,
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      const response = await businessAPI.updateLocation(businessData.id, locationInfo);
 
       if (response.data.success) {
         setSnackbar({

@@ -40,7 +40,7 @@ import {
   AttachMoney,
   Restaurant,
 } from "@mui/icons-material";
-import { menuAPI, uploadAPI, handleApiError } from "@Services/apiService";
+import { menuAPI, uploadAPI, handleApiError } from '@Api';
 
 const OwnerMenu = ({ menu: initialMenu, businessId, onRefresh }) => {
   const [menu, setMenu] = useState(initialMenu || []);

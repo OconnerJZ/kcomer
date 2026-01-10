@@ -43,10 +43,9 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
-import axios from 'axios';
-import { API_URL_SERVER } from '@Utils/enviroments';
+
 import { useAuth } from '@Context/AuthContext';
-import { handleApiError } from '@Services/apiService';
+import { statsAPI, handleApiError } from '@Api';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
@@ -68,15 +67,7 @@ const OwnerReports = ({ stats: initialStats, businessId }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get(
-        `${API_URL_SERVER}/api/stats/business/${businessId}`,
-        {
-          params: { period },
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        }
-      );
+     const response = await statsAPI.getBusinessStats(businessId, period);
 
       if (response.data.success) {
         setStats(response.data.data);

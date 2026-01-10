@@ -18,6 +18,9 @@ import {
   ListItemText,
   useMediaQuery,
   useTheme,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import {
   Dashboard,
@@ -29,6 +32,8 @@ import {
   Person,
   Logout,
   Store,
+  ArrowDownward,
+  ArrowDropDownTwoTone,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@Context/AuthContext";
@@ -39,6 +44,8 @@ const DashboardNavbar = ({
   onTabChange,
   businessName,
   pendingOrders = 0,
+  selectBusiness,
+  businesses,
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -46,7 +53,14 @@ const DashboardNavbar = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElB, setAnchorElB] = useState(null);
   const menuOpen = Boolean(anchorEl);
+  const menuOpenBusi = Boolean(anchorElB);
+
+  const handleChange = (id) => {
+    selectBusiness(id);
+    handleMenuBusiClose();
+  };
 
   const tabs = [
     {
@@ -80,6 +94,14 @@ const DashboardNavbar = ({
     setAnchorEl(null);
   };
 
+  const handleMenuBusiOpen = (event) => {
+    setAnchorElB(event.currentTarget);
+  };
+
+  const handleMenuBusiClose = () => {
+    setAnchorElB(null);
+  };
+
   const handleLogout = () => {
     handleMenuClose();
     logout();
@@ -90,27 +112,94 @@ const DashboardNavbar = ({
     navigate("/explorar");
   };
 
+  const NameBusineesChange = () => {
+    return (
+      <>
+        <Stack direction="row" alignItems={"center"}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 600,
+              color: "rgba(255, 75, 69, 1)",
+              fontSize: "0.7rem",
+            }}
+          >
+            {businessName}
+          </Typography>
+          {businesses.length > 1 && (
+            <IconButton size="small">
+              <ArrowDropDownTwoTone
+                onClick={handleMenuBusiOpen}
+                fontSize="medium"
+              />
+            </IconButton>
+          )}
+        </Stack>
+
+        <Menu
+          anchorEl={anchorElB}
+          open={menuOpenBusi}
+          onClose={handleMenuBusiClose}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          PaperProps={{
+            sx: {
+              minWidth: 240,
+              maxHeight: 240,
+              mt: 1,
+              borderRadius: 2,
+            },
+          }}
+        >
+          {businesses.map((b) => {
+            return (
+              <MenuItem
+                onClick={() => {
+                  handleChange(b?.id);
+                }}
+                key={b?.title}
+              >
+                <ListItemIcon>
+                  <img
+                    width={32}
+                    height={32}
+                    src={"http://localhost:3000/uploads/" + b.urlImage}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  sx={{
+                    fontSize: { xs: "13px" },
+                  }}
+                >
+                  {b?.title}
+                </ListItemText>
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </>
+    );
+  };
+
   return (
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: "rgba(26, 32, 44, 0.95)",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
       }}
     >
       <Toolbar>
-        {/* Logo + Business Name */}
-          {/* Mobile Exit Button */}
-          <IconButton
-            onClick={handleExitDashboard}
-            sx={{ 
-              color: 'white',
-              display: { xs: 'flex', sm: 'flex', md: 'none' }
-            }}
-          >
-            <ArrowBack />
-          </IconButton>
+        <IconButton
+          onClick={handleExitDashboard}
+          sx={{
+            display: { xs: "flex", sm: "flex", md: "none" },
+          }}
+        >
+          <ArrowBack />
+        </IconButton>
+        {isMobile && <NameBusineesChange />}
 
         <Stack direction="row" spacing={2} alignItems="center" sx={{ flex: 1 }}>
           {!isMobile && (
@@ -130,16 +219,11 @@ const DashboardNavbar = ({
               <Box>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: "rgba(255,255,255,0.7)", fontSize: "0.75rem" }}
+                  sx={{ color: "rgba(0,0,0,0.7)", fontSize: "0.75rem" }}
                 >
                   Panel de Negocio
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "white" }}
-                >
-                  {businessName}
-                </Typography>
+                <NameBusineesChange />
               </Box>
             </>
           )}
@@ -160,17 +244,13 @@ const DashboardNavbar = ({
                   onClick={() => onTabChange(tab.id)}
                   sx={{
                     color:
-                      activeTab === tab.id ? "white" : "rgba(255,255,255,0.7)",
-                    backgroundColor:
                       activeTab === tab.id
-                        ? "rgba(255,255,255,0.1)"
-                        : "transparent",
-                    "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.15)",
-                    },
+                        ? "rgba(0,0,0,1)"
+                        : "rgba(0,0,0,0.65)",
+
                     textTransform: "none",
-                    fontWeight: activeTab === tab.id ? 700 : 400,
-                    borderRadius: 2,
+                    fontWeight: activeTab === tab.id ? 600 : 300,
+                    borderRadius: 0,
                     px: 2,
                   }}
                 >
@@ -183,9 +263,8 @@ const DashboardNavbar = ({
 
         {/* Actions */}
         <Stack direction="row" spacing={1} alignItems="center">
-        
           {/* Notifications */}
-          <IconButton sx={{ color: "white" }}>
+          <IconButton>
             <Badge badgeContent={0} color="error">
               <Notifications />
             </Badge>
@@ -227,12 +306,6 @@ const DashboardNavbar = ({
               <Typography variant="caption" color="text.secondary">
                 {user?.email}
               </Typography>
-              <Chip
-                label="Owner"
-                size="small"
-                color="warning"
-                sx={{ mt: 0.5 }}
-              />
             </Box>
             <Divider />
 

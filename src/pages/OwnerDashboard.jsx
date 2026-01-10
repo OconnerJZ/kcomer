@@ -1,5 +1,4 @@
-// src/pages/OwnerDashboard.jsx - VERSIÓN COMPLETA CON NUEVO LAYOUT
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -13,18 +12,11 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  Button,
   Dialog,
   Slide,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  businessAPI,
-  orderAPI,
-  menuAPI,
-  statsAPI,
-  handleApiError,
-} from "@Services/apiService";
+import { businessAPI, handleApiError } from "@Api";
 import { useAuth } from "@Context/AuthContext";
 
 // Importar nuevo layout
@@ -37,9 +29,13 @@ import MenuTab from "./OwnerMenu";
 import ReportsTab from "./OwnerReports";
 import SettingsTab from "./OwnerSettings";
 import { AddBusiness } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import RegisterBusiness from "./RegisterBusiness";
 import Bg from "@Assets/images/qscome-bg-6.png";
+
+// ✅ Importar hook de órdenes para obtener el count
+import useBusinessOrders from "@Hooks/generales/useBusinessOrders";
+
+const BUSINESS_DEFAULT = 0;
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -47,7 +43,6 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 export default function OwnerDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = useState(false);
@@ -64,80 +59,71 @@ export default function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Estados para datos reales
-  const [businessData, setBusinessData] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [menu, setMenu] = useState([]);
-  const [stats, setStats] = useState(null);
+  // ✅ REFACTORIZADO: Solo cargar negocios
+  const [businesses, setBusinesses] = useState([]);
+  const [activeBusinessId, setActiveBusinessId] = useState(null);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  // ✅ NUEVO: Usar hook solo para obtener el count de órdenes pendientes
+  // No pasamos las órdenes como prop, cada tab maneja su propia data
+  const { orders: ordersForCount } = useBusinessOrders(activeBusinessId);
 
-  const loadDashboardData = async () => {
+  const loadBusinesses = async () => {
     try {
       setLoading(true);
-      setError(null);
-
-      // 1. Obtener negocios del usuario
-      const businessesResponse = await businessAPI.getAll();
-
-      // Filtrar por propietario (ajustar según tu lógica)
-      const userBusinesses = businessesResponse.data.data.filter(
-        (b) => b.ownerId === user.id || true // TODO: Ajustar cuando tengas ownerId
+      const res = await businessAPI.getAll();
+      const userBusinesses = res.data.data.filter(
+        (b) => b.ownerId === user.id || true
       );
 
-      const business = userBusinesses[0]; // Tomar el primero por ahora
-      setBusinessData(business);
+      setBusinesses(userBusinesses);
 
-      // 2. Cargar órdenes
-      try {
-        const ordersResponse = await orderAPI.getByBusiness(business.id);
-        if (ordersResponse.data.success) {
-          setOrders(ordersResponse.data.data);
-        }
-      } catch (err) {
-        console.warn("No se pudieron cargar órdenes:", err);
-        setOrders([]);
-      }
-
-      // 3. Cargar menú
-      try {
-        const menuResponse = await menuAPI.getByBusiness(business.id);
-        if (menuResponse.data.success) {
-          setMenu(menuResponse.data.data);
-        }
-      } catch (err) {
-        console.warn("No se pudo cargar menú:", err);
-        setMenu([]);
-      }
-
-      // 4. Cargar estadísticas
-      try {
-        const statsResponse = await statsAPI.getBusinessStats(business.id);
-        if (statsResponse.data.success) {
-          setStats(statsResponse.data.data);
-        }
-      } catch (err) {
-        console.warn("No se pudieron cargar estadísticas:", err);
-        setStats(null);
-      }
+      // negocio default
+      setActiveBusinessId(userBusinesses[BUSINESS_DEFAULT]?.id ?? null);
     } catch (err) {
-      console.error("Error loading dashboard:", err);
-      const errorData = handleApiError(err);
-      setError(errorData.message);
+      setError(handleApiError(err).message);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadBusinesses();
+  }, [user.id]);
+
+  const dataActiveBusiness = useMemo(
+    () => businesses.find((b) => b.id === activeBusinessId),
+    [businesses, activeBusinessId]
+  );
+
+  const selectBusiness = (businessId) => {
+    setActiveBusinessId(businessId);
   };
 
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
   };
 
-  const pendingOrdersCount = orders.filter(
+  // ✅ Count de órdenes pendientes para el badge
+  const pendingOrdersCount = ordersForCount.filter(
     (o) => o.status === "pending"
   ).length;
+
+    if (user?.role === "customer") {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          px: 2,
+          mt:-6
+        }}
+      >
+        <RegisterBusiness />
+      </Box>
+    );
+  }
 
   if (loading) {
     return (
@@ -173,7 +159,7 @@ export default function OwnerDashboard() {
     );
   }
 
-  if (!businessData) {
+  if (!dataActiveBusiness) {
     return (
       <Box
         sx={{
@@ -196,15 +182,17 @@ export default function OwnerDashboard() {
         backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
         backgroundSize: "contain",
         backgroundPosition: "center",
-        pb: { xs: 10, md: 0 }, // Padding bottom para mobile nav
+        pb: { xs: 10, md: 0 },
       }}
     >
       {/* Navbar Personalizado */}
       <DashboardNavbar
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        businessName={businessData.businessName}
+        businessName={dataActiveBusiness.title}
         pendingOrders={pendingOrdersCount}
+        selectBusiness={selectBusiness}
+        businesses={businesses}
       />
 
       <Fab
@@ -213,8 +201,7 @@ export default function OwnerDashboard() {
         size="small"
         onClick={handleClickOpen}
       >
-        {" "}
-        <AddBusiness />{" "}
+        <AddBusiness />
       </Fab>
 
       <Dialog
@@ -238,9 +225,6 @@ export default function OwnerDashboard() {
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
               Registrar negocio
             </Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
-              save
-            </Button>
           </Toolbar>
         </AppBar>
 
@@ -260,27 +244,24 @@ export default function OwnerDashboard() {
       >
         <Fade in={true} timeout={500}>
           <Box>
+            {/* ✅ REFACTORIZADO: Solo pasar businessId, no las órdenes */}
             {activeTab === 0 && (
-              <OrdersTab
-                orders={orders}
-                businessId={businessData.id}
-                onRefresh={loadDashboardData}
-              />
+              <OrdersTab businessId={dataActiveBusiness.id} />
             )}
+            
+            {/* ✅ Cada tab maneja su propia data */}
             {activeTab === 1 && (
-              <MenuTab
-                menu={menu}
-                businessId={businessData.id}
-                onRefresh={loadDashboardData}
-              />
+              <MenuTab businessId={dataActiveBusiness.id} />
             )}
+            
             {activeTab === 2 && (
-              <ReportsTab stats={stats} businessId={businessData.id} />
+              <ReportsTab businessId={dataActiveBusiness.id} />
             )}
+            
             {activeTab === 3 && (
               <SettingsTab
-                businessData={businessData}
-                onRefresh={loadDashboardData}
+                businessData={dataActiveBusiness}
+                onRefresh={loadBusinesses}
               />
             )}
           </Box>
@@ -293,14 +274,6 @@ export default function OwnerDashboard() {
         onTabChange={handleTabChange}
         pendingOrders={pendingOrdersCount}
       />
-
-      {/* Mobile Floating Panel - Speed Dial (opcional) */}
-      {/* Descomentar si prefieres el floating panel en vez del bottom nav */}
-      {/* <DashboardFloatingPanel
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        pendingOrders={pendingOrdersCount}
-      /> */}
     </Box>
   );
 }

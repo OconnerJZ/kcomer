@@ -10,31 +10,35 @@ const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), viteBasicSslPlugin(), VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['logo.png'], 
+  plugins: [
+    react(),
+    viteBasicSslPlugin(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["logo.png"],
       manifest: {
-        name: 'qsCome',
-        short_name: 'qsCome',
-        description: 'Mi app para encontra mi comida de hoy',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        start_url: '/',
+        name: "qsCome",
+        short_name: "qsCome",
+        description: "Mi app para encontra mi comida de hoy",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: "/",
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          }
-        ]
-      }
-    })],
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
+    }),
+  ],
   server: {
     https: true,
     host: true,
@@ -42,6 +46,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@Api": path.resolve(__dirname, "src/api"),
       "@Assets": path.resolve(__dirname, "src/assets"),
       "@Components": path.resolve(__dirname, "src/components"),
       "@Config": path.resolve(__dirname, "src/config"),

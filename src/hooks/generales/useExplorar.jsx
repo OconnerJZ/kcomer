@@ -7,7 +7,7 @@ import useBusiness from "./useBusiness";
 const useExplorar = () => {
   const geolocation = useGeolocation();
   const business = useBusiness();
-  const { setVisible } = useFilterMenu()
+  const { setVisible } = useFilterMenu();
   const seccionDestinoRef = useRef(null);
 
   const scrollToSection = () => {
@@ -20,16 +20,16 @@ const useExplorar = () => {
       if (seccionDestinoRef.current) {
         const elementRect = seccionDestinoRef.current.getBoundingClientRect();
         const isElementVisible = elementRect.top <= 64;
-        setVisible(isElementVisible)
+        setVisible(isElementVisible);
       }
-    }
+    };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     handleScroll();
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-    }
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return {

@@ -52,7 +52,7 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
     { day: 'Domingo', open: '10:00', close: '21:00' }
   ];
 
-  const pathMedia = "http://192.168.100.9:3000/uploads/"
+  const pathMedia = "http://localhost:3000/uploads/"
 
   return (
     <>

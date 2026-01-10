@@ -1,248 +1,430 @@
-// src/context/OrderContext.jsx - VERSIÓN MEJORADA
-import { createContext, useContext, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { orderAPI, handleApiError } from '@Services/apiService';
-import { useAuth } from './AuthContext';
+// src/context/OrderContext.jsx
+// REFACTORIZADO: Context con soporte de sockets para cliente
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
+import PropTypes from "prop-types";
+import { ordersAPI, handleApiError } from "@Api";
+import { useAuth } from "./AuthContext";
+import socketService from "@Services/socketService";
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
 const OrdersContext = createContext();
+const ORDERS_STORAGE_KEY = "qscome_orders";
 
 export const ORDER_STATUS = {
-  PENDING: 'pending',
-  ACCEPTED: 'accepted',
-  PREPARING: 'preparing',
-  READY: 'ready',
-  IN_DELIVERY: 'in_delivery',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  PREPARING: "preparing",
+  READY: "ready",
+  IN_DELIVERY: "in_delivery",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
 };
 
 export const STATUS_LABELS = {
-  [ORDER_STATUS.PENDING]: 'Pendiente',
-  [ORDER_STATUS.ACCEPTED]: 'Aceptada',
-  [ORDER_STATUS.PREPARING]: 'Preparando',
-  [ORDER_STATUS.READY]: 'Lista',
-  [ORDER_STATUS.IN_DELIVERY]: 'En camino',
-  [ORDER_STATUS.COMPLETED]: 'Completada',
-  [ORDER_STATUS.CANCELLED]: 'Cancelada',
+  [ORDER_STATUS.PENDING]: "Pendiente",
+  [ORDER_STATUS.ACCEPTED]: "Aceptada",
+  [ORDER_STATUS.PREPARING]: "Preparando",
+  [ORDER_STATUS.READY]: "Lista",
+  [ORDER_STATUS.IN_DELIVERY]: "En camino",
+  [ORDER_STATUS.COMPLETED]: "Completada",
+  [ORDER_STATUS.CANCELLED]: "Cancelada",
 };
+
+// ============================================================================
+// STORAGE UTILITIES
+// ============================================================================
+
+const storage = {
+  save: (orders) => {
+    try {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    } catch (error) {
+      console.error("Error saving orders to storage:", error);
+    }
+  },
+
+  load: () => {
+    try {
+      const data = localStorage.getItem(ORDERS_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error("Error loading orders from storage:", error);
+      return [];
+    }
+  },
+
+  clear: () => {
+    try {
+      localStorage.removeItem(ORDERS_STORAGE_KEY);
+    } catch (error) {
+      console.error("Error clearing orders storage:", error);
+    }
+  },
+};
+
+// ============================================================================
+// ORDER UTILITIES
+// ============================================================================
+
+const orderUtils = {
+  createOfflineOrder: (orderData, userId) => ({
+    id: `offline_${Date.now()}`,
+    ...orderData,
+    userId,
+    status: ORDER_STATUS.PENDING,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    statusHistory: [
+      {
+        status: ORDER_STATUS.PENDING,
+        note: "Orden creada offline",
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }),
+
+  createStatusHistoryEntry: (status, note = "") => ({
+    status,
+    note: note || "(offline)",
+    timestamp: new Date().toISOString(),
+  }),
+
+  validateOrderData: (orderData) => {
+    if (!orderData) {
+      throw new Error("Datos de orden no proporcionados");
+    }
+    if (!orderData.businessId) {
+      throw new Error("ID de negocio requerido");
+    }
+    if (!orderData.items || !Array.isArray(orderData.items)) {
+      throw new Error("Items de orden requeridos");
+    }
+    if (orderData.items.length === 0) {
+      throw new Error("La orden debe contener al menos un item");
+    }
+  },
+};
+
+// ============================================================================
+// PROVIDER COMPONENT
+// ============================================================================
 
 export const OrdersProvider = ({ children }) => {
   const { user } = useAuth();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // ============================================================================
+  // SOCKET LISTENER - Solo para CLIENTES
+  // ============================================================================
+ const socket = socketService.socket;
+  useEffect(() => {
+    // Solo para clientes (no owners)
+    if(!socketService.isConnected()) return;
+    if (!user?.id || user?.role === 'owner' || user?.role === 'admin') {
+      return;
+    }
+
+    console.log("[OrderContext] Setting up socket listener for user:", user.id);
+
+   
+    if (!socket) {
+      console.error("[OrderContext] Socket not available");
+      return;
+    }
+    
+    socketService.joinUser(user.id)
+    // Unirse a sala de usuario
+    
+
+    // Handler para actualizaciones de estado
+    const handleStatusUpdate = (data) => {
+      console.log("🔄 [OrderContext] Status update:", data);
+
+      if (!data?.orderId) return;
+
+      // Actualizar orden en la lista
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === data.orderId
+            ? {
+                ...order,
+                status: data.status,
+                statusHistory: data.statusHistory || order.statusHistory,
+                updatedAt: new Date().toISOString(),
+              }
+            : order
+        )
+      );
+    };
+
+    // Registrar listener
+    socket.on("order:status_update", handleStatusUpdate);
+
+    console.log("✅ [OrderContext] Socket listener registered");
+    console.log("   order:status_update listeners:", socket.listeners("order:status_update").length);
+
+    // Cleanup
+    return () => {
+      console.log("[OrderContext] Cleaning up socket listener");
+      socket.off("order:status_update", handleStatusUpdate);
+    };
+  }, [user?.id, user?.role, socketService.connected]);
+
+  // ============================================================================
+  // LOAD ORDERS
+  // ============================================================================
+
   useEffect(() => {
     if (user?.id) {
       loadUserOrders(user.id);
+    } else {
+      setOrders([]);
+      storage.clear();
     }
   }, [user?.id]);
 
-  const loadUserOrders = async (userId) => {
+  const loadUserOrders = useCallback(async (userId) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      const response = await orderAPI.getByUser(userId);
-      
-      if (response.data.success) {
-        setOrders(response.data.data);
-        // Guardar en localStorage como backup
-        localStorage.setItem('qscome_orders', JSON.stringify(response.data.data));
-      } else {
-        console.error('Error loading orders:', response.data.message);
-        setError(response.data.message);
+      const response = await ordersAPI.getByUser(userId);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Error al cargar órdenes");
       }
+
+      const ordersData = response.data.data || [];
+      setOrders(ordersData);
+      storage.save(ordersData);
     } catch (err) {
-      console.error('Error loading orders:', err);
       const errorData = handleApiError(err);
       setError(errorData.message);
       
-      // Fallback a localStorage si falla la API
-      const savedOrders = localStorage.getItem('qscome_orders');
-      if (savedOrders) {
-        try {
-          setOrders(JSON.parse(savedOrders));
-        } catch (parseError) {
-          console.error('Error parsing saved orders:', parseError);
-        }
-      }
+      // Load from cache as fallback
+      const cachedOrders = storage.load();
+      setOrders(cachedOrders);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const createOrder = async (orderData) => {
+  // ============================================================================
+  // CREATE ORDER
+  // ============================================================================
+
+  const createOrder = useCallback(async (orderData) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
+      // Validate order data
+      orderUtils.validateOrderData(orderData);
 
-      // Validar datos mínimos
-      if (!orderData.businessId || !orderData.items || orderData.items.length === 0) {
-        throw new Error('Datos de orden incompletos');
-      }
-
+      // Prepare payload
       const payload = {
-        userId: user.id,
-        businessId: orderData.businessId,
-        items: orderData.items,
-        total: orderData.total,
-        customerName: orderData.customerName || user.name,
-        customerPhone: orderData.phoneNumber,
-        deliveryAddress: orderData.deliveryAddress,
-        notes: orderData.notes
-      };
-
-      const response = await orderAPI.create(payload);
-
-      if (response.data.success) {
-        const newOrder = response.data.data;
-        setOrders((prev) => [newOrder, ...prev]);
-        
-        // Actualizar localStorage
-        const updatedOrders = [newOrder, ...orders];
-        localStorage.setItem('qscome_orders', JSON.stringify(updatedOrders));
-        
-        return newOrder;
-      } else {
-        throw new Error(response.data.message);
-      }
-    } catch (err) {
-      console.error('Error creating order:', err);
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-      
-      // Fallback: crear orden localmente
-      const newOrder = {
-        id: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         ...orderData,
         userId: user.id,
-        status: ORDER_STATUS.PENDING,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        statusHistory: [
-          {
-            status: ORDER_STATUS.PENDING,
-            timestamp: new Date().toISOString(),
-            note: 'Orden creada (offline)',
-          },
-        ],
+        customerName: orderData.customerName || user.name || "Cliente",
       };
-      
-      setOrders((prev) => [newOrder, ...prev]);
-      localStorage.setItem('qscome_orders', JSON.stringify([newOrder, ...orders]));
-      
-      return newOrder;
+
+      // Make API call
+      const response = await ordersAPI.create(payload);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Error al crear orden");
+      }
+
+      const newOrder = response.data.data;
+
+      // Update state and storage
+      setOrders((prev) => {
+        const updated = [newOrder, ...prev];
+        storage.save(updated);
+        return updated;
+      });
+
+      return { success: true, data: newOrder };
+    } catch (err) {
+      const errorData = handleApiError(err);
+      setError(errorData.message);
+
+      // Create offline order as fallback
+      const offlineOrder = orderUtils.createOfflineOrder(orderData, user.id);
+
+      setOrders((prev) => {
+        const updated = [offlineOrder, ...prev];
+        storage.save(updated);
+        return updated;
+      });
+
+      return { success: false, data: offlineOrder, error: errorData.message };
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const updateOrderStatus = async (orderId, newStatus, note = '') => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await orderAPI.updateStatus(orderId, newStatus, note);
-      
-      if (response.data.success) {
-        setOrders((prev) =>
-          prev.map((order) => {
-            if (order.id === orderId) {
-              return {
-                ...order,
-                status: newStatus,
-                updatedAt: new Date().toISOString(),
-                statusHistory: [
-                  ...(order.statusHistory || []),
-                  {
-                    status: newStatus,
-                    timestamp: new Date().toISOString(),
-                    note,
-                  },
-                ],
-              };
-            }
-            return order;
-          })
-        );
-        
-        // Actualizar localStorage
-        const updatedOrders = orders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        );
-        localStorage.setItem('qscome_orders', JSON.stringify(updatedOrders));
-      } else {
-        throw new Error(response.data.message);
-      }
-    } catch (err) {
-      console.error('Error updating order status:', err);
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-      
-      // Fallback: actualizar localmente
-      setOrders((prev) =>
-        prev.map((order) => {
-          if (order.id === orderId) {
-            return {
+  // ============================================================================
+  // UPDATE ORDER STATUS
+  // ============================================================================
+
+  const updateOrderStatus = useCallback(async (orderId, status, note = "") => {
+    if (!orderId) {
+      throw new Error("ID de orden requerido");
+    }
+    if (!status) {
+      throw new Error("Estado requerido");
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Optimistically update UI
+    setOrders((prev) => {
+      const updated = prev.map((order) =>
+        order.id === orderId
+          ? {
               ...order,
-              status: newStatus,
+              status,
               updatedAt: new Date().toISOString(),
               statusHistory: [
                 ...(order.statusHistory || []),
-                {
-                  status: newStatus,
-                  timestamp: new Date().toISOString(),
-                  note: note || '(actualización offline)',
-                },
+                orderUtils.createStatusHistoryEntry(status, note),
               ],
-            };
-          }
-          return order;
-        })
+            }
+          : order
       );
+      storage.save(updated);
+      return updated;
+    });
+
+    try {
+      await ordersAPI.updateStatus(orderId, status, note);
+      return { success: true };
+    } catch (err) {
+      const errorData = handleApiError(err);
+      setError(errorData.message);
+      
+      // UI already updated optimistically, keep changes
+      return { success: false, error: errorData.message };
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const getOrdersByUser = (userId) => {
-    return orders.filter((order) => order.userId === userId);
-  };
+  // ============================================================================
+  // CANCEL ORDER
+  // ============================================================================
 
-  const getOrdersByBusiness = (businessId) => {
-    return orders.filter((order) => order.businessId === businessId);
-  };
+  const cancelOrder = useCallback(
+    (orderId, reason = "Orden cancelada por el usuario") => {
+      return updateOrderStatus(orderId, ORDER_STATUS.CANCELLED, reason);
+    },
+    [updateOrderStatus]
+  );
 
-  const getOrdersByStatus = (status) => {
-    return orders.filter((order) => order.status === status);
-  };
+  // ============================================================================
+  // REFRESH ORDERS
+  // ============================================================================
 
-  const cancelOrder = (orderId) => {
-    updateOrderStatus(orderId, ORDER_STATUS.CANCELLED, 'Orden cancelada por el usuario');
-  };
-
-  const loadOrders = async () => {
+  const refreshOrders = useCallback(() => {
     if (user?.id) {
-      await loadUserOrders(user.id);
+      return loadUserOrders(user.id);
     }
-  };
+  }, [user?.id, loadUserOrders]);
 
-  const value = {
-    orders,
-    loading,
-    error,
-    createOrder,
-    updateOrderStatus,
-    getOrdersByUser,
-    getOrdersByBusiness,
-    getOrdersByStatus,
-    cancelOrder,
-    loadOrders,
-    ORDER_STATUS,
-    STATUS_LABELS,
-  };
+  // ============================================================================
+  // SELECTORS
+  // ============================================================================
 
-  return <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>;
+  const selectors = useMemo(
+    () => ({
+      getOrdersByUser: (userId) =>
+        orders.filter((order) => order.userId === userId),
+
+      getOrdersByBusiness: (businessId) =>
+        orders.filter((order) => order.businessId === businessId),
+
+      getOrdersByStatus: (status) =>
+        orders.filter((order) => order.status === status),
+
+      getOrderById: (orderId) =>
+        orders.find((order) => order.id === orderId),
+
+      getPendingOrders: () =>
+        orders.filter((order) => order.status === ORDER_STATUS.PENDING),
+
+      getActiveOrders: () =>
+        orders.filter(
+          (order) =>
+            ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(
+              order.status
+            )
+        ),
+
+      getCompletedOrders: () =>
+        orders.filter(
+          (order) =>
+            order.status === ORDER_STATUS.COMPLETED ||
+            order.status === ORDER_STATUS.CANCELLED
+        ),
+    }),
+    [orders]
+  );
+
+  // ============================================================================
+  // CONTEXT VALUE
+  // ============================================================================
+
+  const value = useMemo(
+    () => ({
+      // State
+      orders,
+      loading,
+      error,
+
+      // Actions
+      createOrder,
+      updateOrderStatus,
+      cancelOrder,
+      refreshOrders,
+
+      // Selectors
+      ...selectors,
+
+      // Constants
+      ORDER_STATUS,
+      STATUS_LABELS,
+    }),
+    [
+      orders,
+      loading,
+      error,
+      createOrder,
+      updateOrderStatus,
+      cancelOrder,
+      refreshOrders,
+      selectors,
+    ]
+  );
+
+  return (
+    <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>
+  );
 };
 
 OrdersProvider.propTypes = {
@@ -252,7 +434,7 @@ OrdersProvider.propTypes = {
 export const useOrders = () => {
   const context = useContext(OrdersContext);
   if (!context) {
-    throw new Error('useOrders debe usarse dentro de OrdersProvider');
+    throw new Error("useOrders debe usarse dentro de OrdersProvider");
   }
   return context;
 };
