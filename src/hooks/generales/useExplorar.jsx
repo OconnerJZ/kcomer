@@ -1,12 +1,7 @@
-import { datacards } from "@Const/listas";
 import { useFilterMenu } from "@Context/FilterMenuContext";
-import useGeolocation from "@Hooks/components/useGeolocation";
 import { useEffect, useRef } from "react";
-import useBusiness from "./useBusiness";
 
 const useExplorar = () => {
-  const geolocation = useGeolocation();
-  const business = useBusiness();
   const { setVisible } = useFilterMenu();
   const seccionDestinoRef = useRef(null);
 
@@ -33,9 +28,6 @@ const useExplorar = () => {
   }, []);
 
   return {
-    datacards,
-    business,
-    geolocation,
     seccionDestinoRef,
     scrollToSection,
   };

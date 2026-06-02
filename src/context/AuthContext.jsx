@@ -8,7 +8,13 @@ import {
   useRef,
 } from "react";
 import PropTypes from "prop-types";
-import { authAPI, handleApiError } from "@Api";
+import { useGoogleLogin } from "@react-oauth/google";
+import {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetMeQuery,
+  useLoginGoogleMutation,
+} from "@Api/auth.api";
 
 // ============================================================================
 // CONSTANTS
@@ -86,6 +92,16 @@ const authUtils = {
       password: userData.password,
     };
   },
+
+  handleApiError: (error) => {
+    if (error?.data?.message) {
+      return { message: error.data.message };
+    }
+    if (error?.message) {
+      return { message: error.message };
+    }
+    return { message: "Error desconocido" };
+  },
 };
 
 // ============================================================================
@@ -94,11 +110,32 @@ const authUtils = {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shouldFetchMe, setShouldFetchMe] = useState(false);
 
   const tokenRefreshInterval = useRef(null);
-  const isValidatingToken = useRef(false);
+
+  // ============================================================================
+  // RTK QUERY HOOKS
+  // ============================================================================
+
+  const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [loginGoogleMutation, { isLoading: isGoogleLoginLoading }] =
+    useLoginGoogleMutation();
+  const [registerMutation, { isLoading: isRegisterLoading }] =
+    useRegisterMutation();
+
+  // Solo ejecuta getMe cuando hay un token guardado
+  const {
+    data: meData,
+    isLoading: isMeLoading,
+    isSuccess: isMeSuccess,
+    isError: isMeError,
+    refetch: refetchMe,
+  } = useGetMeQuery(undefined, {
+    skip: !shouldFetchMe, // Solo ejecuta si hay token
+  });
 
   // ============================================================================
   // SESSION MANAGEMENT
@@ -114,6 +151,7 @@ export const AuthProvider = ({ children }) => {
       if (storage.save(validatedUser)) {
         setUser(validatedUser);
         setError(null);
+        setShouldFetchMe(true); // Habilita el fetch de /me
         return true;
       }
       return false;
@@ -128,6 +166,7 @@ export const AuthProvider = ({ children }) => {
     storage.clear();
     setUser(null);
     setError(null);
+    setShouldFetchMe(false); // Deshabilita el fetch de /me
 
     // Clear token refresh interval
     if (tokenRefreshInterval.current) {
@@ -141,22 +180,15 @@ export const AuthProvider = ({ children }) => {
   // ============================================================================
 
   const validateToken = useCallback(async () => {
-    // Prevent concurrent validation requests
-    if (isValidatingToken.current) {
-      return;
-    }
-
-    isValidatingToken.current = true;
-
     try {
-      const response = await authAPI.getMe();
+      const result = await refetchMe();
 
-      if (response.data.success) {
+      if (result.data) {
         const currentUser = storage.load();
 
         if (currentUser && currentUser.token) {
           const updatedUser = {
-            ...response.data.data,
+            ...result.data,
             token: currentUser.token,
             lastUpdated: new Date().toISOString(),
           };
@@ -171,10 +203,8 @@ export const AuthProvider = ({ children }) => {
       console.error("Token validation error:", err);
       clearSession();
       return { success: false, error: err.message };
-    } finally {
-      isValidatingToken.current = false;
     }
-  }, [saveSession, clearSession]);
+  }, [refetchMe, saveSession, clearSession]);
 
   const startTokenRefresh = useCallback(() => {
     // Clear any existing interval
@@ -196,7 +226,7 @@ export const AuthProvider = ({ children }) => {
     (authData) => {
       try {
         const userData = authUtils.createUserData(authData);
-        
+
         if (saveSession(userData)) {
           startTokenRefresh();
           return { success: true, user: userData };
@@ -208,28 +238,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: err.message };
       }
     },
-    [saveSession, startTokenRefresh]
-  );
-
-  const authRequest = useCallback(
-    async (requestFn, errorMessage = "Error de autenticación") => {
-      setError(null);
-
-      try {
-        const response = await requestFn();
-
-        if (!response?.data?.success) {
-          throw new Error(response?.data?.message || errorMessage);
-        }
-
-        return handleAuthSuccess(response.data.data);
-      } catch (err) {
-        const errorData = handleApiError(err);
-        setError(errorData.message);
-        return { success: false, error: errorData.message };
-      }
-    },
-    [handleAuthSuccess]
+    [saveSession, startTokenRefresh],
   );
 
   const login = useCallback(
@@ -241,41 +250,53 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      return authRequest(
-        () => authAPI.login(credentials),
-        "Error al iniciar sesión"
-      );
+      setError(null);
+
+      try {
+        const response = await loginMutation(credentials).unwrap();
+        return handleAuthSuccess(response);
+      } catch (err) {
+        const errorData = authUtils.handleApiError(err);
+        setError(errorData.message);
+        return { success: false, error: errorData.message };
+      }
     },
-    [authRequest]
+    [loginMutation, handleAuthSuccess],
   );
 
   const loginWithGoogle = useCallback(
-    async (idToken) => {
-      if (!idToken) {
+    async (payload) => {
+      if (!payload?.idToken) {
         return { success: false, error: "Token de Google requerido" };
       }
-
-      return authRequest(
-        () => authAPI.loginGoogle(idToken),
-        "Error al iniciar sesión con Google"
-      );
+      setError(null);
+      try {
+        const response = await loginGoogleMutation(payload).unwrap();
+        return handleAuthSuccess(response);
+      } catch (err) {
+        const errorData = authUtils.handleApiError(err);
+        setError(errorData.message);
+        return { success: false, error: errorData.message };
+      }
     },
-    [authRequest]
+    [loginGoogleMutation, handleAuthSuccess],
   );
 
   const register = useCallback(
     async (userData) => {
+      setError(null);
+
       try {
         const payload = authUtils.prepareRegisterPayload(userData);
-        return authRequest(
-          () => authAPI.register(payload),
-          "Error al registrar usuario"
-        );
+        const response = await registerMutation(payload).unwrap();
+        return handleAuthSuccess(response);
       } catch (err) {
-        return { success: false, error: err.message };
+        const errorData = authUtils.handleApiError(err);
+        setError(errorData.message);
+        return { success: false, error: errorData.message };
       }
     },
-    [authRequest]
+    [registerMutation, handleAuthSuccess],
   );
 
   const logout = useCallback(() => {
@@ -291,9 +312,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await authAPI.getMe();
+      const result = await refetchMe();
 
-      if (!response?.data?.success) {
+      if (!result.data) {
         throw new Error("No se pudo actualizar el usuario");
       }
 
@@ -305,7 +326,7 @@ export const AuthProvider = ({ children }) => {
 
       const updatedUser = {
         ...currentUser,
-        ...response.data.data,
+        ...result.data,
         token: currentUser.token,
         lastUpdated: new Date().toISOString(),
       };
@@ -317,48 +338,81 @@ export const AuthProvider = ({ children }) => {
 
       throw new Error("No se pudo guardar la actualización");
     } catch (err) {
-      const errorData = handleApiError(err);
+      const errorData = authUtils.handleApiError(err);
       setError(errorData.message);
       return { success: false, error: errorData.message };
     }
-  }, []);
+  }, [refetchMe]);
 
   const refreshUser = useCallback(() => {
     return updateUser();
   }, [updateUser]);
 
   // ============================================================================
-  // INITIALIZATION
+  // GOOGLE LOGIN HOOK
   // ============================================================================
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      await loginWithGoogle(tokenResponse.access_token);
+    },
+    onError: (error) => {
+      console.error("Google login error:", error);
+      setError("Error al iniciar sesión con Google");
+    },
+  });
+
+  // ============================================================================
+  // EFFECTS
+  // ============================================================================
+
+  // Efecto para sincronizar meData con el usuario local
+  useEffect(() => {
+    if (isMeSuccess && meData) {
+      const currentUser = storage.load();
+      if (currentUser && currentUser.token) {
+        const updatedUser = {
+          ...meData,
+          token: currentUser.token,
+          lastUpdated: new Date().toISOString(),
+        };
+        storage.save(updatedUser);
+        setUser(updatedUser);
+      }
+    }
+
+    if (isMeError) {
+      console.warn("Error validating token, clearing session");
+      clearSession();
+    }
+  }, [isMeSuccess, isMeError, meData, clearSession]);
+
+  // Efecto de inicialización
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true);
+      setAuthLoading(true);
 
       const savedUser = storage.load();
 
       if (!savedUser) {
-        setLoading(false);
+        setAuthLoading(false);
         return;
       }
 
       if (!authUtils.validateUserData(savedUser)) {
         console.warn("Invalid user data in storage");
         clearSession();
-        setLoading(false);
+        setAuthLoading(false);
         return;
       }
 
       setUser(savedUser);
+      setShouldFetchMe(true); // Habilita el fetch para validar el token
 
-      // Validate token in background
-      const result = await validateToken();
+      // Iniciar refresh de token
+      startTokenRefresh();
 
-      if (result?.success) {
-        startTokenRefresh();
-      }
-
-      setLoading(false);
+      setAuthLoading(false);
     };
 
     initializeAuth();
@@ -369,11 +423,18 @@ export const AuthProvider = ({ children }) => {
         clearInterval(tokenRefreshInterval.current);
       }
     };
-  }, [validateToken, startTokenRefresh, clearSession]);
+  }, [clearSession, startTokenRefresh]);
 
   // ============================================================================
   // CONTEXT VALUE
   // ============================================================================
+
+  const loading =
+    authLoading ||
+    isLoginLoading ||
+    isGoogleLoginLoading ||
+    isRegisterLoading ||
+    isMeLoading;
 
   const value = useMemo(
     () => ({
@@ -386,6 +447,7 @@ export const AuthProvider = ({ children }) => {
       // Auth Actions
       login,
       loginWithGoogle,
+      googleLogin, // Hook de Google Login
       register,
       logout,
 
@@ -400,8 +462,16 @@ export const AuthProvider = ({ children }) => {
     [
       user,
       loading,
-      error
-    ]
+      error,
+      login,
+      loginWithGoogle,
+      googleLogin,
+      register,
+      logout,
+      updateUser,
+      refreshUser,
+      validateToken,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -410,7 +480,6 @@ export const AuthProvider = ({ children }) => {
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
-
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

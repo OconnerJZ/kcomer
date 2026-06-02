@@ -28,7 +28,13 @@ const OwnerOrders = ({ businessId }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const { orders, loading, updateOrderStatus, loadOrders } = useBusinessOrders(businessId);
+  // ✅ Hook refactorizado con RTK Query
+  const { 
+    orders, 
+    loading, 
+    updateOrderStatus, 
+    refreshOrders 
+  } = useBusinessOrders(businessId);
 
   const { filterStatus, setFilterStatus, filteredOrders } =
     useOrderFilters(orders);
@@ -62,10 +68,10 @@ const OwnerOrders = ({ businessId }) => {
 
   const handleRefresh = async () => {
     try {
-      await loadOrders();
+      await refreshOrders(); // ✅ Usa refetch de RTK Query
       showSnackbar("Órdenes actualizadas", "success");
     } catch (error) {
-      showSnackbar(error.message, "error");
+      showSnackbar(error?.message || "Error al actualizar", "error");
     }
   };
 

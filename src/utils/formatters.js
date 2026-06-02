@@ -1,5 +1,4 @@
-import { ORDER_STATUS } from "@Const/orderStatus"; 
-import { COLOR_MAP } from "@Const/orderStatus"; 
+import { ORDER_STATUS, COLOR_MAP } from "@Const/orderStatus"; 
 
 export const getStatusColor = (status) => {
   const statusConfig = ORDER_STATUS[status];

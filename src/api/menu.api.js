@@ -1,15 +1,44 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder, crudEndpoints } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const menuAPI = {
-  getAll: () => apiClient.get("/api/menus"),
-  getById: (id) => apiClient.get(`/api/menus/${id}`),
-  getByBusiness: (businessId) =>
-    apiClient.get(`/api/menus/business/${businessId}`),
-
-  create: (data) => apiClient.post("/api/menus", data),
-  update: (id, data) => apiClient.put(`/api/menus/${id}`, data),
-  delete: (id) => apiClient.delete(`/api/menus/${id}`),
-
-  toggleAvailability: (id) =>
-    apiClient.patch(`/api/menus/${id}/toggle-availability`),
+const dynamicEndpoints = {
+  business: {
+    path: ({ businessId }) => `${ENDPOINTS.menus.business}/${businessId}`,
+    cacheKey: ({ businessId }) => businessId,
+  },
+  toggle: {
+    path: ({ id }) => `${ENDPOINTS.menus.base}/${id}/toggle-availability`,
+    cacheKey: ({ businessId }) => businessId,
+  },
 };
+
+const dynamicEndpoint = (builder, key, method) =>
+  createEndpointBuilder(api, builder)(key, method, {
+    dynamicPath: dynamicEndpoints[key].path,
+    getCacheKey: dynamicEndpoints[key].cacheKey,
+  });
+
+const customsEndpoints = (builder) => ({
+  getMenuByBusiness: dynamicEndpoint(builder, "business", "getAll"),
+  toggleAvailability: dynamicEndpoint(builder, "toggle", "patch"),
+});
+
+const menuEndpoints = (builder) => ({
+  ...crudEndpoints(ENDPOINTS.menus.base, { prefix: "Menu" })(builder),
+  ...customsEndpoints(builder),
+});
+
+const apiMenu = api.injectEndpoints({
+  endpoints: menuEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useCreateMenuMutation,
+  useGetAllMenuQuery,
+  useGetOneMenuQuery,
+  useUpdateMenuMutation,
+  useDeleteMenuMutation,
+  useGetMenuByBusinessQuery,
+  useToggleAvailabilityMutation,
+} = apiMenu;

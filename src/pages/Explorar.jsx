@@ -5,14 +5,32 @@ import Parallax from "@Components/parallax/Parallax";
 import Bg5 from "@Assets/images/qscome-bg-5.jpg";
 import PlayForWorkIcon from "@mui/icons-material/PlayForWork";
 import { Result, Typography } from "antd";
-import useExplorar from "@Hooks/generales/useExplorar";
 import LocationOffIcon from "@mui/icons-material/LocationOff";
 import { namePage } from "@Utils/listMessages";
 import { Business } from "@mui/icons-material";
+import useExplorar from "@Hooks/generales/useExplorar";
+import useBusiness from "@Hooks/generales/useBusiness";
+import useGeolocation from "@Hooks/components/useGeolocation";
 
 const Explorar = () => {
-  const { business, geolocation, seccionDestinoRef, scrollToSection } =
-    useExplorar();
+  const { seccionDestinoRef, scrollToSection } = useExplorar();
+  const { businesses, helperBusinesses, loadBusinessMenu } = useBusiness();
+  const geolocation = useGeolocation();
+
+  if (helperBusinesses.isLoading) {
+    return (
+      <Box
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <Result status="info" title="Cargando negocios..." />
+      </Box>
+    );
+  }
 
   if (geolocation.error) {
     return (
@@ -56,7 +74,6 @@ const Explorar = () => {
             }}
           >
             <Typography className="titlePrimary title">{namePage}</Typography>
-
             <Box className="bg" onClick={scrollToSection}></Box>
             <Box className="button" onClick={scrollToSection}>
               <i>
@@ -69,19 +86,31 @@ const Explorar = () => {
 
       <Box className="bg-card-explore" ref={seccionDestinoRef}>
         <Grid container spacing={2} justifyContent="center" alignItems="center">
-          {business.businesses.length === 0 && (
-          
+          {helperBusinesses.isError &&
+            (helperBusinesses?.status === "rejected" ? (
               <Result
-                icon={
-                  <Business sx={{ fontSize: "5em", color: "red" }} />
-                }
+                icon={<Business sx={{ fontSize: "5em", color: "red" }} />}
                 status="warning"
-                title="Por el momento no hay negocios registrados"
-                subTitle={"ops"}
+                title="Servicio no disponible. Intente más tarde"
+                subTitle={""}
               />
-            
+            ) : (
+              <Result
+                icon={<Business sx={{ fontSize: "5em", color: "red" }} />}
+                status="warning"
+                title={"Favor intentar nuevamente más tarde"}
+                subTitle={""}
+              />
+            ))}
+          {helperBusinesses.isSuccess && businesses.length === 0 && (
+            <Result
+              icon={<Business sx={{ fontSize: "5em", color: "red" }} />}
+              status="warning"
+              title="Por el momento no hay negocios registrados"
+              subTitle={"Ayudanos en compartir la página para crecer nuestra red"}
+            />
           )}
-          {business.businesses.map((data) => (
+          {businesses.map((data) => (
             <Grid
               key={data.id}
               item
@@ -95,7 +124,7 @@ const Explorar = () => {
               <CardPlace
                 key={data.title}
                 data={data}
-                loadBusinessMenu={business.loadBusinessMenu}
+                loadBusinessMenu={loadBusinessMenu}
               />
             </Grid>
           ))}

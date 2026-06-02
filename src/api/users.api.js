@@ -1,8 +1,15 @@
-import apiClient from "./config";
+import { api, crudEndpoints } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const usersAPI = {
-  getAll: () => apiClient.get("/api/users"),
-  getById: (id) => apiClient.get(`/api/users/${id}`),
-  update: (id, data) => apiClient.put(`/api/users/${id}`, data),
-  delete: (id) => apiClient.delete(`/api/users/${id}`),
-};
+const apiUsers = api.injectEndpoints({
+  endpoints: crudEndpoints(ENDPOINTS.users.base, { prefix: "Users" }),
+  overrideExisting: false,
+});
+
+export const {
+  useCreateUsersMutation,
+  useGetAllUsersQuery,
+  useGetOneUsersQuery,
+  useUpdateUsersMutation,
+  useDeleteUsersMutation,
+} = apiUsers;

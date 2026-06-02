@@ -1,38 +1,67 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-export const uploadAPI = {
-  uploadImage: async (file) => {
-    // Validar tamaño
-    if (file.size > MAX_SIZE) {
-      throw new Error("La imagen debe pesar menos de 5MB");
-    }
+const validateImage = (file) => {
+  if (file.size > MAX_SIZE) {
+    throw new Error("La imagen debe pesar menos de 5MB");
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error("Solo se permiten imágenes JPG, PNG, WebP o GIF");
+  }
+};
 
-    // Validar tipo
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      throw new Error("Solo se permiten imágenes JPG, PNG, WebP o GIF");
-    }
+const validateImages = (files) => {
+  files.forEach(validateImage);
+};
 
+const uploadEndpoints = (builder) => {
+  const endpoint = createEndpointBuilder(api, builder);
+
+  return {
+    uploadImage: endpoint("api/upload/image", "create", {
+      isJSON: false, // FormData
+    }),
+
+    uploadMultiple: endpoint("api/upload/multiple", "create", {
+      isJSON: false, // FormData
+    }),
+
+    deleteImage: endpoint("upload-delete", "delete", {
+      dynamicPath: ({ filename }) => `/api/upload/image/${filename}`,
+    }),
+  };
+};
+
+const apiUpload = api.injectEndpoints({
+  endpoints: uploadEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useUploadImageMutation,
+  useUploadMultipleMutation,
+  useDeleteImageMutation,
+} = apiUpload;
+
+export const uploadHelpers = {
+  uploadImage: async (file, uploadMutation) => {
+    validateImage(file);
     const formData = new FormData();
     formData.append("file", file);
-    return apiClient.post("/api/upload/image", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    return uploadMutation(formData);
   },
 
-  // Upload múltiple
-  uploadMultiple: async (files) => {
+  uploadMultiple: async (files, uploadMutation) => {
+    validateImages(files);
     const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append(`files`, file);
+    files.forEach((file) => {
+      formData.append("files", file);
     });
-    return apiClient.post("/api/upload/multiple", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    return uploadMutation(formData);
   },
-
-  // Eliminar imagen
-  deleteImage: (filename) => apiClient.delete(`/api/upload/image/${filename}`),
 };
+
+export { MAX_SIZE, ALLOWED_TYPES, validateImage, validateImages };

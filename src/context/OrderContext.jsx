@@ -1,6 +1,3 @@
-// src/context/OrderContext.jsx
-// REFACTORIZADO: Context con soporte de sockets para cliente
-
 import {
   createContext,
   useContext,
@@ -10,7 +7,11 @@ import {
   useCallback,
 } from "react";
 import PropTypes from "prop-types";
-import { ordersAPI, handleApiError } from "@Api";
+import {
+  useCreateOrdersMutation,
+  useOrderUpdateStatusMutation,
+  useGetOrdersByUserQuery,
+} from "@Api/orders.api";
 import { useAuth } from "./AuthContext";
 import socketService from "@Services/socketService";
 
@@ -19,7 +20,6 @@ import socketService from "@Services/socketService";
 // ============================================================================
 
 const OrdersContext = createContext();
-const ORDERS_STORAGE_KEY = "qscome_orders";
 
 export const ORDER_STATUS = {
   PENDING: "pending",
@@ -42,64 +42,10 @@ export const STATUS_LABELS = {
 };
 
 // ============================================================================
-// STORAGE UTILITIES
-// ============================================================================
-
-const storage = {
-  save: (orders) => {
-    try {
-      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-    } catch (error) {
-      console.error("Error saving orders to storage:", error);
-    }
-  },
-
-  load: () => {
-    try {
-      const data = localStorage.getItem(ORDERS_STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error("Error loading orders from storage:", error);
-      return [];
-    }
-  },
-
-  clear: () => {
-    try {
-      localStorage.removeItem(ORDERS_STORAGE_KEY);
-    } catch (error) {
-      console.error("Error clearing orders storage:", error);
-    }
-  },
-};
-
-// ============================================================================
 // ORDER UTILITIES
 // ============================================================================
 
 const orderUtils = {
-  createOfflineOrder: (orderData, userId) => ({
-    id: `offline_${Date.now()}`,
-    ...orderData,
-    userId,
-    status: ORDER_STATUS.PENDING,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    statusHistory: [
-      {
-        status: ORDER_STATUS.PENDING,
-        note: "Orden creada offline",
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  }),
-
-  createStatusHistoryEntry: (status, note = "") => ({
-    status,
-    note: note || "(offline)",
-    timestamp: new Date().toISOString(),
-  }),
-
   validateOrderData: (orderData) => {
     if (!orderData) {
       throw new Error("Datos de orden no proporcionados");
@@ -123,32 +69,52 @@ const orderUtils = {
 export const OrdersProvider = ({ children }) => {
   const { user } = useAuth();
 
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // RTK Query hooks
+  const {
+    data: ordersResponse,
+    isLoading: loading,
+    error: queryError,
+    refetch: refreshOrders,
+  } = useGetOrdersByUserQuery(
+    { userId: user?.id },
+    {
+      skip: !user?.id,
+    },
+  );
+
+  const [createOrderMutation, { isLoading: creating }] =
+    useCreateOrdersMutation();
+  const [updateStatusMutation, { isLoading: updating }] =
+    useOrderUpdateStatusMutation();
+
   const [error, setError] = useState(null);
+
+  // Extraer orders del response
+  const orders = useMemo(() => {
+    return ordersResponse?.data || ordersResponse || [];
+  }, [ordersResponse]);
 
   // ============================================================================
   // SOCKET LISTENER - Solo para CLIENTES
   // ============================================================================
- const socket = socketService.socket;
+
   useEffect(() => {
     // Solo para clientes (no owners)
-    if(!socketService.isConnected()) return;
-    if (!user?.id || user?.role === 'owner' || user?.role === 'admin') {
+    if (!socketService.isConnected()) return;
+    if (!user?.id || user?.role === "owner" || user?.role === "admin") {
       return;
     }
 
     console.log("[OrderContext] Setting up socket listener for user:", user.id);
 
-   
+    const socket = socketService.socket;
     if (!socket) {
       console.error("[OrderContext] Socket not available");
       return;
     }
-    
-    socketService.joinUser(user.id)
+
     // Unirse a sala de usuario
-    
+    socketService.joinUser(user.id);
 
     // Handler para actualizaciones de estado
     const handleStatusUpdate = (data) => {
@@ -156,175 +122,100 @@ export const OrdersProvider = ({ children }) => {
 
       if (!data?.orderId) return;
 
-      // Actualizar orden en la lista
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === data.orderId
-            ? {
-                ...order,
-                status: data.status,
-                statusHistory: data.statusHistory || order.statusHistory,
-                updatedAt: new Date().toISOString(),
-              }
-            : order
-        )
-      );
+      // RTK Query se encargará de actualizar la cache automáticamente
+      // cuando se haga refetch, pero podemos invalidar manualmente si es necesario
+      refreshOrders();
     };
 
     // Registrar listener
     socket.on("order:status_update", handleStatusUpdate);
 
     console.log("✅ [OrderContext] Socket listener registered");
-    console.log("   order:status_update listeners:", socket.listeners("order:status_update").length);
 
     // Cleanup
     return () => {
       console.log("[OrderContext] Cleaning up socket listener");
       socket.off("order:status_update", handleStatusUpdate);
     };
-  }, [user?.id, user?.role, socketService.connected]);
-
-  // ============================================================================
-  // LOAD ORDERS
-  // ============================================================================
-
-  useEffect(() => {
-    if (user?.id) {
-      loadUserOrders(user.id);
-    } else {
-      setOrders([]);
-      storage.clear();
-    }
-  }, [user?.id]);
-
-  const loadUserOrders = useCallback(async (userId) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await ordersAPI.getByUser(userId);
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Error al cargar órdenes");
-      }
-
-      const ordersData = response.data.data || [];
-      setOrders(ordersData);
-      storage.save(ordersData);
-    } catch (err) {
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-      
-      // Load from cache as fallback
-      const cachedOrders = storage.load();
-      setOrders(cachedOrders);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [user?.id, user?.role, refreshOrders]);
 
   // ============================================================================
   // CREATE ORDER
   // ============================================================================
 
-  const createOrder = useCallback(async (orderData) => {
-    setLoading(true);
-    setError(null);
+  const createOrder = useCallback(
+    async (orderData) => {
+      setError(null);
 
-    try {
-      // Validate order data
-      orderUtils.validateOrderData(orderData);
+      try {
+        // Validate order data
+        orderUtils.validateOrderData(orderData);
 
-      // Prepare payload
-      const payload = {
-        ...orderData,
-        userId: user.id,
-        customerName: orderData.customerName || user.name || "Cliente",
-      };
+        // Prepare payload
+        const payload = {
+          ...orderData,
+          userId: user.id,
+          customerName: orderData.customerName || user.name || "Cliente",
+        };
 
-      // Make API call
-      const response = await ordersAPI.create(payload);
+        // Make API call with optimistic update
+        const result = await createOrderMutation(payload).unwrap();
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Error al crear orden");
+        return { success: true, data: result };
+      } catch (err) {
+        const errorMessage =
+          err?.data?.message || err?.message || "Error al crear orden";
+        setError(errorMessage);
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
       }
-
-      const newOrder = response.data.data;
-
-      // Update state and storage
-      setOrders((prev) => {
-        const updated = [newOrder, ...prev];
-        storage.save(updated);
-        return updated;
-      });
-
-      return { success: true, data: newOrder };
-    } catch (err) {
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-
-      // Create offline order as fallback
-      const offlineOrder = orderUtils.createOfflineOrder(orderData, user.id);
-
-      setOrders((prev) => {
-        const updated = [offlineOrder, ...prev];
-        storage.save(updated);
-        return updated;
-      });
-
-      return { success: false, data: offlineOrder, error: errorData.message };
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+    },
+    [user, createOrderMutation],
+  );
 
   // ============================================================================
   // UPDATE ORDER STATUS
   // ============================================================================
 
-  const updateOrderStatus = useCallback(async (orderId, status, note = "") => {
-    if (!orderId) {
-      throw new Error("ID de orden requerido");
-    }
-    if (!status) {
-      throw new Error("Estado requerido");
-    }
+  const updateOrderStatus = useCallback(
+    async (orderId, status, note = "") => {
+      if (!orderId) {
+        throw new Error("ID de orden requerido");
+      }
+      if (!status) {
+        throw new Error("Estado requerido");
+      }
 
-    setLoading(true);
-    setError(null);
+      setError(null);
 
-    // Optimistically update UI
-    setOrders((prev) => {
-      const updated = prev.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status,
-              updatedAt: new Date().toISOString(),
-              statusHistory: [
-                ...(order.statusHistory || []),
-                orderUtils.createStatusHistoryEntry(status, note),
-              ],
-            }
-          : order
-      );
-      storage.save(updated);
-      return updated;
-    });
+      try {
+        // RTK Query manejará el optimistic update automáticamente
+        await updateStatusMutation({
+          id: orderId,
+          userId: user?.id, // Para cache correcta
+          body: {
+            status,
+            note: note || undefined,
+          },
+        }).unwrap();
 
-    try {
-      await ordersAPI.updateStatus(orderId, status, note);
-      return { success: true };
-    } catch (err) {
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-      
-      // UI already updated optimistically, keep changes
-      return { success: false, error: errorData.message };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        return { success: true };
+      } catch (err) {
+        const errorMessage =
+          err?.data?.message || err?.message || "Error al actualizar estado";
+        setError(errorMessage);
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    },
+    [user?.id, updateStatusMutation],
+  );
 
   // ============================================================================
   // CANCEL ORDER
@@ -334,18 +225,8 @@ export const OrdersProvider = ({ children }) => {
     (orderId, reason = "Orden cancelada por el usuario") => {
       return updateOrderStatus(orderId, ORDER_STATUS.CANCELLED, reason);
     },
-    [updateOrderStatus]
+    [updateOrderStatus],
   );
-
-  // ============================================================================
-  // REFRESH ORDERS
-  // ============================================================================
-
-  const refreshOrders = useCallback(() => {
-    if (user?.id) {
-      return loadUserOrders(user.id);
-    }
-  }, [user?.id, loadUserOrders]);
 
   // ============================================================================
   // SELECTORS
@@ -362,8 +243,7 @@ export const OrdersProvider = ({ children }) => {
       getOrdersByStatus: (status) =>
         orders.filter((order) => order.status === status),
 
-      getOrderById: (orderId) =>
-        orders.find((order) => order.id === orderId),
+      getOrderById: (orderId) => orders.find((order) => order.id === orderId),
 
       getPendingOrders: () =>
         orders.filter((order) => order.status === ORDER_STATUS.PENDING),
@@ -372,18 +252,18 @@ export const OrdersProvider = ({ children }) => {
         orders.filter(
           (order) =>
             ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(
-              order.status
-            )
+              order.status,
+            ),
         ),
 
       getCompletedOrders: () =>
         orders.filter(
           (order) =>
             order.status === ORDER_STATUS.COMPLETED ||
-            order.status === ORDER_STATUS.CANCELLED
+            order.status === ORDER_STATUS.CANCELLED,
         ),
     }),
-    [orders]
+    [orders],
   );
 
   // ============================================================================
@@ -394,8 +274,8 @@ export const OrdersProvider = ({ children }) => {
     () => ({
       // State
       orders,
-      loading,
-      error,
+      loading: loading || creating || updating,
+      error: error || queryError?.message,
 
       // Actions
       createOrder,
@@ -413,13 +293,16 @@ export const OrdersProvider = ({ children }) => {
     [
       orders,
       loading,
+      creating,
+      updating,
       error,
+      queryError,
       createOrder,
       updateOrderStatus,
       cancelOrder,
       refreshOrders,
       selectors,
-    ]
+    ],
   );
 
   return (

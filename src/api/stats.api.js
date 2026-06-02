@@ -1,15 +1,38 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const statsAPI = {
-  getBusinessStats: (businessId, period = 7) =>
-    apiClient.get(`/api/stats/business/${businessId}`, { params: { period } }),
+const statsEndpoints = (builder) => {
+  const endpoint = createEndpointBuilder(api, builder);
 
-  // Nuevos endpoints útiles
-  getDashboardSummary: (businessId) =>
-    apiClient.get(`/api/stats/business/${businessId}/summary`),
-
-  getRevenueByPeriod: (businessId, startDate, endDate) =>
-    apiClient.get(`/api/stats/business/${businessId}/revenue`, {
-      params: { startDate, endDate },
+  return {
+    getBusinessStats: endpoint("stats", "getAll", {
+      dynamicPath: ({ businessId, period = 7 }) => 
+        `${ENDPOINTS.stats.business}/${businessId}?period=${period}`,
+      getCacheKey: ({ businessId, period = 7 }) => `${businessId}-${period}`,
     }),
+
+    getDashboardSummary: endpoint("stats-summary", "getAll", {
+      dynamicPath: ({ businessId }) => 
+        `${ENDPOINTS.stats.business}/${businessId}/summary`,
+      getCacheKey: ({ businessId }) => businessId,
+    }),
+
+    getRevenueByPeriod: endpoint("stats-revenue", "getAll", {
+      dynamicPath: ({ businessId, startDate, endDate }) => 
+        `${ENDPOINTS.stats.business}/${businessId}/revenue?startDate=${startDate}&endDate=${endDate}`,
+      getCacheKey: ({ businessId, startDate, endDate }) => 
+        `${businessId}-${startDate}-${endDate}`,
+    }),
+  };
 };
+
+const apiStats = api.injectEndpoints({
+  endpoints: statsEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useGetBusinessStatsQuery,
+  useGetDashboardSummaryQuery,
+  useGetRevenueByPeriodQuery,
+} = apiStats;

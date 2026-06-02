@@ -1,81 +1,60 @@
-// src/Router.jsx
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import Layout from "@Components/layout/Layout";
-import Explorar from "@Pages/Explorar";
-import Nosotros from "@Pages/Nosotros";
-
 import ScrollToTop from "@Components/ScrollToTop";
-import Pedidos from "@Pages/Pedidos";
-import Login from "@Pages/Login";
-import MisOrdenes from "@Pages/MisOrdenes";
-
-import Perfil from "@Pages/Perfil";
 import { useAuth } from "@Context/AuthContext";
-import LandingRegister from "@Pages/LandingRegister";
-import OwnerDashboard from "@Pages/OwnerDashboard";
+import { lazy } from "react";
 
-// Componente para rutas protegidas
+const Explorar = lazy(() => import("@Pages/Explorar"));
+const Nosotros = lazy(() => import("@Pages/Nosotros"));
+const Pedidos = lazy(() => import("@Pages/Pedidos"));
+const Login = lazy(() => import("@Pages/Login"));
+const MisOrdenes = lazy(() => import("@Pages/MisOrdenes"));
+const Perfil = lazy(() => import("@Pages/Perfil"));
+const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
+const OwnerDashboard = lazy(() => import("@Pages/OwnerDashboard"));
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-
   if (loading) {
     return <div>Cargando...</div>;
   }
-
   if (!isAuthenticated) {
     return <Navigate to="/login/orden" replace />;
   }
-
   return children;
 };
 
 const Router = () => {
+  const routes = [
+    { path: "explorar", element: <Explorar />, isProtected: false },
+    { path: "nosotros", element: <Nosotros />, isProtected: false },
+    { path: "registro", element: <LandingRegister />, isProtected: false },
+    { path: "login/:from?", element: <Login />, isProtected: false },
+    { path: "perfil", element: <Perfil />, isProtected: true },
+    { path: "orden", element: <Pedidos />, isProtected: true },
+    { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true },
+    { path: "owner", element: <OwnerDashboard />, isProtected: true },
+  ];
+
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/explorar" replace />} />
-          <Route path="explorar" element={<Explorar />} />
-          <Route path="nosotros" element={<Nosotros />} />
-          <Route path="registro" element={<LandingRegister />} />
-          <Route path="/login/:from?" element={<Login />} />
-          {/* Rutas protegidas */}
-          <Route
-            path="perfil"
-            element={
-              <ProtectedRoute>
-                <Perfil />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="orden"
-            element={
-              <ProtectedRoute>
-                <Pedidos />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="mis-ordenes"
-            element={
-              <ProtectedRoute>
-                <MisOrdenes />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="owner"
-            element={
-              <ProtectedRoute>
-                <OwnerDashboard />
-              </ProtectedRoute>
-            }
-          />
+          {routes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.isProtected ? (
+                  <ProtectedRoute>{route.element}</ProtectedRoute>
+                ) : (
+                  route.element
+                )
+              }
+            />
+          ))}
         </Route>
       </Routes>
     </BrowserRouter>

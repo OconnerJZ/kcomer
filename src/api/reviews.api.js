@@ -1,9 +1,30 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder, crudEndpoints } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const reviewsAPI = {
-  getByBusiness: (businessId) =>
-    apiClient.get(`/api/reviews/business/${businessId}`),
-  create: (data) => apiClient.post("/api/reviews", data),
-  update: (id, data) => apiClient.put(`/api/reviews/${id}`, data),
-  delete: (id) => apiClient.delete(`/api/reviews/${id}`),
+const customEndpoints = (builder) => {
+  const endpoint = createEndpointBuilder(api, builder);
+
+  return {
+    getReviewsByBusiness: endpoint("reviews", "getAll", {
+      dynamicPath: ({ businessId }) => `${ENDPOINTS.reviews.base}/business/${businessId}`,
+      getCacheKey: ({ businessId }) => businessId,
+    }),
+  };
 };
+
+const reviewsEndpoints = (builder) => ({
+  ...crudEndpoints(ENDPOINTS.reviews.base)(builder),
+  ...customEndpoints(builder),
+});
+
+const apiReviews = api.injectEndpoints({
+  endpoints: reviewsEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useCreateMutation,
+  useUpdateMutation,
+  useDeleteMutation,
+  useGetReviewsByBusinessQuery,
+} = apiReviews;

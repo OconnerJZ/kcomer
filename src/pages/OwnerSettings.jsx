@@ -1,5 +1,5 @@
-// src/pages/dashboard/OwnerSettings.jsx - VERSIÓN COMPLETA
-import { useState, useEffect } from "react";
+// src/pages/dashboard/OwnerSettings.jsx - REFACTORIZADO
+import { useState } from "react";
 import {
   Box,
   Tabs,
@@ -36,231 +36,244 @@ import {
   Add,
   Edit,
 } from "@mui/icons-material";
-import axios from "axios";
-import { API_URL_SERVER } from "@Utils/enviroments";
-import { useAuth } from "@Context/AuthContext";
-import { businessAPI, uploadAPI, catalogsAPI, handleApiError } from '@Api';
+
+// ✅ Importar hook refactorizado
+import useBusinessSettings from "@Hooks/generales/useBusinessSettings";
 import ScheduleField from "@Components/forms/ScheduleField";
 
 const OwnerSettings = ({ businessData, onRefresh }) => {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  // Estados para cada sección
-  const [basicInfo, setBasicInfo] = useState({
-    business_name: "",
-    phone: "",
-    email: "",
-    is_open: true,
-    prep_time_min: 30,
-    estimated_delivery_min: 45,
-  });
+  // ✅ Hook refactorizado con RTK Query
+  const {
+    // State
+    basicInfo,
+    locationInfo,
+    schedules,
+    deliverySettings,
+    paymentMethods,
+    selectedFoodTypes,
+    photos,
+    
+    // Setters
+    setBasicInfo,
+    setLocationInfo,
+    setSchedules,
+    setDeliverySettings,
+    setPaymentMethods,
+    setSelectedFoodTypes,
 
-  const [locationInfo, setLocationInfo] = useState({
-    address: "",
-    city: "",
-    postal_code: "",
-    latitude: "",
-    longitude: "",
-  });
+    // Catalogs
+    availableFoodTypes,
+    availablePaymentMethods,
+    loadingCatalogs,
 
-  const [schedules, setSchedules] = useState([]);
+    // Actions
+    updateBasicInfo,
+    updateLocation,
+    updateSchedules,
+    updateDelivery,
+    updatePayments,
+    updateFoodTypes,
+    uploadPhoto,
+    deletePhoto,
 
-  const [deliverySettings, setDeliverySettings] = useState({
-    delivery_radius_km: 5,
-    delivery_fee: 0,
-    min_order_amount: 0,
-    estimated_time_min: 30,
-    use_own_delivery: false,
-  });
+    // Loading & Error
+    loading,
+    error,
+  } = useBusinessSettings(businessData);
 
-  const [paymentMethods, setPaymentMethods] = useState([
-    { method: "cash", is_active: true, label: "Efectivo" },
-    { method: "card", is_active: false, label: "Tarjeta" },
-    { method: "wallet", is_active: false, label: "Billetera Digital" },
-    { method: "transfer", is_active: false, label: "Transferencia" },
-  ]);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
 
-  const [foodTypes, setFoodTypes] = useState([]);
-  const [availableFoodTypes, setAvailableFoodTypes] = useState([]);
-  const [selectedFoodTypes, setSelectedFoodTypes] = useState([]);
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-  const [photos, setPhotos] = useState([]);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    if (businessData) {
-      loadBusinessSettings();
-    }
-  }, [businessData]);
-
-  useEffect(() => {
-    loadFoodTypes();
-  }, []);
-
-  const loadBusinessSettings = async () => {
-    try {
-      // Cargar datos completos del negocio
-      const response = await businessAPI.getById(businessData.id);
-
-      if (response.data.success) {
-        const data = response.data.data;
-
-        setBasicInfo({
-          business_name: data.businessName || "",
-          phone: data.phone || "",
-          email: data.email || "",
-          is_open: data.isOpen,
-          prep_time_min: data.prepTimeMin || 30,
-          estimated_delivery_min: data.estimatedDeliveryMin || 45,
-        });
-
-        if (data.locations?.[0]) {
-          setLocationInfo({
-            address: data.locations[0].address || "",
-            city: data.locations[0].city || "",
-            postal_code: data.locations[0].postalCode || "",
-            latitude: data.locations[0].latitude || "",
-            longitude: data.locations[0].longitude || "",
-          });
-        }
-
-        if (data.schedules) {
-          setSchedules(data.schedules);
-        }
-
-        if (data.deliverySettings) {
-          setDeliverySettings({
-            delivery_radius_km:
-              parseFloat(data.deliverySettings.deliveryRadiusKm) || 5,
-            delivery_fee: parseFloat(data.deliverySettings.deliveryFee) || 0,
-            min_order_amount:
-              parseFloat(data.deliverySettings.minOrderAmount) || 0,
-            estimated_time_min: data.deliverySettings.estimatedTimeMin || 30,
-            use_own_delivery: data.deliverySettings.useOwnDelivery || false,
-          });
-        }
-
-        if (data.paymentMethods) {
-          const methods = paymentMethods.map((pm) => ({
-            ...pm,
-            is_active:
-              data.paymentMethods.find((m) => m.method === pm.method)
-                ?.isActive || false,
-          }));
-          setPaymentMethods(methods);
-        }
-
-        if (data.foodTypes) {
-          setSelectedFoodTypes(data.foodTypes.map((ft) => ft.id));
-        }
-
-        if (data.photos) {
-          setPhotos(data.photos);
-        }
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        showSnackbar("La imagen debe pesar menos de 5MB", "error");
+        return;
       }
-    } catch (error) {
-      console.error("Error loading settings:", error);
+
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const loadFoodTypes = async () => {
-    try {
-      const response = await catalogsAPI.getFoodTypes();
-      if (response.data.success) {
-        setAvailableFoodTypes(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error loading food types:", error);
-    }
-  };
-
-  // ============== TAB 1: INFORMACIÓN BÁSICA ==============
   const handleSaveBasicInfo = async () => {
-    try {
-      setLoading(true);
-
-      const response = await businessAPI.update(businessData.id, data);
-
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Información actualizada",
-          severity: "success",
-        });
-        if (onRefresh) onRefresh();
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
+    const result = await updateBasicInfo(logoFile);
+    if (result.success) {
+      showSnackbar("Información actualizada exitosamente");
+      setLogoFile(null);
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
     }
   };
+
+  const handleSaveLocation = async () => {
+    const result = await updateLocation();
+    if (result.success) {
+      showSnackbar("Ubicación actualizada exitosamente");
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handleSaveSchedules = async () => {
+    const result = await updateSchedules();
+    if (result.success) {
+      showSnackbar("Horarios actualizados exitosamente");
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handleSaveDelivery = async () => {
+    const result = await updateDelivery();
+    if (result.success) {
+      showSnackbar("Configuración de delivery actualizada");
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handleSavePayments = async () => {
+    const result = await updatePayments();
+    if (result.success) {
+      showSnackbar("Métodos de pago actualizados");
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handleSaveFoodTypes = async () => {
+    const result = await updateFoodTypes();
+    if (result.success) {
+      showSnackbar("Tipos de comida actualizados");
+      if (onRefresh) onRefresh();
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showSnackbar("La imagen debe pesar menos de 5MB", "error");
+      return;
+    }
+
+    const result = await uploadPhoto(file);
+    if (result.success) {
+      showSnackbar("Foto subida exitosamente");
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    const result = await deletePhoto(photoId);
+    if (result.success) {
+      showSnackbar("Foto eliminada");
+    } else {
+      showSnackbar(result.error, "error");
+    }
+  };
+
+  const togglePaymentMethod = (method) => {
+    setPaymentMethods(prev =>
+      prev.map(pm =>
+        pm.method === method ? { ...pm, is_active: !pm.is_active } : pm
+      )
+    );
+  };
+
+  const toggleFoodType = (typeId) => {
+    setSelectedFoodTypes(prev =>
+      prev.includes(typeId)
+        ? prev.filter(id => id !== typeId)
+        : [...prev, typeId]
+    );
+  };
+
+  // ============================================================================
+  // TAB COMPONENTS
+  // ============================================================================
 
   const BasicInfoTab = () => (
     <Paper sx={{ p: 3 }}>
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
-              <Payment color="primary" />
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Información general
-              </Typography>
-            </Stack>
+        <Business color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Información General
+        </Typography>
+      </Stack>
 
-       <Card sx={{ mb: 0 }} elevation={0}>
-            <CardContent>
-           
-              <Box sx={{ textAlign: 'center', mb: 2 }}>
-                <Avatar
-                  src={""}
-                  sx={{
-                    width: 120,
-                    height: 120,
-                    mx: 'auto',
-                    mb: 2,
-                    border: '3px solid',
-                    borderColor: 'primary.light',
-                  }}
-                >
-                  <Business sx={{ fontSize: 60 }} />
-                </Avatar>
+      <Card sx={{ mb: 3 }} elevation={0}>
+        <CardContent>
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Avatar
+              src={logoPreview || basicInfo.logo_url}
+              sx={{
+                width: 120,
+                height: 120,
+                mx: 'auto',
+                mb: 2,
+                border: '3px solid',
+                borderColor: 'primary.light',
+              }}
+            >
+              <Business sx={{ fontSize: 60 }} />
+            </Avatar>
 
-                <Button
-                  variant="outlined"
-                  component="label"
-                  fullWidth
-                  startIcon={<Edit />}
-                >
-                  Cambiar Logo
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={()=>{}}
-                  />
-                </Button>
-              </Box>
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              startIcon={<Edit />}
+            >
+              {logoFile ? "Cambiar Logo" : "Subir Logo"}
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleLogoChange}
+              />
+            </Button>
+          </Box>
 
-              <Alert severity="info" sx={{ fontSize: '0.75rem' }}>
-                Tamaño recomendado: 512x512px
-                <br />
-                Máximo: 5MB
-              </Alert>
-            </CardContent>
-          </Card>
+          <Alert severity="info" sx={{ fontSize: '0.75rem' }}>
+            Tamaño recomendado: 512x512px
+            <br />
+            Máximo: 5MB
+          </Alert>
+        </CardContent>
+      </Card>
 
-      <Stack spacing={2} sx={{ mt: 2 }}>
+      <Stack spacing={2}>
         <TextField
           label="Nombre del negocio"
           value={basicInfo.business_name}
@@ -270,6 +283,18 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           fullWidth
           required
         />
+        
+        <TextField
+          label="Descripción"
+          value={basicInfo.description}
+          onChange={(e) =>
+            setBasicInfo({ ...basicInfo, description: e.target.value })
+          }
+          multiline
+          rows={3}
+          fullWidth
+        />
+
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
@@ -303,7 +328,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
               onChange={(e) =>
                 setBasicInfo({
                   ...basicInfo,
-                  prep_time_min: parseInt(e.target.value),
+                  prep_time_min: parseInt(e.target.value) || 0,
                 })
               }
               fullWidth
@@ -317,7 +342,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
               onChange={(e) =>
                 setBasicInfo({
                   ...basicInfo,
-                  estimated_delivery_min: parseInt(e.target.value),
+                  estimated_delivery_min: parseInt(e.target.value) || 0,
                 })
               }
               fullWidth
@@ -335,7 +360,11 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
               }
             />
           }
-          label={basicInfo.is_open ? <Chip label="Negocio abierto" color="success" variant="outlined"  />  : <Chip label="Negocio cerrado" color="error" variant="outlined"  />}
+          label={
+            basicInfo.is_open 
+              ? <Chip label="Negocio abierto" color="success" variant="outlined" />  
+              : <Chip label="Negocio cerrado" color="error" variant="outlined" />
+          }
         />
 
         <Button
@@ -350,38 +379,16 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     </Paper>
   );
 
-  // ============== TAB 2: UBICACIÓN ==============
-  const handleSaveLocation = async () => {
-    try {
-      setLoading(true);
-
-      const response = await businessAPI.updateLocation(businessData.id, locationInfo);
-
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Ubicación actualizada",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const LocationTab = () => (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Ubicación del Negocio
-      </Typography>
-      <Stack spacing={2} sx={{ mt: 2 }}>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+        <LocationOn color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Ubicación del Negocio
+        </Typography>
+      </Stack>
+
+      <Stack spacing={2}>
         <TextField
           label="Dirección"
           value={locationInfo.address}
@@ -392,6 +399,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           multiline
           rows={2}
         />
+        
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
@@ -408,37 +416,44 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
               label="Código Postal"
               value={locationInfo.postal_code}
               onChange={(e) =>
-                setLocationInfo({
-                  ...locationInfo,
-                  postal_code: e.target.value,
-                })
+                setLocationInfo({ ...locationInfo, postal_code: e.target.value })
               }
               fullWidth
             />
           </Grid>
         </Grid>
+
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
               label="Latitud"
+              type="number"
               value={locationInfo.latitude}
               onChange={(e) =>
                 setLocationInfo({ ...locationInfo, latitude: e.target.value })
               }
               fullWidth
+              placeholder="19.4326"
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
               label="Longitud"
+              type="number"
               value={locationInfo.longitude}
               onChange={(e) =>
                 setLocationInfo({ ...locationInfo, longitude: e.target.value })
               }
               fullWidth
+              placeholder="-99.1332"
             />
           </Grid>
         </Grid>
+
+        <Alert severity="info">
+          Puedes obtener las coordenadas desde Google Maps haciendo clic derecho en la ubicación.
+        </Alert>
+
         <Button
           variant="contained"
           onClick={handleSaveLocation}
@@ -450,104 +465,41 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     </Paper>
   );
 
-  // ============== TAB 3: HORARIOS ==============
-  const handleSaveSchedules = async () => {
-    try {
-      setLoading(true);
+  const SchedulesTab = () => (
+    <Paper sx={{ p: 3 }}>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+        <Schedule color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Horarios de Atención
+        </Typography>
+      </Stack>
 
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}/schedules`,
-        { schedules },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      <ScheduleField 
+        schedules={schedules}
+        onChange={setSchedules}
+      />
 
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Horarios actualizados",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const ScheduleTab = () => (
-    <>
-      <Paper sx={{ p: 3 }}>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
-          <Schedule color="primary" />
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Horarios de Atención
-          </Typography>
-        </Stack>
-
-        <Box sx={{ mt: 2 }}>
-          <ScheduleField
-            formValues={{ schedule: schedules }}
-            setFormValues={(values) => setSchedules(values.schedule)}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSaveSchedules}
-            disabled={loading}
-            sx={{ mt: 2 }}
-          >
-            {loading ? <CircularProgress size={24} /> : "Guardar Horarios"}
-          </Button>
-        </Box>
-      </Paper>
-    </>
+      <Button
+        variant="contained"
+        onClick={handleSaveSchedules}
+        disabled={loading}
+        sx={{ mt: 3 }}
+      >
+        {loading ? <CircularProgress size={24} /> : "Guardar Horarios"}
+      </Button>
+    </Paper>
   );
-
-  // ============== TAB 4: DELIVERY ==============
-  const handleSaveDeliverySettings = async () => {
-    try {
-      setLoading(true);
-
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}/delivery-settings`,
-        deliverySettings,
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Configuración de delivery actualizada",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const DeliveryTab = () => (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Configuración de Delivery
-      </Typography>
-      <Stack spacing={2} sx={{ mt: 2 }}>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+        <LocalShipping color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Configuración de Delivery
+        </Typography>
+      </Stack>
+
+      <Stack spacing={2}>
         <TextField
           label="Radio de entrega (km)"
           type="number"
@@ -555,47 +507,57 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           onChange={(e) =>
             setDeliverySettings({
               ...deliverySettings,
-              delivery_radius_km: parseFloat(e.target.value),
+              delivery_radius_km: parseFloat(e.target.value) || 0,
             })
           }
           fullWidth
         />
+
         <TextField
-          label="Costo de envío ($)"
+          label="Costo de envío"
           type="number"
           value={deliverySettings.delivery_fee}
           onChange={(e) =>
             setDeliverySettings({
               ...deliverySettings,
-              delivery_fee: parseFloat(e.target.value),
+              delivery_fee: parseFloat(e.target.value) || 0,
             })
           }
           fullWidth
+          InputProps={{
+            startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+          }}
         />
+
         <TextField
-          label="Pedido mínimo ($)"
+          label="Monto mínimo de orden"
           type="number"
           value={deliverySettings.min_order_amount}
           onChange={(e) =>
             setDeliverySettings({
               ...deliverySettings,
-              min_order_amount: parseFloat(e.target.value),
+              min_order_amount: parseFloat(e.target.value) || 0,
             })
           }
           fullWidth
+          InputProps={{
+            startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+          }}
         />
+
         <TextField
-          label="Tiempo estimado (minutos)"
+          label="Tiempo estimado de entrega (minutos)"
           type="number"
           value={deliverySettings.estimated_time_min}
           onChange={(e) =>
             setDeliverySettings({
               ...deliverySettings,
-              estimated_time_min: parseInt(e.target.value),
+              estimated_time_min: parseInt(e.target.value) || 0,
             })
           }
           fullWidth
         />
+
         <FormControlLabel
           control={
             <Switch
@@ -610,9 +572,10 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           }
           label="Usar repartidores propios"
         />
+
         <Button
           variant="contained"
-          onClick={handleSaveDeliverySettings}
+          onClick={handleSaveDelivery}
           disabled={loading}
         >
           {loading ? <CircularProgress size={24} /> : "Guardar Configuración"}
@@ -620,38 +583,6 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
       </Stack>
     </Paper>
   );
-
-  // ============== TAB 5: MÉTODOS DE PAGO ==============
-  const handleSavePaymentMethods = async () => {
-    try {
-      setLoading(true);
-
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}/payment-methods`,
-        { payment_methods: paymentMethods },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Métodos de pago actualizados",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const PaymentMethodsTab = () => (
     <Paper sx={{ p: 3 }}>
@@ -662,33 +593,26 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         </Typography>
       </Stack>
 
-      <Alert severity="info">
-        <Typography variant="body2">
-          Configura los métodos de pago que aceptas. Próximamente podrás
-          integrar pasarelas de pago como Stripe o PayPal.
-        </Typography>
-      </Alert>
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        {paymentMethods.map((pm, idx) => (
-          <FormControlLabel
-            key={pm.method}
-            control={
-              <Switch
-                checked={pm.is_active}
-                onChange={(e) => {
-                  const updated = [...paymentMethods];
-                  updated[idx].is_active = e.target.checked;
-                  setPaymentMethods(updated);
-                }}
-              />
-            }
-            label={pm.label}
-          />
+      <Stack spacing={2}>
+        {paymentMethods.map((method) => (
+          <Card key={method.method} variant="outlined">
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography>{method.label}</Typography>
+                <Switch
+                  checked={method.is_active}
+                  onChange={() => togglePaymentMethod(method.method)}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
         ))}
+
         <Button
           variant="contained"
-          onClick={handleSavePaymentMethods}
+          onClick={handleSavePayments}
           disabled={loading}
+          sx={{ mt: 2 }}
         >
           {loading ? <CircularProgress size={24} /> : "Guardar Métodos"}
         </Button>
@@ -696,183 +620,96 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     </Paper>
   );
 
-  // ============== TAB 6: TIPOS DE COMIDA ==============
-  const handleSaveFoodTypes = async () => {
-    try {
-      setLoading(true);
-
-      const response = await axios.put(
-        `${API_URL_SERVER}/api/business/${businessData.id}/food-types`,
-        { food_type_ids: selectedFoodTypes },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSnackbar({
-          open: true,
-          message: "Tipos de comida actualizados",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const FoodTypesTab = () => (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Tipos de Comida
-      </Typography>
-      <Box sx={{ mt: 2 }}>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {availableFoodTypes.map((ft) => (
-            <Chip
-              key={ft.id}
-              label={ft.value}
-              onClick={() => {
-                if (selectedFoodTypes.includes(ft.id)) {
-                  setSelectedFoodTypes(
-                    selectedFoodTypes.filter((id) => id !== ft.id)
-                  );
-                } else {
-                  setSelectedFoodTypes([...selectedFoodTypes, ft.id]);
-                }
-              }}
-              color={selectedFoodTypes.includes(ft.id) ? "primary" : "default"}
-              variant={
-                selectedFoodTypes.includes(ft.id) ? "filled" : "outlined"
-              }
-            />
-          ))}
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+        <Category color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Tipos de Comida
+        </Typography>
+      </Stack>
+
+      {loadingCatalogs ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Stack spacing={2}>
+          <Grid container spacing={2}>
+            {availableFoodTypes.map((type) => (
+              <Grid item xs={6} md={4} key={type.id}>
+                <Card 
+                  variant="outlined"
+                  sx={{
+                    cursor: 'pointer',
+                    borderWidth: selectedFoodTypes.includes(type.id) ? 2 : 1,
+                    borderColor: selectedFoodTypes.includes(type.id) ? 'primary.main' : 'divider',
+                  }}
+                  onClick={() => toggleFoodType(type.id)}
+                >
+                  <CardContent>
+                    <Typography align="center">
+                      {type.name}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Button
+            variant="contained"
+            onClick={handleSaveFoodTypes}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Guardar Tipos"}
+          </Button>
         </Stack>
-        <Button
-          variant="contained"
-          onClick={handleSaveFoodTypes}
-          disabled={loading}
-          sx={{ mt: 3 }}
-        >
-          {loading ? <CircularProgress size={24} /> : "Guardar Tipos"}
-        </Button>
-      </Box>
+      )}
     </Paper>
   );
 
-  // ============== TAB 7: FOTOS ==============
-  const handleUploadPhoto = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      setUploadingPhoto(true);
-
-      const uploadResponse = await uploadAPI.uploadImage(file);
-
-      if (uploadResponse.data.success) {
-        const photoUrl = uploadResponse.data.data.url;
-
-        const response = await axios.post(
-          `${API_URL_SERVER}/api/business/${businessData.id}/photos`,
-          { photo_url: photoUrl },
-          {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }
-        );
-
-        if (response.data.success) {
-          setPhotos([...photos, response.data.data]);
-          setSnackbar({
-            open: true,
-            message: "Foto agregada",
-            severity: "success",
-          });
-        }
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
-  const handleDeletePhoto = async (photoId) => {
-    try {
-      const response = await axios.delete(
-        `${API_URL_SERVER}/api/business/${businessData.id}/photos/${photoId}`,
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setPhotos(photos.filter((p) => p.photoId !== photoId));
-        setSnackbar({
-          open: true,
-          message: "Foto eliminada",
-          severity: "success",
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      setSnackbar({
-        open: true,
-        message: errorData.message,
-        severity: "error",
-      });
-    }
-  };
-
-  const PhotosTab = () => (
+  const GalleryTab = () => (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Galería de Fotos
-      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+        <PhotoLibrary color="primary" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Galería de Fotos
+        </Typography>
+      </Stack>
 
       <Button
         variant="outlined"
         component="label"
         startIcon={<Add />}
-        sx={{ mt: 2, mb: 3 }}
-        disabled={uploadingPhoto}
+        disabled={loading}
+        sx={{ mb: 3 }}
       >
-        {uploadingPhoto ? "Subiendo..." : "Agregar Foto"}
+        Agregar Foto
         <input
           type="file"
           hidden
           accept="image/*"
-          onChange={handleUploadPhoto}
+          onChange={handlePhotoUpload}
         />
       </Button>
 
       <Grid container spacing={2}>
         {photos.map((photo) => (
-          <Grid item xs={12} sm={6} md={4} key={photo.photoId}>
+          <Grid item xs={12} sm={6} md={4} key={photo.id}>
             <Card>
               <CardMedia
                 component="img"
                 height="200"
-                image={photo.photoUrl}
-                alt="Foto del negocio"
+                image={photo.url}
+                alt="Business photo"
               />
               <CardActions>
                 <IconButton
                   size="small"
                   color="error"
-                  onClick={() => handleDeletePhoto(photo.photoId)}
+                  onClick={() => handleDeletePhoto(photo.id)}
+                  disabled={loading}
                 >
                   <Delete />
                 </IconButton>
@@ -883,72 +720,52 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
       </Grid>
 
       {photos.length === 0 && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          No has agregado fotos. Las fotos ayudan a atraer más clientes.
+        <Alert severity="info">
+          No hay fotos en la galería. Agrega algunas para mostrar tu negocio.
         </Alert>
       )}
     </Paper>
   );
 
-  // ============== RENDER PRINCIPAL ==============
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
   return (
     <Box>
-      <Grid item xs={12}>
-        <Card variant="outlined">
-          <CardContent>
-            <Typography variant="subtitle2" gutterBottom>
-              💡 Consejos de Configuración
-            </Typography>
-            <Stack spacing={1} sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                • Mantén tu información de contacto actualizada
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                • Ajusta los tiempos de preparación según tu capacidad real
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                • Desactiva el negocio temporalmente si no puedes atender
-                pedidos
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                • El tiempo de entrega estimado ayuda a los clientes a
-                planificar
-              </Typography>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Paper sx={{ mb: 1 }}>
+      <Paper sx={{ mb: 3 }}>
         <Tabs
           value={activeTab}
           onChange={(e, newValue) => setActiveTab(newValue)}
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab icon={<Business />} label="Información" />
+          <Tab icon={<Business />} label="Básico" />
           <Tab icon={<LocationOn />} label="Ubicación" />
           <Tab icon={<Schedule />} label="Horarios" />
           <Tab icon={<LocalShipping />} label="Delivery" />
           <Tab icon={<Payment />} label="Pagos" />
-          <Tab icon={<Category />} label="Tipos de Comida" />
-          <Tab icon={<PhotoLibrary />} label="Fotos" />
+          <Tab icon={<Category />} label="Categorías" />
+          <Tab icon={<PhotoLibrary />} label="Galería" />
         </Tabs>
       </Paper>
 
       <Box sx={{ mt: 3 }}>
         {activeTab === 0 && <BasicInfoTab />}
         {activeTab === 1 && <LocationTab />}
-        {activeTab === 2 && <ScheduleTab />}
+        {activeTab === 2 && <SchedulesTab />}
         {activeTab === 3 && <DeliveryTab />}
         {activeTab === 4 && <PaymentMethodsTab />}
         {activeTab === 5 && <FoodTypesTab />}
-        {activeTab === 6 && <PhotosTab />}
+        {activeTab === 6 && <GalleryTab />}
       </Box>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           severity={snackbar.severity}

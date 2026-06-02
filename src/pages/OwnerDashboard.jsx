@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useMemo } from "react";
+import { useState, forwardRef, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -16,7 +16,7 @@ import {
   Slide,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { businessAPI, handleApiError } from "@Api";
+import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Context/AuthContext";
 
 // Importar nuevo layout
@@ -28,12 +28,13 @@ import OrdersTab from "./OwnerOrders";
 import MenuTab from "./OwnerMenu";
 import ReportsTab from "./OwnerReports";
 import SettingsTab from "./OwnerSettings";
-import { AddBusiness } from "@mui/icons-material";
 import RegisterBusiness from "./RegisterBusiness";
-import Bg from "@Assets/images/qscome-bg-6.png";
 
-// ✅ Importar hook de órdenes para obtener el count
+// ✅ NUEVOS HOOKS REFACTORIZADOS
+import useBusinessOwner from "@Hooks/generales/useBusinessOwner";
 import useBusinessOrders from "@Hooks/generales/useBusinessOrders";
+
+import Bg from "@Assets/images/qscome-bg-6.png";
 
 const BUSINESS_DEFAULT = 0;
 
@@ -45,7 +46,35 @@ export default function OwnerDashboard() {
   const { user } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [activeTab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
+  const [selectedBusinessId, setSelectedBusinessId] = useState(null);
+
+  // ============================================================================
+  // HOOKS REFACTORIZADOS
+  // ============================================================================
+
+  // Hook para gestión de negocios del owner
+  const {
+    businesses,
+    selectedBusiness,
+    loading: loadingBusinesses,
+    error: businessError,
+    refetchBusinesses,
+    hasBusinesses,
+  } = useBusinessOwner(selectedBusinessId);
+
+  // Hook para órdenes del negocio seleccionado
+  const {
+    orders,
+    loading: loadingOrders,
+    getPendingOrders,
+  } = useBusinessOrders(selectedBusinessId);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -55,60 +84,36 @@ export default function OwnerDashboard() {
     setOpen(false);
   };
 
-  const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // ✅ REFACTORIZADO: Solo cargar negocios
-  const [businesses, setBusinesses] = useState([]);
-  const [activeBusinessId, setActiveBusinessId] = useState(null);
-
-  // ✅ NUEVO: Usar hook solo para obtener el count de órdenes pendientes
-  // No pasamos las órdenes como prop, cada tab maneja su propia data
-  const { orders: ordersForCount } = useBusinessOrders(activeBusinessId);
-
-  const loadBusinesses = async () => {
-    try {
-      setLoading(true);
-      const res = await businessAPI.getAll();
-      const userBusinesses = res.data.data.filter(
-        (b) => b.ownerId === user.id || true
-      );
-
-      setBusinesses(userBusinesses);
-
-      // negocio default
-      setActiveBusinessId(userBusinesses[BUSINESS_DEFAULT]?.id ?? null);
-    } catch (err) {
-      setError(handleApiError(err).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBusinesses();
-  }, [user.id]);
-
-  const dataActiveBusiness = useMemo(
-    () => businesses.find((b) => b.id === activeBusinessId),
-    [businesses, activeBusinessId]
-  );
-
-  const selectBusiness = (businessId) => {
-    setActiveBusinessId(businessId);
-  };
-
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
   };
 
-  // ✅ Count de órdenes pendientes para el badge
-  const pendingOrdersCount = ordersForCount.filter(
-    (o) => o.status === "pending"
-  ).length;
+  const selectBusiness = (businessId) => {
+    setSelectedBusinessId(businessId);
+  };
 
-    if (user?.role === "customer") {
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  // Seleccionar negocio por defecto al cargar
+  useMemo(() => {
+    if (!selectedBusinessId && businesses.length > 0) {
+      setSelectedBusinessId(businesses[BUSINESS_DEFAULT]?.id);
+    }
+  }, [businesses, selectedBusinessId]);
+
+  // Count de órdenes pendientes para el badge
+  const pendingOrdersCount = useMemo(() => {
+    return getPendingOrders().length;
+  }, [getPendingOrders]);
+
+  // ============================================================================
+  // RENDER STATES
+  // ============================================================================
+
+  // Usuario no es owner - mostrar registro
+  if (user?.role === "customer") {
     return (
       <Box
         sx={{
@@ -117,15 +122,18 @@ export default function OwnerDashboard() {
           alignItems: "center",
           minHeight: "100vh",
           px: 2,
-          mt:-6
+          mt: -6,
         }}
-      >
+      > 
+        
         <RegisterBusiness />
+        
       </Box>
     );
   }
 
-  if (loading) {
+  // Loading
+  if (loadingBusinesses && !hasBusinesses()) {
     return (
       <Box
         sx={{
@@ -141,7 +149,8 @@ export default function OwnerDashboard() {
     );
   }
 
-  if (error) {
+  // Error
+  if (businessError) {
     return (
       <Box
         sx={{
@@ -153,13 +162,14 @@ export default function OwnerDashboard() {
         }}
       >
         <Alert severity="error" sx={{ maxWidth: 600 }}>
-          {error}
+          {businessError}
         </Alert>
       </Box>
     );
   }
 
-  if (!dataActiveBusiness) {
+  // No tiene negocios - mostrar registro
+  if (!hasBusinesses()) {
     return (
       <Box
         sx={{
@@ -171,9 +181,30 @@ export default function OwnerDashboard() {
         }}
       >
         <RegisterBusiness />
+        <Typography>{}</Typography>
       </Box>
     );
   }
+
+  // No hay negocio seleccionado (shouldn't happen con el useMemo)
+  if (!selectedBusiness) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
 
   return (
     <Box
@@ -185,16 +216,17 @@ export default function OwnerDashboard() {
         pb: { xs: 10, md: 0 },
       }}
     >
-      {/* Navbar Personalizado */}
+      {/* Navbar Desktop */}
       <DashboardNavbar
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        businessName={dataActiveBusiness.title}
+        businessName={selectedBusiness.title}
         pendingOrders={pendingOrdersCount}
         selectBusiness={selectBusiness}
         businesses={businesses}
       />
 
+      {/* FAB - Agregar Negocio */}
       <Fab
         sx={{ position: "fixed", bottom: 100, right: 16 }}
         color="primary"
@@ -204,6 +236,7 @@ export default function OwnerDashboard() {
         <AddBusiness />
       </Fab>
 
+      {/* Dialog - Registrar Negocio */}
       <Dialog
         fullScreen
         open={open}
@@ -228,7 +261,7 @@ export default function OwnerDashboard() {
           </Toolbar>
         </AppBar>
 
-        <RegisterBusiness />
+        <RegisterBusiness onSuccess={handleClose} />
       </Dialog>
 
       {/* Spacer para compensar navbar fixed */}
@@ -244,24 +277,26 @@ export default function OwnerDashboard() {
       >
         <Fade in={true} timeout={500}>
           <Box>
-            {/* ✅ REFACTORIZADO: Solo pasar businessId, no las órdenes */}
+            {/* ✅ Tabs solo reciben businessId */}
             {activeTab === 0 && (
-              <OrdersTab businessId={dataActiveBusiness.id} />
+              <OrdersTab 
+                businessId={selectedBusinessId}
+                loading={loadingOrders}
+              />
             )}
-            
-            {/* ✅ Cada tab maneja su propia data */}
+
             {activeTab === 1 && (
-              <MenuTab businessId={dataActiveBusiness.id} />
+              <MenuTab businessId={selectedBusinessId} />
             )}
-            
+
             {activeTab === 2 && (
-              <ReportsTab businessId={dataActiveBusiness.id} />
+              <ReportsTab businessId={selectedBusinessId} />
             )}
-            
+
             {activeTab === 3 && (
               <SettingsTab
-                businessData={dataActiveBusiness}
-                onRefresh={loadBusinesses}
+                businessData={selectedBusiness}
+                onRefresh={refetchBusinesses}
               />
             )}
           </Box>

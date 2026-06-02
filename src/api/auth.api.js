@@ -1,9 +1,24 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const authAPI = {
-  login: (credentials) => apiClient.post("/api/auth/login", credentials),
-  register: (data) => apiClient.post("/api/auth/register", data),
-  getMe: () => apiClient.get("/api/auth/me"),
-  loginGoogle: (idToken) => apiClient.post("/api/auth/google", idToken),
-  loginFacebook: () => apiClient.post("/api/auth/facebook"),
+const authEndpoints = (builder) => {
+  const endpoint = createEndpointBuilder(api, builder);
+  return {
+    login: endpoint(ENDPOINTS.auth.login, "create"),
+    register: endpoint(ENDPOINTS.auth.register, "create"),
+    getMe: endpoint(ENDPOINTS.auth.me, "getAll"),
+    loginGoogle: endpoint(ENDPOINTS.auth.google, "create"),
+  };
 };
+
+const apiAuth = api.injectEndpoints({
+  endpoints: authEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetMeQuery,
+  useLoginGoogleMutation,
+} = apiAuth;

@@ -1,11 +1,29 @@
-import apiClient from "./config";
+import { api, createEndpointBuilder } from "@Utils/api";
+import { ENDPOINTS } from "@Const/api";
 
-export const paymentsAPI = {
-  create: (data) => apiClient.post("/api/payments", data),
-  verify: (id) => apiClient.get(`/api/payments/${id}/verify`),
+const paymentsEndpoints = (builder) => {
+  const endpoint = createEndpointBuilder(api, builder);
 
-  // Nuevos métodos para pasarela real (cuando se integre)
-  createPaymentIntent: (data) => apiClient.post("/api/payments/intent", data),
-  confirmPayment: (id, data) =>
-    apiClient.post(`/api/payments/${id}/confirm`, data),
+  return {
+    create: endpoint(ENDPOINTS.payments.base, "create"),
+    verify: endpoint("payments-verify", "getOne", {
+      dynamicPath: ({ id }) => `${ENDPOINTS.payments.base}/${id}/verify`,
+    }),
+    createPaymentIntent: endpoint(ENDPOINTS.payments.intent, "create"),
+    confirmPayment: endpoint("payments-confirm", "create", {
+      dynamicPath: ({ id }) => `${ENDPOINTS.payments.base}/${id}/confirm`,
+    }),
+  };
 };
+
+const apiPayments = api.injectEndpoints({
+  endpoints: paymentsEndpoints,
+  overrideExisting: false,
+});
+
+export const {
+  useCreateMutation,
+  useVerifyQuery,
+  useCreatePaymentIntentMutation,
+  useConfirmPaymentMutation,
+} = apiPayments;

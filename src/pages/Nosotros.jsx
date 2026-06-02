@@ -37,7 +37,7 @@ const Nosotros = () => {
             <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-7" aria-hidden></div>
-                <div className="sticker-tag">Fresh</div>
+                {/*<div className="sticker-tag">Fresh</div>*/}
                 <h3>Explora negocios</h3>
                 <p>
                   Encuentra lugares nuevos según tu humor y tus antojos del día.
@@ -49,7 +49,7 @@ const Nosotros = () => {
             <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-8" aria-hidden></div>
-                <div className="sticker-tag">2</div>
+                 {/*<div className="sticker-tag">Fresh</div>*/}
                 <h3>Explora menús</h3>
                 <p>Mira fotos, precios y todo lo que necesitas para decidir.</p>
                 <div className="corner-sticker" aria-hidden></div>
@@ -59,7 +59,7 @@ const Nosotros = () => {
             <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-3" aria-hidden></div>
-                <div className="sticker-tag">Easy</div>
+                 {/*<div className="sticker-tag">Fresh</div>*/}
                 <h3>Todo desde tu cel o compu</h3>
                 <p>
                   Revisa menús, checa horarios, reserva o pide para llevar sin
@@ -72,7 +72,7 @@ const Nosotros = () => {
             <Grid item xs={12} sm={6} md={4}>
               <div className="pkg">
                 <div className="box-art sticker-4" aria-hidden></div>
-                <div className="sticker-tag">3</div>
+                 {/*<div className="sticker-tag">Fresh</div>*/}
                 <h3>Reseñas reales</h3>
                 <p>
                   Comparte tu experiencia y descubre qué lugares valen la pena.

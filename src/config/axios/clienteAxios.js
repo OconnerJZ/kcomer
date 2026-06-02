@@ -1,18 +1,44 @@
+import { API_URL_SERVER } from "@Utils/enviroments";
 import axios from "axios";
 // import { decrypt, encrypt, getAccessToken } from "@Utils/auth";
 
 const clienteAxios = axios.create({
-  baseURL: "https://jsonplaceholder.typicode.com",
+  baseURL: API_URL_SERVER,
   headers: {
     "X-Requested-With": "XMLHttpRequest",
   },
   // transformRequest: [(data) => encrypt({ data, crypto: true })],
   // transformResponse: [(data) => decrypt({ data, crypto: false })],
 });
-// clienteAxios.interceptors.request.use((config) => {
-//   const accessToken = getAccessToken();
-//   config.headers.Authorization = `Bearer ${accessToken}`;
-//   return config;
-// });
+clienteAxios.interceptors.request.use((config) => {
+  const user = localStorage.getItem("qscome_user");
+  if (user) {
+    try {
+      const userData = JSON.parse(user);
+      if (userData.token) {
+        config.headers.Authorization = `Bearer ${userData.token}`;
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+    }
+  }
+  return config;
+});
+
+clienteAxios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      // Servidor caído, sin conexión, timeout, etc.
+      error.isNetworkError = true;
+      error.friendlyMessage = "El servicio no está disponible. Intenta más tarde.";
+    } else {
+      // Errores HTTP (500, 503, etc.)
+      error.friendlyMessage = 
+        error.response?.data?.message || "Ocurrió un error en el servidor.";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default clienteAxios;

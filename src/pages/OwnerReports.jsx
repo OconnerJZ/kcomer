@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Grid,
@@ -44,42 +44,30 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
-import { useAuth } from '@Context/AuthContext';
-import { statsAPI, handleApiError } from '@Api';
+// ✅ Importar hook de RTK Query
+import { useGetBusinessStatsQuery } from '@Api/stats.api';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
-const OwnerReports = ({ stats: initialStats, businessId }) => {
-  const { user } = useAuth();
-  const [stats, setStats] = useState(initialStats);
-  const [loading, setLoading] = useState(!initialStats);
-  const [error, setError] = useState(null);
+const OwnerReports = ({ businessId }) => {
   const [period, setPeriod] = useState(7);
 
-  useEffect(() => {
-    if (!initialStats) {
-      loadStats();
+  // ✅ RTK Query hook
+  const { 
+    data: statsResponse, 
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useGetBusinessStatsQuery(
+    { businessId, period },
+    { 
+      skip: !businessId,
+      pollingInterval: 60000, // Refetch cada 60 segundos
     }
-  }, [businessId, period]);
+  );
 
-  const loadStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-     const response = await statsAPI.getBusinessStats(businessId, period);
-
-      if (response.data.success) {
-        setStats(response.data.data);
-      }
-    } catch (err) {
-      console.error('Error loading stats:', err);
-      const errorData = handleApiError(err);
-      setError(errorData.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Extraer stats del response
+  const stats = statsResponse?.data || statsResponse;
 
   if (loading) {
     return (
@@ -89,8 +77,12 @@ const OwnerReports = ({ stats: initialStats, businessId }) => {
     );
   }
 
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
+  if (queryError) {
+    return (
+      <Alert severity="error">
+        {queryError?.data?.message || queryError?.message || "Error al cargar estadísticas"}
+      </Alert>
+    );
   }
 
   if (!stats) {
@@ -112,6 +104,7 @@ const OwnerReports = ({ stats: initialStats, businessId }) => {
             <MenuItem value={7}>Últimos 7 días</MenuItem>
             <MenuItem value={15}>Últimos 15 días</MenuItem>
             <MenuItem value={30}>Últimos 30 días</MenuItem>
+            <MenuItem value={90}>Últimos 90 días</MenuItem>
           </Select>
         </FormControl>
       </Stack>
