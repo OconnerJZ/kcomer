@@ -11,7 +11,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import GeneralContent from "@Components/layout/GeneralContent";
+import GeneralContent from "@Shared/components/layout/GeneralContent";
 import ProfileActions from "../components/ProfileActions";
 import ProfileInfoCard from "../components/ProfileInfoCard";
 import useProfile from "../hooks/useProfile";
