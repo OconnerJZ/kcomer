@@ -95,6 +95,7 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => {
         onMovement={onMovement}
         businessId={business.id}
         businessName={business.name}
+        paymentMethods={business.paymentMethods}
         menu={business.menu}
       />
     ),
