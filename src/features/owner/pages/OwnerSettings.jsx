@@ -52,6 +52,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     paymentMethods,
     selectedFoodTypes,
     photos,
+    coverImage,
     setBasicInfo,
     setLocationInfo,
     setSchedules,
@@ -66,6 +67,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     updateDelivery,
     updatePayments,
     updateFoodTypes,
+    updateCoverImage,
     uploadPhoto,
     deletePhoto,
     loading,
@@ -124,6 +126,10 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     handleResult(await deletePhoto(photoId), "Foto eliminada", { refresh: false });
   };
 
+  const handleSetCover = async (photoUrl) => {
+    handleResult(await updateCoverImage(photoUrl), "Portada actualizada", { refresh: false });
+  };
+
   const togglePaymentMethod = (method) => {
     setPaymentMethods((current) => current.map((paymentMethod) =>
       paymentMethod.method === method
@@ -144,7 +150,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
     <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onSave={handleSavePayments} loading={loading} />,
     <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
-    <GalleryTab key="gallery" photos={photos} coverImage={businessData?.coverImage || businessData?.cover_image || ""} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
+    <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
   ];
 
   return (
@@ -153,25 +159,13 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
           CONFIGURACIÓN
         </Typography>
-        <Typography variant="h4" fontWeight={800} sx={{ mt: 0.2 }}>
-          Tu negocio
-        </Typography>
+        <Typography variant="h4" fontWeight={800} sx={{ mt: 0.2 }}>Tu negocio</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>
           Mantén la información que ven tus clientes y la operación diaria en un solo lugar.
         </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1,
-          overflowX: "auto",
-          pb: 1,
-          mb: 3,
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        }}
-      >
+      <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: 3, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
         {NAV_ITEMS.map((item, index) => {
           const Icon = item.icon;
           const selected = activeTab === index;
