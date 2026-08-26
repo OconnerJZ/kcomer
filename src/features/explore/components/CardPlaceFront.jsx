@@ -1,4 +1,4 @@
-import { Box, Chip, Stack, Button, Tooltip } from "@mui/material";
+import { Box, Chip, Stack, IconButton, Tooltip, Typography } from "@mui/material";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import MenuBook from "@mui/icons-material/MenuBook";
 import LocationOn from "@mui/icons-material/LocationOn";
@@ -24,54 +24,54 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
               label={chip.label}
               size="small"
               variant="outlined"
-              sx={{ borderRadius: 999, fontSize: ".72rem", bgcolor: "rgba(255,255,255,.7)" }}
+              sx={{ borderRadius: 999, fontSize: ".7rem", bgcolor: "rgba(255,255,255,.52)", backdropFilter: "blur(8px)" }}
             />
           ))}
         </Stack>
       </Box>
     )}
 
-    <Box
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="flex-start"
       sx={{
-        width: "100%",
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: 0.75,
-        my: 2,
+        my: 2.1,
+        px: 0.5,
       }}
     >
       {ACTIONS.map((action) => (
         <Tooltip key={action.key} title={action.label} arrow>
-          <Button
-            onClick={() => onMovement({ movement: action.key })}
-            startIcon={action.icon}
-            sx={{
-              minWidth: 0,
-              px: 1,
-              py: 1,
-              borderRadius: 2,
-              color: "text.primary",
-              bgcolor: "rgba(255,255,255,.72)",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: "none",
-              textTransform: "none",
-              fontSize: ".75rem",
-              fontWeight: 700,
-              "& .MuiButton-startIcon": { mr: { xs: 0, sm: 0.5 } },
-              "&:hover": {
-                bgcolor: "background.paper",
-                borderColor: "rgba(255, 75, 69, .35)",
-                transform: "translateY(-1px)",
-              },
-              transition: "all .16s ease",
-            }}
-          >
-            <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>{action.label}</Box>
-          </Button>
+          <Stack spacing={0.65} alignItems="center" sx={{ minWidth: 56 }}>
+            <IconButton
+              onClick={() => onMovement({ movement: action.key })}
+              aria-label={action.label}
+              sx={{
+                width: 42,
+                height: 42,
+                color: "text.primary",
+                bgcolor: "rgba(255,255,255,.68)",
+                border: "1px solid rgba(0,0,0,.07)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 5px 14px rgba(0,0,0,.045)",
+                "&:hover": {
+                  bgcolor: "common.white",
+                  color: "primary.main",
+                  transform: "translateY(-2px) scale(1.03)",
+                  boxShadow: "0 9px 22px rgba(0,0,0,.08)",
+                },
+                transition: "all .18s ease",
+              }}
+            >
+              {action.icon}
+            </IconButton>
+            <Typography variant="caption" sx={{ fontSize: ".68rem", fontWeight: 700, color: "text.secondary" }}>
+              {action.label}
+            </Typography>
+          </Stack>
         </Tooltip>
       ))}
-    </Box>
+    </Stack>
 
     <CardPlaceAccordion data={data} />
   </StyledFront>
