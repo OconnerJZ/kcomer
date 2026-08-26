@@ -37,23 +37,18 @@ const SocketInitializer = () => {
       return undefined;
     }
 
-    const nextIds = new Set(businessIds.map(String));
-    const currentIds = joinedBusinessIdsRef.current;
+    const joinedIds = joinedBusinessIdsRef.current;
 
-    currentIds.forEach((businessId) => {
-      if (!nextIds.has(businessId)) {
-        socketService.leaveRoom(`business:${businessId}`);
-      }
-    });
-
-    nextIds.forEach((businessId) => {
-      if (!currentIds.has(businessId)) {
+    businessIds.map(String).forEach((businessId) => {
+      if (!joinedIds.has(businessId)) {
         socketService.joinBusiness(businessId);
+        joinedIds.add(businessId);
       }
     });
 
-    joinedBusinessIdsRef.current = nextIds;
-
+    // Para el owner principal no abandonamos salas al cambiar de negocio visible:
+    // su alcance realtime es global durante toda la sesión. Una desconexión/logout
+    // limpia todas las suscripciones del socket.
     return undefined;
   }, [businessIdsKey, connected, hasGlobalScope]);
 
