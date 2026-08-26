@@ -17,7 +17,13 @@ import {
 import { Remove, NoteAdd } from "@mui/icons-material";
 import { normalizeCartItem } from "@Features/cart/model/cartItem";
 
-const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
+const CardMenuList = ({
+  item,
+  businessId,
+  businessName,
+  paymentMethods = [],
+  onAddToCart,
+}) => {
   const menuItem = useMemo(() => normalizeCartItem(item), [item]);
   const [quantity, setQuantity] = useState(0);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
@@ -29,6 +35,7 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
       itemId: menuItem.id,
       businessId,
       businessName,
+      paymentMethods,
       item: { ...menuItem, quantity: qty, note: itemNote || "" },
     });
   };
