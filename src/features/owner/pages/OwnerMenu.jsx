@@ -39,12 +39,12 @@ import MenuItemDialog from "@Features/owner/components/menu/MenuItemDialog";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 
 const EMPTY_MENU_FORM = {
-  item_name: "",
+  name: "",
   description: "",
   price: "",
   category: "",
-  image_url: "",
-  is_available: true,
+  image: "",
+  available: true,
 };
 
 const OwnerMenu = ({ businessId, onRefresh }) => {
@@ -78,16 +78,15 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
 
   const handleOpenMenuDialog = (item = null) => {
     if (item) {
-      const currentImage = item.image || item.image_url || "";
       setMenuForm({
-        item_name: item.name || item.item_name || "",
-        description: item.description || "",
-        price: item.price ?? "",
-        category: item.category || "",
-        image_url: currentImage,
-        is_available: item.available ?? item.is_available ?? true,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        category: item.category,
+        image: item.image,
+        available: item.available,
       });
-      image.resetImage(currentImage);
+      image.resetImage(item.image);
     } else {
       setMenuForm(EMPTY_MENU_FORM);
       image.resetImage();
@@ -117,7 +116,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
 
   const handleSaveMenuItem = async () => {
     try {
-      if (!menuForm.item_name || !menuForm.price) {
+      if (!menuForm.name || !menuForm.price) {
         showSnackbar("Nombre y precio son requeridos", "error");
         return;
       }
@@ -211,10 +210,10 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
             <TableBody>
               {menu.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell><Stack direction="row" spacing={2} alignItems="center"><Avatar src={item.image || item.image_url} variant="rounded" sx={{ width: 50, height: 50 }}><ImageIcon /></Avatar><Box><Typography variant="body2" fontWeight={500}>{item.name || item.item_name}</Typography><Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography></Box></Stack></TableCell>
+                  <TableCell><Stack direction="row" spacing={2} alignItems="center"><Avatar src={item.image} variant="rounded" sx={{ width: 50, height: 50 }}><ImageIcon /></Avatar><Box><Typography variant="body2" fontWeight={500}>{item.name}</Typography><Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography></Box></Stack></TableCell>
                   <TableCell>{item.category && <Chip label={item.category} size="small" sx={{ borderRadius: 0 }} />}</TableCell>
-                  <TableCell align="right"><Typography fontWeight={500}>${Number(item.price || 0).toFixed(2)}</Typography></TableCell>
-                  <TableCell align="center"><Switch checked={item.available ?? item.is_available ?? false} onChange={() => handleToggleAvailability(item.id)} size="small" /></TableCell>
+                  <TableCell align="right"><Typography fontWeight={500}>${item.price.toFixed(2)}</Typography></TableCell>
+                  <TableCell align="center"><Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" /></TableCell>
                   <TableCell align="right"><Stack direction="row" spacing={1} justifyContent="flex-end"><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></TableCell>
                 </TableRow>
               ))}
@@ -227,7 +226,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         <Grid container spacing={2}>
           {menu.map((item) => (
             <Grid item xs={12} sm={6} key={item.id}>
-              <Fade in><Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0, height: "100%" }}><CardContent><Stack spacing={2}><Stack direction="row" spacing={2}><Avatar src={item.image || item.image_url} variant="rounded" sx={{ width: 60, height: 60 }}><ImageIcon /></Avatar><Box sx={{ flex: 1, minWidth: 0 }}><Typography variant="subtitle1" fontWeight={500} noWrap>{item.name || item.item_name}</Typography><Typography variant="h6" color="primary">${Number(item.price || 0).toFixed(2)}</Typography></Box></Stack>{item.description && <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography>}<Stack direction="row" justifyContent="space-between" alignItems="center"><FormControlLabel control={<Switch checked={item.available ?? item.is_available ?? false} onChange={() => handleToggleAvailability(item.id)} size="small" />} label="Disponible" /><Stack direction="row" spacing={1}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></Stack></Stack></CardContent></Card></Fade>
+              <Fade in><Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0, height: "100%" }}><CardContent><Stack spacing={2}><Stack direction="row" spacing={2}><Avatar src={item.image} variant="rounded" sx={{ width: 60, height: 60 }}><ImageIcon /></Avatar><Box sx={{ flex: 1, minWidth: 0 }}><Typography variant="subtitle1" fontWeight={500} noWrap>{item.name}</Typography><Typography variant="h6" color="primary">${item.price.toFixed(2)}</Typography></Box></Stack>{item.description && <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography>}<Stack direction="row" justifyContent="space-between" alignItems="center"><FormControlLabel control={<Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" />} label="Disponible" /><Stack direction="row" spacing={1}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></Stack></Stack></CardContent></Card></Fade>
             </Grid>
           ))}
         </Grid>
