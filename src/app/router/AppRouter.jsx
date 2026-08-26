@@ -1,8 +1,8 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import Layout from "@Components/layout/Layout";
-import ScrollToTop from "@Components/ScrollToTop";
+import Layout from "@Shared/components/layout/Layout";
+import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
 const Explorar = lazy(() => import("@Pages/Explorar"));
 const Nosotros = lazy(() => import("@Pages/Nosotros"));
