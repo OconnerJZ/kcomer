@@ -18,6 +18,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Context/AuthContext";
+import { isOwner } from "@Const/roles";
 
 // Importar nuevo layout
 import DashboardNavbar from "@Components/layout/DashboardNavbar";
@@ -112,8 +113,8 @@ export default function OwnerDashboard() {
   // RENDER STATES
   // ============================================================================
 
-  // Usuario no es owner - mostrar registro
-  if (user?.role === "customer") {
+  // Usuario no es owner (cliente, user, o rol no contemplado) - mostrar registro
+  if (!isOwner(user)) {
     return (
       <Box
         sx={{

@@ -13,13 +13,20 @@ const Perfil = lazy(() => import("@Pages/Perfil"));
 const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
 const OwnerDashboard = lazy(() => import("@Pages/OwnerDashboard"));
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+// `roles` es opcional: si se pasa, restringe la ruta a esos roles.
+// Ej. para una ruta exclusiva de admin: { path: "admin", roles: OWNER_ROLES }.
+// Nota: /owner se deja SIN roles a propósito, porque también es la puerta de
+// entrada para que un cliente registre su negocio (ver OwnerDashboard).
+const ProtectedRoute = ({ children, roles }) => {
+  const { isAuthenticated, loading, user } = useAuth();
   if (loading) {
     return <div>Cargando...</div>;
   }
   if (!isAuthenticated) {
     return <Navigate to="/login/orden" replace />;
+  }
+  if (roles && !roles.includes(user?.role)) {
+    return <Navigate to="/explorar" replace />;
   }
   return children;
 };
@@ -48,7 +55,9 @@ const Router = () => {
               path={route.path}
               element={
                 route.isProtected ? (
-                  <ProtectedRoute>{route.element}</ProtectedRoute>
+                  <ProtectedRoute roles={route.roles}>
+                    {route.element}
+                  </ProtectedRoute>
                 ) : (
                   route.element
                 )

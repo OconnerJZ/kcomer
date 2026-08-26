@@ -1,26 +1,27 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { 
+import { useState, useCallback, useMemo } from "react";
+import {
   useGetOrdersByBusinessQuery,
   useOrderUpdateStatusMutation,
 } from "@Api/orders.api";
-import socketService from "@Services/socketService";
+import { useSocketEvent } from "@Hooks/useSocket";
 
 export const useBusinessOrders = (businessId) => {
   const [error, setError] = useState(null);
-  const { 
-    data: ordersResponse, 
+  const {
+    data: ordersResponse,
     isLoading: loading,
     error: queryError,
     refetch: refreshOrders,
   } = useGetOrdersByBusinessQuery(
     { businessId },
-    { 
+    {
       skip: !businessId,
-      pollingInterval: 30000, // Refetch cada 30 segundos
+      pollingInterval: 30000, // Refetch cada 30 segundos (fallback)
     }
   );
 
-  const [updateStatusMutation, { isLoading: updating }] = useOrderUpdateStatusMutation();
+  const [updateStatusMutation, { isLoading: updating }] =
+    useOrderUpdateStatusMutation();
 
   const orders = useMemo(() => {
     return ordersResponse?.data || ordersResponse || [];
@@ -38,7 +39,7 @@ export const useBusinessOrders = (businessId) => {
         await updateStatusMutation({
           id: orderId,
           businessId,
-          body: { 
+          body: {
             status: newStatus,
             note: note || undefined,
           },
@@ -46,7 +47,8 @@ export const useBusinessOrders = (businessId) => {
 
         return { success: true };
       } catch (err) {
-        const errorMessage = err?.data?.message || err?.message || "Error al actualizar estado";
+        const errorMessage =
+          err?.data?.message || err?.message || "Error al actualizar estado";
         setError(errorMessage);
         throw new Error(errorMessage);
       }
@@ -54,45 +56,30 @@ export const useBusinessOrders = (businessId) => {
     [businessId, updateStatusMutation]
   );
 
-  useEffect(() => {
-    if (!socketService.isConnected()) return;
-    if (!businessId) return;
+  // ============================================================================
+  // SOCKET LISTENER - Nuevas órdenes para el negocio
+  // ============================================================================
+  // Reactivo: se une a la sala del negocio y escucha "order:new" en cuanto el
+  // socket conecta; se re-suscribe automáticamente tras cada reconexión.
 
-    console.log("[useBusinessOrders] Setting up listener for business:", businessId);
-
-    const socket = socketService.socket;
-    if (!socket) {
-      console.error("[useBusinessOrders] Socket not available");
-      return;
-    }
-
-    // Unirse a sala del negocio
-    socketService.joinBusiness(businessId);
-
-    // Handler para NUEVAS órdenes
-    const handleNewOrder = (newOrder) => {
-      console.log("🔔 [useBusinessOrders] Nueva orden:", newOrder);
-
+  useSocketEvent(
+    "order:new",
+    (newOrder) => {
       if (!newOrder?.id) return;
       refreshOrders();
-    };
-
-    socket.on("order:new", handleNewOrder);
-
-    console.log("✅ [useBusinessOrders] Listener registered");
-
-    return () => {
-      console.log("[useBusinessOrders] Cleaning up");
-      socket.off("order:new", handleNewOrder);
-    };
-  }, [businessId, refreshOrders]);
+    },
+    {
+      enabled: !!businessId,
+      room: { type: "business", id: businessId },
+    }
+  );
 
   // ============================================================================
   // SELECTORS
   // ============================================================================
 
   const selectors = useMemo(() => ({
-    getOrderById: (orderId) => 
+    getOrderById: (orderId) =>
       orders.find((order) => order.id === orderId),
 
     getOrdersByStatus: (status) =>
@@ -122,8 +109,8 @@ export const useBusinessOrders = (businessId) => {
     getCompletedOrders: () =>
       orders.filter(
         (order) =>
-          order.status === "completed" || 
-          order.status === "cancelled" || 
+          order.status === "completed" ||
+          order.status === "cancelled" ||
           order.status === "rejected"
       ),
 
@@ -131,7 +118,7 @@ export const useBusinessOrders = (businessId) => {
 
     hasOrders: () => orders.length > 0,
 
-    hasPendingOrders: () => 
+    hasPendingOrders: () =>
       orders.some((order) => order.status === "pending"),
   }), [orders]);
 

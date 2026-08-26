@@ -8,13 +8,13 @@ import {
   useRef,
 } from "react";
 import PropTypes from "prop-types";
-import { useGoogleLogin } from "@react-oauth/google";
 import {
   useLoginMutation,
   useRegisterMutation,
   useGetMeQuery,
   useLoginGoogleMutation,
 } from "@Api/auth.api";
+import { isTokenExpired } from "@Utils/token";
 
 // ============================================================================
 // CONSTANTS
@@ -22,7 +22,7 @@ import {
 
 const AuthContext = createContext();
 const STORAGE_KEY = "qscome_user";
-const TOKEN_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
+const SESSION_CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
 // ============================================================================
 // STORAGE UTILITIES
@@ -90,6 +90,9 @@ const authUtils = {
       user_name: userData.name,
       email: userData.email,
       password: userData.password,
+      // El backend hace: auxRole = isBusiness ? "owner" : role.
+      // Espera el flag en camelCase; enviarlo así crea la cuenta como owner.
+      ...(userData.isBusiness && { isBusiness: true }),
     };
   },
 
@@ -114,7 +117,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [shouldFetchMe, setShouldFetchMe] = useState(false);
 
-  const tokenRefreshInterval = useRef(null);
+  const sessionCheckInterval = useRef(null);
 
   // ============================================================================
   // RTK QUERY HOOKS
@@ -168,15 +171,15 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     setShouldFetchMe(false); // Deshabilita el fetch de /me
 
-    // Clear token refresh interval
-    if (tokenRefreshInterval.current) {
-      clearInterval(tokenRefreshInterval.current);
-      tokenRefreshInterval.current = null;
+    // Clear session check interval
+    if (sessionCheckInterval.current) {
+      clearInterval(sessionCheckInterval.current);
+      sessionCheckInterval.current = null;
     }
   }, []);
 
   // ============================================================================
-  // TOKEN VALIDATION & REFRESH
+  // TOKEN VALIDATION & SESSION WATCHER
   // ============================================================================
 
   const validateToken = useCallback(async () => {
@@ -206,17 +209,24 @@ export const AuthProvider = ({ children }) => {
     }
   }, [refetchMe, saveSession, clearSession]);
 
-  const startTokenRefresh = useCallback(() => {
+  const startSessionWatcher = useCallback(() => {
     // Clear any existing interval
-    if (tokenRefreshInterval.current) {
-      clearInterval(tokenRefreshInterval.current);
+    if (sessionCheckInterval.current) {
+      clearInterval(sessionCheckInterval.current);
     }
 
-    // Set up new interval
-    tokenRefreshInterval.current = setInterval(() => {
-      validateToken();
-    }, TOKEN_REFRESH_INTERVAL);
-  }, [validateToken]);
+    // Chequeo periódico de sesión. El token NO se renueva aquí (el backend no
+    // expone refresh): si ya expiró, cerramos sesión; si sigue vigente,
+    // revalidamos el perfil vía /me.
+    sessionCheckInterval.current = setInterval(() => {
+      const current = storage.load();
+      if (!current?.token || isTokenExpired(current.token)) {
+        clearSession();
+      } else {
+        validateToken();
+      }
+    }, SESSION_CHECK_INTERVAL);
+  }, [validateToken, clearSession]);
 
   // ============================================================================
   // AUTHENTICATION OPERATIONS
@@ -228,7 +238,7 @@ export const AuthProvider = ({ children }) => {
         const userData = authUtils.createUserData(authData);
 
         if (saveSession(userData)) {
-          startTokenRefresh();
+          startSessionWatcher();
           return { success: true, user: userData };
         }
 
@@ -238,7 +248,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: err.message };
       }
     },
-    [saveSession, startTokenRefresh],
+    [saveSession, startSessionWatcher],
   );
 
   const login = useCallback(
@@ -349,20 +359,6 @@ export const AuthProvider = ({ children }) => {
   }, [updateUser]);
 
   // ============================================================================
-  // GOOGLE LOGIN HOOK
-  // ============================================================================
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      await loginWithGoogle(tokenResponse.access_token);
-    },
-    onError: (error) => {
-      console.error("Google login error:", error);
-      setError("Error al iniciar sesión con Google");
-    },
-  });
-
-  // ============================================================================
   // EFFECTS
   // ============================================================================
 
@@ -406,11 +402,18 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // Si el token ya expiró, no intentamos usarlo: cerramos sesión de una vez.
+      if (isTokenExpired(savedUser.token)) {
+        clearSession();
+        setAuthLoading(false);
+        return;
+      }
+
       setUser(savedUser);
       setShouldFetchMe(true); // Habilita el fetch para validar el token
 
-      // Iniciar refresh de token
-      startTokenRefresh();
+      // Iniciar el watcher de sesión
+      startSessionWatcher();
 
       setAuthLoading(false);
     };
@@ -419,11 +422,19 @@ export const AuthProvider = ({ children }) => {
 
     // Cleanup on unmount
     return () => {
-      if (tokenRefreshInterval.current) {
-        clearInterval(tokenRefreshInterval.current);
+      if (sessionCheckInterval.current) {
+        clearInterval(sessionCheckInterval.current);
       }
     };
-  }, [clearSession, startTokenRefresh]);
+  }, [clearSession, startSessionWatcher]);
+
+  // Cerrar sesión cuando el backend rechaza el token (401 vía interceptor).
+  // Al quedar sin sesión, ProtectedRoute redirige a login automáticamente.
+  useEffect(() => {
+    const onUnauthorized = () => clearSession();
+    window.addEventListener("auth:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("auth:unauthorized", onUnauthorized);
+  }, [clearSession]);
 
   // ============================================================================
   // CONTEXT VALUE
@@ -447,7 +458,6 @@ export const AuthProvider = ({ children }) => {
       // Auth Actions
       login,
       loginWithGoogle,
-      googleLogin, // Hook de Google Login
       register,
       logout,
 
@@ -465,7 +475,6 @@ export const AuthProvider = ({ children }) => {
       error,
       login,
       loginWithGoogle,
-      googleLogin,
       register,
       logout,
       updateUser,

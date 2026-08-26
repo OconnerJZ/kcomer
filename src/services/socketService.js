@@ -3,6 +3,15 @@ import { io } from "socket.io-client";
 import { API_URL_SERVER } from "@Utils/enviroments";
 
 // ============================================================================
+// LOGGING (silenciado en producción)
+// ============================================================================
+
+const DEV = import.meta.env?.DEV ?? false;
+const log = (...a) => DEV && console.log(...a);
+const warn = (...a) => DEV && console.warn(...a);
+const logError = (...a) => DEV && console.error(...a);
+
+// ============================================================================
 // CONSTANTS
 // ============================================================================
 
@@ -37,11 +46,49 @@ class SocketService {
 
     // Event handlers registry
     this.eventHandlers = new Map();
+
+    // Suscriptores del estado de conexión (para useSyncExternalStore)
+    this._statusListeners = new Set();
   }
 
-  // ============================================================================
+  // ==========================================================================
+  // REACTIVE STATUS STORE (para React vía useSyncExternalStore)
+  // ==========================================================================
+
+  /**
+   * Suscribe un listener a los cambios de estado de conexión.
+   * Devuelve la función de limpieza (unsubscribe). Referencia estable.
+   * @param {Function} listener
+   * @returns {Function} unsubscribe
+   */
+  subscribeStatus = (listener) => {
+    this._statusListeners.add(listener);
+    return () => this._statusListeners.delete(listener);
+  };
+
+  /**
+   * Snapshot del estado de conexión. Devuelve un primitivo (boolean),
+   * por lo que es seguro para useSyncExternalStore.
+   * @returns {boolean}
+   */
+  getStatusSnapshot = () => this.connected;
+
+  /**
+   * Notifica a los suscriptores que el estado de conexión cambió.
+   */
+  _emitStatus = () => {
+    this._statusListeners.forEach((listener) => {
+      try {
+        listener();
+      } catch (error) {
+        logError("Error en status listener:", error);
+      }
+    });
+  };
+
+  // ==========================================================================
   // CONNECTION MANAGEMENT
-  // ============================================================================
+  // ==========================================================================
 
   /**
    * Connect to socket server
@@ -50,19 +97,19 @@ class SocketService {
    */
   connect(user) {
     if (!user || !user.token) {
-      console.error("❌ No se puede conectar sin usuario o token");
+      logError("❌ No se puede conectar sin usuario o token");
       return null;
     }
 
     // If already connected with same user, return existing socket
     if (this.socket?.connected && this.currentUser?.id === user.id) {
-      console.log("✅ Socket ya conectado para este usuario");
+      log("✅ Socket ya conectado para este usuario");
       return this.socket;
     }
 
     // Disconnect existing connection if different user
     if (this.socket && this.currentUser?.id !== user.id) {
-      console.log("🔄 Cambiando usuario, desconectando socket anterior");
+      log("🔄 Cambiando usuario, desconectando socket anterior");
       this.disconnect();
     }
 
@@ -81,7 +128,7 @@ class SocketService {
     this.setupEventHandlers();
     this.socket.connect();
 
-    console.log("🔌 Iniciando conexión Socket.IO...");
+    log("🔌 Iniciando conexión Socket.IO...");
     return this.socket;
   }
 
@@ -95,48 +142,45 @@ class SocketService {
     this.socket.on("connect", () => {
       this.connected = true;
       this.reconnectAttempts = 0;
-      console.log("Usuario: ",this.currentUser)
-      console.log("✅ Socket.IO conectado:", this.socket.id);
+      this._emitStatus(); // ⟵ avisa a React que ya hay conexión
+      log("✅ Socket.IO conectado:", this.socket.id);
 
       // Auto-join rooms based on user role
       this.autoJoinRooms();
 
-      // Notify listeners - USAR notifyListeners en lugar de emit
+      // Notify listeners
       this.notifyListeners("connected", { socketId: this.socket.id });
     });
 
     // Disconnection
     this.socket.on("disconnect", (reason) => {
       this.connected = false;
-      console.log("❌ Socket.IO desconectado:", reason);
+      this._emitStatus(); // ⟵ avisa a React que se perdió la conexión
+      log("❌ Socket.IO desconectado:", reason);
 
       // Notify listeners
       this.notifyListeners("disconnected", { reason });
 
       // Handle different disconnect reasons
       if (reason === "io server disconnect") {
-        // Server forcefully disconnected, don't reconnect automatically
-        console.warn("⚠️ Servidor cerró la conexión");
+        warn("⚠️ Servidor cerró la conexión");
       } else if (reason === "transport close" || reason === "ping timeout") {
-        // Connection lost, will try to reconnect
-        console.log("🔄 Pérdida de conexión, intentando reconectar...");
+        log("🔄 Pérdida de conexión, intentando reconectar...");
       }
     });
 
     // Connection error
     this.socket.on("connect_error", (error) => {
-      console.error("❌ Error de conexión Socket.IO:", error.message);
+      logError("❌ Error de conexión Socket.IO:", error.message);
       this.reconnectAttempts++;
 
-      // Notify listeners
       this.notifyListeners("connection_error", {
         error: error.message,
         attempts: this.reconnectAttempts,
       });
 
-      // Check if max attempts reached
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error("❌ Máximo de intentos de reconexión alcanzado");
+        logError("❌ Máximo de intentos de reconexión alcanzado");
         this.disconnect();
         this.notifyListeners("max_reconnect_attempts_reached");
       }
@@ -144,13 +188,13 @@ class SocketService {
 
     // Reconnection attempt
     this.socket.on("reconnect_attempt", (attemptNumber) => {
-      console.log(`🔄 Intento de reconexión #${attemptNumber}`);
+      log(`🔄 Intento de reconexión #${attemptNumber}`);
       this.notifyListeners("reconnect_attempt", { attemptNumber });
     });
 
     // Reconnection successful
     this.socket.on("reconnect", (attemptNumber) => {
-      console.log("🎉 Socket.IO reconectado (intento:", attemptNumber, ")");
+      log("🎉 Socket.IO reconectado (intento:", attemptNumber, ")");
       this.reconnectAttempts = 0;
       this.notifyListeners("reconnected", { attemptNumber });
 
@@ -160,13 +204,13 @@ class SocketService {
 
     // Reconnection failed
     this.socket.on("reconnect_failed", () => {
-      console.error("❌ Falló la reconexión después de todos los intentos");
+      logError("❌ Falló la reconexión después de todos los intentos");
       this.notifyListeners("reconnect_failed");
     });
 
     // Authentication error
     this.socket.on("auth_error", (error) => {
-      console.error("❌ Error de autenticación:", error);
+      logError("❌ Error de autenticación:", error);
       this.notifyListeners("auth_error", error);
       this.disconnect();
     });
@@ -181,13 +225,11 @@ class SocketService {
     const { role, id } = this.currentUser;
 
     if (role === "owner" || role === "admin") {
-      // Join business room for owners/admins
       const businessIdToJoin = localStorage.getItem("owner_business_id");
       if (businessIdToJoin) {
         this.joinBusiness(businessIdToJoin);
       }
     } else if (role === "customer" || role === "user") {
-      // Join user room for customers
       this.joinUser(id);
     }
   }
@@ -205,7 +247,9 @@ class SocketService {
       this.reconnectAttempts = 0;
       this.listeners.clear();
       this.eventHandlers.clear();
-      console.log("👋 Socket.IO desconectado manualmente");
+      this.clearActiveBusiness(); // ⟵ no dejar el negocio persistido tras logout
+      this._emitStatus(); // ⟵ avisa a React que ya no hay conexión
+      log("👋 Socket.IO desconectado manualmente");
     }
   }
 
@@ -225,33 +269,32 @@ class SocketService {
     return this.socket?.id || null;
   }
 
-  // ============================================================================
+  // ==========================================================================
   // ROOM MANAGEMENT
-  // ============================================================================
+  // ==========================================================================
 
   /**
    * Join business room (for owners/admins)
    * @param {string} businessId
    */
   joinBusiness(businessId) {
-    
     if (!this.socket?.connected) {
-      console.warn("⚠️ Socket no conectado, no se puede unir a sala");
+      warn("⚠️ Socket no conectado, no se puede unir a sala");
       return;
     }
 
     if (!businessId) {
-      console.error("❌ businessId requerido para unirse a sala");
+      logError("❌ businessId requerido para unirse a sala");
       return;
     }
-    
-    console.log("📤 Emitiendo join:business con ID:", businessId);
-    
+
+    log("📤 Emitiendo join:business con ID:", businessId);
+
     this.socket.emit("join:business", businessId, (response) => {
       if (response?.success) {
-        console.log("✅ Unido a sala business:", businessId);
+        log("✅ Unido a sala business:", businessId);
       } else {
-        console.error("❌ Error al unirse a sala business:", response?.error);
+        logError("❌ Error al unirse a sala business:", response?.error);
       }
     });
   }
@@ -262,22 +305,22 @@ class SocketService {
    */
   joinUser(userId) {
     if (!this.socket?.connected) {
-      console.warn("⚠️ Socket no conectado, no se puede unir a sala");
+      warn("⚠️ Socket no conectado, no se puede unir a sala");
       return;
     }
 
     if (!userId) {
-      console.error("❌ userId requerido para unirse a sala");
+      logError("❌ userId requerido para unirse a sala");
       return;
     }
 
-    console.log("📤 Emitiendo join:user con ID:", userId);
+    log("📤 Emitiendo join:user con ID:", userId);
 
     this.socket.emit("join:user", userId, (response) => {
       if (response?.success) {
-        console.log("✅ Unido a sala user:", userId);
+        log("✅ Unido a sala user:", userId);
       } else {
-        console.error("❌ Error al unirse a sala user:", response?.error);
+        logError("❌ Error al unirse a sala user:", response?.error);
       }
     });
   }
@@ -289,115 +332,104 @@ class SocketService {
   leaveRoom(room) {
     if (this.socket?.connected) {
       this.socket.emit("leave:room", room);
-      console.log("👋 Saliendo de sala:", room);
+      log("👋 Saliendo de sala:", room);
     }
   }
 
-  // ============================================================================
-  // ORDER MANAGEMENT
-  // ============================================================================
+  /**
+   * Define el negocio activo del owner y lo persiste para que autoJoinRooms()
+   * pueda re-unirse a la sala tras un reconnect o un reload (cuando el dashboard
+   * aún no ha montado). Si ya hay conexión, se une de inmediato.
+   *
+   * Es la API que deben usar los componentes en lugar de tocar localStorage
+   * directamente.
+   * @param {string} businessId
+   */
+  setActiveBusiness(businessId) {
+    if (!businessId) return;
+
+    try {
+      localStorage.setItem("owner_business_id", String(businessId));
+    } catch (error) {
+      logError("No se pudo persistir owner_business_id:", error);
+    }
+
+    if (this.socket?.connected) {
+      this.joinBusiness(businessId);
+    }
+  }
 
   /**
-   * Create new order
-   * @param {Object} orderData
-   * @param {Function} callback
+   * Limpia el negocio activo persistido (al cerrar sesión / cambiar de usuario).
    */
+  clearActiveBusiness() {
+    try {
+      localStorage.removeItem("owner_business_id");
+    } catch {
+      /* noop */
+    }
+  }
+
+  // ==========================================================================
+  // ORDER MANAGEMENT
+  // ==========================================================================
+
   createOrder(orderData, callback) {
     if (!this.socket?.connected) {
       callback?.({ success: false, error: "Socket no conectado" });
       return;
     }
-
     this.socket.emit("order:create", orderData, callback);
   }
 
-  /**
-   * Update order status
-   * @param {string} orderId
-   * @param {string} status
-   * @param {Function} callback
-   */
   updateOrderStatus(orderId, status, callback) {
     if (!this.socket?.connected) {
       callback?.({ success: false, error: "Socket no conectado" });
       return;
     }
-
-    this.socket.emit(
-      "order:update_status",
-      { orderId, status },
-      callback
-    );
+    this.socket.emit("order:update_status", { orderId, status }, callback);
   }
 
-  /**
-   * Listen to new orders (for business)
-   * @param {Function} callback
-   */
   onNewOrder(callback) {
     const eventName = "order:new";
-
     const handler = (data) => {
-      callback?.({
-        type: "order:new",
-        tag: `order-new`,
-        data: data,
-      });
+      callback?.({ type: "order:new", tag: `order-new`, data });
     };
-
     this.socket.on(eventName, handler);
     this.listeners.set(eventName, handler);
   }
 
-  /**
-   * Remove new order listener
-   */
   offNewOrder() {
     this.off("order:new");
   }
 
-  /**
-   * Listen to order status updates
-   * @param {Function} callback
-   */
   onOrderStatusUpdate(callback) {
     const eventName = "order:status_update";
-
     const handler = (data) => {
       callback?.({
         type: "order:status_update",
         tag: `order-status-${data.orderId}`,
-        data: data,
+        data,
       });
     };
-
     this.socket.on(eventName, handler);
     this.listeners.set(eventName, handler);
   }
 
-  /**
-   * Remove order status update listener
-   */
   offOrderStatusUpdate() {
     this.off("order:status_update");
   }
 
-  // ============================================================================
+  // ==========================================================================
   // GENERIC EVENT MANAGEMENT
-  // ============================================================================
+  // ==========================================================================
 
-  /**
-   * Listen to custom socket event
-   * @param {string} event
-   * @param {Function} callback
-   */
   on(event, callback) {
     if (!this.socket) {
-      console.warn("⚠️ Socket no inicializado");
+      warn("⚠️ Socket no inicializado");
       return;
     }
 
-    // Store in event handlers for custom events
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, []);
     }
@@ -406,17 +438,11 @@ class SocketService {
     this.socket.on(event, callback);
   }
 
-  /**
-   * Remove listener for specific event
-   * @param {string} event
-   * @param {Function} callback - Optional specific callback to remove
-   */
   off(event, callback) {
     if (this.socket) {
       if (callback) {
         this.socket.off(event, callback);
 
-        // Remove from eventHandlers
         if (this.eventHandlers.has(event)) {
           const handlers = this.eventHandlers.get(event);
           const index = handlers.indexOf(callback);
@@ -433,12 +459,6 @@ class SocketService {
     }
   }
 
-  /**
-   * Emit event to socket server (for Socket.IO events)
-   * @param {string} event
-   * @param {*} data
-   * @param {Function} callback - Optional acknowledgment callback
-   */
   emitToServer(event, data, callback) {
     if (this.socket?.connected) {
       if (callback) {
@@ -447,15 +467,10 @@ class SocketService {
         this.socket.emit(event, data);
       }
     } else {
-      console.warn("⚠️ Socket no conectado, no se puede emitir evento:", event);
+      warn("⚠️ Socket no conectado, no se puede emitir evento:", event);
     }
   }
 
-  /**
-   * Notify internal listeners (for internal events)
-   * @param {string} event
-   * @param {*} data
-   */
   notifyListeners(event, data) {
     if (this.eventHandlers.has(event)) {
       const handlers = this.eventHandlers.get(event);
@@ -463,58 +478,43 @@ class SocketService {
         try {
           handler(data);
         } catch (error) {
-          console.error(`Error en listener de ${event}:`, error);
+          logError(`Error en listener de ${event}:`, error);
         }
       });
     }
   }
 
-  // ============================================================================
+  // ==========================================================================
   // NOTIFICATION MANAGEMENT
-  // ============================================================================
+  // ==========================================================================
 
-  /**
-   * Request notification permission
-   * @returns {Promise<boolean>}
-   */
   async requestNotificationPermission() {
     if (!("Notification" in window)) {
-      console.log("ℹ️ Este navegador no soporta notificaciones");
+      log("ℹ️ Este navegador no soporta notificaciones");
       return false;
     }
 
     if (Notification.permission === "granted") {
-      console.log("✅ Permisos de notificación ya concedidos");
+      log("✅ Permisos de notificación ya concedidos");
       return true;
     }
 
     if (Notification.permission === "denied") {
-      console.log("❌ Permisos de notificación denegados");
+      log("❌ Permisos de notificación denegados");
       return false;
     }
 
     try {
       const permission = await Notification.requestPermission();
       const granted = permission === "granted";
-
-      if (granted) {
-        console.log("✅ Permisos de notificación concedidos");
-      } else {
-        console.log("⚠️ Permisos de notificación no concedidos");
-      }
-
+      log(granted ? "✅ Permisos concedidos" : "⚠️ Permisos no concedidos");
       return granted;
     } catch (error) {
-      console.error("❌ Error al solicitar permisos de notificación:", error);
+      logError("❌ Error al solicitar permisos de notificación:", error);
       return false;
     }
   }
 
-  /**
-   * Show browser notification
-   * @param {string} title
-   * @param {Object} options
-   */
   showNotification(title, options = {}) {
     if (Notification.permission !== "granted") {
       return;
@@ -527,15 +527,11 @@ class SocketService {
         ...options,
       });
 
-      // Auto-close after 5 seconds
       setTimeout(() => notification.close(), 5000);
 
-      // Handle notification click
       notification.onclick = () => {
         window.focus();
         notification.close();
-
-        // Custom click handler if provided
         if (options.onClick) {
           options.onClick(options.data);
         }
@@ -543,51 +539,38 @@ class SocketService {
 
       return notification;
     } catch (error) {
-      console.error("❌ Error al mostrar notificación:", error);
+      logError("❌ Error al mostrar notificación:", error);
       return null;
     }
   }
 
-  // ============================================================================
+  // ==========================================================================
   // UTILITY METHODS
-  // ============================================================================
+  // ==========================================================================
 
-  /**
-   * Get connection status info
-   * @returns {Object}
-   */
   getStatus() {
     return {
       connected: this.connected,
       socketId: this.getSocketId(),
       reconnectAttempts: this.reconnectAttempts,
       currentUser: this.currentUser
-        ? {
-            id: this.currentUser.id,
-            role: this.currentUser.role,
-          }
+        ? { id: this.currentUser.id, role: this.currentUser.role }
         : null,
     };
   }
 
-  /**
-   * Reconnect manually
-   */
   reconnect() {
     if (this.socket) {
-      console.log("🔄 Reconexión manual iniciada");
+      log("🔄 Reconexión manual iniciada");
       this.socket.connect();
     } else if (this.currentUser) {
-      console.log("🔄 Creando nueva conexión");
+      log("🔄 Creando nueva conexión");
       this.connect(this.currentUser);
     } else {
-      console.error("❌ No se puede reconectar sin usuario");
+      logError("❌ No se puede reconectar sin usuario");
     }
   }
 
-  /**
-   * Clear all listeners
-   */
   clearAllListeners() {
     this.listeners.clear();
     this.eventHandlers.clear();
@@ -596,7 +579,7 @@ class SocketService {
       this.socket.removeAllListeners();
     }
 
-    console.log("🧹 Todos los listeners eliminados");
+    log("🧹 Todos los listeners eliminados");
   }
 }
 
@@ -605,69 +588,5 @@ class SocketService {
 // ============================================================================
 
 export const socketService = new SocketService();
-
-// ============================================================================
-// REACT HOOK
-// ============================================================================
-
-import { useEffect, useState } from "react";
-import { useAuth } from "@Context/AuthContext";
-
-/**
- * React hook for using socket service
- * @param {Object} options - Configuration options
- * @returns {Object} Socket service and status
- */
-export const useSocket = (options = {}) => {
-  const { autoConnect = true, autoRequestPermission = true } = options;
-
-  const { user, isAuthenticated } = useAuth();
-  const [connected, setConnected] = useState(socketService.isConnected());
-  const [socketId, setSocketId] = useState(socketService.getSocketId());
-
-  useEffect(() => {
-    // Connect when authenticated
-    
-    if (autoConnect && isAuthenticated && user) {
-      socketService.connect(user);
-
-      // Request notification permission
-      if (autoRequestPermission) {
-        socketService.requestNotificationPermission();
-      }
-    }
-
-    // Setup status listeners
-    const handleConnected = (data) => {
-      setConnected(true);
-      setSocketId(data.socketId);
-    };
-
-    const handleDisconnected = () => {
-      setConnected(false);
-      setSocketId(null);
-    };
-
-    socketService.on("connected", handleConnected);
-    socketService.on("disconnected", handleDisconnected);
-
-    // Cleanup: Remove listeners but don't disconnect
-    // Socket stays active across component unmounts
-    return () => {
-      socketService.off("connected", handleConnected);
-      socketService.off("disconnected", handleDisconnected);
-    };
-  }, [isAuthenticated, user, autoConnect, autoRequestPermission]);
-
-  return {
-    socket: socketService,
-    connected,
-    socketId,
-    isConnected: connected,
-  };
-};
-
-window.socketService = socketService;
-console.log("🔧 socketService disponible en window.socketService");
 
 export default socketService;

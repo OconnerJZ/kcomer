@@ -2,7 +2,6 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   useMemo,
   useCallback,
 } from "react";
@@ -13,7 +12,7 @@ import {
   useGetOrdersByUserQuery,
 } from "@Api/orders.api";
 import { useAuth } from "./AuthContext";
-import socketService from "@Services/socketService";
+import { useSocketEvent } from "@Hooks/components/useSocket";
 
 // ============================================================================
 // CONSTANTS
@@ -97,47 +96,24 @@ export const OrdersProvider = ({ children }) => {
   // ============================================================================
   // SOCKET LISTENER - Solo para CLIENTES
   // ============================================================================
+  // Reactivo: se engancha en cuanto el socket conecta y se re-suscribe tras
+  // cada reconexión. Sin race condition ni stale closures.
 
-  useEffect(() => {
-    // Solo para clientes (no owners)
-    if (!socketService.isConnected()) return;
-    if (!user?.id || user?.role === "owner" || user?.role === "admin") {
-      return;
-    }
+  const isCustomer =
+    !!user?.id && user?.role !== "owner" && user?.role !== "admin";
 
-    console.log("[OrderContext] Setting up socket listener for user:", user.id);
-
-    const socket = socketService.socket;
-    if (!socket) {
-      console.error("[OrderContext] Socket not available");
-      return;
-    }
-
-    // Unirse a sala de usuario
-    socketService.joinUser(user.id);
-
-    // Handler para actualizaciones de estado
-    const handleStatusUpdate = (data) => {
-      console.log("🔄 [OrderContext] Status update:", data);
-
+  useSocketEvent(
+    "order:status_update",
+    (data) => {
       if (!data?.orderId) return;
-
-      // RTK Query se encargará de actualizar la cache automáticamente
-      // cuando se haga refetch, pero podemos invalidar manualmente si es necesario
+      // La invalidación real de la cache la maneja RTK Query en el refetch.
       refreshOrders();
-    };
-
-    // Registrar listener
-    socket.on("order:status_update", handleStatusUpdate);
-
-    console.log("✅ [OrderContext] Socket listener registered");
-
-    // Cleanup
-    return () => {
-      console.log("[OrderContext] Cleaning up socket listener");
-      socket.off("order:status_update", handleStatusUpdate);
-    };
-  }, [user?.id, user?.role, refreshOrders]);
+    },
+    {
+      enabled: isCustomer,
+      room: { type: "user", id: user?.id },
+    },
+  );
 
   // ============================================================================
   // CREATE ORDER
@@ -148,17 +124,14 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       try {
-        // Validate order data
         orderUtils.validateOrderData(orderData);
 
-        // Prepare payload
         const payload = {
           ...orderData,
           userId: user.id,
           customerName: orderData.customerName || user.name || "Cliente",
         };
 
-        // Make API call with optimistic update
         const result = await createOrderMutation(payload).unwrap();
 
         return { success: true, data: result };
@@ -192,7 +165,6 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       try {
-        // RTK Query manejará el optimistic update automáticamente
         await updateStatusMutation({
           id: orderId,
           userId: user?.id, // Para cache correcta

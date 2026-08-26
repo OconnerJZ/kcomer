@@ -9,10 +9,12 @@ const dynamicEndpoints = {
   menu: {
     path: ({ businessId }) => `${ENDPOINTS.businesses.base}/${businessId}/menu`,
     cacheKey: ({ businessId }) => businessId,
+    tagType: "Menu",
   },
   owner: {
     path: ({ ownerId }) => `${ENDPOINTS.businesses.owner}/${ownerId}`,
     cacheKey: ({ ownerId }) => ownerId,
+    tagType: "Business",
   },
 };
 
@@ -21,6 +23,7 @@ const endpoints = (builder) => {
     createEndpointBuilder(api, builder)(key, "getAll", {
       dynamicPath: dynamicEndpoints[key].path,
       getCacheKey: dynamicEndpoints[key].cacheKey,
+      tagType: dynamicEndpoints[key].tagType,
     });
   return {
     getMenu: createEndpoint("menu"),
@@ -29,7 +32,10 @@ const endpoints = (builder) => {
 };
 
 const businessEndpoint = (builder) => ({
-  ...crudEndpoints(ENDPOINTS.businesses.base,{prefix: "Business"})(builder),
+  ...crudEndpoints(ENDPOINTS.businesses.base, {
+    prefix: "Business",
+    tagType: "Business",
+  })(builder),
   ...endpoints(builder),
 });
 

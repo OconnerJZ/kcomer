@@ -16,6 +16,7 @@ const dynamicEndpoint = (builder, key, method) =>
   createEndpointBuilder(api, builder)(key, method, {
     dynamicPath: dynamicEndpoints[key].path,
     getCacheKey: dynamicEndpoints[key].cacheKey,
+    tagType: "Menu",
   });
 
 const customsEndpoints = (builder) => ({
@@ -24,7 +25,7 @@ const customsEndpoints = (builder) => ({
 });
 
 const menuEndpoints = (builder) => ({
-  ...crudEndpoints(ENDPOINTS.menus.base, { prefix: "Menu" })(builder),
+  ...crudEndpoints(ENDPOINTS.menus.base, { prefix: "Menu", tagType: "Menu" })(builder),
   ...customsEndpoints(builder),
 });
 

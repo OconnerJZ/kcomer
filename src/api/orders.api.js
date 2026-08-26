@@ -24,6 +24,7 @@ const customEndpoints = (builder) => {
     endpoint(key, method, {
       dynamicPath: dynamicEndpoints[key].path,
       getCacheKey: dynamicEndpoints[key].cacheKey,
+      tagType: "Orders",
     });
 
   return {
@@ -34,7 +35,7 @@ const customEndpoints = (builder) => {
 };
 
 const ordersEndpoints = (builder) => ({
-  ...crudEndpoints(ENDPOINTS.orders.base, {prefix: "Orders"})(builder),
+  ...crudEndpoints(ENDPOINTS.orders.base, { prefix: "Orders", tagType: "Orders" })(builder),
   ...customEndpoints(builder),
 });
 

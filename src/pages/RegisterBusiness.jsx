@@ -29,7 +29,7 @@ import { useAuth } from "@Context/AuthContext";
 
 const RegisterBusiness = ({ onSuccess }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   // ============================================================================
   // STATE
@@ -207,7 +207,11 @@ const RegisterBusiness = ({ onSuccess }) => {
       if (result) {
         setSubmitted(true);
         showSnackbar("Negocio registrado exitosamente");
-        
+
+        // Refrescar el usuario para traer el rol actualizado (owner) desde
+        // el backend; si no, el dashboard seguiría tratándolo como cliente.
+        await refreshUser();
+
         if (onSuccess) {
           setTimeout(() => {
             onSuccess();
@@ -258,7 +262,7 @@ const RegisterBusiness = ({ onSuccess }) => {
                   <Button
                     key="dashboard"
                     variant="contained"
-                    onClick={() => navigate("/explorar")}
+                    onClick={() => navigate("/owner")}
                   >
                     Administrar mi negocio
                   </Button>,

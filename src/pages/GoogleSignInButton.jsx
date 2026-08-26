@@ -1,55 +1,35 @@
 import PropTypes from "prop-types";
-import { Box, Button, Stack } from "@mui/material";
-import { Google } from "@mui/icons-material";
+import { Box, Stack } from "@mui/material";
 
-const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
-
+// Botón oficial de Google (GIS) en local y producción. GIS lo pinta dentro de
+// #google-btn (lo hace initializeGoogleSignIn desde useLogin). Reservamos alto
+// para que no salte la maquetación mientras el SDK lo renderiza, y lo
+// centramos para mantener la estética del formulario.
 const GoogleSignInButton = ({ loading }) => {
-  const handleCustomGoogleLogin = () => {
-    if (!isLocalhost && window.google) {
-      google.accounts.id.prompt();
-    }
-  };
-
   return (
     <Stack spacing={2} sx={{ mb: 3 }}>
-      {isLocalhost ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Box id="google-btn" />
-        </Box>
-      ) : (
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<Google />}
-          onClick={handleCustomGoogleLogin}
-          disabled={loading}
-          sx={{
-            py: 1.2,
-            borderColor: "#db4437",
-            color: "#db4437",
-            "&:hover": {
-              borderColor: "#c23321",
-              bgcolor: "rgba(219, 68, 55, 0.04)",
-            },
-          }}
-        >
-          Continuar con Google
-        </Button>
-      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          minHeight: 44, // evita el salto de layout hasta que GIS pinta el botón
+          opacity: loading ? 0.6 : 1,
+          pointerEvents: loading ? "none" : "auto",
+          transition: "opacity 0.2s ease",
+        }}
+      >
+        <Box id="google-btn" />
+      </Box>
     </Stack>
   );
 };
 
 GoogleSignInButton.propTypes = {
-  loading: PropTypes.bool.isRequired,
+  loading: PropTypes.bool,
+};
+
+GoogleSignInButton.defaultProps = {
+  loading: false,
 };
 
 export default GoogleSignInButton;

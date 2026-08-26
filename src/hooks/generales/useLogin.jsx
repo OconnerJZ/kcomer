@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "@Context/AuthContext";
 import { GOOGLE_CLIENT_ID } from "@Utils/enviroments";
@@ -71,10 +71,8 @@ const useLogin = () => {
     setIsRegisterBusiness(isBusinessRegistration);
   }, [from]);
 
-  // Inicializar Google Sign-In
-  useEffect(() => {
-    initializeGoogleSignIn(GOOGLE_CLIENT_ID, handleGoogleLoginCallback);
-  }, []);
+  // Inicialización de Google Sign-In: ver más abajo (usa un ref para no
+  // capturar una versión vieja del callback / stale closure).
 
   // ============================================================================
   // HANDLERS
@@ -102,6 +100,21 @@ const useLogin = () => {
     },
     [loginWithGoogle, isRegisterBusiness, navigate, redirectPath],
   );
+
+  // Ref siempre con la última versión del callback: así el wrapper que registra
+  // GIS es estable (init una sola vez) pero ejecuta el callback más reciente,
+  // evitando el stale closure con isRegisterBusiness / redirectPath.
+  const googleCallbackRef = useRef(handleGoogleLoginCallback);
+  useEffect(() => {
+    googleCallbackRef.current = handleGoogleLoginCallback;
+  }, [handleGoogleLoginCallback]);
+
+  // Inicializar Google Sign-In una sola vez con un wrapper estable.
+  useEffect(() => {
+    initializeGoogleSignIn(GOOGLE_CLIENT_ID, (credential) =>
+      googleCallbackRef.current(credential),
+    );
+  }, []);
 
   const handleSubmit = useCallback(
     async (credentials) => {
