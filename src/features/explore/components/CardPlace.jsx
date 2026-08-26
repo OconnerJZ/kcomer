@@ -1,5 +1,4 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
+import { useMemo, useState } from "react";
 import {
   CardHeader,
   Avatar,
@@ -21,8 +20,15 @@ import {
 import CardPlaceFront from "./CardPlaceFront";
 import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
+import { normalizeBusiness } from "@Features/business/model/business";
 
 const MEDIA_PATH = API_URL_MEDIA_SERVER;
+
+const getMediaUrl = (logo = "") => {
+  if (!logo) return "";
+  if (/^https?:\/\//i.test(logo)) return logo;
+  return `${MEDIA_PATH}/${String(logo).replace(/^\/+/, "")}`;
+};
 
 const TitlePlace = ({ text = "Tacos el pariente" }) => (
   <Typography className="titlePrimary" sx={{ fontWeight: 900, fontSize: "23px" }} level="title-sm">
@@ -30,35 +36,25 @@ const TitlePlace = ({ text = "Tacos el pariente" }) => (
   </Typography>
 );
 
-TitlePlace.propTypes = { text: PropTypes.string };
-
-const BusinessAvatar = ({ data }) => (
+const BusinessAvatar = ({ business }) => (
   <Avatar
     className="card-avatar"
     sx={{
       width: 110,
       height: 110,
-      border: data?.isOpen
+      border: business.open
         ? "2px solid rgba(13, 158, 61, 1)"
         : "2px solid rgb(255,64,59)",
       borderStyle: "dashed",
       padding: "2px",
       cursor: "pointer",
     }}
-    aria-label="recipe"
-    src={`${MEDIA_PATH}/${data?.urlImage}`}
+    aria-label={business.name || "negocio"}
+    src={getMediaUrl(business.logo)}
   >
-    {data?.title?.charAt(0) || "T"}
+    {business.name?.charAt(0) || "T"}
   </Avatar>
 );
-
-BusinessAvatar.propTypes = {
-  data: PropTypes.shape({
-    isOpen: PropTypes.bool,
-    urlImage: PropTypes.string,
-    title: PropTypes.string,
-  }),
-};
 
 const BusinessStats = ({ likes, hasDelivery }) => (
   <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
@@ -69,11 +65,6 @@ const BusinessStats = ({ likes, hasDelivery }) => (
     </Stack>
   </Box>
 );
-
-BusinessStats.propTypes = {
-  likes: PropTypes.number,
-  hasDelivery: PropTypes.bool,
-};
 
 const ScheduleButton = ({ onClick }) => (
   <IconButton
@@ -94,37 +85,29 @@ const ScheduleButton = ({ onClick }) => (
   </IconButton>
 );
 
-ScheduleButton.propTypes = { onClick: PropTypes.func.isRequired };
-
-const MovementContent = ({ movement, flipped, onMovement, data }) => {
+const MovementContent = ({ movement, flipped, onMovement, business }) => {
   const movementMap = {
-    location: <CardPlaceLocation flipped={flipped} onMovement={onMovement} />,
-    photo: <CardPlacePhotos flipped={flipped} onMovement={onMovement} />,
+    location: <CardPlaceLocation flipped={flipped} onMovement={onMovement} business={business} />,
+    photo: <CardPlacePhotos flipped={flipped} onMovement={onMovement} business={business} />,
     menu: (
       <CardPlaceMenu
         flipped={flipped}
         onMovement={onMovement}
-        businessId={data.id}
-        businessName={data.title}
-        menu={data.menu || []}
+        businessId={business.id}
+        businessName={business.name}
+        menu={business.menu}
       />
     ),
-    review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} />,
+    review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} business={business} />,
   };
 
   return movementMap[movement] || null;
 };
 
-MovementContent.propTypes = {
-  movement: PropTypes.string,
-  flipped: PropTypes.bool,
-  onMovement: PropTypes.func,
-  data: PropTypes.object,
-};
-
 const CardPlace = ({ data, loadBusinessMenu }) => {
+  const business = useMemo(() => normalizeBusiness(data), [data]);
   const { flipped, movement, expanded, onMovement, expandCard } = useCardPlace({
-    data,
+    data: business,
     loadBusinessMenu,
   });
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -139,12 +122,12 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
       <StyledCard sx={{ width: 340, borderRadius: "20px", position: "relative" }} elevation={7}>
         <CardHeader
           onClick={expandCard}
-          avatar={<BusinessAvatar data={data} />}
-          title={<TitlePlace text={data?.title} />}
+          avatar={<BusinessAvatar business={business} />}
+          title={<TitlePlace text={business.name} />}
           subheader={
             <Stack direction="row" spacing={1} justifyContent="center">
               <ScheduleButton onClick={handleScheduleOpen} />
-              <BusinessStats likes={data?.likes} hasDelivery={data?.hasDelivery} />
+              <BusinessStats likes={business.likes} hasDelivery={business.hasDelivery} />
             </Stack>
           }
           sx={{
@@ -157,29 +140,14 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
         />
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardPlaceFront flipped={flipped} onMovement={onMovement} data={data} />
-          <MovementContent movement={movement} flipped={flipped} onMovement={onMovement} data={data} />
+          <CardPlaceFront flipped={flipped} onMovement={onMovement} data={business} />
+          <MovementContent movement={movement} flipped={flipped} onMovement={onMovement} business={business} />
         </Collapse>
       </StyledCard>
 
-      <ScheduleDialog open={scheduleOpen} onClose={() => setScheduleOpen(false)} data={data} />
+      <ScheduleDialog open={scheduleOpen} onClose={() => setScheduleOpen(false)} data={business} />
     </>
   );
-};
-
-CardPlace.propTypes = {
-  data: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title: PropTypes.string.isRequired,
-    urlImage: PropTypes.string,
-    isOpen: PropTypes.bool,
-    likes: PropTypes.number,
-    hasDelivery: PropTypes.bool,
-    tags: PropTypes.arrayOf(PropTypes.object),
-    schedule: PropTypes.object,
-    menu: PropTypes.array,
-  }).isRequired,
-  loadBusinessMenu: PropTypes.func.isRequired,
 };
 
 export default CardPlace;
