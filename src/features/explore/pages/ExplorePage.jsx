@@ -1,18 +1,19 @@
 import {
   Box,
-  Button,
   CircularProgress,
   Grid,
+  IconButton,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
 import {
-  ArrowDownward,
+  ArrowDownwardRounded,
   Business,
   LocationOff,
   RestaurantMenu,
 } from "@mui/icons-material";
+import { keyframes } from "@mui/system";
 import CardPlace from "@Features/explore/components/CardPlace";
 import Parallax from "@Features/explore/components/Parallax";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
@@ -20,6 +21,17 @@ import Bg5 from "@Assets/images/qscome-bg-5.jpg";
 import useBusiness from "@Features/business/hooks/useBusiness";
 import useExplore from "@Features/explore/hooks/useExplore";
 import useGeolocation from "@Features/explore/hooks/useGeolocation";
+
+const ripple = keyframes`
+  0% { transform: scale(.72); opacity: .55; }
+  70% { opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+`;
+
+const floatArrow = keyframes`
+  0%, 100% { transform: translateY(-1px); }
+  50% { transform: translateY(4px); }
+`;
 
 const EmptyExploreState = ({ icon, title, description }) => (
   <Paper
@@ -30,9 +42,10 @@ const EmptyExploreState = ({ icon, title, description }) => (
       p: { xs: 3, sm: 4 },
       textAlign: "center",
       border: "1px solid",
-      borderColor: "divider",
-      borderRadius: 3,
-      bgcolor: "rgba(255,255,255,.86)",
+      borderColor: "rgba(0,0,0,.07)",
+      borderRadius: 4,
+      bgcolor: "rgba(255,255,255,.78)",
+      backdropFilter: "blur(14px)",
     }}
   >
     <Box sx={{ mb: 1.5, color: "text.secondary" }}>{icon}</Box>
@@ -41,6 +54,49 @@ const EmptyExploreState = ({ icon, title, description }) => (
       {description}
     </Typography>
   </Paper>
+);
+
+const WaveExploreButton = ({ onClick }) => (
+  <Stack direction="row" spacing={2} alignItems="center">
+    <Box sx={{ position: "relative", width: 60, height: 60, display: "grid", placeItems: "center" }}>
+      {[0, 1].map((index) => (
+        <Box
+          key={index}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,.52)",
+            animation: `${ripple} 2.35s ease-out ${index * 1.12}s infinite`,
+            pointerEvents: "none",
+          }}
+        />
+      ))}
+      <IconButton
+        onClick={onClick}
+        aria-label="ver lugares"
+        sx={{
+          width: 48,
+          height: 48,
+          bgcolor: "common.white",
+          color: "#282828",
+          boxShadow: "0 10px 28px rgba(0,0,0,.16)",
+          "&:hover": { bgcolor: "common.white", transform: "scale(1.05)" },
+          transition: "transform .2s ease",
+        }}
+      >
+        <ArrowDownwardRounded sx={{ animation: `${floatArrow} 1.55s ease-in-out infinite` }} />
+      </IconButton>
+    </Box>
+    <Box>
+      <Typography variant="body2" sx={{ color: "common.white", fontWeight: 800, lineHeight: 1.1 }}>
+        Ver lugares
+      </Typography>
+      <Typography variant="caption" sx={{ color: "rgba(255,255,255,.68)" }}>
+        Explora lo que hay cerca
+      </Typography>
+    </Box>
+  </Stack>
 );
 
 export default function ExplorePage() {
@@ -86,25 +142,8 @@ export default function ExplorePage() {
               >
                 Negocios locales, menús reales y todo lo que necesitas para elegir sin complicarte.
               </Typography>
-              <Box sx={{ pt: 1 }}>
-                <Button
-                  variant="contained"
-                  onClick={scrollToSection}
-                  endIcon={<ArrowDownward />}
-                  disableElevation
-                  sx={{
-                    px: 2.5,
-                    py: 1.15,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 800,
-                    bgcolor: "white",
-                    color: "text.primary",
-                    "&:hover": { bgcolor: "rgba(255,255,255,.9)" },
-                  }}
-                >
-                  Ver lugares
-                </Button>
+              <Box sx={{ pt: 1.5 }}>
+                <WaveExploreButton onClick={scrollToSection} />
               </Box>
             </Stack>
           </Box>
@@ -114,9 +153,11 @@ export default function ExplorePage() {
       <Box
         ref={seccionDestinoRef}
         sx={{
-          bgcolor: "#f7f7f7",
+          position: "relative",
           px: { xs: 2, sm: 3, md: 5 },
           py: { xs: 5, md: 7 },
+          // Mantener visible el background global de AppLayout.
+          bgcolor: "transparent",
         }}
       >
         <Box sx={{ maxWidth: 1280, mx: "auto" }}>
@@ -176,7 +217,7 @@ export default function ExplorePage() {
           )}
 
           {!helperBusinesses.isLoading && !geolocation.error && businesses.length > 0 && (
-            <Grid container spacing={{ xs: 2.5, md: 3 }} justifyContent="center" alignItems="flex-start">
+            <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center" alignItems="flex-start">
               {businesses.map((data) => (
                 <Grid key={data.id} item xs={12} sm={6} md={4} lg={3} sx={{ display: "flex", justifyContent: "center" }}>
                   <CardPlace data={data} loadBusinessMenu={loadBusinessMenu} />
