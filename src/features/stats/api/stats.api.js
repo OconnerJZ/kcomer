@@ -10,18 +10,6 @@ const statsEndpoints = (builder) => {
         `${ENDPOINTS.stats.business}/${businessId}?period=${period}`,
       tagType: "Stats",
     }),
-
-    getDashboardSummary: endpoint("stats-summary", "getAll", {
-      dynamicPath: ({ businessId }) =>
-        `${ENDPOINTS.stats.business}/${businessId}/summary`,
-      tagType: "Stats",
-    }),
-
-    getRevenueByPeriod: endpoint("stats-revenue", "getAll", {
-      dynamicPath: ({ businessId, startDate, endDate }) =>
-        `${ENDPOINTS.stats.business}/${businessId}/revenue?startDate=${startDate}&endDate=${endDate}`,
-      tagType: "Stats",
-    }),
   };
 };
 
@@ -30,8 +18,4 @@ const apiStats = api.injectEndpoints({
   overrideExisting: false,
 });
 
-export const {
-  useGetBusinessStatsQuery,
-  useGetDashboardSummaryQuery,
-  useGetRevenueByPeriodQuery,
-} = apiStats;
+export const { useGetBusinessStatsQuery } = apiStats;
