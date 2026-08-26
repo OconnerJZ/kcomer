@@ -9,6 +9,7 @@ import {
   Typography,
   Stack,
   IconButton,
+  Chip,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
@@ -17,14 +18,26 @@ import {
   formatOrderDate,
   formatCurrency,
 } from "@Features/orders/model/orderFormatters";
+import { getOrderUrgency } from "@Features/orders/model/orderPriority";
 
-const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedOrderId = null }) => (
+const urgencyChip = {
+  overdue: { color: "error", variant: "filled" },
+  warning: { color: "warning", variant: "filled" },
+  new: { color: "success", variant: "outlined" },
+  normal: { color: "default", variant: "outlined" },
+};
+
+const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedOrderId, now = Date.now() }) => (
   <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0 }}>
     <Table>
       <TableHead>
         <TableRow sx={{ borderBottom: "2px solid rgba(255, 75, 69, 0.8)" }}>
-          {["Orden", "Cliente", "Items", "Total", "Estado", "Fecha", "Acciones"].map((header) => (
-            <TableCell key={header} align={header === "Acciones" ? "right" : "left"} sx={{ fontWeight: 600, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#666", py: 2 }}>
+          {["Orden", "Cliente", "Items", "Total", "Estado", "Espera", "Fecha", "Acciones"].map((header) => (
+            <TableCell
+              key={header}
+              align={header === "Acciones" ? "right" : "left"}
+              sx={{ fontWeight: 600, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#666", py: 2 }}
+            >
               {header}
             </TableCell>
           ))}
@@ -33,15 +46,18 @@ const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedO
       <TableBody>
         {orders.map((order) => {
           const highlighted = String(order.id) === String(highlightedOrderId);
+          const urgency = getOrderUrgency(order, now);
+          const chip = urgencyChip[urgency.level] || urgencyChip.normal;
+
           return (
             <TableRow
               key={order.id}
               sx={{
                 borderBottom: "1px solid #f0f0f0",
-                bgcolor: highlighted ? "rgba(255, 75, 69, 0.10)" : "transparent",
+                bgcolor: highlighted ? "rgba(255, 75, 69, 0.08)" : "transparent",
                 boxShadow: highlighted ? "inset 4px 0 0 rgba(255, 75, 69, 0.9)" : "none",
-                "&:hover": { bgcolor: highlighted ? "rgba(255, 75, 69, 0.14)" : "#fafafa" },
-                transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+                "&:hover": { bgcolor: highlighted ? "rgba(255, 75, 69, 0.12)" : "#fafafa" },
+                transition: "background-color 0.2s ease, box-shadow 0.2s ease",
               }}
             >
               <TableCell><Typography variant="body2" sx={{ fontWeight: 600, fontFamily: "monospace" }}>#{order.id}</Typography></TableCell>
@@ -49,6 +65,9 @@ const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedO
               <TableCell><Typography variant="body2" sx={{ color: "#666", fontSize: "0.875rem" }}>{order.items.length}</Typography></TableCell>
               <TableCell><Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{formatCurrency(order.total)}</Typography></TableCell>
               <TableCell><StatusChip status={order.status} /></TableCell>
+              <TableCell>
+                <Chip size="small" label={urgency.label} color={chip.color} variant={chip.variant} />
+              </TableCell>
               <TableCell><Typography variant="caption" sx={{ color: "#999", fontSize: "0.75rem" }}>{formatOrderDate(order.createdAt)}</Typography></TableCell>
               <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
