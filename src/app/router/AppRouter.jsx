@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import Layout from "@Shared/components/layout/Layout";
+import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
 const Explorar = lazy(() => import("@Features/explore/pages/ExplorePage"));
@@ -37,7 +37,7 @@ export default function AppRouter() {
       <ScrollToTop />
       <Suspense fallback={<div>Cargando...</div>}>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<AppLayout />}>
             <Route index element={<Navigate to="explorar" replace />} />
             {routes.map((route) => (
               <Route
