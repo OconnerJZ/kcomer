@@ -20,6 +20,7 @@ import {
   getAuthErrorMessage,
   isValidSessionUser,
   prepareRegisterPayload,
+  refreshSessionUser,
 } from "@Features/auth/session/sessionModel";
 
 const AuthContext = createContext();
@@ -76,31 +77,31 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const persistMeData = useCallback((userData) => {
+    const currentUser = sessionStorage.load();
+    const updatedUser = refreshSessionUser({ currentUser, userData });
+    if (!sessionStorage.save(updatedUser)) {
+      throw new Error("No se pudo guardar la actualización");
+    }
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   const validateToken = useCallback(async () => {
     try {
       const result = await refetchMe();
       if (!result.data) throw new Error("Token validation failed");
-
-      const currentUser = sessionStorage.load();
-      if (!currentUser?.token) throw new Error("Token validation failed");
-
-      saveSession({
-        ...result.data,
-        token: currentUser.token,
-      });
-
+      persistMeData(result.data);
       return { success: true };
     } catch (err) {
       console.error("Token validation error:", err);
       clearSession();
       return { success: false, error: err.message };
     }
-  }, [refetchMe, saveSession, clearSession]);
+  }, [refetchMe, persistMeData, clearSession]);
 
   const startSessionWatcher = useCallback(() => {
-    if (sessionCheckInterval.current) {
-      clearInterval(sessionCheckInterval.current);
-    }
+    if (sessionCheckInterval.current) clearInterval(sessionCheckInterval.current);
 
     sessionCheckInterval.current = setInterval(() => {
       const current = sessionStorage.load();
@@ -116,10 +117,7 @@ export const AuthProvider = ({ children }) => {
     (authData) => {
       try {
         const userData = createSessionUser(authData);
-        if (!saveSession(userData)) {
-          throw new Error("No se pudo guardar la sesión");
-        }
-
+        if (!saveSession(userData)) throw new Error("No se pudo guardar la sesión");
         startSessionWatcher();
         return { success: true, user: userData };
       } catch (err) {
@@ -130,59 +128,42 @@ export const AuthProvider = ({ children }) => {
     [saveSession, startSessionWatcher],
   );
 
-  const login = useCallback(
-    async (credentials) => {
-      if (!credentials?.email || !credentials?.password) {
-        return { success: false, error: "Email y contraseña son requeridos" };
-      }
+  const login = useCallback(async (credentials) => {
+    if (!credentials?.email || !credentials?.password) {
+      return { success: false, error: "Email y contraseña son requeridos" };
+    }
+    setError(null);
+    try {
+      return handleAuthSuccess(await loginMutation(credentials).unwrap());
+    } catch (err) {
+      const message = getAuthErrorMessage(err);
+      setError(message);
+      return { success: false, error: message };
+    }
+  }, [loginMutation, handleAuthSuccess]);
 
-      setError(null);
-      try {
-        const response = await loginMutation(credentials).unwrap();
-        return handleAuthSuccess(response);
-      } catch (err) {
-        const message = getAuthErrorMessage(err);
-        setError(message);
-        return { success: false, error: message };
-      }
-    },
-    [loginMutation, handleAuthSuccess],
-  );
+  const loginWithGoogle = useCallback(async (payload) => {
+    if (!payload?.idToken) return { success: false, error: "Token de Google requerido" };
+    setError(null);
+    try {
+      return handleAuthSuccess(await loginGoogleMutation(payload).unwrap());
+    } catch (err) {
+      const message = getAuthErrorMessage(err);
+      setError(message);
+      return { success: false, error: message };
+    }
+  }, [loginGoogleMutation, handleAuthSuccess]);
 
-  const loginWithGoogle = useCallback(
-    async (payload) => {
-      if (!payload?.idToken) {
-        return { success: false, error: "Token de Google requerido" };
-      }
-
-      setError(null);
-      try {
-        const response = await loginGoogleMutation(payload).unwrap();
-        return handleAuthSuccess(response);
-      } catch (err) {
-        const message = getAuthErrorMessage(err);
-        setError(message);
-        return { success: false, error: message };
-      }
-    },
-    [loginGoogleMutation, handleAuthSuccess],
-  );
-
-  const register = useCallback(
-    async (userData) => {
-      setError(null);
-      try {
-        const payload = prepareRegisterPayload(userData);
-        const response = await registerMutation(payload).unwrap();
-        return handleAuthSuccess(response);
-      } catch (err) {
-        const message = getAuthErrorMessage(err);
-        setError(message);
-        return { success: false, error: message };
-      }
-    },
-    [registerMutation, handleAuthSuccess],
-  );
+  const register = useCallback(async (userData) => {
+    setError(null);
+    try {
+      return handleAuthSuccess(await registerMutation(prepareRegisterPayload(userData)).unwrap());
+    } catch (err) {
+      const message = getAuthErrorMessage(err);
+      setError(message);
+      return { success: false, error: message };
+    }
+  }, [registerMutation, handleAuthSuccess]);
 
   const logout = useCallback(() => {
     clearSession();
@@ -194,44 +175,25 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await refetchMe();
       if (!result.data) throw new Error("No se pudo actualizar el usuario");
-
-      const currentUser = sessionStorage.load();
-      if (!currentUser?.token) throw new Error("Sesión no válida");
-
-      const updatedUser = {
-        ...currentUser,
-        ...result.data,
-        token: currentUser.token,
-        lastUpdated: new Date().toISOString(),
-      };
-
-      if (!sessionStorage.save(updatedUser)) {
-        throw new Error("No se pudo guardar la actualización");
-      }
-
-      setUser(updatedUser);
+      const updatedUser = persistMeData(result.data);
       return { success: true, user: updatedUser };
     } catch (err) {
       const message = getAuthErrorMessage(err);
       setError(message);
       return { success: false, error: message };
     }
-  }, [refetchMe]);
+  }, [refetchMe, persistMeData]);
 
   const refreshUser = useCallback(() => updateUser(), [updateUser]);
   const clearError = useCallback(() => setError(null), []);
 
   useEffect(() => {
     if (isMeSuccess && meData) {
-      const currentUser = sessionStorage.load();
-      if (currentUser?.token) {
-        const updatedUser = {
-          ...meData,
-          token: currentUser.token,
-          lastUpdated: new Date().toISOString(),
-        };
-        sessionStorage.save(updatedUser);
-        setUser(updatedUser);
+      try {
+        persistMeData(meData);
+      } catch (err) {
+        console.error("Error refreshing session user:", err);
+        clearSession();
       }
     }
 
@@ -239,7 +201,7 @@ export const AuthProvider = ({ children }) => {
       console.warn("Error validating token, clearing session");
       clearSession();
     }
-  }, [isMeSuccess, isMeError, meData, clearSession]);
+  }, [isMeSuccess, isMeError, meData, clearSession, persistMeData]);
 
   useEffect(() => {
     setAuthLoading(true);
@@ -262,9 +224,7 @@ export const AuthProvider = ({ children }) => {
     setAuthLoading(false);
 
     return () => {
-      if (sessionCheckInterval.current) {
-        clearInterval(sessionCheckInterval.current);
-      }
+      if (sessionCheckInterval.current) clearInterval(sessionCheckInterval.current);
     };
   }, [clearSession, startSessionWatcher]);
 
@@ -274,42 +234,22 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("auth:unauthorized", onUnauthorized);
   }, [clearSession]);
 
-  const loading =
-    authLoading ||
-    isLoginLoading ||
-    isGoogleLoginLoading ||
-    isRegisterLoading ||
-    isMeLoading;
+  const loading = authLoading || isLoginLoading || isGoogleLoginLoading || isRegisterLoading || isMeLoading;
 
-  const value = useMemo(
-    () => ({
-      user,
-      loading,
-      error,
-      isAuthenticated: !!user,
-      login,
-      loginWithGoogle,
-      register,
-      logout,
-      updateUser,
-      refreshUser,
-      validateToken,
-      clearError,
-    }),
-    [
-      user,
-      loading,
-      error,
-      login,
-      loginWithGoogle,
-      register,
-      logout,
-      updateUser,
-      refreshUser,
-      validateToken,
-      clearError,
-    ],
-  );
+  const value = useMemo(() => ({
+    user,
+    loading,
+    error,
+    isAuthenticated: !!user,
+    login,
+    loginWithGoogle,
+    register,
+    logout,
+    updateUser,
+    refreshUser,
+    validateToken,
+    clearError,
+  }), [user, loading, error, login, loginWithGoogle, register, logout, updateUser, refreshUser, validateToken, clearError]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
