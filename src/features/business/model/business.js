@@ -5,17 +5,24 @@ const DEFAULT_PAYMENT_METHODS = [
   { method: "transfer", active: false, label: "Transferencia" },
 ];
 
+const compactValues = (values = []) =>
+  Array.from(new Set(values.filter((value) => value !== null && value !== undefined && value !== "")));
+
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
   const delivery = business.deliverySettings || business.delivery_settings || {};
   const methods = business.paymentMethods || business.payment_methods || [];
   const foodTypes = business.foodTypes || business.food_types || [];
+  const phone = business.phone || business.phones?.[0] || "";
+  const email = business.email || business.emails?.[0] || "";
 
   return {
     id: business.id ?? null,
     name: business.name || business.title || business.businessName || business.business_name || "",
-    phone: business.phone || "",
-    email: business.email || "",
+    phone,
+    phones: compactValues([phone, ...(business.phones || [])]),
+    email,
+    emails: compactValues([email, ...(business.emails || [])]),
     description: business.description || "",
     open: business.open ?? business.isOpen ?? business.is_open ?? true,
     prepTimeMin: Number(business.prepTimeMin ?? business.prep_time_min ?? 30),
