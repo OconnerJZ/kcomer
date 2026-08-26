@@ -18,40 +18,21 @@ import EmptyState from "@Features/orders/components/EmptyState";
 import { ORDER_STATUS } from "@Features/orders/model/orderStatus";
 
 const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [highlightedOrderId, setHighlightedOrderId] = useState(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const {
-    orders,
-    loading,
-    updateOrderStatus,
-    refreshOrders,
-  } = useBusinessOrders(businessId);
-
-  const { filterStatus, setFilterStatus, filteredOrders } = useOrderFilters(orders);
-
-  const {
-    isOpen,
-    order: selectedOrder,
-    openDialog,
-    closeDialog,
-  } = useOrderDialog();
+  const { orders, loading, updateOrderStatus, refreshOrders } = useBusinessOrders(businessId);
+  const { filterStatus, setFilterStatus, filteredOrders, now } = useOrderFilters(orders);
+  const { isOpen, order: selectedOrder, openDialog, closeDialog } = useOrderDialog();
 
   useEffect(() => {
     if (focusedOrderId == null || loading || orders.length === 0) return;
 
-    const targetOrder = orders.find(
-      (order) => String(order.id) === String(focusedOrderId),
-    );
-
+    const targetOrder = orders.find((order) => String(order.id) === String(focusedOrderId));
     if (!targetOrder) return;
 
     setFilterStatus("all");
@@ -59,10 +40,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
     openDialog(targetOrder);
     onFocusHandled?.();
 
-    const timeout = window.setTimeout(() => {
-      setHighlightedOrderId(null);
-    }, 4500);
-
+    const timeout = window.setTimeout(() => setHighlightedOrderId(null), 4500);
     return () => window.clearTimeout(timeout);
   }, [focusedOrderId, loading, orders, openDialog, onFocusHandled, setFilterStatus]);
 
@@ -74,10 +52,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
     try {
       const result = await updateOrderStatus(orderId, newStatus);
       if (result.success) {
-        showSnackbar(
-          `Orden actualizada a ${ORDER_STATUS[newStatus].label}`,
-          "success",
-        );
+        showSnackbar(`Orden actualizada a ${ORDER_STATUS[newStatus].label}`, "success");
         closeDialog();
       }
     } catch (error) {
@@ -113,6 +88,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
           onUpdateStatus={handleUpdateStatus}
           isSmall={isSmall}
           highlightedOrderId={highlightedOrderId}
+          now={now}
         />
       )}
 
@@ -126,6 +102,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
               onUpdateStatus={handleUpdateStatus}
               isSmall={isSmall}
               highlighted={String(order.id) === String(highlightedOrderId)}
+              now={now}
             />
           ))}
         </Stack>
@@ -148,11 +125,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
-          sx={{
-            border: "1px solid #e0e0e0",
-            borderRadius: 0,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
+          sx={{ border: "1px solid #e0e0e0", borderRadius: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
         >
           {snackbar.message}
         </Alert>
