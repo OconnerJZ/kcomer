@@ -19,8 +19,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { isOwner } from "@Const/roles";
-import DashboardNavbar from "@Components/layout/DashboardNavbar";
-import DashboardMobileNav from "@Components/layout/DashboardMobileNav";
+import DashboardNavbar from "@Features/owner/components/navigation/DashboardNavbar";
+import DashboardMobileNav from "@Features/owner/components/navigation/DashboardMobileNav";
 import OrdersTab from "@Features/owner/pages/OwnerOrders";
 import MenuTab from "@Features/owner/pages/OwnerMenu";
 import ReportsTab from "@Features/owner/pages/OwnerReports";
@@ -70,9 +70,7 @@ export default function OwnerDashboard() {
     }
   }, [businesses, selectedBusinessId]);
 
-  const pendingOrdersCount = useMemo(() => {
-    return getPendingOrders().length;
-  }, [getPendingOrders]);
+  const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
 
   if (!isOwner(user)) {
     return (
@@ -153,14 +151,12 @@ export default function OwnerDashboard() {
       <Box sx={{ height: { xs: 56, sm: 64 } }} />
 
       <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
-        <Fade in={true} timeout={500}>
+        <Fade in timeout={500}>
           <Box>
             {activeTab === 0 && <OrdersTab businessId={selectedBusinessId} loading={loadingOrders} />}
             {activeTab === 1 && <MenuTab businessId={selectedBusinessId} />}
             {activeTab === 2 && <ReportsTab businessId={selectedBusinessId} />}
-            {activeTab === 3 && (
-              <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />
-            )}
+            {activeTab === 3 && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
           </Box>
         </Fade>
       </Container>
