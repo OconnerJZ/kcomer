@@ -10,7 +10,7 @@ const Login = lazy(() => import("@Features/auth/pages/Login"));
 const Pedidos = lazy(() => import("@Features/checkout/pages/CheckoutPage"));
 const MisOrdenes = lazy(() => import("@Features/orders/pages/MyOrders"));
 const Perfil = lazy(() => import("@Features/profile/pages/ProfilePage"));
-const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
+const LandingRegister = lazy(() => import("@Features/owner/pages/OwnerRegistrationLanding"));
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 
 const ProtectedRoute = ({ children, roles }) => {
