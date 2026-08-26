@@ -25,8 +25,8 @@ const phones = (values = []) => values.map((phone) => (
 const useCardPlaceAccordion = ({ datacard }) => ({
   data: [
     { label: "Redes Sociales", icon: <Diversity3 style={{ fontSize: "23px" }} />, color: "primary", details: <CardPlaceRedes datacard={datacard} />, defaultExpanded: false },
-    { label: "Teléfono", icon: <Smartphone style={{ fontSize: "23px" }} />, color: "success", details: phones(datacard?.phones), defaultExpanded: false },
-    { label: "Correo electrónico", icon: <Email style={{ fontSize: "23px" }} />, color: "danger", details: emails(datacard?.emails), defaultExpanded: false },
+    { label: "Teléfono", icon: <Smartphone style={{ fontSize: "23px" }} />, color: "success", details: phones(datacard?.phones || []), defaultExpanded: false },
+    { label: "Correo electrónico", icon: <Email style={{ fontSize: "23px" }} />, color: "danger", details: emails(datacard?.emails || []), defaultExpanded: false },
   ],
 });
 
