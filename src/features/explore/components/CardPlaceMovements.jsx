@@ -1,35 +1,70 @@
 import { Swiper } from "antd-mobile";
-import { Avatar, List } from "antd";
+import { Avatar, List, Rate, Spin } from "antd";
 import { Box, Typography } from "@mui/material";
 import CardPlaceBack from "./CardPlaceBack";
 import MemoriesPhotos from "./MemoriesPhotos";
 import CardMenuList from "@Features/menu/components/CardMenuList";
 import { separateByGroups } from "@Shared/utils/commons";
 import useCart from "@Features/cart/context/CartContext";
+import { useGetReviewsByBusinessQuery } from "@Features/reviews/api/reviews.api";
+import { normalizeReviews } from "@Features/reviews/model/review";
+import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 
-export const CardPlaceLocation = ({ flipped, onMovement }) => (
-  <CardPlaceBack flipped={flipped} onMovement={onMovement}>
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3765.9365039125723!2d-99.61316002468963!3d19.285127281962982!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85cd8a40b51a21a7%3A0x530047adce4171e3!2sTacos%20El%20Pariente!5e0!3m2!1ses!2smx!4v1693958860077!5m2!1ses!2smx"
-      width="100%"
-      height="200"
-      style={{ border: 0 }}
-      loading="lazy"
-      referrerPolicy="no-referrer-when-downgrade"
-    />
-  </CardPlaceBack>
-);
+const resolveMediaUrl = (value = "") => {
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\//, "")}`;
+};
 
-export const CardPlacePhotos = ({ flipped, onMovement }) => {
-  const imgs = [
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/448976/berlin.jpg",
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/448976/london.jpg",
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/448976/los-angeles.jpg",
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/448976/italy.jpg",
-  ];
+const buildMapsEmbedUrl = ({ latitude, longitude, address }) => {
+  const query = latitude && longitude ? `${latitude},${longitude}` : address;
+  if (!query) return "";
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+};
+
+export const CardPlaceLocation = ({ flipped, onMovement, business }) => {
+  const location = business?.location || {};
+  const mapUrl = buildMapsEmbedUrl(location);
+
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
-      <MemoriesPhotos imgs={imgs} />
+      {mapUrl ? (
+        <iframe
+          src={mapUrl}
+          title={`Ubicación de ${business?.name || "negocio"}`}
+          width="100%"
+          height="200"
+          style={{ border: 0 }}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      ) : (
+        <Box sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Ubicación no disponible
+          </Typography>
+        </Box>
+      )}
+    </CardPlaceBack>
+  );
+};
+
+export const CardPlacePhotos = ({ flipped, onMovement, business }) => {
+  const imgs = (business?.photos || [])
+    .map((photo) => resolveMediaUrl(typeof photo === "string" ? photo : photo?.url || photo?.image || photo?.imageUrl))
+    .filter(Boolean);
+
+  return (
+    <CardPlaceBack flipped={flipped} onMovement={onMovement}>
+      {imgs.length > 0 ? (
+        <MemoriesPhotos imgs={imgs} />
+      ) : (
+        <Box sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Este negocio aún no tiene fotos publicadas
+          </Typography>
+        </Box>
+      )}
     </CardPlaceBack>
   );
 };
@@ -70,27 +105,43 @@ export const CardPlaceMenu = ({ flipped, onMovement, businessId, businessName, m
   );
 };
 
-export const CardPlaceReviews = ({ flipped, onMovement }) => {
-  const data = Array.from({ length: 23 }).map((_, i) => ({
-    title: `Usuario ${i + 1}`,
-    avatar: `https://xsgames.co/randomusers/avatar.php?g=pixel&key=${i}`,
-    content: "Excelente lugar, la comida está deliciosa y el servicio es muy bueno. Totalmente recomendado para pasar un buen rato con familia o amigos.",
-  }));
+export const CardPlaceReviews = ({ flipped, onMovement, businessId }) => {
+  const { data: reviewsResponse, isLoading } = useGetReviewsByBusinessQuery(
+    { businessId },
+    { skip: !businessId },
+  );
+  const reviews = normalizeReviews(reviewsResponse?.data || reviewsResponse || []);
 
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
-      <List
-        itemLayout="vertical"
-        size="default"
-        pagination={{ position: "bottom", align: "center", responsive: true, pageSize: 2 }}
-        dataSource={data}
-        renderItem={(item) => (
-          <List.Item key={item.title} style={{ fontSize: "11.5px" }}>
-            <List.Item.Meta avatar={<Avatar src={item.avatar} />} title={item.title} />
-            {item.content}
-          </List.Item>
-        )}
-      />
+      {isLoading ? (
+        <Box sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Spin />
+        </Box>
+      ) : reviews.length === 0 ? (
+        <Box sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Este negocio aún no tiene reseñas
+          </Typography>
+        </Box>
+      ) : (
+        <List
+          itemLayout="vertical"
+          size="default"
+          pagination={reviews.length > 2 ? { position: "bottom", align: "center", responsive: true, pageSize: 2 } : false}
+          dataSource={reviews}
+          renderItem={(item) => (
+            <List.Item key={item.id || `${item.userName}-${item.createdAt || item.comment}`} style={{ fontSize: "11.5px" }}>
+              <List.Item.Meta
+                avatar={<Avatar src={resolveMediaUrl(item.avatar)}>{item.userName?.charAt(0)}</Avatar>}
+                title={item.userName}
+                description={item.rating > 0 ? <Rate disabled allowHalf value={item.rating} style={{ fontSize: 13 }} /> : null}
+              />
+              {item.comment || "Sin comentario"}
+            </List.Item>
+          )}
+        />
+      )}
     </CardPlaceBack>
   );
 };
