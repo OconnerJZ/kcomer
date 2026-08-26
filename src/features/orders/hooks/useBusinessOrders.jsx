@@ -3,7 +3,7 @@ import {
   useGetOrdersByBusinessQuery,
   useOrderUpdateStatusMutation,
 } from "@Features/orders/api/orders.api";
-import { useSocketEvent } from "@Hooks/useSocket";
+import { useSocketEvent } from "@Shared/hooks/useSocket";
 
 export const useBusinessOrders = (businessId) => {
   const [error, setError] = useState(null);
