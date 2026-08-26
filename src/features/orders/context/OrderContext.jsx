@@ -1,0 +1,212 @@
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
+import PropTypes from "prop-types";
+import {
+  useCreateOrdersMutation,
+  useOrderUpdateStatusMutation,
+  useGetOrdersByUserQuery,
+} from "@Features/orders/api/orders.api";
+import { useAuth } from "@Features/auth/context/AuthContext";
+import { useSocketEvent } from "@Hooks/components/useSocket";
+
+const OrdersContext = createContext();
+
+export const ORDER_STATUS = {
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  PREPARING: "preparing",
+  READY: "ready",
+  IN_DELIVERY: "in_delivery",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+export const STATUS_LABELS = {
+  [ORDER_STATUS.PENDING]: "Pendiente",
+  [ORDER_STATUS.ACCEPTED]: "Aceptada",
+  [ORDER_STATUS.PREPARING]: "Preparando",
+  [ORDER_STATUS.READY]: "Lista",
+  [ORDER_STATUS.IN_DELIVERY]: "En camino",
+  [ORDER_STATUS.COMPLETED]: "Completada",
+  [ORDER_STATUS.CANCELLED]: "Cancelada",
+};
+
+const orderUtils = {
+  validateOrderData: (orderData) => {
+    if (!orderData) throw new Error("Datos de orden no proporcionados");
+    if (!orderData.businessId) throw new Error("ID de negocio requerido");
+    if (!orderData.items || !Array.isArray(orderData.items)) {
+      throw new Error("Items de orden requeridos");
+    }
+    if (orderData.items.length === 0) {
+      throw new Error("La orden debe contener al menos un item");
+    }
+  },
+};
+
+export const OrdersProvider = ({ children }) => {
+  const { user } = useAuth();
+
+  const {
+    data: ordersResponse,
+    isLoading: loading,
+    error: queryError,
+    refetch: refreshOrders,
+  } = useGetOrdersByUserQuery(
+    { userId: user?.id },
+    { skip: !user?.id },
+  );
+
+  const [createOrderMutation, { isLoading: creating }] =
+    useCreateOrdersMutation();
+  const [updateStatusMutation, { isLoading: updating }] =
+    useOrderUpdateStatusMutation();
+  const [error, setError] = useState(null);
+
+  const orders = useMemo(
+    () => ordersResponse?.data || ordersResponse || [],
+    [ordersResponse],
+  );
+
+  const isCustomer =
+    !!user?.id && user?.role !== "owner" && user?.role !== "admin";
+
+  useSocketEvent(
+    "order:status_update",
+    (data) => {
+      if (!data?.orderId) return;
+      refreshOrders();
+    },
+    {
+      enabled: isCustomer,
+      room: { type: "user", id: user?.id },
+    },
+  );
+
+  const createOrder = useCallback(
+    async (orderData) => {
+      setError(null);
+      try {
+        orderUtils.validateOrderData(orderData);
+        const payload = {
+          ...orderData,
+          userId: user.id,
+          customerName: orderData.customerName || user.name || "Cliente",
+        };
+        const result = await createOrderMutation(payload).unwrap();
+        return { success: true, data: result };
+      } catch (err) {
+        const errorMessage =
+          err?.data?.message || err?.message || "Error al crear orden";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [user, createOrderMutation],
+  );
+
+  const updateOrderStatus = useCallback(
+    async (orderId, status, note = "") => {
+      if (!orderId) throw new Error("ID de orden requerido");
+      if (!status) throw new Error("Estado requerido");
+      setError(null);
+      try {
+        await updateStatusMutation({
+          id: orderId,
+          userId: user?.id,
+          body: { status, note: note || undefined },
+        }).unwrap();
+        return { success: true };
+      } catch (err) {
+        const errorMessage =
+          err?.data?.message || err?.message || "Error al actualizar estado";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [user?.id, updateStatusMutation],
+  );
+
+  const cancelOrder = useCallback(
+    (orderId, reason = "Orden cancelada por el usuario") =>
+      updateOrderStatus(orderId, ORDER_STATUS.CANCELLED, reason),
+    [updateOrderStatus],
+  );
+
+  const selectors = useMemo(
+    () => ({
+      getOrdersByUser: (userId) =>
+        orders.filter((order) => order.userId === userId),
+      getOrdersByBusiness: (businessId) =>
+        orders.filter((order) => order.businessId === businessId),
+      getOrdersByStatus: (status) =>
+        orders.filter((order) => order.status === status),
+      getOrderById: (orderId) => orders.find((order) => order.id === orderId),
+      getPendingOrders: () =>
+        orders.filter((order) => order.status === ORDER_STATUS.PENDING),
+      getActiveOrders: () =>
+        orders.filter(
+          (order) =>
+            ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(
+              order.status,
+            ),
+        ),
+      getCompletedOrders: () =>
+        orders.filter((order) =>
+          [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(order.status),
+        ),
+    }),
+    [orders],
+  );
+
+  const value = useMemo(
+    () => ({
+      orders,
+      loading: loading || creating || updating,
+      error: error || queryError?.message,
+      createOrder,
+      updateOrderStatus,
+      cancelOrder,
+      refreshOrders,
+      ...selectors,
+      ORDER_STATUS,
+      STATUS_LABELS,
+    }),
+    [
+      orders,
+      loading,
+      creating,
+      updating,
+      error,
+      queryError,
+      createOrder,
+      updateOrderStatus,
+      cancelOrder,
+      refreshOrders,
+      selectors,
+    ],
+  );
+
+  return (
+    <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>
+  );
+};
+
+OrdersProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export const useOrders = () => {
+  const context = useContext(OrdersContext);
+  if (!context) {
+    throw new Error("useOrders debe usarse dentro de OrdersProvider");
+  }
+  return context;
+};
+
+export default useOrders;
