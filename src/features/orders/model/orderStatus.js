@@ -14,6 +14,7 @@ export const ORDER_STATUS = {
   in_delivery: { label: "En camino", color: "in_delivery", icon: LocalShipping },
   completed: { label: "Completada", color: "completed", icon: CheckCircle },
   cancelled: { label: "Cancelada", color: "error", icon: Cancel },
+  rejected: { label: "Rechazada", color: "error", icon: Cancel },
 };
 
 export const STATUS_COLORS = {
