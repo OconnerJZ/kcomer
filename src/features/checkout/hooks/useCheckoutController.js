@@ -9,14 +9,6 @@ import {
   validateCheckout,
 } from "../model/checkout";
 
-const normalizeAddresses = (addresses = []) =>
-  (Array.isArray(addresses) ? addresses : []).map((address, index) => ({
-    id: address.id ?? index,
-    street: address.street || address.address || address.line1 || "",
-    number: address.number || address.externalNumber || address.external_number || "",
-    references: address.references || address.reference || "",
-  }));
-
 export const useCheckoutController = (providedAddresses) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -42,7 +34,7 @@ export const useCheckoutController = (providedAddresses) => {
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
 
   const addresses = useMemo(
-    () => normalizeAddresses(providedAddresses ?? user?.addresses ?? []),
+    () => providedAddresses ?? user?.addresses ?? [],
     [providedAddresses, user?.addresses],
   );
 
