@@ -37,9 +37,8 @@ import {
   Edit,
 } from "@mui/icons-material";
 
-// ✅ Importar hook refactorizado
-import useBusinessSettings from "@Hooks/generales/useBusinessSettings";
-import ScheduleField from "@Components/forms/ScheduleField";
+import useBusinessSettings from "@Features/owner/hooks/useBusinessSettings";
+import ScheduleField from "@Features/owner/components/registration/ScheduleField";
 
 const OwnerSettings = ({ businessData, onRefresh }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -49,9 +48,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     severity: "success",
   });
 
-  // ✅ Hook refactorizado con RTK Query
   const {
-    // State
     basicInfo,
     locationInfo,
     schedules,
@@ -59,21 +56,15 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     paymentMethods,
     selectedFoodTypes,
     photos,
-    
-    // Setters
     setBasicInfo,
     setLocationInfo,
     setSchedules,
     setDeliverySettings,
     setPaymentMethods,
     setSelectedFoodTypes,
-
-    // Catalogs
     availableFoodTypes,
     availablePaymentMethods,
     loadingCatalogs,
-
-    // Actions
     updateBasicInfo,
     updateLocation,
     updateSchedules,
@@ -82,18 +73,12 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     updateFoodTypes,
     uploadPhoto,
     deletePhoto,
-
-    // Loading & Error
     loading,
     error,
   } = useBusinessSettings(businessData);
 
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -204,24 +189,20 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   };
 
   const togglePaymentMethod = (method) => {
-    setPaymentMethods(prev =>
-      prev.map(pm =>
-        pm.method === method ? { ...pm, is_active: !pm.is_active } : pm
-      )
+    setPaymentMethods((prev) =>
+      prev.map((pm) =>
+        pm.method === method ? { ...pm, is_active: !pm.is_active } : pm,
+      ),
     );
   };
 
   const toggleFoodType = (typeId) => {
-    setSelectedFoodTypes(prev =>
+    setSelectedFoodTypes((prev) =>
       prev.includes(typeId)
-        ? prev.filter(id => id !== typeId)
-        : [...prev, typeId]
+        ? prev.filter((id) => id !== typeId)
+        : [...prev, typeId],
     );
   };
-
-  // ============================================================================
-  // TAB COMPONENTS
-  // ============================================================================
 
   const BasicInfoTab = () => (
     <Paper sx={{ p: 3 }}>
@@ -234,16 +215,16 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
       <Card sx={{ mb: 3 }} elevation={0}>
         <CardContent>
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
+          <Box sx={{ textAlign: "center", mb: 2 }}>
             <Avatar
               src={logoPreview || basicInfo.logo_url}
               sx={{
                 width: 120,
                 height: 120,
-                mx: 'auto',
+                mx: "auto",
                 mb: 2,
-                border: '3px solid',
-                borderColor: 'primary.light',
+                border: "3px solid",
+                borderColor: "primary.light",
               }}
             >
               <Business sx={{ fontSize: 60 }} />
@@ -265,7 +246,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
             </Button>
           </Box>
 
-          <Alert severity="info" sx={{ fontSize: '0.75rem' }}>
+          <Alert severity="info" sx={{ fontSize: "0.75rem" }}>
             Tamaño recomendado: 512x512px
             <br />
             Máximo: 5MB
@@ -283,7 +264,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           fullWidth
           required
         />
-        
+
         <TextField
           label="Descripción"
           value={basicInfo.description}
@@ -361,9 +342,11 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
             />
           }
           label={
-            basicInfo.is_open 
-              ? <Chip label="Negocio abierto" color="success" variant="outlined" />  
-              : <Chip label="Negocio cerrado" color="error" variant="outlined" />
+            basicInfo.is_open ? (
+              <Chip label="Negocio abierto" color="success" variant="outlined" />
+            ) : (
+              <Chip label="Negocio cerrado" color="error" variant="outlined" />
+            )
           }
         />
 
@@ -399,7 +382,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           multiline
           rows={2}
         />
-        
+
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
@@ -454,11 +437,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           Puedes obtener las coordenadas desde Google Maps haciendo clic derecho en la ubicación.
         </Alert>
 
-        <Button
-          variant="contained"
-          onClick={handleSaveLocation}
-          disabled={loading}
-        >
+        <Button variant="contained" onClick={handleSaveLocation} disabled={loading}>
           {loading ? <CircularProgress size={24} /> : "Guardar Ubicación"}
         </Button>
       </Stack>
@@ -474,10 +453,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         </Typography>
       </Stack>
 
-      <ScheduleField 
-        schedules={schedules}
-        onChange={setSchedules}
-      />
+      <ScheduleField schedules={schedules} onChange={setSchedules} />
 
       <Button
         variant="contained"
@@ -573,11 +549,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           label="Usar repartidores propios"
         />
 
-        <Button
-          variant="contained"
-          onClick={handleSaveDelivery}
-          disabled={loading}
-        >
+        <Button variant="contained" onClick={handleSaveDelivery} disabled={loading}>
           {loading ? <CircularProgress size={24} /> : "Guardar Configuración"}
         </Button>
       </Stack>
@@ -630,7 +602,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
       </Stack>
 
       {loadingCatalogs ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
           <CircularProgress />
         </Box>
       ) : (
@@ -638,30 +610,26 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           <Grid container spacing={2}>
             {availableFoodTypes.map((type) => (
               <Grid item xs={6} md={4} key={type.id}>
-                <Card 
+                <Card
                   variant="outlined"
                   sx={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                     borderWidth: selectedFoodTypes.includes(type.id) ? 2 : 1,
-                    borderColor: selectedFoodTypes.includes(type.id) ? 'primary.main' : 'divider',
+                    borderColor: selectedFoodTypes.includes(type.id)
+                      ? "primary.main"
+                      : "divider",
                   }}
                   onClick={() => toggleFoodType(type.id)}
                 >
                   <CardContent>
-                    <Typography align="center">
-                      {type.name}
-                    </Typography>
+                    <Typography align="center">{type.name}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
 
-          <Button
-            variant="contained"
-            onClick={handleSaveFoodTypes}
-            disabled={loading}
-          >
+          <Button variant="contained" onClick={handleSaveFoodTypes} disabled={loading}>
             {loading ? <CircularProgress size={24} /> : "Guardar Tipos"}
           </Button>
         </Stack>
@@ -686,12 +654,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         sx={{ mb: 3 }}
       >
         Agregar Foto
-        <input
-          type="file"
-          hidden
-          accept="image/*"
-          onChange={handlePhotoUpload}
-        />
+        <input type="file" hidden accept="image/*" onChange={handlePhotoUpload} />
       </Button>
 
       <Grid container spacing={2}>
@@ -727,10 +690,6 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     </Paper>
   );
 
-  // ============================================================================
-  // MAIN RENDER
-  // ============================================================================
-
   return (
     <Box>
       <Paper sx={{ mb: 3 }}>
@@ -760,7 +719,6 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         {activeTab === 6 && <GalleryTab />}
       </Box>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
