@@ -18,7 +18,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { isOwner } from "@Const/roles";
+import { isOwner } from "@Features/auth/model/roles";
 import DashboardNavbar from "@Features/owner/components/navigation/DashboardNavbar";
 import DashboardMobileNav from "@Features/owner/components/navigation/DashboardMobileNav";
 import OrdersTab from "@Features/owner/pages/OwnerOrders";
