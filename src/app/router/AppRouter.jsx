@@ -1,11 +1,12 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@Context/AuthContext";
+import { useAuth } from "@Features/auth/context/AuthContext";
 import Layout from "@Components/layout/Layout";
+import ScrollToTop from "@Components/ScrollToTop";
 
 const Explorar = lazy(() => import("@Pages/Explorar"));
 const Nosotros = lazy(() => import("@Pages/Nosotros"));
-const Login = lazy(() => import("@Pages/Login"));
+const Login = lazy(() => import("@Features/auth/pages/Login"));
 const Pedidos = lazy(() => import("@Pages/Pedidos"));
 const MisOrdenes = lazy(() => import("@Pages/MisOrdenes"));
 const Perfil = lazy(() => import("@Pages/Perfil"));
@@ -14,13 +15,9 @@ const OwnerDashboard = lazy(() => import("@Pages/OwnerDashboard"));
 
 const ProtectedRoute = ({ children, roles }) => {
   const { isAuthenticated, loading, user } = useAuth();
-
   if (loading) return <div>Cargando...</div>;
   if (!isAuthenticated) return <Navigate to="/login/orden" replace />;
-  if (roles && !roles.includes(user?.role)) {
-    return <Navigate to="/explorar" replace />;
-  }
-
+  if (roles && !roles.includes(user?.role)) return <Navigate to="/explorar" replace />;
   return children;
 };
 
@@ -37,6 +34,7 @@ const routes = [
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Suspense fallback={<div>Cargando...</div>}>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -45,19 +43,13 @@ export default function AppRouter() {
               <Route
                 key={route.path}
                 path={route.path}
-                element={
-                  route.isProtected ? (
-                    <ProtectedRoute roles={route.roles}>
-                      {route.element}
-                    </ProtectedRoute>
-                  ) : (
-                    route.element
-                  )
-                }
+                element={route.isProtected ? (
+                  <ProtectedRoute roles={route.roles}>{route.element}</ProtectedRoute>
+                ) : route.element}
               />
             ))}
           </Route>
-          <Route path="/login/:from" element={<Login />} />
+          <Route path="/login/:from?" element={<Login />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
