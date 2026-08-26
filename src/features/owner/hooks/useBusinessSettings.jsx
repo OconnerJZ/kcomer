@@ -16,11 +16,7 @@ import {
   toLocationPayload,
   toPaymentMethodsPayload,
 } from "@Features/business/model/business";
-import {
-  useGetCategoriesQuery,
-  useGetFoodTypesQuery,
-  useGetPaymentMethodsQuery,
-} from "@Features/catalogs/api/catalogs.api";
+import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
 import {
   uploadHelpers,
   useUploadImageMutation,
@@ -47,8 +43,6 @@ export const useBusinessSettings = (businessData) => {
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
 
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
-  const { data: categoriesResponse, isLoading: loadingCategories } = useGetCategoriesQuery();
-  const { data: paymentMethodsResponse, isLoading: loadingPaymentMethods } = useGetPaymentMethodsQuery();
 
   const [basicInfo, setBasicInfo] = useState({
     name: "",
@@ -97,8 +91,6 @@ export const useBusinessSettings = (businessData) => {
   }, [businessData]);
 
   const availableFoodTypes = useMemo(() => foodTypesResponse?.data || foodTypesResponse || [], [foodTypesResponse]);
-  const availableCategories = useMemo(() => categoriesResponse?.data || categoriesResponse || [], [categoriesResponse]);
-  const availablePaymentMethods = useMemo(() => paymentMethodsResponse?.data || paymentMethodsResponse || [], [paymentMethodsResponse]);
   const businessId = businessData?.id;
 
   const runMutation = useCallback(async (mutation, args, fallback) => {
@@ -203,9 +195,7 @@ export const useBusinessSettings = (businessData) => {
     setPaymentMethods,
     setSelectedFoodTypes,
     availableFoodTypes,
-    availableCategories,
-    availablePaymentMethods,
-    loadingCatalogs: loadingFoodTypes || loadingCategories || loadingPaymentMethods,
+    loadingCatalogs: loadingFoodTypes,
     updateBasicInfo,
     updateLocation,
     updateSchedules,
