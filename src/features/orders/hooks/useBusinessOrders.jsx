@@ -63,16 +63,11 @@ export const useBusinessOrders = (businessId) => {
     (newOrder) => {
       if (!newOrder?.id) return;
       const eventBusinessId = newOrder.businessId ?? newOrder.business_id;
-
-      // La suscripción global del owner recibe eventos de todos sus negocios,
-      // pero esta query representa únicamente el negocio visible actualmente.
       if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
       refreshOrders();
     },
     {
       enabled: !!businessId,
-      // Owner/admin ya están suscritos globalmente desde AppProviders.
-      // Roles operativos futuros se suscribirán solo al negocio que atienden.
       room: hasGlobalRealtimeScope
         ? undefined
         : { type: "business", id: businessId },
@@ -89,13 +84,9 @@ export const useBusinessOrders = (businessId) => {
       getReadyOrders: () => orders.filter((order) => order.status === "ready"),
       getInDeliveryOrders: () => orders.filter((order) => order.status === "in_delivery"),
       getActiveOrders: () =>
-        orders.filter(
-          (order) => !["completed", "cancelled", "rejected"].includes(order.status),
-        ),
+        orders.filter((order) => !["completed", "cancelled"].includes(order.status)),
       getCompletedOrders: () =>
-        orders.filter((order) =>
-          ["completed", "cancelled", "rejected"].includes(order.status),
-        ),
+        orders.filter((order) => ["completed", "cancelled"].includes(order.status)),
       getTotalOrders: () => orders.length,
       hasOrders: () => orders.length > 0,
       hasPendingOrders: () => orders.some((order) => order.status === "pending"),
