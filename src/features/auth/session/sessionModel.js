@@ -1,13 +1,28 @@
+import { normalizeSessionUser, normalizeUser } from "@Features/users/model/user";
+
 export const createSessionUser = (authResponse) => {
   if (!authResponse?.user || !authResponse?.token) {
     throw new Error("Datos de autenticación incompletos");
   }
 
-  return {
-    ...authResponse.user,
+  return normalizeSessionUser({
+    user: authResponse.user,
     token: authResponse.token,
-    lastUpdated: new Date().toISOString(),
-  };
+  });
+};
+
+export const refreshSessionUser = ({ currentUser, userData }) => {
+  if (!currentUser?.token) {
+    throw new Error("Sesión no válida");
+  }
+
+  return normalizeSessionUser({
+    user: {
+      ...normalizeUser(currentUser),
+      ...normalizeUser(userData),
+    },
+    token: currentUser.token,
+  });
 };
 
 export const isValidSessionUser = (userData) =>
