@@ -4,6 +4,10 @@ const CATALOGS_NAME = "api/catalogs";
 const MENU_NAME = "api/menus";
 const USERS_NAME = "api/users";
 const ORDERS_NAME = "api/orders";
+const PAYMENTS_NAME = "api/payments";
+const REVIEWS_NAME = "api/reviews";
+const STATS_NAME = "api/stats";
+const UPLOAD_NAME = "api/upload";
 
 export const ENDPOINTS = {
   auth: {
@@ -34,22 +38,22 @@ export const ENDPOINTS = {
     business: `${ORDERS_NAME}/business`,
   },
   payments: {
-    base: "/api/payments",
-    verify: "/api/payments/verify",
-    intent: "/api/payments/intent",
-    confirm: "/api/payments/confirm",
+    base: PAYMENTS_NAME,
+    verify: `${PAYMENTS_NAME}/verify`,
+    intent: `${PAYMENTS_NAME}/intent`,
+    confirm: `${PAYMENTS_NAME}/confirm`,
   },
   reviews: {
-    base: "/api/reviews",
-    business: "/api/reviews/business",
+    base: REVIEWS_NAME,
+    business: `${REVIEWS_NAME}/business`,
   },
   stats: {
-    business: "/api/stats/business",
-    summary: "/api/stats/business/summary",
-    revenue: "/api/stats/business/revenue",
+    business: `${STATS_NAME}/business`,
+    summary: `${STATS_NAME}/business/summary`,
+    revenue: `${STATS_NAME}/business/revenue`,
   },
   upload: {
-    image: "/api/upload/image",
-    multiple: "/api/upload/multiple",
+    image: `${UPLOAD_NAME}/image`,
+    multiple: `${UPLOAD_NAME}/multiple`,
   },
 };
