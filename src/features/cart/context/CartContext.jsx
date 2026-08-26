@@ -17,11 +17,32 @@ const calculateBusinessTotal = (items) =>
     0,
   );
 
+const normalizeStoredCart = (storedCart = {}) =>
+  Object.fromEntries(
+    Object.entries(storedCart).map(([businessId, business]) => {
+      const items = Object.fromEntries(
+        Object.entries(business?.items || {}).map(([itemId, item]) => [
+          itemId,
+          normalizeCartItem({ ...item, id: item.id ?? itemId }),
+        ]),
+      );
+
+      return [
+        businessId,
+        {
+          businessName: business?.businessName || business?.business_name || "",
+          items,
+          total: calculateBusinessTotal(items),
+        },
+      ];
+    }),
+  );
+
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : {};
+      return saved ? normalizeStoredCart(JSON.parse(saved)) : {};
     } catch {
       return {};
     }
