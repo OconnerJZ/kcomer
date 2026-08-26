@@ -5,7 +5,7 @@ import FilterMenuProvider from "@Context/FilterMenuContext";
 import { CartProvider } from "@Features/cart/context/CartContext";
 import { AuthProvider, useAuth } from "@Features/auth/context/AuthContext";
 import { OrdersProvider } from "@Features/orders/context/OrderContext";
-import socketService from "@Services/socketService";
+import socketService from "@Shared/services/realtime/socketService";
 
 const SocketInitializer = () => {
   const { user, isAuthenticated } = useAuth();
