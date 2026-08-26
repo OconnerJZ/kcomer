@@ -14,6 +14,7 @@ import {
 import { Visibility } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
 import ActionButton from "./ActionButton";
+import PendingOrderActions from "./PendingOrderActions";
 import {
   formatOrderDate,
   formatCurrency,
@@ -70,9 +71,13 @@ const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedO
               </TableCell>
               <TableCell><Typography variant="caption" sx={{ color: "#999", fontSize: "0.75rem" }}>{formatOrderDate(order.createdAt)}</Typography></TableCell>
               <TableCell align="right">
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
                   <IconButton size="small" onClick={() => onViewOrder(order)} sx={{ "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}><Visibility sx={{ fontSize: 18 }} /></IconButton>
-                  <ActionButton order={order} onClick={onUpdateStatus} isSmall={isSmall} />
+                  {order.status === "pending" ? (
+                    <PendingOrderActions order={order} onUpdateStatus={onUpdateStatus} />
+                  ) : (
+                    <ActionButton order={order} onClick={onUpdateStatus} isSmall={isSmall} />
+                  )}
                 </Stack>
               </TableCell>
             </TableRow>
