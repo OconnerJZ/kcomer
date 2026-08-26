@@ -127,18 +127,17 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
     setSnackbar({ open: true, message, severity });
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
+  const handleUpdateStatus = async (orderId, newStatus, note = "") => {
     try {
-      const result = await updateOrderStatus(orderId, newStatus);
+      const result = await updateOrderStatus(orderId, newStatus, note);
       if (result.success) {
-        showSnackbar(
-          `Orden actualizada a ${ORDER_STATUS[newStatus].label}`,
-          "success",
-        );
+        const label = ORDER_STATUS[newStatus]?.label || newStatus;
+        showSnackbar(`Orden actualizada a ${label}`, "success");
         closeDialog();
       }
     } catch (error) {
       showSnackbar(error.message, "error");
+      throw error;
     }
   };
 
