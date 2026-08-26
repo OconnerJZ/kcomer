@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useFilterMenu } from "@Context/FilterMenuContext";
+import { useFilterMenu } from "@Features/explore/context/FilterMenuContext";
 
 export default function useExplore() {
   const { setVisible } = useFilterMenu();
