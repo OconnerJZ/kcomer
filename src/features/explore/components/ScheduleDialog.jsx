@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +11,6 @@ import {
 import {
   Close,
   AccessTime,
-  WbSunny,
-  Nightlight,
   CheckCircle,
   Cancel,
 } from "@mui/icons-material";
@@ -106,23 +103,14 @@ const ScheduleDay = ({ schedule, isToday, index }) => {
           </Box>
 
           <Box sx={{ flex: 1 }}>
-            <Typography
-              sx={{
-                color: isClosed ? "#ff4b45" : "#333",
-                fontWeight: 700,
-                fontSize: "1rem",
-                mb: 0.5,
-              }}
-            >
+            <Typography sx={{ color: isClosed ? "#ff4b45" : "#333", fontWeight: 700, fontSize: "1rem", mb: 0.5 }}>
               {schedule.day}
             </Typography>
 
             {isClosed ? (
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Cancel sx={{ fontSize: 16, color: "#ff4b45" }} />
-                <Typography
-                  sx={{ color: "#ff4b45", fontSize: "0.85rem", fontWeight: 600 }}
-                >
+                <Typography sx={{ color: "#ff4b45", fontSize: "0.85rem", fontWeight: 600 }}>
                   Cerrado
                 </Typography>
               </Stack>
@@ -146,19 +134,8 @@ const ScheduleDay = ({ schedule, isToday, index }) => {
   );
 };
 
-ScheduleDay.propTypes = {
-  schedule: PropTypes.shape({
-    day: PropTypes.string.isRequired,
-    open: PropTypes.string,
-    close: PropTypes.string,
-    isClosed: PropTypes.bool,
-  }).isRequired,
-  isToday: PropTypes.bool,
-  index: PropTypes.number.isRequired,
-};
-
 const ScheduleDialog = ({ open, onClose, data }) => {
-  const scheduleData = data?.schedule || DEFAULT_SCHEDULE;
+  const scheduleData = data?.schedules?.length ? data.schedules : DEFAULT_SCHEDULE;
 
   const todayIndex = useMemo(() => {
     const today = new Date().getDay();
@@ -173,35 +150,10 @@ const ScheduleDialog = ({ open, onClose, data }) => {
       fullWidth
       TransitionComponent={Slide}
       TransitionProps={{ direction: "up" }}
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          bgcolor: "#fafafa",
-          maxHeight: "90vh",
-        },
-      }}
+      PaperProps={{ sx: { borderRadius: 4, bgcolor: "#fafafa", maxHeight: "90vh" } }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          bgcolor: "#3a3b3d",
-          p: 2,
-          pb: 3,
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: -50,
-            right: -50,
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
-            background: "rgba(255, 255, 255, 0.1)",
-            filter: "blur(60px)",
-          }}
-        />
+      <Box sx={{ position: "relative", bgcolor: "#3a3b3d", p: 2, pb: 3, overflow: "hidden" }}>
+        <Box sx={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, borderRadius: "50%", background: "rgba(255, 255, 255, 0.1)", filter: "blur(60px)" }} />
 
         <IconButton
           onClick={onClose}
@@ -212,10 +164,7 @@ const ScheduleDialog = ({ open, onClose, data }) => {
             color: "white",
             bgcolor: "rgba(255, 255, 255, 0.2)",
             backdropFilter: "blur(10px)",
-            "&:hover": {
-              bgcolor: "rgba(255, 255, 255, 0.3)",
-              transform: "rotate(90deg)",
-            },
+            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.3)", transform: "rotate(90deg)" },
             transition: "all 0.3s ease",
           }}
         >
@@ -223,15 +172,8 @@ const ScheduleDialog = ({ open, onClose, data }) => {
         </IconButton>
 
         <Stack spacing={1.5} alignItems="center" textAlign="center">
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: "white",
-              textShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            {data?.title}
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "white", textShadow: "0 2px 8px rgba(0, 0, 0, 0.2)" }}>
+            {data?.name}
           </Typography>
 
           <Box
@@ -242,11 +184,9 @@ const ScheduleDialog = ({ open, onClose, data }) => {
               px: 2,
               py: 0.75,
               borderRadius: 20,
-              bgcolor: data?.isOpen
-                ? "rgba(76, 175, 80, 0.2)"
-                : "rgba(244, 67, 54, 0.2)",
+              bgcolor: data?.open ? "rgba(76, 175, 80, 0.2)" : "rgba(244, 67, 54, 0.2)",
               border: "2px solid",
-              borderColor: data?.isOpen ? "#4caf50" : "#f44336",
+              borderColor: data?.open ? "#4caf50" : "#f44336",
               backdropFilter: "blur(10px)",
             }}
           >
@@ -255,25 +195,18 @@ const ScheduleDialog = ({ open, onClose, data }) => {
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
-                bgcolor: data?.isOpen ? "#4caf50" : "#f44336",
-                animation: data?.isOpen ? "pulse 2s ease-in-out infinite" : "none",
+                bgcolor: data?.open ? "#4caf50" : "#f44336",
+                animation: data?.open ? "pulse 2s ease-in-out infinite" : "none",
                 "@keyframes pulse": {
                   "0%, 100%": { opacity: 1, transform: "scale(1)" },
                   "50%": { opacity: 0.5, transform: "scale(1.2)" },
                 },
               }}
             />
-            <Typography
-              sx={{
-                color: "white",
-                fontWeight: 700,
-                fontSize: "0.85rem",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {data?.isOpen ? "Abierto ahora" : "Cerrado"}
+            <Typography sx={{ color: "white", fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.5px" }}>
+              {data?.open ? "Abierto ahora" : "Cerrado"}
             </Typography>
-            {data?.isOpen ? (
+            {data?.open ? (
               <CheckCircle sx={{ fontSize: 18, color: "#4caf50" }} />
             ) : (
               <Cancel sx={{ fontSize: 18, color: "#f44336" }} />
@@ -285,36 +218,12 @@ const ScheduleDialog = ({ open, onClose, data }) => {
       <DialogContent sx={{ pt: 3, pb: 3, px: 3 }}>
         <Box sx={{ mb: 2 }}>
           {scheduleData.map((schedule, index) => (
-            <ScheduleDay
-              key={schedule.day}
-              schedule={schedule}
-              isToday={index === todayIndex}
-              index={index}
-            />
+            <ScheduleDay key={schedule.day || index} schedule={schedule} isToday={index === todayIndex} index={index} />
           ))}
         </Box>
 
-        <Box
-          sx={{
-            mt: 3,
-            p: 2,
-            borderRadius: 2,
-            bgcolor: "white",
-            border: "1px dashed #e0e0e0",
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-              fontStyle: "italic",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-            }}
-          >
+        <Box sx={{ mt: 3, p: 2, borderRadius: 2, bgcolor: "white", border: "1px dashed #e0e0e0", textAlign: "center" }}>
+          <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
             <AccessTime sx={{ fontSize: 16 }} />
             Los horarios pueden variar en días festivos
           </Typography>
@@ -322,23 +231,6 @@ const ScheduleDialog = ({ open, onClose, data }) => {
       </DialogContent>
     </Dialog>
   );
-};
-
-ScheduleDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  data: PropTypes.shape({
-    title: PropTypes.string,
-    isOpen: PropTypes.bool,
-    schedule: PropTypes.arrayOf(
-      PropTypes.shape({
-        day: PropTypes.string,
-        open: PropTypes.string,
-        close: PropTypes.string,
-        isClosed: PropTypes.bool,
-      }),
-    ),
-  }),
 };
 
 export default ScheduleDialog;
