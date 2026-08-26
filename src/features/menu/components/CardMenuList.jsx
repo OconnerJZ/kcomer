@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AspectRatio from "@mui/joy/AspectRatio";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";
@@ -15,9 +15,10 @@ import {
   TextField,
 } from "@mui/material";
 import { Remove, NoteAdd } from "@mui/icons-material";
-import PropTypes from "prop-types";
+import { normalizeCartItem } from "@Features/cart/model/cartItem";
 
 const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
+  const menuItem = useMemo(() => normalizeCartItem(item), [item]);
   const [quantity, setQuantity] = useState(0);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [note, setNote] = useState("");
@@ -25,10 +26,10 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
 
   const updateCart = (qty, itemNote) => {
     onAddToCart({
-      itemId: item.id,
+      itemId: menuItem.id,
       businessId,
       businessName,
-      item: { ...item, quantity: qty, note: itemNote || "" },
+      item: { ...menuItem, quantity: qty, note: itemNote || "" },
     });
   };
 
@@ -72,12 +73,12 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
         }}
       >
         <AspectRatio ratio="1" sx={{ width: 90, borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px" }}>
-          <img src={item.image} srcSet={item.image} loading="lazy" alt={item.name} />
+          <img src={menuItem.image} srcSet={menuItem.image} loading="lazy" alt={menuItem.name} />
         </AspectRatio>
 
         <CardContent sx={{ flex: 1 }}>
-          <Typography level="title-md">{item.name}</Typography>
-          <Typography sx={{ fontSize: "11px", mb: "3px" }}>{item.description}</Typography>
+          <Typography level="title-md">{menuItem.name}</Typography>
+          <Typography sx={{ fontSize: "11px", mb: "3px" }}>{menuItem.description}</Typography>
 
           {hasNote && note && (
             <Chip size="sm" variant="soft" color="warning" sx={{ mt: 0.5, fontSize: "10px" }}>
@@ -93,7 +94,7 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
               sx={{ pointerEvents: "none", minHeight: 0, height: "23px", fontSize: "13px" }}
               startDecorator="$"
             >
-              {item.price.toFixed(2)}
+              {menuItem.price.toFixed(2)}
             </Chip>
 
             {quantity > 0 && (
@@ -123,7 +124,7 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
       <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Agregar nota especial</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{item.name}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{menuItem.name}</Typography>
           <TextField
             autoFocus
             fullWidth
@@ -143,19 +144,6 @@ const CardMenuList = ({ item, businessId, businessName, onAddToCart }) => {
       </Dialog>
     </>
   );
-};
-
-CardMenuList.propTypes = {
-  item: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    price: PropTypes.number.isRequired,
-    image: PropTypes.string,
-  }).isRequired,
-  businessId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  businessName: PropTypes.string.isRequired,
-  onAddToCart: PropTypes.func.isRequired,
 };
 
 export default CardMenuList;
