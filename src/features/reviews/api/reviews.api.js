@@ -1,5 +1,5 @@
-import { api, createEndpointBuilder, crudEndpoints } from "@Utils/api";
-import { ENDPOINTS } from "@Const/api";
+import { api, createEndpointBuilder, crudEndpoints } from "@Shared/api/rtk/api";
+import { ENDPOINTS } from "@Shared/api/endpoints";
 
 const customEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
