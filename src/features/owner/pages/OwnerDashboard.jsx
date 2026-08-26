@@ -28,8 +28,6 @@ import useBusinessOwner from "@Features/owner/hooks/useBusinessOwner";
 import useBusinessOrders from "@Features/owner/hooks/useBusinessOrders";
 import Bg from "@Assets/images/qscome-bg-6.png";
 
-const BUSINESS_DEFAULT = 0;
-
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -60,12 +58,32 @@ export default function OwnerDashboard() {
   const selectBusiness = (businessId) => setSelectedBusinessId(businessId);
 
   useEffect(() => {
-    if (!selectedBusinessId && businesses.length > 0) {
-      setSelectedBusinessId(businesses[BUSINESS_DEFAULT]?.id);
+    if (businesses.length === 0) {
+      if (selectedBusinessId !== null) setSelectedBusinessId(null);
+      return;
+    }
+
+    const selectionStillExists = businesses.some(
+      (business) => String(business.id) === String(selectedBusinessId),
+    );
+
+    if (!selectionStillExists) {
+      setSelectedBusinessId(businesses[0].id);
     }
   }, [businesses, selectedBusinessId]);
 
   const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
+
+  const handleBusinessCreated = async () => {
+    handleClose();
+    const result = await refetchBusinesses();
+    const refreshed = result?.data?.data || result?.data || [];
+    const list = Array.isArray(refreshed) ? refreshed : [];
+    if (list.length > 0) {
+      const newest = list[list.length - 1];
+      if (newest?.id != null) setSelectedBusinessId(newest.id);
+    }
+  };
 
   if (!isOwner(user)) {
     return (
@@ -94,7 +112,7 @@ export default function OwnerDashboard() {
   if (!hasBusinesses()) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2 }}>
-        <RegisterBusiness />
+        <RegisterBusiness onSuccess={refetchBusinesses} />
       </Box>
     );
   }
@@ -120,7 +138,8 @@ export default function OwnerDashboard() {
       <DashboardNavbar
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        businessName={selectedBusiness.title}
+        businessName={selectedBusiness.name}
+        selectedBusinessId={selectedBusinessId}
         pendingOrders={pendingOrdersCount}
         selectBusiness={selectBusiness}
         businesses={businesses}
@@ -139,7 +158,7 @@ export default function OwnerDashboard() {
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">Registrar negocio</Typography>
           </Toolbar>
         </AppBar>
-        <RegisterBusiness onSuccess={handleClose} />
+        <RegisterBusiness onSuccess={handleBusinessCreated} />
       </Dialog>
 
       <Box sx={{ height: { xs: 56, sm: 64 } }} />
