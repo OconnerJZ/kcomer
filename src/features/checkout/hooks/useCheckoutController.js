@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useCart } from "@Features/cart/context/CartContext";
@@ -9,22 +9,15 @@ import {
   validateCheckout,
 } from "../model/checkout";
 
-const DEFAULT_ADDRESSES = [
-  {
-    id: 1,
-    street: "Av. Insurgentes",
-    number: "123",
-    references: "Entre Reforma y Chapultepec",
-  },
-  {
-    id: 2,
-    street: "Calle Madero",
-    number: "456",
-    references: "Edificio azul",
-  },
-];
+const normalizeAddresses = (addresses = []) =>
+  (Array.isArray(addresses) ? addresses : []).map((address, index) => ({
+    id: address.id ?? index,
+    street: address.street || address.address || address.line1 || "",
+    number: address.number || address.externalNumber || address.external_number || "",
+    references: address.references || address.reference || "",
+  }));
 
-export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
+export const useCheckoutController = (providedAddresses) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const {
@@ -40,12 +33,24 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
     form,
     orderType,
     addressType,
+    setAddressType,
     setErrors,
     resetCheckout,
   } = checkout;
 
   const [activeTab, setActiveTab] = useState(0);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+
+  const addresses = useMemo(
+    () => normalizeAddresses(providedAddresses ?? user?.addresses ?? []),
+    [providedAddresses, user?.addresses],
+  );
+
+  useEffect(() => {
+    if (addresses.length === 0 && addressType === "saved") {
+      setAddressType("new");
+    }
+  }, [addressType, addresses.length, setAddressType]);
 
   const businesses = useMemo(() => Object.keys(cart), [cart]);
   const currentBusinessId = businesses[activeTab] || null;
@@ -68,6 +73,7 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
         itemId: item.id,
         businessId,
         businessName: cart[businessId].businessName,
+        paymentMethods: cart[businessId].paymentMethods || [],
         item: {
           ...item,
           quantity: newQuantity,
