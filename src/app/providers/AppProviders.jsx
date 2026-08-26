@@ -7,11 +7,13 @@ import { AuthProvider, useAuth } from "@Features/auth/context/AuthContext";
 import { hasGlobalBusinessRealtimeScope } from "@Features/auth/model/roles";
 import { getUserBusinessIds } from "@Features/users/model/user";
 import { OrdersProvider } from "@Features/orders/context/OrderContext";
+import { NotificationProvider, useNotifications } from "@Features/notifications/context/NotificationContext";
 import { useSocketConnected, useSocketEvent } from "@Shared/hooks/useSocket";
 import socketService from "@Shared/services/realtime/socketService";
 
 const SocketInitializer = () => {
   const { user, isAuthenticated } = useAuth();
+  const { addOrderNotification } = useNotifications();
   const connected = useSocketConnected();
   const userId = user?.id;
   const token = user?.token;
@@ -33,12 +35,9 @@ const SocketInitializer = () => {
   }, [isAuthenticated, userId, token, role]);
 
   useEffect(() => {
-    if (!connected || !hasGlobalScope) {
-      return undefined;
-    }
+    if (!connected || !hasGlobalScope) return undefined;
 
     const joinedIds = joinedBusinessIdsRef.current;
-
     businessIds.map(String).forEach((businessId) => {
       if (!joinedIds.has(businessId)) {
         socketService.joinBusiness(businessId);
@@ -46,9 +45,6 @@ const SocketInitializer = () => {
       }
     });
 
-    // Para el owner principal no abandonamos salas al cambiar de negocio visible:
-    // su alcance realtime es global durante toda la sesión. Una desconexión/logout
-    // limpia todas las suscripciones del socket.
     return undefined;
   }, [businessIdsKey, connected, hasGlobalScope]);
 
@@ -57,15 +53,12 @@ const SocketInitializer = () => {
     (order) => {
       if (!hasGlobalScope) return;
 
-      const businessName =
-        order?.businessName || order?.business_name || order?.business?.name || "otro negocio";
-      const customerName = order?.customerName || order?.customer_name || "Un cliente";
-
-      socketService.showNotification(`Nueva orden · ${businessName}`, {
-        body: `${customerName} acaba de realizar un pedido.`,
+      const notification = addOrderNotification(order);
+      socketService.showNotification(notification.title, {
+        body: notification.message,
         data: {
-          orderId: order?.id,
-          businessId: order?.businessId ?? order?.business_id,
+          orderId: notification.orderId,
+          businessId: notification.businessId,
         },
       });
     },
@@ -79,12 +72,14 @@ export default function AppProviders({ children }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <AuthProvider>
-        <SocketInitializer />
-        <OrdersProvider>
-          <CartProvider>
-            <FilterMenuProvider>{children}</FilterMenuProvider>
-          </CartProvider>
-        </OrdersProvider>
+        <NotificationProvider>
+          <SocketInitializer />
+          <OrdersProvider>
+            <CartProvider>
+              <FilterMenuProvider>{children}</FilterMenuProvider>
+            </CartProvider>
+          </OrdersProvider>
+        </NotificationProvider>
       </AuthProvider>
     </LocalizationProvider>
   );
