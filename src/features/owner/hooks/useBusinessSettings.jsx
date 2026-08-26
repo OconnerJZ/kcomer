@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUpdateBusinessMutation } from "@Features/business/api/business.api";
 import {
+  normalizeBusiness,
+  toBasicInfoPayload,
+  toDeliveryPayload,
+  toLocationPayload,
+  toPaymentMethodsPayload,
+} from "@Features/business/model/business";
+import {
   useGetCategoriesQuery,
   useGetFoodTypesQuery,
   useGetPaymentMethodsQuery,
@@ -20,91 +27,54 @@ export const useBusinessSettings = (businessData) => {
   const { data: paymentMethodsResponse, isLoading: loadingPaymentMethods } = useGetPaymentMethodsQuery();
 
   const [basicInfo, setBasicInfo] = useState({
-    business_name: "",
+    name: "",
     phone: "",
     email: "",
     description: "",
-    is_open: true,
-    prep_time_min: 30,
-    estimated_delivery_min: 45,
-    logo_url: "",
+    open: true,
+    prepTimeMin: 30,
+    estimatedDeliveryMin: 45,
+    logo: "",
   });
   const [locationInfo, setLocationInfo] = useState({
     address: "",
     city: "",
-    postal_code: "",
+    postalCode: "",
     latitude: "",
     longitude: "",
   });
   const [schedules, setSchedules] = useState([]);
   const [deliverySettings, setDeliverySettings] = useState({
-    delivery_radius_km: 5,
-    delivery_fee: 0,
-    min_order_amount: 0,
-    estimated_time_min: 30,
-    use_own_delivery: false,
+    deliveryRadiusKm: 5,
+    deliveryFee: 0,
+    minOrderAmount: 0,
+    estimatedTimeMin: 30,
+    useOwnDelivery: false,
   });
-  const [paymentMethods, setPaymentMethods] = useState([
-    { method: "cash", is_active: true, label: "Efectivo" },
-    { method: "card", is_active: false, label: "Tarjeta" },
-    { method: "wallet", is_active: false, label: "Billetera Digital" },
-    { method: "transfer", is_active: false, label: "Transferencia" },
-  ]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedFoodTypes, setSelectedFoodTypes] = useState([]);
   const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     if (!businessData) return;
+    const business = normalizeBusiness(businessData);
 
     setBasicInfo({
-      business_name: businessData.title || businessData.businessName || "",
-      phone: businessData.phone || "",
-      email: businessData.email || "",
-      description: businessData.description || "",
-      is_open: businessData.isOpen ?? businessData.is_open ?? true,
-      prep_time_min: businessData.prepTimeMin || businessData.prep_time_min || 30,
-      estimated_delivery_min:
-        businessData.estimatedDeliveryMin || businessData.estimated_delivery_min || 45,
-      logo_url: businessData.logo || businessData.logoUrl || businessData.logo_url || "",
+      name: business.name,
+      phone: business.phone,
+      email: business.email,
+      description: business.description,
+      open: business.open,
+      prepTimeMin: business.prepTimeMin,
+      estimatedDeliveryMin: business.estimatedDeliveryMin,
+      logo: business.logo,
     });
-
-    const loc = businessData.location || businessData.locations?.[0];
-    if (loc) {
-      setLocationInfo({
-        address: loc.address || "",
-        city: loc.city || "",
-        postal_code: loc.postalCode || loc.postal_code || "",
-        latitude: loc.latitude || "",
-        longitude: loc.longitude || "",
-      });
-    }
-
-    setSchedules(businessData.schedules || []);
-
-    const delivery = businessData.deliverySettings || businessData.delivery_settings;
-    if (delivery) {
-      setDeliverySettings({
-        delivery_radius_km: Number(delivery.deliveryRadiusKm || delivery.delivery_radius_km) || 5,
-        delivery_fee: Number(delivery.deliveryFee || delivery.delivery_fee) || 0,
-        min_order_amount: Number(delivery.minOrderAmount || delivery.min_order_amount) || 0,
-        estimated_time_min: delivery.estimatedTimeMin || delivery.estimated_time_min || 30,
-        use_own_delivery: delivery.useOwnDelivery || delivery.use_own_delivery || false,
-      });
-    }
-
-    const methods = businessData.paymentMethods || businessData.payment_methods;
-    if (methods) {
-      setPaymentMethods((prev) =>
-        prev.map((pm) => {
-          const current = methods.find((m) => m.method === pm.method);
-          return { ...pm, is_active: current?.isActive ?? current?.is_active ?? false };
-        }),
-      );
-    }
-
-    const foodTypes = businessData.foodTypes || businessData.food_types;
-    if (foodTypes) setSelectedFoodTypes(foodTypes.map((item) => item.id));
-    setPhotos(businessData.photos || []);
+    setLocationInfo(business.location);
+    setSchedules(business.schedules);
+    setDeliverySettings(business.deliverySettings);
+    setPaymentMethods(business.paymentMethods);
+    setSelectedFoodTypes(business.foodTypeIds);
+    setPhotos(business.photos);
   }, [businessData]);
 
   const availableFoodTypes = useMemo(
@@ -138,28 +108,19 @@ export const useBusinessSettings = (businessData) => {
 
   const updateBasicInfo = useCallback(
     async (logoFile = null) => {
-      let logoUrl = basicInfo.logo_url;
+      let logo = basicInfo.logo;
       if (logoFile) {
         const uploadResult = await uploadHelpers.uploadImage(logoFile, uploadImage);
         const uploaded = uploadResult?.data?.data || uploadResult?.data;
-        logoUrl = uploaded?.url || uploaded?.filename || logoUrl;
+        logo = uploaded?.url || uploaded?.filename || logo;
       }
-      return saveBusinessSection({
-        business_name: basicInfo.business_name,
-        phone: basicInfo.phone,
-        email: basicInfo.email,
-        description: basicInfo.description,
-        is_open: basicInfo.is_open,
-        prep_time_min: Number(basicInfo.prep_time_min),
-        estimated_delivery_min: Number(basicInfo.estimated_delivery_min),
-        logo_url: logoUrl,
-      });
+      return saveBusinessSection(toBasicInfoPayload({ ...basicInfo, logo }));
     },
     [basicInfo, saveBusinessSection, uploadImage],
   );
 
   const updateLocation = useCallback(
-    () => saveBusinessSection({ location: locationInfo }),
+    () => saveBusinessSection({ location: toLocationPayload(locationInfo) }),
     [locationInfo, saveBusinessSection],
   );
   const updateSchedules = useCallback(
@@ -167,11 +128,11 @@ export const useBusinessSettings = (businessData) => {
     [schedules, saveBusinessSection],
   );
   const updateDelivery = useCallback(
-    () => saveBusinessSection({ delivery_settings: deliverySettings }),
+    () => saveBusinessSection({ delivery_settings: toDeliveryPayload(deliverySettings) }),
     [deliverySettings, saveBusinessSection],
   );
   const updatePayments = useCallback(
-    () => saveBusinessSection({ payment_methods: paymentMethods }),
+    () => saveBusinessSection({ payment_methods: toPaymentMethodsPayload(paymentMethods) }),
     [paymentMethods, saveBusinessSection],
   );
   const updateFoodTypes = useCallback(
