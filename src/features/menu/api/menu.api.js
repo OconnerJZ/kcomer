@@ -5,8 +5,8 @@ const dynamicEndpoints = {
   business: {
     path: ({ businessId }) => `${ENDPOINTS.menus.business}/${businessId}`,
   },
-  toggle: {
-    path: ({ id }) => `${ENDPOINTS.menus.base}/${id}/toggle-availability`,
+  managedBusiness: {
+    path: ({ businessId }) => `${ENDPOINTS.menus.business}/${businessId}/manage`,
   },
 };
 
@@ -18,7 +18,7 @@ const dynamicEndpoint = (builder, key, method) =>
 
 const customsEndpoints = (builder) => ({
   getMenuByBusiness: dynamicEndpoint(builder, "business", "getAll"),
-  toggleAvailability: dynamicEndpoint(builder, "toggle", "patch"),
+  getManagedMenuByBusiness: dynamicEndpoint(builder, "managedBusiness", "getAll"),
 });
 
 const menuEndpoints = (builder) => ({
@@ -38,5 +38,5 @@ export const {
   useUpdateMenuMutation,
   useDeleteMenuMutation,
   useGetMenuByBusinessQuery,
-  useToggleAvailabilityMutation,
+  useGetManagedMenuByBusinessQuery,
 } = apiMenu;
