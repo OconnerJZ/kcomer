@@ -11,7 +11,7 @@ const compactValues = (values = []) =>
 const getPhotoValue = (photo) =>
   typeof photo === "string"
     ? photo
-    : photo?.url || photo?.image || photo?.imageUrl || photo?.image_url || "";
+    : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || photo?.image_url || "";
 
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
@@ -20,7 +20,7 @@ export const normalizeBusiness = (business = {}) => {
   const foodTypes = business.foodTypes || business.food_types || [];
   const phone = business.phone || business.phones?.[0] || "";
   const email = business.email || business.emails?.[0] || "";
-  const photos = business.photos || [];
+  const photos = business.photos || business.businessPhotos || business.business_photos || [];
   const logo =
     business.logo ||
     business.logoUrl ||
@@ -31,6 +31,8 @@ export const normalizeBusiness = (business = {}) => {
   const coverImage =
     business.coverImage ||
     business.cover_image ||
+    business.bannerUrl ||
+    business.banner_url ||
     business.coverUrl ||
     business.cover_url ||
     business.heroImage ||
@@ -39,7 +41,7 @@ export const normalizeBusiness = (business = {}) => {
     logo;
 
   return {
-    id: business.id ?? null,
+    id: business.id ?? business.businessId ?? business.business_id ?? null,
     name: business.name || business.title || business.businessName || business.business_name || "",
     phone,
     phones: compactValues([phone, ...(business.phones || [])]),
@@ -53,6 +55,7 @@ export const normalizeBusiness = (business = {}) => {
     ),
     logo,
     coverImage,
+    bannerUrl: business.bannerUrl || business.banner_url || "",
     likes: Number(business.likes ?? business.rating_count ?? business.ratingCount ?? 0),
     rating: Number(business.rating ?? business.average_rating ?? business.averageRating ?? 0),
     hasDelivery: Boolean(
@@ -69,8 +72,8 @@ export const normalizeBusiness = (business = {}) => {
       latitude: location.latitude ?? "",
       longitude: location.longitude ?? "",
     },
-    schedules: business.schedules || business.schedule || [],
-    schedule: business.schedule || business.schedules || [],
+    schedules: business.schedules || business.schedule || business.businessSchedules || [],
+    schedule: business.schedule || business.schedules || business.businessSchedules || [],
     menu: business.menu || [],
     tags: business.tags || foodTypes,
     deliverySettings: {
