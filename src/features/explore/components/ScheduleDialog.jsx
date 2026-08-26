@@ -1,233 +1,162 @@
 import {
+  Box,
+  Chip,
   Dialog,
   DialogContent,
-  Box,
-  Typography,
+  Divider,
   IconButton,
   Stack,
-  Fade,
-  Slide,
+  Typography,
 } from "@mui/material";
-import {
-  Close,
-  AccessTime,
-  CheckCircle,
-  Cancel,
-} from "@mui/icons-material";
+import { AccessTime, Close } from "@mui/icons-material";
 import { useMemo } from "react";
 
-const DEFAULT_SCHEDULE = [
-  { day: "Lunes", open: "09:00", close: "22:00", isClosed: false },
-  { day: "Martes", open: "09:00", close: "22:00", isClosed: false },
-  { day: "Miércoles", open: "09:00", close: "22:00", isClosed: false },
-  { day: "Jueves", open: "09:00", close: "22:00", isClosed: false },
-  { day: "Viernes", open: "09:00", close: "23:00", isClosed: false },
-  { day: "Sábado", open: "10:00", close: "23:00", isClosed: false },
-  { day: "Domingo", open: null, close: null, isClosed: true },
+const DAY_NAMES = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
 ];
 
-const DAYS_SHORT = ["L", "M", "X", "J", "V", "S", "D"];
+const normalizeDay = (value = "") =>
+  String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
 
-const ScheduleDay = ({ schedule, isToday, index }) => {
-  const isClosed = schedule.isClosed || (!schedule.open && !schedule.close);
+const isScheduleClosed = (schedule = {}) =>
+  schedule.isClosed === true || schedule.closed === true || (!schedule.open && !schedule.close);
+
+const getTodaySchedule = (schedules = []) => {
+  const todayName = DAY_NAMES[new Date().getDay()];
+  const normalizedToday = normalizeDay(todayName);
+
+  return schedules.find((schedule) => normalizeDay(schedule?.day) === normalizedToday) || null;
+};
+
+const ScheduleRow = ({ schedule, isToday }) => {
+  const closed = isScheduleClosed(schedule);
 
   return (
-    <Fade in timeout={300 + index * 100}>
-      <Box
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "minmax(90px, 1fr) auto",
+        alignItems: "center",
+        gap: 2,
+        px: 1.5,
+        py: 1.25,
+        borderRadius: 2,
+        bgcolor: isToday ? "rgba(255,75,69,.055)" : "transparent",
+      }}
+    >
+      <Stack direction="row" spacing={1} alignItems="center" minWidth={0}>
+        <Typography variant="body2" fontWeight={isToday ? 800 : 600} noWrap>
+          {schedule.day || "Día"}
+        </Typography>
+        {isToday && (
+          <Typography variant="caption" color="primary.main" fontWeight={800}>
+            HOY
+          </Typography>
+        )}
+      </Stack>
+
+      <Typography
+        variant="body2"
         sx={{
-          position: "relative",
-          p: 2.5,
-          mb: 1.5,
-          borderRadius: 2,
-          bgcolor: "white",
-          border: "2px solid",
-          borderColor: isClosed ? "#ff4b45" : isToday ? "#0958d9" : "#e0e0e0",
-          boxShadow: isToday
-            ? "0 8px 16px rgba(102, 126, 234, 0.15)"
-            : "0 2px 8px rgba(0, 0, 0, 0.05)",
-          transform: isToday ? "scale(1.02)" : "scale(1)",
-          transition: "all 0.3s ease",
-          "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-            borderColor: isClosed ? "#ff4b45" : "#0958d9",
-          },
-          opacity: isClosed ? 0.7 : 1,
+          fontWeight: 700,
+          color: closed ? "text.disabled" : "text.primary",
+          whiteSpace: "nowrap",
         }}
       >
-        {isToday && !isClosed && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: -1,
-              right: -1,
-              bgcolor: "#0958d9",
-              color: "white",
-              fontWeight: 700,
-              fontSize: "0.65rem",
-              px: 1.5,
-              py: 0.5,
-              borderRadius: "0 8px 0 8px",
-            }}
-          >
-            HOY
-          </Box>
-        )}
-
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: "50%",
-              bgcolor: isClosed
-                ? "rgba(255, 75, 69, 0.1)"
-                : isToday
-                  ? "rgba(102, 126, 234, 0.15)"
-                  : "rgba(0, 0, 0, 0.05)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 900,
-              fontSize: "1.2rem",
-              color: isClosed ? "#ff4b45" : isToday ? "#0958d9" : "#666",
-              border: "2px solid",
-              borderColor: isClosed
-                ? "#ff4b45"
-                : isToday
-                  ? "#0958d9"
-                  : "transparent",
-            }}
-          >
-            {DAYS_SHORT[index]}
-          </Box>
-
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ color: isClosed ? "#ff4b45" : "#333", fontWeight: 700, fontSize: "1rem", mb: 0.5 }}>
-              {schedule.day}
-            </Typography>
-
-            {isClosed ? (
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Cancel sx={{ fontSize: 16, color: "#ff4b45" }} />
-                <Typography sx={{ color: "#ff4b45", fontSize: "0.85rem", fontWeight: 600 }}>
-                  Cerrado
-                </Typography>
-              </Stack>
-            ) : (
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <AccessTime sx={{ fontSize: 16, color: "#ffa726" }} />
-                <Typography sx={{ color: "#666", fontSize: "0.85rem", fontWeight: 600 }}>
-                  {schedule.open}
-                </Typography>
-                <Box sx={{ width: 16, height: 2, bgcolor: "#e0e0e0", borderRadius: 1 }} />
-                <AccessTime sx={{ fontSize: 16, color: "#5c6bc0" }} />
-                <Typography sx={{ color: "#666", fontSize: "0.85rem", fontWeight: 600 }}>
-                  {schedule.close}
-                </Typography>
-              </Stack>
-            )}
-          </Box>
-        </Stack>
-      </Box>
-    </Fade>
+        {closed ? "Cerrado" : `${schedule.open} – ${schedule.close}`}
+      </Typography>
+    </Box>
   );
 };
 
 const ScheduleDialog = ({ open, onClose, data }) => {
-  const scheduleData = data?.schedules?.length ? data.schedules : DEFAULT_SCHEDULE;
-
-  const todayIndex = useMemo(() => {
-    const today = new Date().getDay();
-    return today === 0 ? 6 : today - 1;
-  }, []);
+  const schedules = Array.isArray(data?.schedules) ? data.schedules : [];
+  const todaySchedule = useMemo(() => getTodaySchedule(schedules), [schedules]);
+  const todayClosed = todaySchedule ? isScheduleClosed(todaySchedule) : !data?.open;
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
-      TransitionComponent={Slide}
-      TransitionProps={{ direction: "up" }}
-      PaperProps={{ sx: { borderRadius: 4, bgcolor: "#fafafa", maxHeight: "90vh" } }}
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 24px 70px rgba(0,0,0,.16)",
+        },
+      }}
     >
-      <Box sx={{ position: "relative", bgcolor: "#3a3b3d", p: 2, pb: 3, overflow: "hidden" }}>
-        <Box sx={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, borderRadius: "50%", background: "rgba(255, 255, 255, 0.1)", filter: "blur(60px)" }} />
-
-        <IconButton
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            color: "white",
-            bgcolor: "rgba(255, 255, 255, 0.2)",
-            backdropFilter: "blur(10px)",
-            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.3)", transform: "rotate(90deg)" },
-            transition: "all 0.3s ease",
-          }}
-        >
-          <Close />
-        </IconButton>
-
-        <Stack spacing={1.5} alignItems="center" textAlign="center">
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "white", textShadow: "0 2px 8px rgba(0, 0, 0, 0.2)" }}>
-            {data?.name}
-          </Typography>
-
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 1,
-              px: 2,
-              py: 0.75,
-              borderRadius: 20,
-              bgcolor: data?.open ? "rgba(76, 175, 80, 0.2)" : "rgba(244, 67, 54, 0.2)",
-              border: "2px solid",
-              borderColor: data?.open ? "#4caf50" : "#f44336",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                bgcolor: data?.open ? "#4caf50" : "#f44336",
-                animation: data?.open ? "pulse 2s ease-in-out infinite" : "none",
-                "@keyframes pulse": {
-                  "0%, 100%": { opacity: 1, transform: "scale(1)" },
-                  "50%": { opacity: 0.5, transform: "scale(1.2)" },
-                },
-              }}
-            />
-            <Typography sx={{ color: "white", fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.5px" }}>
-              {data?.open ? "Abierto ahora" : "Cerrado"}
+      <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+          <Box minWidth={0}>
+            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".65rem" }}>
+              Horarios
             </Typography>
-            {data?.open ? (
-              <CheckCircle sx={{ fontSize: 18, color: "#4caf50" }} />
-            ) : (
-              <Cancel sx={{ fontSize: 18, color: "#f44336" }} />
-            )}
+            <Typography variant="h5" fontWeight={850} noWrap>
+              {data?.name || "Negocio"}
+            </Typography>
           </Box>
+          <IconButton onClick={onClose} size="small" aria-label="cerrar horarios">
+            <Close fontSize="small" />
+          </IconButton>
+        </Stack>
+
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
+          <Chip
+            size="small"
+            label={data?.open ? "Abierto ahora" : "Cerrado ahora"}
+            color={data?.open ? "success" : "default"}
+            variant={data?.open ? "filled" : "outlined"}
+            sx={{ fontWeight: 750 }}
+          />
+          {todaySchedule && !todayClosed && (
+            <Typography variant="body2" color="text.secondary">
+              Hoy · {todaySchedule.open} – {todaySchedule.close}
+            </Typography>
+          )}
         </Stack>
       </Box>
 
-      <DialogContent sx={{ pt: 3, pb: 3, px: 3 }}>
-        <Box sx={{ mb: 2 }}>
-          {scheduleData.map((schedule, index) => (
-            <ScheduleDay key={schedule.day || index} schedule={schedule} isToday={index === todayIndex} index={index} />
-          ))}
-        </Box>
+      <Divider />
 
-        <Box sx={{ mt: 3, p: 2, borderRadius: 2, bgcolor: "white", border: "1px dashed #e0e0e0", textAlign: "center" }}>
-          <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-            <AccessTime sx={{ fontSize: 16 }} />
-            Los horarios pueden variar en días festivos
+      <DialogContent sx={{ px: 2, py: 2 }}>
+        {schedules.length > 0 ? (
+          <Stack spacing={0.25}>
+            {schedules.map((schedule, index) => {
+              const todayName = normalizeDay(DAY_NAMES[new Date().getDay()]);
+              const isToday = normalizeDay(schedule?.day) === todayName;
+              return <ScheduleRow key={schedule?.id ?? schedule?.day ?? index} schedule={schedule} isToday={isToday} />;
+            })}
+          </Stack>
+        ) : (
+          <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
+            <AccessTime sx={{ fontSize: 32, color: "text.disabled", mb: 1 }} />
+            <Typography variant="body2" fontWeight={700}>
+              Horario no disponible
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Este negocio todavía no ha publicado sus horarios.
+            </Typography>
+          </Box>
+        )}
+
+        {schedules.length > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2, px: 1.5 }}>
+            Los horarios pueden cambiar en días festivos o fechas especiales.
           </Typography>
-        </Box>
+        )}
       </DialogContent>
     </Dialog>
   );
