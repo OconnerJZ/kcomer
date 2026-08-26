@@ -45,6 +45,7 @@ const resolveMediaUrl = (value = "") => {
 const DashboardNavbar = ({
   activeTab,
   onTabChange,
+  onNotificationNavigate,
   businessName,
   selectedBusinessId,
   pendingOrders = 0,
@@ -78,8 +79,10 @@ const DashboardNavbar = ({
 
   const handleNotificationSelect = (notification) => {
     markAsRead(notification.id);
-    if (notification.businessId != null) selectBusiness(notification.businessId);
-    onTabChange(0);
+    onNotificationNavigate?.({
+      businessId: notification.businessId,
+      orderId: notification.orderId,
+    });
     setNotificationAnchor(null);
   };
 
