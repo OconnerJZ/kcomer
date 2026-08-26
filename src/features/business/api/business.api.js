@@ -2,8 +2,8 @@ import {
   api,
   createEndpointBuilder,
   crudEndpoints,
-} from "@Utils/api";
-import { ENDPOINTS } from "@Const/api";
+} from "@Shared/api/rtk/api";
+import { ENDPOINTS } from "@Shared/api/endpoints";
 
 const dynamicEndpoints = {
   menu: {
