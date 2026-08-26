@@ -11,7 +11,7 @@ const Pedidos = lazy(() => import("@Pages/Pedidos"));
 const MisOrdenes = lazy(() => import("@Pages/MisOrdenes"));
 const Perfil = lazy(() => import("@Pages/Perfil"));
 const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
-const OwnerDashboard = lazy(() => import("@Pages/OwnerDashboard"));
+const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 
 const ProtectedRoute = ({ children, roles }) => {
   const { isAuthenticated, loading, user } = useAuth();
