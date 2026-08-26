@@ -5,14 +5,13 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import PropTypes from "prop-types";
 import {
   useCreateOrdersMutation,
   useOrderUpdateStatusMutation,
   useGetOrdersByUserQuery,
 } from "@Features/orders/api/orders.api";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { useSocketEvent } from "@Hooks/components/useSocket";
+import { useSocketEvent } from "@Shared/hooks/useSocket";
 
 const OrdersContext = createContext();
 
@@ -195,10 +194,6 @@ export const OrdersProvider = ({ children }) => {
   return (
     <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>
   );
-};
-
-OrdersProvider.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export const useOrders = () => {
