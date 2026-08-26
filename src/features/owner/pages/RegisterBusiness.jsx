@@ -1,34 +1,19 @@
 import { useMemo, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Fade,
-  Paper,
-  Snackbar,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Fade, LinearProgress, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import { StorefrontRounded } from "@mui/icons-material";
 import { Result } from "antd";
 import "antd/dist/reset.css";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCreateBusinessMutation } from "@Features/business/api/business.api";
 import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
 import { normalizeCatalogOptions } from "@Features/catalogs/model/catalogOption";
-import {
-  createBusinessRegistrationForm,
-  toBusinessRegistrationPayload,
-} from "@Features/owner/model/businessRegistration";
-import {
-  useUploadImageMutation,
-  uploadHelpers,
-} from "@Shared/api/uploads/upload.api";
+import { createBusinessRegistrationForm, toBusinessRegistrationPayload } from "@Features/owner/model/businessRegistration";
+import { useUploadImageMutation, uploadHelpers } from "@Shared/api/uploads/upload.api";
 import FormField from "@Features/owner/components/registration/FormField";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
-import { isMobile } from "@Shared/utils/commons";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { isOwner } from "@Features/auth/model/roles";
+import Bg from "@Assets/images/qscome-bg-6.png";
 
 const RegisterBusiness = ({ onSuccess }) => {
   const navigate = useNavigate();
@@ -39,238 +24,102 @@ const RegisterBusiness = ({ onSuccess }) => {
   const [submitted, setSubmitted] = useState(false);
   const [ownerReady, setOwnerReady] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
-
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
   const [createBusiness, { isLoading: creating }] = useCreateBusinessMutation();
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
-
-  const foodTypes = useMemo(
-    () => normalizeCatalogOptions(foodTypesResponse?.data || foodTypesResponse || []),
-    [foodTypesResponse],
-  );
+  const foodTypes = useMemo(() => normalizeCatalogOptions(foodTypesResponse?.data || foodTypesResponse || []), [foodTypesResponse]);
   const loading = creating || uploading;
 
   const steps = useMemo(() => [
-    {
-      label: "Datos del negocio",
-      fields: [
-        { name: "businessName", label: "Nombre del negocio", type: "text", required: true, validate: "alphanumeric" },
-        { name: "phone", label: "Teléfono", type: "text", required: true, validate: "phone" },
-        { name: "foodTypeIds", label: "Tipo de comida", type: "autocomplete-multiple", options: foodTypes, required: true },
-        { name: "hasDelivery", label: "¿Ofrece servicio a domicilio?", type: "switch", required: false },
-        { name: "logo", label: "Logo del negocio", type: "image", required: true },
-      ],
-    },
-    { label: "Horarios", fields: [{ name: "schedule", type: "schedule", required: true }] },
-    { label: "Ubicación", fields: [{ name: "location", label: "Ubicación en mapa", type: "map", required: true }] },
+    { label: "Tu negocio", subtitle: "Lo esencial para que las personas lo reconozcan.", fields: [
+      { name: "businessName", label: "Nombre del negocio", type: "text", required: true, validate: "alphanumeric" },
+      { name: "phone", label: "Teléfono", type: "text", required: true, validate: "phone" },
+      { name: "foodTypeIds", label: "Tipo de comida", type: "autocomplete-multiple", options: foodTypes, required: true },
+      { name: "hasDelivery", label: "¿Ofrece servicio a domicilio?", type: "switch" },
+      { name: "logo", label: "Logo del negocio", type: "image", required: true },
+    ]},
+    { label: "Cuándo te encuentran", subtitle: "Configura los horarios que verán tus clientes.", fields: [{ name: "schedule", type: "schedule", required: true }] },
+    { label: "Dónde estás", subtitle: "Marca tu ubicación para que llegar sea sencillo.", fields: [{ name: "location", label: "Ubicación en mapa", type: "map", required: true }] },
   ], [foodTypes]);
 
-  const showSnackbar = (message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const closeSnackbar = () => {
-    setSnackbar((current) => ({ ...current, open: false }));
-  };
+  const showSnackbar = (message, severity = "success") => setSnackbar({ open: true, message, severity });
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = {};
-
+    const nextErrors = {};
     steps[currentTab].fields.forEach((field) => {
-      const value = formValues[field.name];
       if (!field.required) return;
-
-      if (field.type === "autocomplete-multiple" || field.type === "schedule") {
-        if (!Array.isArray(value) || value.length === 0) {
-          newErrors[field.name] = true;
-          valid = false;
-        }
-        return;
-      }
-
-      if (field.type === "image") {
-        if (!value) {
-          newErrors[field.name] = true;
-          valid = false;
-        }
-        return;
-      }
-
-      if (field.type === "map") {
-        if (!value?.latitude || !value?.longitude) {
-          newErrors[field.name] = true;
-          valid = false;
-        }
-        return;
-      }
-
-      if (typeof value !== "string" || value.trim() === "") {
-        newErrors[field.name] = true;
-        valid = false;
-      }
+      const value = formValues[field.name];
+      const empty = field.type === "autocomplete-multiple" || field.type === "schedule"
+        ? !Array.isArray(value) || !value.length
+        : field.type === "map"
+          ? !value?.latitude || !value?.longitude
+          : !value || (typeof value === "string" && !value.trim());
+      if (empty) { nextErrors[field.name] = true; valid = false; }
     });
-
-    setErrors(newErrors);
+    setErrors(nextErrors);
     return valid;
   };
 
   const handleSubmit = async () => {
     try {
       let logoUrl = "";
-
       if (formValues.logo) {
         const uploadResult = await uploadHelpers.uploadImage(formValues.logo, uploadImage);
         const uploaded = uploadResult?.data?.data || uploadResult?.data;
         logoUrl = uploaded?.url || uploaded?.filename || "";
-        if (!logoUrl) {
-          showSnackbar("Error al subir el logo", "error");
-          return;
-        }
+        if (!logoUrl) return showSnackbar("Error al subir el logo", "error");
       }
-
-      const businessData = toBusinessRegistrationPayload({
-        form: formValues,
-        userId: user?.id,
-        logoUrl,
-      });
-
+      const businessData = toBusinessRegistrationPayload({ form: formValues, userId: user?.id, logoUrl });
       const result = await createBusiness(businessData).unwrap();
       if (!result) return;
-
       const refreshResult = await refreshUser();
-      const refreshedUser = refreshResult?.user;
-      const canManageBusiness = isOwner(refreshedUser);
-
-      setOwnerReady(canManageBusiness);
+      const ready = isOwner(refreshResult?.user);
+      setOwnerReady(ready);
       setSubmitted(true);
-      showSnackbar(
-        canManageBusiness
-          ? "Negocio registrado exitosamente"
-          : "Negocio registrado. Estamos actualizando tus permisos.",
-        canManageBusiness ? "success" : "info",
-      );
-
-      if (onSuccess && canManageBusiness) onSuccess();
+      showSnackbar("Negocio registrado exitosamente", "success");
+      if (onSuccess) await onSuccess();
     } catch (error) {
-      console.error("Error creating business:", error);
       showSnackbar(error?.data?.message || error?.message || "Error al registrar negocio", "error");
     }
   };
 
   const nextPrev = async (direction) => {
-    if (direction === 1 && !validateForm()) {
-      showSnackbar("Por favor completa todos los campos requeridos", "error");
-      return;
-    }
-
-    const nextTab = currentTab + direction;
-    if (nextTab >= steps.length) {
-      await handleSubmit();
-      return;
-    }
-    setCurrentTab(nextTab);
+    if (direction === 1 && !validateForm()) return showSnackbar("Completa los campos requeridos", "error");
+    const next = currentTab + direction;
+    if (next >= steps.length) return handleSubmit();
+    setCurrentTab(next);
   };
 
-  if (isOwner(user) && !submitted) {
-    return <Navigate to="/owner" replace />;
-  }
+  if (submitted) return (
+    <GeneralContent>
+      <Box sx={{ minHeight: 420, display: "grid", placeItems: "center", px: 2 }}>
+        <Paper elevation={0} sx={{ maxWidth: 520, p: 2, borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+          <Result status="success" title="¡Tu negocio ya está en Kcomer!" subTitle="Ahora puedes completar su menú, portada y configuración desde el panel." extra={<Button variant="contained" onClick={() => navigate(ownerReady ? "/owner" : "/explorar")}>{ownerReady ? "Administrar negocio" : "Continuar"}</Button>} />
+        </Paper>
+      </Box>
+    </GeneralContent>
+  );
 
-  if (submitted) {
-    return (
-      <GeneralContent title="Negocio">
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Card sx={{ width: "100%", maxWidth: 500 }}>
-            <CardContent>
-              <Result
-                status={ownerReady ? "success" : "info"}
-                title={ownerReady ? "¡Registro exitoso!" : "¡Negocio registrado!"}
-                subTitle={ownerReady
-                  ? "Tu negocio se ha registrado correctamente."
-                  : "El negocio se creó correctamente, pero tu sesión aún no refleja los permisos de propietario."}
-                extra={ownerReady ? [
-                  <Button key="dashboard" variant="contained" onClick={() => navigate("/owner")}>
-                    Administrar mi negocio
-                  </Button>,
-                ] : [
-                  <Button key="explore" variant="contained" onClick={() => navigate("/explorar")}>
-                    Volver a explorar
-                  </Button>,
-                ]}
-              />
-            </CardContent>
-          </Card>
-        </Box>
-      </GeneralContent>
-    );
-  }
-
+  const step = steps[currentTab];
   return (
-    <GeneralContent title="Negocio">
-      <Box sx={{ display: "flex", justifyContent: "center", mt: isMobile() ? 1 : 3, px: 2, py: 0 }}>
-        <Paper sx={{ mt: 2, mb: 2, maxWidth: 450, width: "100%", p: 2, borderRadius: 3 }} elevation={6}>
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Typography variant="caption" color="text.secondary">
-              Paso {currentTab + 1} de {steps.length}
-            </Typography>
+    <GeneralContent>
+      <Box sx={{ minHeight: "calc(100vh - 64px)", py: { xs: 3, md: 5 }, px: 2, backgroundImage: `linear-gradient(rgba(255,255,255,.78),rgba(255,255,255,.92)), url(${Bg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+        <Paper elevation={0} sx={{ mx: "auto", width: "100%", maxWidth: 720, overflow: "hidden", borderRadius: { xs: 4, md: 6 }, border: "1px solid rgba(255,255,255,.9)", boxShadow: "0 24px 70px rgba(32,28,26,.12)", bgcolor: "rgba(255,255,255,.9)", backdropFilter: "blur(18px)" }}>
+          <Box sx={{ p: { xs: 2.5, sm: 4 }, pb: 2, background: "linear-gradient(135deg,#201c1b 0%,#302724 100%)", color: "white" }}>
+            <Stack direction="row" spacing={2} alignItems="center"><Box sx={{ width: 48, height: 48, borderRadius: 3, display: "grid", placeItems: "center", bgcolor: "rgba(255,255,255,.1)" }}><StorefrontRounded /></Box><Box><Typography variant="overline" sx={{ opacity: .65, letterSpacing: ".14em" }}>CREAR NEGOCIO</Typography><Typography variant="h4" fontWeight={900}>Hazlo fácil de descubrir.</Typography></Box></Stack>
           </Box>
-
-          <Box sx={{ width: "100%", overflow: "hidden", position: "relative" }}>
-            <Box sx={{ display: "flex", width: `${steps.length * 100}%`, transform: `translateX(-${(currentTab * 100) / steps.length}%)`, transition: "transform 0.5s ease" }}>
-              {steps.map((step, index) => (
-                <Box key={step.label} sx={{ width: `${100 / steps.length}%`, flexShrink: 0, boxSizing: "border-box", paddingRight: 2 }}>
-                  <Fade in={index === currentTab} timeout={500} unmountOnExit>
-                    <Box>
-                      <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>{step.label}</Typography>
-                      {step.fields.some((field) => field.name === "foodTypeIds") && loadingFoodTypes ? (
-                        <Box sx={{ textAlign: "center", py: 3 }}>
-                          <Typography variant="body2" color="text.secondary">Cargando tipos de comida...</Typography>
-                        </Box>
-                      ) : (
-                        step.fields.map((field) => (
-                          <FormField
-                            key={field.name}
-                            field={field}
-                            formValues={formValues}
-                            setFormValues={setFormValues}
-                            error={errors[field.name]}
-                          />
-                        ))
-                      )}
-                    </Box>
-                  </Fade>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 3 }}>
-            {currentTab > 0 && <Button onClick={() => nextPrev(-1)} disabled={loading}>Anterior</Button>}
-            <Button variant="contained" onClick={() => nextPrev(1)} disabled={loading || loadingFoodTypes}>
-              {loading ? "Enviando..." : currentTab === steps.length - 1 ? "Registrar Negocio" : "Siguiente"}
-            </Button>
-          </Box>
-
-          <Box sx={{ textAlign: "center", mt: 4 }}>
-            {steps.map((step, index) => {
-              const isFinished = index < currentTab && step.fields.every((field) => {
-                const value = formValues[field.name];
-                if (Array.isArray(value)) return value.length > 0;
-                if (typeof value === "object") return Boolean(value);
-                return String(value ?? "").trim() !== "";
-              });
-              const stepColor = index === currentTab ? "#1976d2" : isFinished ? "#04AA6D" : "#bbbbbb";
-              return <Box key={step.label} component="span" sx={{ height: 15, width: 15, margin: "0 2px", borderRadius: "50%", display: "inline-block", opacity: index === currentTab ? 1 : 0.5, backgroundColor: stepColor, transition: "all 0.3s ease" }} />;
-            })}
+          <LinearProgress variant="determinate" value={((currentTab + 1) / steps.length) * 100} sx={{ height: 4 }} />
+          <Box sx={{ p: { xs: 2.5, sm: 4 } }}>
+            <Typography variant="caption" color="primary" fontWeight={800}>PASO {currentTab + 1} / {steps.length}</Typography>
+            <Typography variant="h5" fontWeight={850}>{step.label}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{step.subtitle}</Typography>
+            <Fade in key={currentTab} timeout={240}><Box>{loadingFoodTypes && currentTab === 0 ? <Typography color="text.secondary">Cargando tipos de comida...</Typography> : step.fields.map((field) => <FormField key={field.name} field={field} formValues={formValues} setFormValues={setFormValues} error={errors[field.name]} />)}</Box></Fade>
+            <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}><Button onClick={() => nextPrev(-1)} disabled={currentTab === 0 || loading}>Anterior</Button><Button variant="contained" disableElevation onClick={() => nextPrev(1)} disabled={loading || loadingFoodTypes} sx={{ borderRadius: 999, px: 3 }}>{loading ? "Guardando..." : currentTab === steps.length - 1 ? "Crear negocio" : "Continuar"}</Button></Stack>
           </Box>
         </Paper>
       </Box>
-
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-        <Alert severity={snackbar.severity} onClose={closeSnackbar} sx={{ width: "100%" }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: "top", horizontal: "center" }}><Alert severity={snackbar.severity}>{snackbar.message}</Alert></Snackbar>
     </GeneralContent>
   );
 };
