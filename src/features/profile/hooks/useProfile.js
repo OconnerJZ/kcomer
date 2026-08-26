@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { useUpdateUsersMutation } from "@Features/users/api/users.api";
 
 export const useProfile = () => {
   const navigate = useNavigate();
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
+  const [updateUserMutation] = useUpdateUsersMutation();
 
   const [editMode, setEditMode] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -23,23 +25,29 @@ export const useProfile = () => {
 
   const handleSave = async () => {
     try {
+      if (!user?.id) throw new Error("Usuario no disponible");
+
       setLoading(true);
       setError("");
       setSuccess("");
 
-      const result = await updateUser({
-        name: formData.name,
-        phone: formData.phone,
-      });
+      await updateUserMutation({
+        id: user.id,
+        body: {
+          name: formData.name,
+          phone: formData.phone,
+        },
+      }).unwrap();
 
-      if (result?.success === false) {
-        throw new Error(result.error || "Error al actualizar el perfil");
+      const refreshResult = await refreshUser();
+      if (refreshResult?.success === false) {
+        throw new Error(refreshResult.error || "No se pudo refrescar el perfil");
       }
 
       setSuccess("Perfil actualizado exitosamente");
       setEditMode(false);
     } catch (err) {
-      setError(err?.message || "Error al actualizar el perfil");
+      setError(err?.data?.message || err?.message || "Error al actualizar el perfil");
     } finally {
       setLoading(false);
     }
