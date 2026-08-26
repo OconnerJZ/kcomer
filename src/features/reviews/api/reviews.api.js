@@ -7,7 +7,6 @@ const customEndpoints = (builder) => {
   return {
     getReviewsByBusiness: endpoint("reviews", "getAll", {
       dynamicPath: ({ businessId }) => `${ENDPOINTS.reviews.base}/business/${businessId}`,
-      getCacheKey: ({ businessId }) => businessId,
       tagType: "Reviews",
     }),
   };
