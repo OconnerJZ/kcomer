@@ -22,7 +22,22 @@ export const normalizeBusiness = (business = {}) => {
     estimatedDeliveryMin: Number(
       business.estimatedDeliveryMin ?? business.estimated_delivery_min ?? 45,
     ),
-    logo: business.logo || business.logoUrl || business.logo_url || "",
+    logo:
+      business.logo ||
+      business.logoUrl ||
+      business.logo_url ||
+      business.urlImage ||
+      business.image ||
+      "",
+    likes: Number(business.likes ?? business.rating_count ?? business.ratingCount ?? 0),
+    rating: Number(business.rating ?? business.average_rating ?? business.averageRating ?? 0),
+    hasDelivery: Boolean(
+      business.hasDelivery ??
+        business.has_delivery ??
+        business.deliveryEnabled ??
+        business.delivery_enabled ??
+        false,
+    ),
     location: {
       address: location.address || "",
       city: location.city || "",
@@ -30,7 +45,10 @@ export const normalizeBusiness = (business = {}) => {
       latitude: location.latitude ?? "",
       longitude: location.longitude ?? "",
     },
-    schedules: business.schedules || [],
+    schedules: business.schedules || business.schedule || [],
+    schedule: business.schedule || business.schedules || [],
+    menu: business.menu || [],
+    tags: business.tags || foodTypes,
     deliverySettings: {
       deliveryRadiusKm: Number(delivery.deliveryRadiusKm ?? delivery.delivery_radius_km ?? 5),
       deliveryFee: Number(delivery.deliveryFee ?? delivery.delivery_fee ?? 0),
@@ -49,6 +67,9 @@ export const normalizeBusiness = (business = {}) => {
     photos: business.photos || [],
   };
 };
+
+export const normalizeBusinesses = (businesses = []) =>
+  Array.isArray(businesses) ? businesses.map(normalizeBusiness) : [];
 
 export const toBasicInfoPayload = (business) => ({
   business_name: business.name,
