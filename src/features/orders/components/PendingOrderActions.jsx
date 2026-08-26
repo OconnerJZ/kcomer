@@ -18,7 +18,11 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
   if (order?.status !== "pending") return null;
 
   const handleReject = async () => {
-    await onUpdateStatus(order.id, "rejected", reason.trim());
+    const detail = reason.trim();
+    const note = detail
+      ? `Orden rechazada por el negocio: ${detail}`
+      : "Orden rechazada por el negocio";
+    await onUpdateStatus(order.id, "cancelled", note);
     setRejectOpen(false);
     setReason("");
   };
@@ -54,7 +58,7 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
         <DialogTitle>Rechazar orden #{order.id}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            Esta acción cerrará la orden como rechazada. Puedes agregar un motivo para mantener contexto operativo.
+            La orden se cerrará como cancelada y quedará registrado que fue rechazada por el negocio.
           </DialogContentText>
           <TextField
             autoFocus
