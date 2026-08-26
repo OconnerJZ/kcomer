@@ -36,6 +36,7 @@ import {
 import useBusinessMenu from "@Features/menu/hooks/useBusinessMenu";
 import DeleteMenuDialog from "@Features/owner/components/menu/DeleteMenuDialog";
 import MenuItemDialog from "@Features/owner/components/menu/MenuItemDialog";
+import useImagePreview from "@Shared/hooks/useImagePreview";
 
 const EMPTY_MENU_FORM = {
   item_name: "",
@@ -61,8 +62,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, itemId: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [menuForm, setMenuForm] = useState(EMPTY_MENU_FORM);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const image = useImagePreview();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -78,20 +78,19 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
 
   const handleOpenMenuDialog = (item = null) => {
     if (item) {
+      const currentImage = item.image || item.image_url || "";
       setMenuForm({
         item_name: item.name || item.item_name || "",
         description: item.description || "",
         price: item.price ?? "",
         category: item.category || "",
-        image_url: item.image || item.image_url || "",
+        image_url: currentImage,
         is_available: item.available ?? item.is_available ?? true,
       });
-      setImagePreview(item.image || item.image_url || "");
-      setImageFile(null);
+      image.resetImage(currentImage);
     } else {
       setMenuForm(EMPTY_MENU_FORM);
-      setImagePreview("");
-      setImageFile(null);
+      image.resetImage();
     }
     setMenuDialog({ open: true, item });
   };
@@ -99,26 +98,21 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
   const handleCloseMenuDialog = () => {
     setMenuDialog({ open: false, item: null });
     setMenuForm(EMPTY_MENU_FORM);
-    setImageFile(null);
-    setImagePreview("");
+    image.resetImage();
   };
 
   const handleFormChange = (field, value) => {
     setMenuForm((current) => ({ ...current, [field]: value }));
   };
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showSnackbar("La imagen debe pesar menos de 5MB", "error");
-      return;
+    try {
+      await image.selectImage(file);
+    } catch (error) {
+      showSnackbar(error.message, "error");
     }
-
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
-    reader.readAsDataURL(file);
   };
 
   const handleSaveMenuItem = async () => {
@@ -129,8 +123,8 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
       }
 
       const result = menuDialog.item
-        ? await updateItem(menuDialog.item.id, menuForm, imageFile)
-        : await createItem(menuForm, imageFile);
+        ? await updateItem(menuDialog.item.id, menuForm, image.file)
+        : await createItem(menuForm, image.file);
 
       if (!result.success) {
         showSnackbar(result.error, "error");
@@ -183,145 +177,45 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
 
   return (
     <Box>
-      <Paper
-        elevation={0}
-        sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0", borderRadius: 0 }}
-      >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
-          gap={2}
-        >
+      <Paper elevation={0} sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0", borderRadius: 0 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
           <Box>
-            <Typography
-              variant="overline"
-              sx={{ color: "#666", letterSpacing: "0.15em", fontSize: "0.688rem" }}
-            >
+            <Typography variant="overline" sx={{ color: "#666", letterSpacing: "0.15em", fontSize: "0.688rem" }}>
               Gestión de Menú
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 500 }}>
               {menu.length} {menu.length === 1 ? "platillo" : "platillos"}
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => handleOpenMenuDialog()}
-            sx={{ textTransform: "none", borderRadius: 0, boxShadow: "none" }}
-          >
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} sx={{ textTransform: "none", borderRadius: 0, boxShadow: "none" }}>
             Agregar Platillo
           </Button>
         </Stack>
       </Paper>
 
-      {loading && !hasItems() && (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
-          <CircularProgress />
-        </Box>
-      )}
+      {loading && !hasItems() && <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}><CircularProgress /></Box>}
 
       {!loading && !hasItems() && (
-        <Paper
-          elevation={0}
-          sx={{ p: 5, textAlign: "center", border: "2px dashed #e0e0e0", borderRadius: 0 }}
-        >
+        <Paper elevation={0} sx={{ p: 5, textAlign: "center", border: "2px dashed #e0e0e0", borderRadius: 0 }}>
           <Restaurant sx={{ fontSize: 60, color: "#ccc", mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No hay platillos en el menú
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Comienza agregando tu primer platillo
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => handleOpenMenuDialog()}
-            sx={{ textTransform: "none", borderRadius: 0 }}
-          >
-            Agregar Platillo
-          </Button>
+          <Typography variant="h6" color="text.secondary" gutterBottom>No hay platillos en el menú</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Comienza agregando tu primer platillo</Typography>
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} sx={{ textTransform: "none", borderRadius: 0 }}>Agregar Platillo</Button>
         </Paper>
       )}
 
       {!isMobile && hasItems() && (
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: "1px solid #e0e0e0", borderRadius: 0 }}
-        >
+        <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0 }}>
           <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "#fafafa" }}>
-                <TableCell>Platillo</TableCell>
-                <TableCell>Categoría</TableCell>
-                <TableCell align="right">Precio</TableCell>
-                <TableCell align="center">Disponible</TableCell>
-                <TableCell align="right">Acciones</TableCell>
-              </TableRow>
-            </TableHead>
+            <TableHead><TableRow sx={{ bgcolor: "#fafafa" }}><TableCell>Platillo</TableCell><TableCell>Categoría</TableCell><TableCell align="right">Precio</TableCell><TableCell align="center">Disponible</TableCell><TableCell align="right">Acciones</TableCell></TableRow></TableHead>
             <TableBody>
               {menu.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar
-                        src={item.image || item.image_url}
-                        variant="rounded"
-                        sx={{ width: 50, height: 50 }}
-                      >
-                        <ImageIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={500}>
-                          {item.name || item.item_name}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {item.description}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    {item.category && (
-                      <Chip label={item.category} size="small" sx={{ borderRadius: 0 }} />
-                    )}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography fontWeight={500}>
-                      ${Number(item.price || 0).toFixed(2)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Switch
-                      checked={item.available ?? item.is_available ?? false}
-                      onChange={() => handleToggleAvailability(item.id)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <IconButton size="small" onClick={() => handleOpenMenuDialog(item)}>
-                        <Edit fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => setDeleteDialog({ open: true, itemId: item.id })}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
+                  <TableCell><Stack direction="row" spacing={2} alignItems="center"><Avatar src={item.image || item.image_url} variant="rounded" sx={{ width: 50, height: 50 }}><ImageIcon /></Avatar><Box><Typography variant="body2" fontWeight={500}>{item.name || item.item_name}</Typography><Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography></Box></Stack></TableCell>
+                  <TableCell>{item.category && <Chip label={item.category} size="small" sx={{ borderRadius: 0 }} />}</TableCell>
+                  <TableCell align="right"><Typography fontWeight={500}>${Number(item.price || 0).toFixed(2)}</Typography></TableCell>
+                  <TableCell align="center"><Switch checked={item.available ?? item.is_available ?? false} onChange={() => handleToggleAvailability(item.id)} size="small" /></TableCell>
+                  <TableCell align="right"><Stack direction="row" spacing={1} justifyContent="flex-end"><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -333,108 +227,17 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         <Grid container spacing={2}>
           {menu.map((item) => (
             <Grid item xs={12} sm={6} key={item.id}>
-              <Fade in>
-                <Card
-                  elevation={0}
-                  sx={{ border: "1px solid #e0e0e0", borderRadius: 0, height: "100%" }}
-                >
-                  <CardContent>
-                    <Stack spacing={2}>
-                      <Stack direction="row" spacing={2}>
-                        <Avatar
-                          src={item.image || item.image_url}
-                          variant="rounded"
-                          sx={{ width: 60, height: 60 }}
-                        >
-                          <ImageIcon />
-                        </Avatar>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="subtitle1" fontWeight={500} noWrap>
-                            {item.name || item.item_name}
-                          </Typography>
-                          <Typography variant="h6" color="primary">
-                            ${Number(item.price || 0).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      {item.description && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {item.description}
-                        </Typography>
-                      )}
-
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={item.available ?? item.is_available ?? false}
-                              onChange={() => handleToggleAvailability(item.id)}
-                              size="small"
-                            />
-                          }
-                          label="Disponible"
-                        />
-                        <Stack direction="row" spacing={1}>
-                          <IconButton size="small" onClick={() => handleOpenMenuDialog(item)}>
-                            <Edit fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => setDeleteDialog({ open: true, itemId: item.id })}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </Stack>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Fade>
+              <Fade in><Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0, height: "100%" }}><CardContent><Stack spacing={2}><Stack direction="row" spacing={2}><Avatar src={item.image || item.image_url} variant="rounded" sx={{ width: 60, height: 60 }}><ImageIcon /></Avatar><Box sx={{ flex: 1, minWidth: 0 }}><Typography variant="subtitle1" fontWeight={500} noWrap>{item.name || item.item_name}</Typography><Typography variant="h6" color="primary">${Number(item.price || 0).toFixed(2)}</Typography></Box></Stack>{item.description && <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography>}<Stack direction="row" justifyContent="space-between" alignItems="center"><FormControlLabel control={<Switch checked={item.available ?? item.is_available ?? false} onChange={() => handleToggleAvailability(item.id)} size="small" />} label="Disponible" /><Stack direction="row" spacing={1}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></Stack></Stack></CardContent></Card></Fade>
             </Grid>
           ))}
         </Grid>
       )}
 
-      <MenuItemDialog
-        open={menuDialog.open}
-        editing={!!menuDialog.item}
-        fullScreen={isSmall}
-        loading={loading}
-        form={menuForm}
-        imagePreview={imagePreview}
-        onClose={handleCloseMenuDialog}
-        onSave={handleSaveMenuItem}
-        onImageChange={handleImageChange}
-        onFormChange={handleFormChange}
-      />
+      <MenuItemDialog open={menuDialog.open} editing={!!menuDialog.item} fullScreen={isSmall} loading={loading} form={menuForm} imagePreview={image.preview} onClose={handleCloseMenuDialog} onSave={handleSaveMenuItem} onImageChange={handleImageChange} onFormChange={handleFormChange} />
 
-      <DeleteMenuDialog
-        open={deleteDialog.open}
-        loading={loading}
-        onClose={() => setDeleteDialog({ open: false, itemId: null })}
-        onConfirm={handleDeleteMenuItem}
-      />
+      <DeleteMenuDialog open={deleteDialog.open} loading={loading} onClose={() => setDeleteDialog({ open: false, itemId: null })} onConfirm={handleDeleteMenuItem} />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={closeSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}><Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert></Snackbar>
     </Box>
   );
 };
