@@ -7,6 +7,11 @@ import {
   useToggleAvailabilityMutation,
 } from "@Features/menu/api/menu.api";
 import {
+  normalizeMenuItem,
+  normalizeMenuItems,
+  toMenuPayload,
+} from "@Features/menu/model/menuItem";
+import {
   useUploadImageMutation,
   uploadHelpers,
 } from "@Shared/api/uploads/upload.api";
@@ -30,68 +35,54 @@ export const useBusinessMenu = (businessId) => {
   const [toggleAvailability, { isLoading: toggling }] = useToggleAvailabilityMutation();
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
 
-  const menu = useMemo(() => menuResponse?.data || menuResponse || [], [menuResponse]);
+  const menu = useMemo(
+    () => normalizeMenuItems(menuResponse?.data || menuResponse || []),
+    [menuResponse],
+  );
+
+  const resolveImageUrl = useCallback(
+    async (itemData, imageFile) => {
+      if (!imageFile) return itemData.image || "";
+
+      const uploadResult = await uploadHelpers.uploadImage(imageFile, uploadImage);
+      if (uploadResult.data?.success) return uploadResult.data.data.url;
+      return itemData.image || "";
+    },
+    [uploadImage],
+  );
 
   const createItem = useCallback(
     async (itemData, imageFile = null) => {
       setError(null);
       try {
-        let imageUrl = itemData.image_url || "";
-        if (imageFile) {
-          const uploadResult = await uploadHelpers.uploadImage(imageFile, uploadImage);
-          if (uploadResult.data?.success) imageUrl = uploadResult.data.data.url;
-        }
-
-        const payload = {
-          business_id: businessId,
-          item_name: itemData.item_name,
-          description: itemData.description || "",
-          price: Number.parseFloat(itemData.price),
-          category: itemData.category || "",
-          image_url: imageUrl,
-          is_available: itemData.is_available ?? true,
-        };
-
+        const image = await resolveImageUrl(itemData, imageFile);
+        const payload = toMenuPayload({ ...itemData, image }, businessId);
         const result = await createMenuItem(payload).unwrap();
-        return { success: true, data: result };
+        return { success: true, data: normalizeMenuItem(result) };
       } catch (err) {
         const errorMessage = err?.data?.message || err?.message || "Error al crear item";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
     },
-    [businessId, createMenuItem, uploadImage],
+    [businessId, createMenuItem, resolveImageUrl],
   );
 
   const updateItem = useCallback(
     async (itemId, itemData, imageFile = null) => {
       setError(null);
       try {
-        let imageUrl = itemData.image_url || "";
-        if (imageFile) {
-          const uploadResult = await uploadHelpers.uploadImage(imageFile, uploadImage);
-          if (uploadResult.data?.success) imageUrl = uploadResult.data.data.url;
-        }
-
-        const payload = {
-          business_id: businessId,
-          item_name: itemData.item_name,
-          description: itemData.description || "",
-          price: Number.parseFloat(itemData.price),
-          category: itemData.category || "",
-          image_url: imageUrl,
-          is_available: itemData.is_available ?? true,
-        };
-
+        const image = await resolveImageUrl(itemData, imageFile);
+        const payload = toMenuPayload({ ...itemData, image }, businessId);
         const result = await updateMenuItem({ id: itemId, body: payload }).unwrap();
-        return { success: true, data: result };
+        return { success: true, data: normalizeMenuItem(result) };
       } catch (err) {
         const errorMessage = err?.data?.message || err?.message || "Error al actualizar item";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
     },
-    [businessId, updateMenuItem, uploadImage],
+    [businessId, resolveImageUrl, updateMenuItem],
   );
 
   const deleteItem = useCallback(async (itemId) => {
@@ -121,8 +112,8 @@ export const useBusinessMenu = (businessId) => {
   const selectors = useMemo(() => ({
     getItemById: (itemId) => menu.find((item) => item.id === itemId),
     getItemsByCategory: (category) => menu.filter((item) => item.category === category),
-    getAvailableItems: () => menu.filter((item) => item.is_available || item.available),
-    getUnavailableItems: () => menu.filter((item) => !(item.is_available || item.available)),
+    getAvailableItems: () => menu.filter((item) => item.available),
+    getUnavailableItems: () => menu.filter((item) => !item.available),
     getCategories: () => Array.from(new Set(menu.map((item) => item.category).filter(Boolean))),
     hasItems: () => menu.length > 0,
     getTotalItems: () => menu.length,
