@@ -1,12 +1,10 @@
-import { useState, forwardRef, useMemo } from "react";
+import { useState, forwardRef, useMemo, useEffect } from "react";
 import {
   Box,
   CircularProgress,
   Alert,
   Container,
   Fade,
-  useMediaQuery,
-  useTheme,
   Fab,
   AppBar,
   Toolbar,
@@ -38,8 +36,6 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 export default function OwnerDashboard() {
   const { user } = useAuth();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeTab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
@@ -54,7 +50,6 @@ export default function OwnerDashboard() {
   } = useBusinessOwner(selectedBusinessId);
 
   const {
-    orders,
     loading: loadingOrders,
     getPendingOrders,
   } = useBusinessOrders(selectedBusinessId);
@@ -64,7 +59,7 @@ export default function OwnerDashboard() {
   const handleTabChange = (newTab) => setActiveTab(newTab);
   const selectBusiness = (businessId) => setSelectedBusinessId(businessId);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!selectedBusinessId && businesses.length > 0) {
       setSelectedBusinessId(businesses[BUSINESS_DEFAULT]?.id);
     }
@@ -100,7 +95,6 @@ export default function OwnerDashboard() {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2 }}>
         <RegisterBusiness />
-        <Typography>{}</Typography>
       </Box>
     );
   }
