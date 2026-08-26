@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import FilterMenuProvider from "@Context/FilterMenuContext";
-import { CartProvider } from "@Hooks/components/useCart";
+import { CartProvider } from "@Features/cart/context/CartContext";
 import { AuthProvider, useAuth } from "@Features/auth/context/AuthContext";
 import { OrdersProvider } from "@Features/orders/context/OrderContext";
 import socketService from "@Services/socketService";
