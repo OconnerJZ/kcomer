@@ -9,15 +9,17 @@ import socketService from "@Shared/services/realtime/socketService";
 
 const SocketInitializer = () => {
   const { user, isAuthenticated } = useAuth();
+  const userId = user?.id;
+  const token = user?.token;
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      socketService.connect(user);
+    if (isAuthenticated && userId && token) {
+      socketService.connect({ ...user, id: userId, token });
       socketService.requestNotificationPermission();
     } else {
       socketService.disconnect();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, userId, token]);
 
   return null;
 };
