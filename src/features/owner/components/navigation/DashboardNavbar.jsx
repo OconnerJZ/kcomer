@@ -31,12 +31,20 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import LogoClassic from "/pwa-512x512.png";
+
+const resolveMediaUrl = (value = "") => {
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
+};
 
 const DashboardNavbar = ({
   activeTab,
   onTabChange,
   businessName,
+  selectedBusinessId,
   pendingOrders = 0,
   selectBusiness,
   businesses,
@@ -99,19 +107,32 @@ const DashboardNavbar = ({
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         PaperProps={{ sx: { minWidth: 240, maxHeight: 240, mt: 1, borderRadius: 2 } }}
       >
-        {businesses.map((business) => (
-          <MenuItem onClick={() => handleChange(business?.id)} key={business?.id ?? business?.title}>
-            <ListItemIcon>
-              <img
-                width={32}
-                height={32}
-                src={"http://localhost:3000/uploads/" + business.urlImage}
-                alt={business?.title || "Negocio"}
+        {businesses.map((business) => {
+          const selected = String(business.id) === String(selectedBusinessId);
+          return (
+            <MenuItem
+              selected={selected}
+              onClick={() => handleChange(business.id)}
+              key={business.id ?? business.name}
+            >
+              <ListItemIcon>
+                <Avatar
+                  variant="rounded"
+                  src={resolveMediaUrl(business.logo)}
+                  alt={business.name || "Negocio"}
+                  sx={{ width: 32, height: 32 }}
+                >
+                  {business.name?.charAt(0)}
+                </Avatar>
+              </ListItemIcon>
+              <ListItemText
+                primary={business.name || "Negocio"}
+                secondary={selected ? "Negocio activo" : undefined}
+                sx={{ fontSize: { xs: "13px" } }}
               />
-            </ListItemIcon>
-            <ListItemText sx={{ fontSize: { xs: "13px" } }}>{business?.title}</ListItemText>
-          </MenuItem>
-        ))}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </>
   );
