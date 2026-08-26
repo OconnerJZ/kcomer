@@ -14,7 +14,6 @@ import {
 import { Image, Upload } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import PropTypes from "prop-types";
 import GoogleMapField from "./GoogleMapField";
 import ScheduleField from "./ScheduleField";
 import { API_KEY_MAPS } from "@Shared/config/env";
@@ -96,12 +95,6 @@ const ImageField = ({ field, formValues, setFormValues }) => {
       )}
     </Box>
   );
-};
-
-ImageField.propTypes = {
-  field: PropTypes.object.isRequired,
-  formValues: PropTypes.object.isRequired,
-  setFormValues: PropTypes.func.isRequired,
 };
 
 const fieldComponents = {
@@ -260,22 +253,6 @@ const FormField = (props) => {
     return null;
   }
   return <Field {...props} />;
-};
-
-FormField.propTypes = {
-  field: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    label: PropTypes.string,
-    type: PropTypes.string.isRequired,
-    required: PropTypes.bool,
-    options: PropTypes.array,
-    validate: PropTypes.string,
-  }).isRequired,
-  formValues: PropTypes.object.isRequired,
-  setFormValues: PropTypes.func.isRequired,
-  error: PropTypes.bool,
-  helperText: PropTypes.string,
-  validate: PropTypes.string,
 };
 
 export default FormField;
