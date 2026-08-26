@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useUpdateUsersMutation } from "@Features/users/api/users.api";
+import { toUserUpdatePayload } from "@Features/users/model/user";
 
 export const useProfile = () => {
   const navigate = useNavigate();
@@ -18,6 +19,14 @@ export const useProfile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  useEffect(() => {
+    if (editMode) return;
+    setFormData({
+      name: user?.name || "",
+      phone: user?.phone || "",
+    });
+  }, [editMode, user?.name, user?.phone]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((current) => ({ ...current, [name]: value }));
@@ -33,10 +42,7 @@ export const useProfile = () => {
 
       await updateUserMutation({
         id: user.id,
-        body: {
-          name: formData.name,
-          phone: formData.phone,
-        },
+        body: toUserUpdatePayload(formData),
       }).unwrap();
 
       const refreshResult = await refreshUser();
