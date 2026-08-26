@@ -45,7 +45,10 @@ export const validateCheckout = ({
     errors.general = "El total debe ser mayor a $0";
   }
 
-  return errors;
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
 };
 
 export const buildDeliveryAddress = ({
@@ -60,7 +63,7 @@ export const buildDeliveryAddress = ({
 
   if (addressType === "saved") {
     const selectedAddress = addresses.find(
-      (address) => address.id === form.userAddressId,
+      (address) => String(address.id) === String(form.userAddressId),
     );
 
     if (!selectedAddress) return "";
@@ -80,7 +83,8 @@ export const buildOrderPayload = ({
   business,
   user,
   orderType,
-  deliveryAddress,
+  addressType,
+  addresses = [],
   form,
 }) => ({
   businessId,
@@ -91,7 +95,12 @@ export const buildOrderPayload = ({
   items: Object.values(business.items),
   total: business.total,
   orderType,
-  deliveryAddress,
+  deliveryAddress: buildDeliveryAddress({
+    orderType,
+    addressType,
+    form,
+    addresses,
+  }),
   phoneNumber: form.customerPhone,
   paymentMethod: form.paymentMethod,
   notes: form.notes,
