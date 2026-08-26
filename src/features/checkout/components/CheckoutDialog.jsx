@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography } from "@mui/material";
 import ContactSection from "./ContactSection";
 import DeliveryAddressSection from "./DeliveryAddressSection";
@@ -19,6 +20,28 @@ export default function CheckoutDialog({
   handleChange,
   handleNewAddressChange,
 }) {
+  const paymentMethods = currentBusiness?.paymentMethods || [];
+  const activePaymentMethods = paymentMethods.filter((method) => method.active !== false);
+  const validPaymentMethod = activePaymentMethods.some(
+    (method) => method.method === form.paymentMethod,
+  );
+
+  useEffect(() => {
+    if (!currentBusiness) return;
+    if (validPaymentMethod) return;
+
+    const fallback = activePaymentMethods[0]?.method || "cash";
+    if (form.paymentMethod !== fallback) {
+      handleChange("paymentMethod", fallback);
+    }
+  }, [
+    activePaymentMethods,
+    currentBusiness,
+    form.paymentMethod,
+    handleChange,
+    validPaymentMethod,
+  ]);
+
   if (!currentBusiness) return null;
 
   return (
@@ -31,7 +54,11 @@ export default function CheckoutDialog({
         <Stack spacing={3}>
           <OrderTypeSelector orderType={orderType} onChange={setOrderType} />
           <ContactSection form={form} errors={errors} onChange={handleChange} />
-          <PaymentMethodSelector paymentMethod={form.paymentMethod} onChange={(value) => handleChange("paymentMethod", value)} />
+          <PaymentMethodSelector
+            paymentMethod={form.paymentMethod}
+            methods={paymentMethods}
+            onChange={(value) => handleChange("paymentMethod", value)}
+          />
           {orderType === "delivery" && (
             <DeliveryAddressSection
               addressType={addressType}
