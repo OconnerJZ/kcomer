@@ -1,4 +1,5 @@
 import { api, createEndpointBuilder } from "@Shared/api/rtk/api";
+import { ENDPOINTS } from "@Shared/api/endpoints";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -20,10 +21,10 @@ const uploadEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
 
   return {
-    uploadImage: endpoint("api/upload/image", "create", { isJSON: false }),
-    uploadMultiple: endpoint("api/upload/multiple", "create", { isJSON: false }),
+    uploadImage: endpoint(ENDPOINTS.upload.image, "create", { isJSON: false }),
+    uploadMultiple: endpoint(ENDPOINTS.upload.multiple, "create", { isJSON: false }),
     deleteImage: endpoint("upload-delete", "delete", {
-      dynamicPath: ({ filename }) => `/api/upload/image/${filename}`,
+      dynamicPath: ({ filename }) => `${ENDPOINTS.upload.image}/${filename}`,
     }),
   };
 };
