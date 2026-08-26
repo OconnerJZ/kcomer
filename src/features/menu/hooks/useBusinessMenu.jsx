@@ -1,10 +1,12 @@
 import { useState, useCallback, useMemo } from "react";
+import { useDispatch } from "react-redux";
 import {
   useGetManagedMenuByBusinessQuery,
   useCreateMenuMutation,
   useUpdateMenuMutation,
   useDeleteMenuMutation,
 } from "@Features/menu/api/menu.api";
+import { api } from "@Shared/api/rtk/api";
 import {
   normalizeMenuItem,
   normalizeMenuItems,
@@ -17,17 +19,23 @@ import {
 
 const unwrapData = (response) => response?.data ?? response;
 
+const getDraftItems = (draft) => {
+  if (Array.isArray(draft)) return draft;
+  if (Array.isArray(draft?.data)) return draft.data;
+  return null;
+};
+
 export const useBusinessMenu = (businessId) => {
+  const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const queryArg = useMemo(() => ({ businessId }), [businessId]);
+
   const {
     data: menuResponse,
     isLoading: loading,
     error: queryError,
     refetch: refreshMenu,
-  } = useGetManagedMenuByBusinessQuery(
-    { businessId },
-    { skip: !businessId },
-  );
+  } = useGetManagedMenuByBusinessQuery(queryArg, { skip: !businessId });
 
   const [createMenuItem, { isLoading: creating }] = useCreateMenuMutation();
   const [updateMenuItem, { isLoading: updating }] = useUpdateMenuMutation();
@@ -37,6 +45,19 @@ export const useBusinessMenu = (businessId) => {
   const menu = useMemo(
     () => normalizeMenuItems(menuResponse?.data || menuResponse || []),
     [menuResponse],
+  );
+
+  const patchManagedMenu = useCallback(
+    (recipe) => {
+      if (!businessId) return null;
+      return dispatch(
+        api.util.updateQueryData("getManagedMenuByBusiness", queryArg, (draft) => {
+          const items = getDraftItems(draft);
+          if (items) recipe(items);
+        }),
+      );
+    },
+    [businessId, dispatch, queryArg],
   );
 
   const resolveImageUrl = useCallback(
@@ -70,33 +91,53 @@ export const useBusinessMenu = (businessId) => {
   const updateItem = useCallback(
     async (itemId, itemData, imageFile = null) => {
       setError(null);
+      let patch;
       try {
         const image = await resolveImageUrl(itemData, imageFile);
+        const optimisticItem = normalizeMenuItem({
+          ...itemData,
+          id: itemId,
+          image,
+          businessId,
+        });
+
+        patch = patchManagedMenu((items) => {
+          const index = items.findIndex((item) => String(item.id) === String(itemId));
+          if (index >= 0) items[index] = { ...items[index], ...optimisticItem };
+        });
+
         const payload = toMenuPayload({ ...itemData, image }, businessId);
         const response = await updateMenuItem({ id: itemId, body: payload }).unwrap();
         return { success: true, data: normalizeMenuItem(unwrapData(response)) };
       } catch (err) {
+        patch?.undo?.();
         const errorMessage = err?.data?.message || err?.message || "Error al actualizar item";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
     },
-    [businessId, resolveImageUrl, updateMenuItem],
+    [businessId, patchManagedMenu, resolveImageUrl, updateMenuItem],
   );
 
   const deleteItem = useCallback(
     async (itemId) => {
       setError(null);
+      const patch = patchManagedMenu((items) => {
+        const index = items.findIndex((item) => String(item.id) === String(itemId));
+        if (index >= 0) items.splice(index, 1);
+      });
+
       try {
         await deleteMenuItem(itemId).unwrap();
         return { success: true };
       } catch (err) {
+        patch?.undo?.();
         const errorMessage = err?.data?.message || err?.message || "Error al eliminar item";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
     },
-    [deleteMenuItem],
+    [deleteMenuItem, patchManagedMenu],
   );
 
   const toggleItemAvailability = useCallback(
@@ -105,19 +146,28 @@ export const useBusinessMenu = (businessId) => {
       const item = menu.find((current) => String(current.id) === String(itemId));
       if (!item) return { success: false, error: "Platillo no encontrado" };
 
+      const nextAvailable = !item.available;
+      const patch = patchManagedMenu((items) => {
+        const target = items.find((current) => String(current.id) === String(itemId));
+        if (!target) return;
+        if ("available" in target) target.available = nextAvailable;
+        if ("is_available" in target) target.is_available = nextAvailable;
+      });
+
       try {
         await updateMenuItem({
           id: itemId,
-          body: { is_available: !item.available },
+          body: { is_available: nextAvailable },
         }).unwrap();
         return { success: true };
       } catch (err) {
+        patch?.undo?.();
         const errorMessage = err?.data?.message || err?.message || "Error al cambiar disponibilidad";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
     },
-    [menu, updateMenuItem],
+    [menu, patchManagedMenu, updateMenuItem],
   );
 
   const selectors = useMemo(
