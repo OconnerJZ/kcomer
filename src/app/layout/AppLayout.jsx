@@ -3,11 +3,11 @@ import { Box, Toolbar } from "@mui/material";
 import Navbar from "@App/navigation/Navbar";
 import FiltersPanel from "@Features/explore/components/FiltersPanel";
 import Bg from "@Assets/images/qscome-bg-6.png";
-import { namePage } from "@Utils/listMessages";
 import { isMobile } from "@Shared/utils/commons";
 import Content from "@Shared/components/layout/Content";
 
 const { Header: AntdHeader, Content: AntdContent, Footer: AntdFooter } = AntdLayout;
+const APP_NAME = "qsCome";
 
 export default function AppLayout() {
   return (
@@ -25,7 +25,7 @@ export default function AppLayout() {
       {!isMobile() && (
         <AntdFooter style={{ backgroundColor: "#3a3b3d", color: "#f5f5f5", textAlign: "center", letterSpacing: "3.2px" }}>
           <Box component="span" className="footer">
-            COPYRIGHT © {new Date().getFullYear()} {namePage} - TODOS LOS DERECHOS RESERVADOS
+            COPYRIGHT © {new Date().getFullYear()} {APP_NAME} - TODOS LOS DERECHOS RESERVADOS
           </Box>
         </AntdFooter>
       )}
