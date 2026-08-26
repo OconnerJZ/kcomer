@@ -5,8 +5,8 @@ const paymentsEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
 
   return {
-    create: endpoint(ENDPOINTS.payments.base, "create"),
-    verify: endpoint("payments-verify", "getOne", {
+    createPayment: endpoint(ENDPOINTS.payments.base, "create"),
+    verifyPayment: endpoint("payments-verify", "getOne", {
       dynamicPath: ({ id }) => `${ENDPOINTS.payments.base}/${id}/verify`,
     }),
     createPaymentIntent: endpoint(ENDPOINTS.payments.intent, "create"),
@@ -22,8 +22,8 @@ const apiPayments = api.injectEndpoints({
 });
 
 export const {
-  useCreateMutation,
-  useVerifyQuery,
+  useCreatePaymentMutation,
+  useVerifyPaymentQuery,
   useCreatePaymentIntentMutation,
   useConfirmPaymentMutation,
 } = apiPayments;
