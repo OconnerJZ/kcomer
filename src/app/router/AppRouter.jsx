@@ -1,0 +1,65 @@
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@Context/AuthContext";
+import Layout from "@Components/layout/Layout";
+
+const Explorar = lazy(() => import("@Pages/Explorar"));
+const Nosotros = lazy(() => import("@Pages/Nosotros"));
+const Login = lazy(() => import("@Pages/Login"));
+const Pedidos = lazy(() => import("@Pages/Pedidos"));
+const MisOrdenes = lazy(() => import("@Pages/MisOrdenes"));
+const Perfil = lazy(() => import("@Pages/Perfil"));
+const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
+const OwnerDashboard = lazy(() => import("@Pages/OwnerDashboard"));
+
+const ProtectedRoute = ({ children, roles }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) return <div>Cargando...</div>;
+  if (!isAuthenticated) return <Navigate to="/login/orden" replace />;
+  if (roles && !roles.includes(user?.role)) {
+    return <Navigate to="/explorar" replace />;
+  }
+
+  return children;
+};
+
+const routes = [
+  { path: "explorar", element: <Explorar /> },
+  { path: "nosotros", element: <Nosotros /> },
+  { path: "registro", element: <LandingRegister /> },
+  { path: "perfil", element: <Perfil />, isProtected: true },
+  { path: "orden", element: <Pedidos />, isProtected: true },
+  { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true },
+  { path: "owner", element: <OwnerDashboard />, isProtected: true },
+];
+
+export default function AppRouter() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<div>Cargando...</div>}>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="explorar" replace />} />
+            {routes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  route.isProtected ? (
+                    <ProtectedRoute roles={route.roles}>
+                      {route.element}
+                    </ProtectedRoute>
+                  ) : (
+                    route.element
+                  )
+                }
+              />
+            ))}
+          </Route>
+          <Route path="/login/:from" element={<Login />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
