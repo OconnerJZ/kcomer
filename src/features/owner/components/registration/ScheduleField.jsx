@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { MobileTimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const days = [
   "Lunes",
@@ -20,49 +20,78 @@ const days = [
   "Domingo",
 ];
 
-const ScheduleField = ({ formValues, setFormValues }) => {
-  useEffect(() => {
-    if (!formValues.schedule) {
+const createDefaultSchedule = () =>
+  days.map((day) => ({
+    day,
+    isClosed: false,
+    opened: "",
+    closed: "",
+  }));
+
+const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
+  const controlledSchedule = useMemo(
+    () => schedules ?? formValues?.schedule,
+    [schedules, formValues?.schedule],
+  );
+
+  const updateSchedule = (updater) => {
+    if (onChange) {
+      onChange((current) => updater(current || createDefaultSchedule()));
+      return;
+    }
+
+    if (setFormValues) {
       setFormValues((prev) => ({
         ...prev,
-        schedule: days.map((day) => ({
-          day,
-          isClosed: false,
-          opened: "",
-          closed: "",
-        })),
+        schedule: updater(prev.schedule || createDefaultSchedule()),
       }));
     }
-  }, [formValues.schedule, setFormValues]);
+  };
+
+  useEffect(() => {
+    if (controlledSchedule) return;
+
+    if (onChange) {
+      onChange(createDefaultSchedule());
+      return;
+    }
+
+    if (setFormValues) {
+      setFormValues((prev) => ({
+        ...prev,
+        schedule: createDefaultSchedule(),
+      }));
+    }
+  }, [controlledSchedule, onChange, setFormValues]);
 
   const updateDay = (index, changes) => {
-    setFormValues((prev) => {
-      const schedule = [...prev.schedule];
-      schedule[index] = { ...schedule[index], ...changes };
-      return { ...prev, schedule };
+    updateSchedule((current) => {
+      const next = [...current];
+      next[index] = { ...next[index], ...changes };
+      return next;
     });
   };
 
   const copyReferenceDay = () => {
-    const schedule = formValues.schedule;
-    const reference = schedule.find((day) => !day.isClosed && day.opened && day.closed);
+    const reference = controlledSchedule?.find(
+      (day) => !day.isClosed && day.opened && day.closed,
+    );
 
     if (!reference) {
       alert("No hay ningún día abierto con horario para copiar.");
       return;
     }
 
-    setFormValues((prev) => ({
-      ...prev,
-      schedule: prev.schedule.map((day) =>
+    updateSchedule((current) =>
+      current.map((day) =>
         day.isClosed
           ? day
-          : { ...day, opened: reference.opened, closed: reference.closed }
+          : { ...day, opened: reference.opened, closed: reference.closed },
       ),
-    }));
+    );
   };
 
-  if (!formValues.schedule) return null;
+  if (!controlledSchedule) return null;
 
   return (
     <Box sx={{ my: 3 }}>
@@ -70,7 +99,7 @@ const ScheduleField = ({ formValues, setFormValues }) => {
         Copiar día al resto
       </Button>
 
-      {formValues.schedule.map((day, index) => (
+      {controlledSchedule.map((day, index) => (
         <Box
           key={day.day}
           sx={{
