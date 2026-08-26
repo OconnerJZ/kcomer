@@ -6,7 +6,7 @@ import {
   useTheme,
   Stack,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useBusinessOrders from "@Features/orders/hooks/useBusinessOrders";
 import { useOrderFilters } from "@Features/orders/hooks/useOrderFilters";
 import { useOrderDialog } from "@Features/orders/hooks/useOrderDialog";
@@ -17,12 +17,13 @@ import OrderDialog from "@Features/orders/components/OrderDialog";
 import EmptyState from "@Features/orders/components/EmptyState";
 import { ORDER_STATUS } from "@Features/orders/model/orderStatus";
 
-const OwnerOrders = ({ businessId }) => {
+const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+  const [highlightedOrderId, setHighlightedOrderId] = useState(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -35,8 +36,7 @@ const OwnerOrders = ({ businessId }) => {
     refreshOrders,
   } = useBusinessOrders(businessId);
 
-  const { filterStatus, setFilterStatus, filteredOrders } =
-    useOrderFilters(orders);
+  const { filterStatus, setFilterStatus, filteredOrders } = useOrderFilters(orders);
 
   const {
     isOpen,
@@ -44,6 +44,27 @@ const OwnerOrders = ({ businessId }) => {
     openDialog,
     closeDialog,
   } = useOrderDialog();
+
+  useEffect(() => {
+    if (focusedOrderId == null || loading || orders.length === 0) return;
+
+    const targetOrder = orders.find(
+      (order) => String(order.id) === String(focusedOrderId),
+    );
+
+    if (!targetOrder) return;
+
+    setFilterStatus("all");
+    setHighlightedOrderId(targetOrder.id);
+    openDialog(targetOrder);
+    onFocusHandled?.();
+
+    const timeout = window.setTimeout(() => {
+      setHighlightedOrderId(null);
+    }, 4500);
+
+    return () => window.clearTimeout(timeout);
+  }, [focusedOrderId, loading, orders, openDialog, onFocusHandled, setFilterStatus]);
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -91,6 +112,7 @@ const OwnerOrders = ({ businessId }) => {
           onViewOrder={openDialog}
           onUpdateStatus={handleUpdateStatus}
           isSmall={isSmall}
+          highlightedOrderId={highlightedOrderId}
         />
       )}
 
@@ -103,6 +125,7 @@ const OwnerOrders = ({ businessId }) => {
               onViewOrder={openDialog}
               onUpdateStatus={handleUpdateStatus}
               isSmall={isSmall}
+              highlighted={String(order.id) === String(highlightedOrderId)}
             />
           ))}
         </Stack>
@@ -119,12 +142,12 @@ const OwnerOrders = ({ businessId }) => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
           sx={{
             border: "1px solid #e0e0e0",
             borderRadius: 0,
