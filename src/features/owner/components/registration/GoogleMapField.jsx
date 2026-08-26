@@ -8,7 +8,6 @@ import {
   Alert,
 } from "@mui/material";
 import { MyLocation } from "@mui/icons-material";
-import PropTypes from "prop-types";
 import {
   getCurrentPosition,
   loadGoogleMaps,
@@ -193,20 +192,6 @@ const GoogleMapField = ({ value, onChange, label = "Ubicación en mapa", apiKey 
       </Paper>
     </Box>
   );
-};
-
-GoogleMapField.propTypes = {
-  value: PropTypes.shape({
-    lat: PropTypes.number,
-    lng: PropTypes.number,
-    latitude: PropTypes.number,
-    longitude: PropTypes.number,
-    address: PropTypes.string,
-    formatted_address: PropTypes.string,
-  }),
-  onChange: PropTypes.func.isRequired,
-  label: PropTypes.string,
-  apiKey: PropTypes.string.isRequired,
 };
 
 export default GoogleMapField;
