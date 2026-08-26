@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { normalizeCartItem } from "@Features/cart/model/cartItem";
 
 const CartContext = createContext();
 const STORAGE_KEY = "qscome_cart";
@@ -32,15 +33,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = useCallback(
     ({ itemId, businessId, businessName, item }) => {
-      const completeItem = {
-        id: item.id,
-        name: item.name || "",
-        description: item.description || "",
-        price: Number(item.price) || 0,
-        quantity: item.quantity || 0,
-        note: item.note || "",
-        image: item.image || "",
-      };
+      const completeItem = normalizeCartItem({ ...item, id: item.id ?? itemId });
 
       setCart((prev) => {
         const currentBusiness = prev[businessId] || {
