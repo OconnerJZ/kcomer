@@ -1,17 +1,27 @@
 import { useState, useCallback, useMemo } from "react";
+import { useDispatch } from "react-redux";
 import {
   useGetOrdersByBusinessQuery,
   useOrderUpdateStatusMutation,
 } from "@Features/orders/api/orders.api";
+import { api } from "@Shared/api/rtk/api";
 import { normalizeOrders } from "@Features/orders/model/order";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { hasGlobalBusinessRealtimeScope } from "@Features/auth/model/roles";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 
+const getDraftOrders = (draft) => {
+  if (Array.isArray(draft)) return draft;
+  if (Array.isArray(draft?.data)) return draft.data;
+  return null;
+};
+
 export const useBusinessOrders = (businessId) => {
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const [error, setError] = useState(null);
   const hasGlobalRealtimeScope = hasGlobalBusinessRealtimeScope(user);
+  const queryArg = useMemo(() => ({ businessId }), [businessId]);
 
   const {
     data: ordersResponse,
@@ -19,13 +29,10 @@ export const useBusinessOrders = (businessId) => {
     isFetching,
     error: queryError,
     refetch: refreshOrders,
-  } = useGetOrdersByBusinessQuery(
-    { businessId },
-    {
-      skip: !businessId,
-      pollingInterval: 30000,
-    },
-  );
+  } = useGetOrdersByBusinessQuery(queryArg, {
+    skip: !businessId,
+    pollingInterval: 30000,
+  });
 
   const [updateStatusMutation, { isLoading: updating }] = useOrderUpdateStatusMutation();
 
@@ -41,6 +48,29 @@ export const useBusinessOrders = (businessId) => {
       }
 
       setError(null);
+      const timestamp = new Date().toISOString();
+      const patch = dispatch(
+        api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
+          const items = getDraftOrders(draft);
+          if (!items) return;
+
+          const order = items.find((item) => String(item.id) === String(orderId));
+          if (!order) return;
+
+          order.status = newStatus;
+          order.updatedAt = timestamp;
+
+          if (Array.isArray(order.statusHistory)) {
+            order.statusHistory.push({
+              status: newStatus,
+              timestamp,
+              note: note || `Estado cambiado a ${newStatus}`,
+              optimistic: true,
+            });
+          }
+        }),
+      );
+
       try {
         await updateStatusMutation({
           id: orderId,
@@ -49,13 +79,14 @@ export const useBusinessOrders = (businessId) => {
         }).unwrap();
         return { success: true };
       } catch (err) {
+        patch.undo();
         const errorMessage =
           err?.data?.message || err?.message || "Error al actualizar estado";
         setError(errorMessage);
         throw new Error(errorMessage);
       }
     },
-    [businessId, updateStatusMutation],
+    [businessId, dispatch, queryArg, updateStatusMutation],
   );
 
   useSocketEvent(
