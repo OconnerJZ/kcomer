@@ -2,9 +2,9 @@ import { Button } from "@mui/material";
 import { getNextStatus, getActionLabels, STATUS_COLORS } from "@Features/orders/model/orderStatus";
 
 const ActionButton = ({ order, onClick, isSmall }) => {
-  const nextStatus = getNextStatus(order.status);
+  const nextStatus = getNextStatus(order.status, order.orderType);
   const actionLabel = getActionLabels(order.orderType);
-  if (!nextStatus || !actionLabel) return null;
+  if (!nextStatus || !actionLabel?.[nextStatus]) return null;
 
   const colors = STATUS_COLORS[order.status] || {
     bg: "#1a1a1a",
