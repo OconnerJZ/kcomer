@@ -14,7 +14,6 @@ export const ORDER_STATUS = {
   in_delivery: { label: "En camino", color: "in_delivery", icon: LocalShipping },
   completed: { label: "Completada", color: "completed", icon: CheckCircle },
   cancelled: { label: "Cancelada", color: "error", icon: Cancel },
-  rejected: { label: "Rechazada", color: "error", icon: Cancel },
 };
 
 export const STATUS_COLORS = {
@@ -41,11 +40,11 @@ export const getActionLabels = (orderType) => ({
   accepted: "Aceptar",
   preparing: "Iniciar preparación",
   ready: "Marcar como lista",
-  in_delivery: orderType === "pickup" ? "Lista para recoger" : "En camino",
-  completed: "Completar",
+  in_delivery: "En camino",
+  completed: orderType === "pickup" ? "Entregar pedido" : "Completar",
 });
 
-export const STATUS_FLOW = {
+const DEFAULT_STATUS_FLOW = {
   pending: "accepted",
   accepted: "preparing",
   preparing: "ready",
@@ -53,5 +52,10 @@ export const STATUS_FLOW = {
   in_delivery: "completed",
 };
 
-export const getNextStatus = (currentStatus) => STATUS_FLOW[currentStatus];
-export const canTransition = (currentStatus) => Boolean(STATUS_FLOW[currentStatus]);
+export const getNextStatus = (currentStatus, orderType = "delivery") => {
+  if (currentStatus === "ready" && orderType === "pickup") return "completed";
+  return DEFAULT_STATUS_FLOW[currentStatus];
+};
+
+export const canTransition = (currentStatus, orderType) =>
+  Boolean(getNextStatus(currentStatus, orderType));
