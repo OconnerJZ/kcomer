@@ -25,7 +25,7 @@ import ReportsTab from "@Features/owner/pages/OwnerReports";
 import SettingsTab from "@Features/owner/pages/OwnerSettings";
 import RegisterBusiness from "@Features/owner/pages/RegisterBusiness";
 import useBusinessOwner from "@Features/owner/hooks/useBusinessOwner";
-import useBusinessOrders from "@Features/owner/hooks/useBusinessOrders";
+import useBusinessOrders from "@Features/orders/hooks/useBusinessOrders";
 import Bg from "@Assets/images/qscome-bg-6.png";
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -37,6 +37,7 @@ export default function OwnerDashboard() {
   const [activeTab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
+  const [focusedOrderId, setFocusedOrderId] = useState(null);
 
   const {
     businesses,
@@ -55,7 +56,16 @@ export default function OwnerDashboard() {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const handleTabChange = (newTab) => setActiveTab(newTab);
-  const selectBusiness = (businessId) => setSelectedBusinessId(businessId);
+  const selectBusiness = (businessId) => {
+    setSelectedBusinessId(businessId);
+    setFocusedOrderId(null);
+  };
+
+  const handleNotificationNavigate = ({ businessId, orderId }) => {
+    if (businessId != null) setSelectedBusinessId(businessId);
+    setFocusedOrderId(orderId ?? null);
+    setActiveTab(0);
+  };
 
   useEffect(() => {
     if (businesses.length === 0) {
@@ -126,18 +136,11 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        pb: { xs: 10, md: 0 },
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`, backgroundSize: "contain", backgroundPosition: "center", pb: { xs: 10, md: 0 } }}>
       <DashboardNavbar
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onNotificationNavigate={handleNotificationNavigate}
         businessName={selectedBusiness.name}
         selectedBusinessId={selectedBusinessId}
         pendingOrders={pendingOrdersCount}
@@ -145,16 +148,12 @@ export default function OwnerDashboard() {
         businesses={businesses}
       />
 
-      <Fab sx={{ position: "fixed", bottom: 100, right: 16 }} color="primary" size="small" onClick={handleClickOpen}>
-        <AddBusiness />
-      </Fab>
+      <Fab sx={{ position: "fixed", bottom: 100, right: 16 }} color="primary" size="small" onClick={handleClickOpen}><AddBusiness /></Fab>
 
       <Dialog fullScreen open={open} onClose={handleClose} slots={{ transition: Transition }}>
         <AppBar sx={{ position: "relative" }}>
           <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
-              <CloseIcon />
-            </IconButton>
+            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close"><CloseIcon /></IconButton>
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">Registrar negocio</Typography>
           </Toolbar>
         </AppBar>
@@ -166,7 +165,14 @@ export default function OwnerDashboard() {
       <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
         <Fade in timeout={500}>
           <Box>
-            {activeTab === 0 && <OrdersTab businessId={selectedBusinessId} loading={loadingOrders} />}
+            {activeTab === 0 && (
+              <OrdersTab
+                businessId={selectedBusinessId}
+                loading={loadingOrders}
+                focusedOrderId={focusedOrderId}
+                onFocusHandled={() => setFocusedOrderId(null)}
+              />
+            )}
             {activeTab === 1 && <MenuTab businessId={selectedBusinessId} />}
             {activeTab === 2 && <ReportsTab businessId={selectedBusinessId} />}
             {activeTab === 3 && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
@@ -174,11 +180,7 @@ export default function OwnerDashboard() {
         </Fade>
       </Container>
 
-      <DashboardMobileNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        pendingOrders={pendingOrdersCount}
-      />
+      <DashboardMobileNav activeTab={activeTab} onTabChange={handleTabChange} pendingOrders={pendingOrdersCount} />
     </Box>
   );
 }
