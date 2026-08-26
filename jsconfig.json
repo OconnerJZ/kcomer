@@ -1,18 +1,21 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@Api/*": ["./src/api/*"],
-            "@Assets/*": ["./src/assets/*"],
-            "@Components/*": ["./src/components/*"],
-            "@Config/*": ["./src/config/*"],
-            "@Const/*": ["./src/const/*"],
-            "@Context/*": ["./src/context/*"],
-            "@Hooks/*": ["./src/hooks/*"],
-            "@Pages/*": ["./src/pages/*"],
-            "@Redux/*": ["./src/redux/*"],
-            "@Services/*": ["./src/services/*"],
-            "@Utils/*": ["./src/utils/*"],
-          }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@App/*": ["./src/app/*"],
+      "@Features/*": ["./src/features/*"],
+      "@Shared/*": ["./src/shared/*"],
+      "@Api/*": ["./src/api/*"],
+      "@Assets/*": ["./src/assets/*"],
+      "@Components/*": ["./src/components/*"],
+      "@Config/*": ["./src/config/*"],
+      "@Const/*": ["./src/const/*"],
+      "@Context/*": ["./src/context/*"],
+      "@Hooks/*": ["./src/hooks/*"],
+      "@Pages/*": ["./src/pages/*"],
+      "@Redux/*": ["./src/redux/*"],
+      "@Services/*": ["./src/services/*"],
+      "@Utils/*": ["./src/utils/*"]
     }
+  }
 }
