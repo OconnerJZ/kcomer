@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { CUSTOMER_ROLES, OWNER_ROLES } from "@Features/auth/model/roles";
 import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
@@ -26,9 +27,9 @@ const routes = [
   { path: "nosotros", element: <Nosotros /> },
   { path: "registro", element: <LandingRegister /> },
   { path: "perfil", element: <Perfil />, isProtected: true },
-  { path: "orden", element: <Pedidos />, isProtected: true },
-  { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true },
-  { path: "owner", element: <OwnerDashboard />, isProtected: true },
+  { path: "orden", element: <Pedidos />, isProtected: true, roles: CUSTOMER_ROLES },
+  { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true, roles: CUSTOMER_ROLES },
+  { path: "owner", element: <OwnerDashboard />, isProtected: true, roles: OWNER_ROLES },
 ];
 
 export default function AppRouter() {
@@ -50,6 +51,7 @@ export default function AppRouter() {
             ))}
           </Route>
           <Route path="/login/:from?" element={<Login />} />
+          <Route path="*" element={<Navigate to="/explorar" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
