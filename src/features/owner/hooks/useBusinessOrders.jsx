@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import {
   useGetOrdersByBusinessQuery,
   useOrderUpdateStatusMutation,
-} from "@Api/orders.api";
+} from "@Features/orders/api/orders.api";
 import { useSocketEvent } from "@Hooks/useSocket";
 
 export const useBusinessOrders = (businessId) => {
