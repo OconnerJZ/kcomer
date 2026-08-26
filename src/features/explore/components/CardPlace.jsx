@@ -10,16 +10,16 @@ import {
   IconButton,
 } from "@mui/material";
 import { ThumbUp, DeliveryDining, AccessTime } from "@mui/icons-material";
-import { StyledCard } from "@Components/card/CardPlaceStyled";
+import { StyledCard } from "./CardPlaceStyled";
 import useCardPlace from "@Features/explore/hooks/useCardPlace";
 import {
   CardPlaceLocation,
   CardPlaceMenu,
   CardPlacePhotos,
   CardPlaceReviews,
-} from "@Components/card/CardPlaceMovements";
-import CardPlaceFront from "@Components/card/CardPlaceFront";
-import ScheduleDialog from "@Components/card/ScheduleDialog";
+} from "./CardPlaceMovements";
+import CardPlaceFront from "./CardPlaceFront";
+import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 
 const MEDIA_PATH = API_URL_MEDIA_SERVER;
