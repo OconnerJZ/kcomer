@@ -44,15 +44,13 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
-// ✅ Importar hook de RTK Query
-import { useGetBusinessStatsQuery } from '@Api/stats.api';
+import { useGetBusinessStatsQuery } from '@Features/stats/api/stats.api';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
 const OwnerReports = ({ businessId }) => {
   const [period, setPeriod] = useState(7);
 
-  // ✅ RTK Query hook
   const { 
     data: statsResponse, 
     isLoading: loading,
@@ -62,11 +60,10 @@ const OwnerReports = ({ businessId }) => {
     { businessId, period },
     { 
       skip: !businessId,
-      pollingInterval: 60000, // Refetch cada 60 segundos
+      pollingInterval: 60000,
     }
   );
 
-  // Extraer stats del response
   const stats = statsResponse?.data || statsResponse;
 
   if (loading) {
@@ -93,7 +90,6 @@ const OwnerReports = ({ businessId }) => {
 
   return (
     <Box>
-      {/* Selector de Período */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Typography variant="h6">Reportes y Estadísticas</Typography>
         <FormControl size="small">
@@ -109,7 +105,6 @@ const OwnerReports = ({ businessId }) => {
         </FormControl>
       </Stack>
 
-      {/* Tarjetas de Resumen */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
@@ -121,13 +116,24 @@ const OwnerReports = ({ businessId }) => {
                   </Typography>
                   <ShoppingBag color="primary" />
                 </Stack>
-                <Typography variant="h4">{summary.totalOrders}</Typography>
-                <Stack direction="row" spacing={0.5} alignItems="center">
-                  <TrendingUp fontSize="small" color="success" />
-                  <Typography variant="caption" color="success.main">
-                    +12% vs período anterior
-                  </Typography>
-                </Stack>
+                <Typography variant="h4" fontWeight={700}>
+                  {summary.totalOrders || 0}
+                </Typography>
+                {summary.ordersGrowth !== undefined && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    {summary.ordersGrowth >= 0 ? (
+                      <TrendingUp color="success" fontSize="small" />
+                    ) : (
+                      <TrendingDown color="error" fontSize="small" />
+                    )}
+                    <Typography
+                      variant="caption"
+                      color={summary.ordersGrowth >= 0 ? 'success.main' : 'error.main'}
+                    >
+                      {Math.abs(summary.ordersGrowth)}%
+                    </Typography>
+                  </Stack>
+                )}
               </Stack>
             </CardContent>
           </Card>
@@ -139,17 +145,13 @@ const OwnerReports = ({ businessId }) => {
               <Stack spacing={1}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography color="text.secondary" variant="body2">
-                    Ingresos Totales
+                    Ingresos
                   </Typography>
                   <AttachMoney color="success" />
                 </Stack>
-                <Typography variant="h4">${summary.totalRevenue.toFixed(2)}</Typography>
-                <Stack direction="row" spacing={0.5} alignItems="center">
-                  <TrendingUp fontSize="small" color="success" />
-                  <Typography variant="caption" color="success.main">
-                    +8% vs período anterior
-                  </Typography>
-                </Stack>
+                <Typography variant="h4" fontWeight={700}>
+                  ${(summary.totalRevenue || 0).toFixed(2)}
+                </Typography>
               </Stack>
             </CardContent>
           </Card>
@@ -163,15 +165,11 @@ const OwnerReports = ({ businessId }) => {
                   <Typography color="text.secondary" variant="body2">
                     Ticket Promedio
                   </Typography>
-                  <Assessment color="info" />
+                  <Assessment color="warning" />
                 </Stack>
-                <Typography variant="h4">${summary.avgOrderValue.toFixed(2)}</Typography>
-                <Stack direction="row" spacing={0.5} alignItems="center">
-                  <TrendingDown fontSize="small" color="error" />
-                  <Typography variant="caption" color="error.main">
-                    -3% vs período anterior
-                  </Typography>
-                </Stack>
+                <Typography variant="h4" fontWeight={700}>
+                  ${(summary.averageOrder || 0).toFixed(2)}
+                </Typography>
               </Stack>
             </CardContent>
           </Card>
@@ -187,9 +185,8 @@ const OwnerReports = ({ businessId }) => {
                   </Typography>
                   <HourglassEmpty color="warning" />
                 </Stack>
-                <Typography variant="h4">{summary.pendingOrders}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Requieren atención
+                <Typography variant="h4" fontWeight={700}>
+                  {summary.pendingOrders || 0}
                 </Typography>
               </Stack>
             </CardContent>
@@ -197,69 +194,53 @@ const OwnerReports = ({ businessId }) => {
         </Grid>
       </Grid>
 
-      {/* Gráficas */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Gráfica de Ventas por Día */}
-        <Grid item xs={12} md={8}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} lg={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Ventas del Período
+              Ventas por Día
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesByDay}>
+              <LineChart data={salesByDay || []}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
+                <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="ventas" 
-                  stroke="#8884d8" 
-                  strokeWidth={2} 
-                  name="Ventas ($)" 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="ordenes" 
-                  stroke="#82ca9d" 
-                  strokeWidth={2} 
-                  name="Órdenes" 
-                />
+                <Line type="monotone" dataKey="revenue" name="Ingresos" stroke="#8884d8" />
+                <Line type="monotone" dataKey="orders" name="Órdenes" stroke="#82ca9d" />
               </LineChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
 
-        {/* Gráfica de Estado de Órdenes */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} lg={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Estado de Órdenes
+              Órdenes por Estado
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={ordersByStatus}
+                  data={ordersByStatus || []}
+                  dataKey="value"
+                  nameKey="name"
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={(entry) => entry.name}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
+                  outerRadius={90}
+                  label
                 >
-                  {ordersByStatus.map((entry, index) => (
+                  {(ordersByStatus || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
 
-        {/* Productos Más Vendidos */}
         <Grid item xs={12}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -270,31 +251,22 @@ const OwnerReports = ({ businessId }) => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Producto</TableCell>
-                    <TableCell align="right">Vendidos</TableCell>
-                    <TableCell align="right">Precio</TableCell>
+                    <TableCell align="right">Cantidad</TableCell>
                     <TableCell align="right">Ingresos</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {topProducts.map((item) => (
-                    <TableRow key={item.id}>
+                  {(topProducts || []).map((product) => (
+                    <TableRow key={product.id || product.name}>
                       <TableCell>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                          <Avatar src={item.image} variant="rounded" />
-                          <Box>
-                            <Typography variant="body2">{item.name}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {item.category}
-                            </Typography>
-                          </Box>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Avatar src={product.image} sx={{ width: 32, height: 32 }} />
+                          <Typography>{product.name}</Typography>
                         </Stack>
                       </TableCell>
-                      <TableCell align="right">{item.sold}</TableCell>
-                      <TableCell align="right">${item.price.toFixed(2)}</TableCell>
+                      <TableCell align="right">{product.quantity}</TableCell>
                       <TableCell align="right">
-                        <Typography color="success.main" fontWeight={600}>
-                          ${(item.sold * item.price).toFixed(2)}
-                        </Typography>
+                        ${(product.revenue || 0).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
