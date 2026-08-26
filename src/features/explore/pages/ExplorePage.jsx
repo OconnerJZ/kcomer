@@ -7,10 +7,11 @@ import CardPlace from "@Features/explore/components/CardPlace";
 import Parallax from "@Features/explore/components/Parallax";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import Bg5 from "@Assets/images/qscome-bg-5.jpg";
-import { namePage } from "@Utils/listMessages";
 import useBusiness from "@Features/business/hooks/useBusiness";
 import useExplore from "@Features/explore/hooks/useExplore";
 import useGeolocation from "@Features/explore/hooks/useGeolocation";
+
+const EXPLORE_TITLE = "Descubre qué comer hoy";
 
 export default function ExplorePage() {
   const { seccionDestinoRef, scrollToSection } = useExplore();
@@ -43,7 +44,7 @@ export default function ExplorePage() {
       <Parallax bg={Bg5}>
         <Box style={{ width: "100%", height: "80vh", position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Box style={{ display: "flex", flexFlow: "column", alignItems: "center", justifyContent: "center" }}>
-            <Typography className="titlePrimary title">{namePage}</Typography>
+            <Typography className="titlePrimary title">{EXPLORE_TITLE}</Typography>
             <Box className="bg" onClick={scrollToSection} />
             <Box className="button" onClick={scrollToSection}>
               <i><PlayForWorkIcon sx={{ fontSize: "38px", marginTop: "4px" }} /></i>
@@ -68,7 +69,7 @@ export default function ExplorePage() {
               icon={<Business sx={{ fontSize: "5em", color: "red" }} />}
               status="warning"
               title="Por el momento no hay negocios registrados"
-              subTitle="Ayudanos en compartir la página para crecer nuestra red"
+              subTitle="Ayúdanos compartiendo la página para crecer nuestra red"
             />
           )}
 
