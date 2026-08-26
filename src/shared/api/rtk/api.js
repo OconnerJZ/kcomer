@@ -19,7 +19,14 @@ export const api = createApi({
   endpoints: () => ({}),
 });
 
+const normalizePath = (path = "") => `/${String(path).replace(/^\/+/, "")}`;
 const getArgId = (arg) => (arg && typeof arg === "object" ? arg.id : arg);
+
+const resolvePath = ({ resource, dynamicPath, arg, suffix }) => {
+  if (dynamicPath) return normalizePath(dynamicPath(arg));
+  const base = normalizePath(resource);
+  return suffix == null ? base : `${base}/${suffix}`;
+};
 
 const provideListTags = (tagType) => (result) => {
   if (!tagType) return [];
@@ -57,16 +64,17 @@ export const builders = ({
 
   return {
     [getName("getAll")]: builder.query({
-      query: (arg) => (dynamicPath ? dynamicPath(arg) : `/${resource}`),
+      query: (arg) => resolvePath({ resource, dynamicPath, arg }),
       providesTags: provideListTags(tagType),
     }),
     [getName("getOne")]: builder.query({
-      query: (arg) => (dynamicPath ? dynamicPath(arg) : `/${resource}/${arg}`),
+      query: (arg) =>
+        resolvePath({ resource, dynamicPath, arg, suffix: dynamicPath ? undefined : arg }),
       providesTags: provideOneTag(tagType),
     }),
     [getName("create")]: builder.mutation({
       query: (payload) => ({
-        url: `/${resource}`,
+        url: resolvePath({ resource, dynamicPath, arg: payload }),
         method: "POST",
         data: payload,
         headers: isJSON ? { "Content-Type": "application/json" } : undefined,
@@ -74,26 +82,41 @@ export const builders = ({
       invalidatesTags: invalidateList(tagType),
     }),
     [getName("update")]: builder.mutation({
-      query: ({ id, body }) => ({
-        url: dynamicPath ? dynamicPath({ id, body }) : `/${resource}/${id}`,
+      query: (arg) => ({
+        url: resolvePath({
+          resource,
+          dynamicPath,
+          arg,
+          suffix: dynamicPath ? undefined : arg.id,
+        }),
         method: "PUT",
-        data: body,
+        data: arg.body,
         headers: isJSON ? { "Content-Type": "application/json" } : undefined,
       }),
       invalidatesTags: invalidateItemAndList(tagType),
     }),
     [getName("patch")]: builder.mutation({
-      query: ({ id, body }) => ({
-        url: dynamicPath ? dynamicPath({ id, body }) : `/${resource}/${id}`,
+      query: (arg) => ({
+        url: resolvePath({
+          resource,
+          dynamicPath,
+          arg,
+          suffix: dynamicPath ? undefined : arg.id,
+        }),
         method: "PATCH",
-        data: body,
+        data: arg.body,
         headers: isJSON ? { "Content-Type": "application/json" } : undefined,
       }),
       invalidatesTags: invalidateItemAndList(tagType),
     }),
     [getName("delete")]: builder.mutation({
       query: (arg) => ({
-        url: dynamicPath ? dynamicPath(arg) : `/${resource}/${arg}`,
+        url: resolvePath({
+          resource,
+          dynamicPath,
+          arg,
+          suffix: dynamicPath ? undefined : arg,
+        }),
         method: "DELETE",
       }),
       invalidatesTags: invalidateItemAndList(tagType),
