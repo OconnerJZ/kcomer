@@ -1,0 +1,85 @@
+const DEFAULT_PAYMENT_METHODS = [
+  { method: "cash", active: true, label: "Efectivo" },
+  { method: "card", active: false, label: "Tarjeta" },
+  { method: "wallet", active: false, label: "Billetera Digital" },
+  { method: "transfer", active: false, label: "Transferencia" },
+];
+
+export const normalizeBusiness = (business = {}) => {
+  const location = business.location || business.locations?.[0] || {};
+  const delivery = business.deliverySettings || business.delivery_settings || {};
+  const methods = business.paymentMethods || business.payment_methods || [];
+  const foodTypes = business.foodTypes || business.food_types || [];
+
+  return {
+    id: business.id ?? null,
+    name: business.name || business.title || business.businessName || business.business_name || "",
+    phone: business.phone || "",
+    email: business.email || "",
+    description: business.description || "",
+    open: business.open ?? business.isOpen ?? business.is_open ?? true,
+    prepTimeMin: Number(business.prepTimeMin ?? business.prep_time_min ?? 30),
+    estimatedDeliveryMin: Number(
+      business.estimatedDeliveryMin ?? business.estimated_delivery_min ?? 45,
+    ),
+    logo: business.logo || business.logoUrl || business.logo_url || "",
+    location: {
+      address: location.address || "",
+      city: location.city || "",
+      postalCode: location.postalCode || location.postal_code || "",
+      latitude: location.latitude ?? "",
+      longitude: location.longitude ?? "",
+    },
+    schedules: business.schedules || [],
+    deliverySettings: {
+      deliveryRadiusKm: Number(delivery.deliveryRadiusKm ?? delivery.delivery_radius_km ?? 5),
+      deliveryFee: Number(delivery.deliveryFee ?? delivery.delivery_fee ?? 0),
+      minOrderAmount: Number(delivery.minOrderAmount ?? delivery.min_order_amount ?? 0),
+      estimatedTimeMin: Number(delivery.estimatedTimeMin ?? delivery.estimated_time_min ?? 30),
+      useOwnDelivery: Boolean(delivery.useOwnDelivery ?? delivery.use_own_delivery ?? false),
+    },
+    paymentMethods: DEFAULT_PAYMENT_METHODS.map((method) => {
+      const current = methods.find((item) => item.method === method.method);
+      return {
+        ...method,
+        active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active,
+      };
+    }),
+    foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
+    photos: business.photos || [],
+  };
+};
+
+export const toBasicInfoPayload = (business) => ({
+  business_name: business.name,
+  phone: business.phone,
+  email: business.email,
+  description: business.description,
+  is_open: business.open,
+  prep_time_min: Number(business.prepTimeMin),
+  estimated_delivery_min: Number(business.estimatedDeliveryMin),
+  logo_url: business.logo,
+});
+
+export const toLocationPayload = (location) => ({
+  address: location.address,
+  city: location.city,
+  postal_code: location.postalCode,
+  latitude: location.latitude,
+  longitude: location.longitude,
+});
+
+export const toDeliveryPayload = (delivery) => ({
+  delivery_radius_km: Number(delivery.deliveryRadiusKm),
+  delivery_fee: Number(delivery.deliveryFee),
+  min_order_amount: Number(delivery.minOrderAmount),
+  estimated_time_min: Number(delivery.estimatedTimeMin),
+  use_own_delivery: Boolean(delivery.useOwnDelivery),
+});
+
+export const toPaymentMethodsPayload = (methods = []) =>
+  methods.map((method) => ({
+    method: method.method,
+    is_active: Boolean(method.active),
+    label: method.label,
+  }));
