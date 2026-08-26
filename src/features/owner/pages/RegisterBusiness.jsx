@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Result } from "antd";
 import "antd/dist/reset.css";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useCreateBusinessMutation } from "@Features/business/api/business.api";
 import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
 import { normalizeCatalogOptions } from "@Features/catalogs/model/catalogOption";
@@ -28,6 +28,7 @@ import FormField from "@Features/owner/components/registration/FormField";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { isMobile } from "@Shared/utils/commons";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { isOwner } from "@Features/auth/model/roles";
 
 const RegisterBusiness = ({ onSuccess }) => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const RegisterBusiness = ({ onSuccess }) => {
   const [formValues, setFormValues] = useState(createBusinessRegistrationForm);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [ownerReady, setOwnerReady] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
@@ -136,10 +138,20 @@ const RegisterBusiness = ({ onSuccess }) => {
       const result = await createBusiness(businessData).unwrap();
       if (!result) return;
 
+      const refreshResult = await refreshUser();
+      const refreshedUser = refreshResult?.user;
+      const canManageBusiness = isOwner(refreshedUser);
+
+      setOwnerReady(canManageBusiness);
       setSubmitted(true);
-      showSnackbar("Negocio registrado exitosamente");
-      await refreshUser();
-      if (onSuccess) setTimeout(() => onSuccess(), 2000);
+      showSnackbar(
+        canManageBusiness
+          ? "Negocio registrado exitosamente"
+          : "Negocio registrado. Estamos actualizando tus permisos.",
+        canManageBusiness ? "success" : "info",
+      );
+
+      if (onSuccess && canManageBusiness) onSuccess();
     } catch (error) {
       console.error("Error creating business:", error);
       showSnackbar(error?.data?.message || error?.message || "Error al registrar negocio", "error");
@@ -160,6 +172,10 @@ const RegisterBusiness = ({ onSuccess }) => {
     setCurrentTab(nextTab);
   };
 
+  if (isOwner(user) && !submitted) {
+    return <Navigate to="/owner" replace />;
+  }
+
   if (submitted) {
     return (
       <GeneralContent title="Negocio">
@@ -167,12 +183,18 @@ const RegisterBusiness = ({ onSuccess }) => {
           <Card sx={{ width: "100%", maxWidth: 500 }}>
             <CardContent>
               <Result
-                status="success"
-                title="¡Registro exitoso!"
-                subTitle="Tu negocio se ha registrado correctamente."
-                extra={[
+                status={ownerReady ? "success" : "info"}
+                title={ownerReady ? "¡Registro exitoso!" : "¡Negocio registrado!"}
+                subTitle={ownerReady
+                  ? "Tu negocio se ha registrado correctamente."
+                  : "El negocio se creó correctamente, pero tu sesión aún no refleja los permisos de propietario."}
+                extra={ownerReady ? [
                   <Button key="dashboard" variant="contained" onClick={() => navigate("/owner")}>
                     Administrar mi negocio
+                  </Button>,
+                ] : [
+                  <Button key="explore" variant="contained" onClick={() => navigate("/explorar")}>
+                    Volver a explorar
                   </Button>,
                 ]}
               />
