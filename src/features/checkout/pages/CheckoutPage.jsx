@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { DeleteSweep } from "@mui/icons-material";
 import { Segmented } from "antd";
-import GeneralContent from "@Components/layout/GeneralContent";
+import GeneralContent from "@Shared/components/layout/GeneralContent";
 import CartBusinessTabs from "@Features/cart/components/CartBusinessTabs";
 import CartItemList from "@Features/cart/components/CartItemList";
 import EmptyCartState from "@Features/cart/components/EmptyCartState";
