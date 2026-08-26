@@ -3,6 +3,7 @@ import {
   useGetOrdersByBusinessQuery,
   useOrderUpdateStatusMutation,
 } from "@Features/orders/api/orders.api";
+import { normalizeOrders } from "@Features/orders/model/order";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 
 export const useBusinessOrders = (businessId) => {
@@ -22,10 +23,10 @@ export const useBusinessOrders = (businessId) => {
 
   const [updateStatusMutation, { isLoading: updating }] = useOrderUpdateStatusMutation();
 
-  const orders = useMemo(
-    () => ordersResponse?.data || ordersResponse || [],
-    [ordersResponse],
-  );
+  const orders = useMemo(() => {
+    const rawOrders = ordersResponse?.data || ordersResponse || [];
+    return normalizeOrders(rawOrders);
+  }, [ordersResponse]);
 
   const updateOrderStatus = useCallback(
     async (orderId, newStatus, note = "") => {
