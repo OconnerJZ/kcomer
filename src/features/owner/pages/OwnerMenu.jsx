@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Avatar,
@@ -9,7 +9,6 @@ import {
   Chip,
   CircularProgress,
   Fade,
-  FormControlLabel,
   Grid,
   IconButton,
   Paper,
@@ -26,16 +25,11 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import {
-  Add,
-  Delete,
-  Edit,
-  Image as ImageIcon,
-  Restaurant,
-} from "@mui/icons-material";
+import { Add, Delete, Edit, Image as ImageIcon, Restaurant } from "@mui/icons-material";
 import useBusinessMenu from "@Features/menu/hooks/useBusinessMenu";
 import DeleteMenuDialog from "@Features/owner/components/menu/DeleteMenuDialog";
 import MenuItemDialog from "@Features/owner/components/menu/MenuItemDialog";
+import MenuToolbar from "@Features/owner/components/menu/MenuToolbar";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 
 const EMPTY_MENU_FORM = {
@@ -62,19 +56,34 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, itemId: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [menuForm, setMenuForm] = useState(EMPTY_MENU_FORM);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
   const image = useImagePreview();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const showSnackbar = (message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
-  };
+  const categories = useMemo(
+    () => [...new Set(menu.map((item) => item.category).filter(Boolean))].sort(),
+    [menu],
+  );
 
-  const closeSnackbar = () => {
-    setSnackbar((current) => ({ ...current, open: false }));
-  };
+  const filteredMenu = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return menu.filter((item) => {
+      const matchesCategory = category === "all" || item.category === category;
+      const matchesSearch = !term || [item.name, item.description, item.category]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term));
+      return matchesCategory && matchesSearch;
+    });
+  }, [menu, search, category]);
+
+  const availableCount = useMemo(() => menu.filter((item) => item.available).length, [menu]);
+
+  const showSnackbar = (message, severity = "success") => setSnackbar({ open: true, message, severity });
+  const closeSnackbar = () => setSnackbar((current) => ({ ...current, open: false }));
 
   const handleOpenMenuDialog = (item = null) => {
     if (item) {
@@ -130,15 +139,10 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         return;
       }
 
-      showSnackbar(
-        menuDialog.item
-          ? "Platillo actualizado exitosamente"
-          : "Platillo agregado exitosamente",
-      );
+      showSnackbar(menuDialog.item ? "Platillo actualizado" : "Platillo agregado");
       handleCloseMenuDialog();
       onRefresh?.();
     } catch (error) {
-      console.error("Error saving menu item:", error);
       showSnackbar(error?.message || "Error al guardar", "error");
     }
   };
@@ -156,7 +160,6 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         showSnackbar(result.error, "error");
       }
     } catch (error) {
-      console.error("Error deleting menu item:", error);
       showSnackbar(error?.message || "Error al eliminar", "error");
     } finally {
       setDeleteDialog({ open: false, itemId: null });
@@ -169,52 +172,78 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
       if (result.success) showSnackbar("Disponibilidad actualizada");
       else showSnackbar(result.error, "error");
     } catch (error) {
-      console.error("Error toggling availability:", error);
       showSnackbar(error?.message || "Error al actualizar", "error");
     }
   };
 
   return (
     <Box>
-      <Paper elevation={0} sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0", borderRadius: 0 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 2, bgcolor: "rgba(255,255,255,.72)", backdropFilter: "blur(10px)" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={2}>
           <Box>
-            <Typography variant="overline" sx={{ color: "#666", letterSpacing: "0.15em", fontSize: "0.688rem" }}>
-              Gestión de Menú
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 500 }}>
-              {menu.length} {menu.length === 1 ? "platillo" : "platillos"}
-            </Typography>
+            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.16em", fontSize: "0.68rem" }}>Menú del negocio</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>Tu catálogo, simple y vivo</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Actualiza disponibilidad, precios y presentación sin interrumpir la operación.</Typography>
           </Box>
-          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} sx={{ textTransform: "none", borderRadius: 0, boxShadow: "none" }}>
-            Agregar Platillo
-          </Button>
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} disableElevation sx={{ textTransform: "none", borderRadius: 2, px: 2.25, py: 1 }}>Agregar platillo</Button>
         </Stack>
       </Paper>
+
+      {hasItems() && (
+        <MenuToolbar
+          search={search}
+          onSearchChange={setSearch}
+          categories={categories}
+          selectedCategory={category}
+          onCategoryChange={setCategory}
+          total={menu.length}
+          available={availableCount}
+        />
+      )}
 
       {loading && !hasItems() && <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}><CircularProgress /></Box>}
 
       {!loading && !hasItems() && (
-        <Paper elevation={0} sx={{ p: 5, textAlign: "center", border: "2px dashed #e0e0e0", borderRadius: 0 }}>
-          <Restaurant sx={{ fontSize: 60, color: "#ccc", mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>No hay platillos en el menú</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Comienza agregando tu primer platillo</Typography>
-          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} sx={{ textTransform: "none", borderRadius: 0 }}>Agregar Platillo</Button>
+        <Paper elevation={0} sx={{ p: 5, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: 2 }}>
+          <Restaurant sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
+          <Typography variant="h6" gutterBottom>No hay platillos todavía</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Agrega el primero y empieza a construir una experiencia de menú atractiva.</Typography>
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} disableElevation sx={{ textTransform: "none", borderRadius: 2 }}>Agregar platillo</Button>
         </Paper>
       )}
 
-      {!isMobile && hasItems() && (
-        <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0 }}>
+      {hasItems() && filteredMenu.length === 0 && (
+        <Paper elevation={0} sx={{ p: 4, textAlign: "center", border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Typography variant="body1" fontWeight={700}>No encontramos coincidencias</Typography>
+          <Typography variant="body2" color="text.secondary">Prueba otra búsqueda o categoría.</Typography>
+        </Paper>
+      )}
+
+      {!isMobile && filteredMenu.length > 0 && (
+        <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
           <Table>
-            <TableHead><TableRow sx={{ bgcolor: "#fafafa" }}><TableCell>Platillo</TableCell><TableCell>Categoría</TableCell><TableCell align="right">Precio</TableCell><TableCell align="center">Disponible</TableCell><TableCell align="right">Acciones</TableCell></TableRow></TableHead>
+            <TableHead><TableRow sx={{ bgcolor: "rgba(0,0,0,.025)" }}><TableCell>Platillo</TableCell><TableCell>Categoría</TableCell><TableCell align="right">Precio</TableCell><TableCell align="center">Estado</TableCell><TableCell align="right">Acciones</TableCell></TableRow></TableHead>
             <TableBody>
-              {menu.map((item) => (
-                <TableRow key={item.id} hover>
-                  <TableCell><Stack direction="row" spacing={2} alignItems="center"><Avatar src={item.image} variant="rounded" sx={{ width: 50, height: 50 }}><ImageIcon /></Avatar><Box><Typography variant="body2" fontWeight={500}>{item.name}</Typography><Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography></Box></Stack></TableCell>
-                  <TableCell>{item.category && <Chip label={item.category} size="small" sx={{ borderRadius: 0 }} />}</TableCell>
-                  <TableCell align="right"><Typography fontWeight={500}>${item.price.toFixed(2)}</Typography></TableCell>
-                  <TableCell align="center"><Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" /></TableCell>
-                  <TableCell align="right"><Stack direction="row" spacing={1} justifyContent="flex-end"><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></TableCell>
+              {filteredMenu.map((item) => (
+                <TableRow key={item.id} hover sx={{ "& td": { borderColor: "divider" } }}>
+                  <TableCell>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar src={item.image} variant="rounded" sx={{ width: 54, height: 54, borderRadius: 2 }}><ImageIcon /></Avatar>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={800}>{item.name}</Typography>
+                        {item.description && <Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden", maxWidth: 420 }}>{item.description}</Typography>}
+                      </Box>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>{item.category && <Chip label={item.category} size="small" variant="outlined" sx={{ borderRadius: 999 }} />}</TableCell>
+                  <TableCell align="right"><Typography fontWeight={800}>${item.price.toFixed(2)}</Typography></TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                      <Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" />
+                      <Typography variant="caption" color={item.available ? "success.main" : "text.secondary"}>{item.available ? "Disponible" : "Pausado"}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="right"><Stack direction="row" spacing={0.5} justifyContent="flex-end"><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -222,20 +251,43 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         </TableContainer>
       )}
 
-      {isMobile && hasItems() && (
-        <Grid container spacing={2}>
-          {menu.map((item) => (
+      {isMobile && filteredMenu.length > 0 && (
+        <Grid container spacing={1.5}>
+          {filteredMenu.map((item) => (
             <Grid item xs={12} sm={6} key={item.id}>
-              <Fade in><Card elevation={0} sx={{ border: "1px solid #e0e0e0", borderRadius: 0, height: "100%" }}><CardContent><Stack spacing={2}><Stack direction="row" spacing={2}><Avatar src={item.image} variant="rounded" sx={{ width: 60, height: 60 }}><ImageIcon /></Avatar><Box sx={{ flex: 1, minWidth: 0 }}><Typography variant="subtitle1" fontWeight={500} noWrap>{item.name}</Typography><Typography variant="h6" color="primary">${item.price.toFixed(2)}</Typography></Box></Stack>{item.description && <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography>}<Stack direction="row" justifyContent="space-between" alignItems="center"><FormControlLabel control={<Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" />} label="Disponible" /><Stack direction="row" spacing={1}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></Stack></Stack></CardContent></Card></Fade>
+              <Fade in>
+                <Card elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, height: "100%", bgcolor: "rgba(255,255,255,.82)", overflow: "hidden" }}>
+                  <CardContent sx={{ p: 2 }}>
+                    <Stack spacing={1.5}>
+                      <Stack direction="row" spacing={1.5}>
+                        <Avatar src={item.image} variant="rounded" sx={{ width: 72, height: 72, borderRadius: 2 }}><ImageIcon /></Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="subtitle1" fontWeight={800} noWrap>{item.name}</Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800 }}>${item.price.toFixed(2)}</Typography>
+                          {item.category && <Typography variant="caption" color="text.secondary">{item.category}</Typography>}
+                        </Box>
+                      </Stack>
+
+                      {item.description && <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</Typography>}
+
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" />
+                          <Typography variant="caption" color={item.available ? "success.main" : "text.secondary"}>{item.available ? "Disponible" : "Pausado"}</Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={0.5}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack>
+                      </Stack>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Fade>
             </Grid>
           ))}
         </Grid>
       )}
 
       <MenuItemDialog open={menuDialog.open} editing={!!menuDialog.item} fullScreen={isSmall} loading={loading} form={menuForm} imagePreview={image.preview} onClose={handleCloseMenuDialog} onSave={handleSaveMenuItem} onImageChange={handleImageChange} onFormChange={handleFormChange} />
-
       <DeleteMenuDialog open={deleteDialog.open} loading={loading} onClose={() => setDeleteDialog({ open: false, itemId: null })} onConfirm={handleDeleteMenuItem} />
-
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}><Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert></Snackbar>
     </Box>
   );
