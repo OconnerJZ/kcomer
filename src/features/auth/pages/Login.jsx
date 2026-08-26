@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import { isMobile } from "@Utils/commons";
-import GeneralContent from "@Components/layout/GeneralContent";
+import { isMobile } from "@Shared/utils/commons";
+import GeneralContent from "@Shared/components/layout/GeneralContent";
 import useLogin from "@Features/auth/hooks/useLogin";
 import LoginForm from "@Features/auth/components/LoginForm";
 
