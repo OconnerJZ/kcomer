@@ -31,6 +31,9 @@ const normalizeStoredCart = (storedCart = {}) =>
         businessId,
         {
           businessName: business?.businessName || business?.business_name || "",
+          paymentMethods: Array.isArray(business?.paymentMethods)
+            ? business.paymentMethods
+            : [],
           items,
           total: calculateBusinessTotal(items),
         },
@@ -53,12 +56,13 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = useCallback(
-    ({ itemId, businessId, businessName, item }) => {
+    ({ itemId, businessId, businessName, paymentMethods = [], item }) => {
       const completeItem = normalizeCartItem({ ...item, id: item.id ?? itemId });
 
       setCart((prev) => {
         const currentBusiness = prev[businessId] || {
           businessName,
+          paymentMethods,
           items: {},
           total: 0,
         };
@@ -72,6 +76,10 @@ export const CartProvider = ({ children }) => {
           [businessId]: {
             ...currentBusiness,
             businessName: businessName || currentBusiness.businessName,
+            paymentMethods:
+              paymentMethods.length > 0
+                ? paymentMethods
+                : currentBusiness.paymentMethods || [],
             items,
             total: calculateBusinessTotal(items),
           },
