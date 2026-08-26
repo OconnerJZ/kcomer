@@ -1,7 +1,7 @@
 import { Layout as AntdLayout } from "antd";
 import { Box, Toolbar } from "@mui/material";
 import Navbar from "@Components/layout/Navbar";
-import FiltersPanel from "@Components/filters/FiltersPanel";
+import FiltersPanel from "@Features/explore/components/FiltersPanel";
 import Bg from "@Assets/images/qscome-bg-6.png";
 import { namePage } from "@Utils/listMessages";
 import { isMobile } from "@Shared/utils/commons";
