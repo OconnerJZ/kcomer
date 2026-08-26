@@ -10,6 +10,7 @@ import {
   useOrderUpdateStatusMutation,
   useGetOrdersByUserQuery,
 } from "@Features/orders/api/orders.api";
+import { normalizeOrders } from "@Features/orders/model/order";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 
@@ -35,17 +36,15 @@ export const STATUS_LABELS = {
   [ORDER_STATUS.CANCELLED]: "Cancelada",
 };
 
-const orderUtils = {
-  validateOrderData: (orderData) => {
-    if (!orderData) throw new Error("Datos de orden no proporcionados");
-    if (!orderData.businessId) throw new Error("ID de negocio requerido");
-    if (!orderData.items || !Array.isArray(orderData.items)) {
-      throw new Error("Items de orden requeridos");
-    }
-    if (orderData.items.length === 0) {
-      throw new Error("La orden debe contener al menos un item");
-    }
-  },
+const validateOrderData = (orderData) => {
+  if (!orderData) throw new Error("Datos de orden no proporcionados");
+  if (!orderData.businessId) throw new Error("ID de negocio requerido");
+  if (!Array.isArray(orderData.items)) {
+    throw new Error("Items de orden requeridos");
+  }
+  if (orderData.items.length === 0) {
+    throw new Error("La orden debe contener al menos un item");
+  }
 };
 
 export const OrdersProvider = ({ children }) => {
@@ -61,16 +60,14 @@ export const OrdersProvider = ({ children }) => {
     { skip: !user?.id },
   );
 
-  const [createOrderMutation, { isLoading: creating }] =
-    useCreateOrdersMutation();
-  const [updateStatusMutation, { isLoading: updating }] =
-    useOrderUpdateStatusMutation();
+  const [createOrderMutation, { isLoading: creating }] = useCreateOrdersMutation();
+  const [updateStatusMutation, { isLoading: updating }] = useOrderUpdateStatusMutation();
   const [error, setError] = useState(null);
 
-  const orders = useMemo(
-    () => ordersResponse?.data || ordersResponse || [],
-    [ordersResponse],
-  );
+  const orders = useMemo(() => {
+    const rawOrders = ordersResponse?.data || ordersResponse || [];
+    return normalizeOrders(rawOrders);
+  }, [ordersResponse]);
 
   const isCustomer =
     !!user?.id && user?.role !== "owner" && user?.role !== "admin";
@@ -91,7 +88,7 @@ export const OrdersProvider = ({ children }) => {
     async (orderData) => {
       setError(null);
       try {
-        orderUtils.validateOrderData(orderData);
+        validateOrderData(orderData);
         const payload = {
           ...orderData,
           userId: user.id,
@@ -151,9 +148,7 @@ export const OrdersProvider = ({ children }) => {
       getActiveOrders: () =>
         orders.filter(
           (order) =>
-            ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(
-              order.status,
-            ),
+            ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(order.status),
         ),
       getCompletedOrders: () =>
         orders.filter((order) =>
