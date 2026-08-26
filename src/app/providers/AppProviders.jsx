@@ -4,7 +4,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import FilterMenuProvider from "@Context/FilterMenuContext";
 import { CartProvider } from "@Hooks/components/useCart";
 import { AuthProvider, useAuth } from "@Features/auth/context/AuthContext";
-import { OrdersProvider } from "@Context/OrderContext";
+import { OrdersProvider } from "@Features/orders/context/OrderContext";
 import socketService from "@Services/socketService";
 
 const SocketInitializer = () => {
