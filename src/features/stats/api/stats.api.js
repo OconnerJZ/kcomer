@@ -8,22 +8,18 @@ const statsEndpoints = (builder) => {
     getBusinessStats: endpoint("stats", "getAll", {
       dynamicPath: ({ businessId, period = 7 }) =>
         `${ENDPOINTS.stats.business}/${businessId}?period=${period}`,
-      getCacheKey: ({ businessId, period = 7 }) => `${businessId}-${period}`,
       tagType: "Stats",
     }),
 
     getDashboardSummary: endpoint("stats-summary", "getAll", {
       dynamicPath: ({ businessId }) =>
         `${ENDPOINTS.stats.business}/${businessId}/summary`,
-      getCacheKey: ({ businessId }) => businessId,
       tagType: "Stats",
     }),
 
     getRevenueByPeriod: endpoint("stats-revenue", "getAll", {
       dynamicPath: ({ businessId, startDate, endDate }) =>
         `${ENDPOINTS.stats.business}/${businessId}/revenue?startDate=${startDate}&endDate=${endDate}`,
-      getCacheKey: ({ businessId, startDate, endDate }) =>
-        `${businessId}-${startDate}-${endDate}`,
       tagType: "Stats",
     }),
   };
