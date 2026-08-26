@@ -21,11 +21,11 @@ import {
   BasicInfoTab,
   DeliveryTab,
   FoodTypesTab,
-  GalleryTab,
   LocationTab,
   PaymentMethodsTab,
   SchedulesTab,
 } from "@Features/owner/components/settings/SettingsTabs";
+import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
 
