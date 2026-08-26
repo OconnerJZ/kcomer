@@ -1,17 +1,18 @@
-import { useEffect } from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
 import HeaderImg from "@Assets/images/qscome-header-1.png";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { isMobile } from "@Shared/utils/commons";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { isOwner } from "@Features/auth/model/roles";
+import RegisterBusiness from "./RegisterBusiness";
 
 export default function OwnerRegistrationLanding() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) navigate("/owner");
-  }, [isAuthenticated, navigate]);
+  if (loading) return null;
+  if (isOwner(user)) return <Navigate to="/owner" replace />;
+  if (isAuthenticated) return <RegisterBusiness />;
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -45,7 +46,7 @@ export default function OwnerRegistrationLanding() {
             ¡Haz que todos encuentren tu negocio!
           </Typography>
           <Typography variant="body1" gutterBottom>
-            <strong>Registrate</strong> y destaca en nuestra página
+            <strong>Regístrate</strong> y destaca en nuestra página
           </Typography>
           <Typography variant="body1" gutterBottom>
             ¡No dejes que te busquen y no te encuentren!
