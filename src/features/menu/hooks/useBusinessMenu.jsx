@@ -6,7 +6,10 @@ import {
   useDeleteMenuMutation,
   useToggleAvailabilityMutation,
 } from "@Features/menu/api/menu.api";
-import { useUploadImageMutation, uploadHelpers } from "@Api/upload.api";
+import {
+  useUploadImageMutation,
+  uploadHelpers,
+} from "@Shared/api/uploads/upload.api";
 
 export const useBusinessMenu = (businessId) => {
   const [error, setError] = useState(null);
@@ -27,9 +30,7 @@ export const useBusinessMenu = (businessId) => {
   const [toggleAvailability, { isLoading: toggling }] = useToggleAvailabilityMutation();
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
 
-  const menu = useMemo(() => {
-    return menuResponse?.data || menuResponse || [];
-  }, [menuResponse]);
+  const menu = useMemo(() => menuResponse?.data || menuResponse || [], [menuResponse]);
 
   const createItem = useCallback(
     async (itemData, imageFile = null) => {
@@ -76,7 +77,7 @@ export const useBusinessMenu = (businessId) => {
           business_id: businessId,
           item_name: itemData.item_name,
           description: itemData.description || "",
-          price: parseFloat(itemData.price),
+          price: Number.parseFloat(itemData.price),
           category: itemData.category || "",
           image_url: imageUrl,
           is_available: itemData.is_available ?? true,
