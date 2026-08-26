@@ -4,10 +4,15 @@ import {
   useOrderUpdateStatusMutation,
 } from "@Features/orders/api/orders.api";
 import { normalizeOrders } from "@Features/orders/model/order";
+import { useAuth } from "@Features/auth/context/AuthContext";
+import { hasGlobalBusinessRealtimeScope } from "@Features/auth/model/roles";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 
 export const useBusinessOrders = (businessId) => {
+  const { user } = useAuth();
   const [error, setError] = useState(null);
+  const hasGlobalRealtimeScope = hasGlobalBusinessRealtimeScope(user);
+
   const {
     data: ordersResponse,
     isLoading: loading,
@@ -58,12 +63,19 @@ export const useBusinessOrders = (businessId) => {
     (newOrder) => {
       if (!newOrder?.id) return;
       const eventBusinessId = newOrder.businessId ?? newOrder.business_id;
+
+      // La suscripción global del owner recibe eventos de todos sus negocios,
+      // pero esta query representa únicamente el negocio visible actualmente.
       if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
       refreshOrders();
     },
     {
       enabled: !!businessId,
-      room: { type: "business", id: businessId },
+      // Owner/admin ya están suscritos globalmente desde AppProviders.
+      // Roles operativos futuros se suscribirán solo al negocio que atienden.
+      room: hasGlobalRealtimeScope
+        ? undefined
+        : { type: "business", id: businessId },
     },
   );
 
