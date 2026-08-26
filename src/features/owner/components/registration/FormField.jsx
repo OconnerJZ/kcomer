@@ -76,6 +76,8 @@ const ImageField = ({ field, formValues, setFormValues }) => {
   );
 };
 
+const getOptionLabel = (option) => option?.label || "";
+
 const fieldComponents = {
   text: ({ field, formValues, setFormValues, error, helperText, validate }) => <TextField label={field.label} type="text" value={formValues[field.name] || ""} onChange={(event) => handleValidatedChange(event, setFormValues, validate || field.validate, field)} fullWidth margin="normal" error={!!error} helperText={helperText} required={field.required} />,
   email: ({ field, formValues, setFormValues, error, helperText }) => <TextField label={field.label} type="email" value={formValues[field.name] || ""} onChange={(event) => handleValidatedChange(event, setFormValues, "email", field)} fullWidth margin="normal" error={!!error} helperText={helperText || "Formato: usuario@ejemplo.com"} required={field.required} />,
@@ -86,12 +88,12 @@ const fieldComponents = {
   autocomplete: ({ field, formValues, setFormValues, error, helperText }) => {
     const options = field.options || [];
     const selectedOption = options.find((option) => option.id === formValues[field.name]) || null;
-    return <Autocomplete options={options} getOptionLabel={(option) => option.value || ""} value={selectedOption} onChange={(_, newValue) => setFormValues((prev) => ({ ...prev, [field.name]: newValue?.id || null }))} renderInput={(params) => <TextField {...params} label={field.label} margin="normal" fullWidth error={!!error} helperText={helperText} required={field.required} />} />;
+    return <Autocomplete options={options} getOptionLabel={getOptionLabel} value={selectedOption} onChange={(_, newValue) => setFormValues((prev) => ({ ...prev, [field.name]: newValue?.id || null }))} renderInput={(params) => <TextField {...params} label={field.label} margin="normal" fullWidth error={!!error} helperText={helperText} required={field.required} />} />;
   },
   "autocomplete-multiple": ({ field, formValues, setFormValues, error, helperText }) => {
     const options = field.options || [];
     const selectedOptions = options.filter((option) => Array.isArray(formValues[field.name]) && formValues[field.name].includes(option.id));
-    return <Autocomplete multiple options={options} getOptionLabel={(option) => option.value || ""} value={selectedOptions} onChange={(_, newValue) => setFormValues((prev) => ({ ...prev, [field.name]: newValue.map((value) => value.id) }))} renderInput={(params) => <TextField {...params} label={field.label} margin="normal" fullWidth error={!!error} helperText={helperText} required={field.required} />} />;
+    return <Autocomplete multiple options={options} getOptionLabel={getOptionLabel} value={selectedOptions} onChange={(_, newValue) => setFormValues((prev) => ({ ...prev, [field.name]: newValue.map((value) => value.id) }))} renderInput={(params) => <TextField {...params} label={field.label} margin="normal" fullWidth error={!!error} helperText={helperText} required={field.required} />} />;
   },
   image: ImageField,
   schedule: ScheduleField,
