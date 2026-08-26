@@ -7,7 +7,6 @@ import {
   useCallback,
   useRef,
 } from "react";
-import PropTypes from "prop-types";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -320,8 +319,6 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-AuthProvider.propTypes = { children: PropTypes.node.isRequired };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
