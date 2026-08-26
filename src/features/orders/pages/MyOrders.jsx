@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { Restaurant } from "@mui/icons-material";
-import GeneralContent from "@Components/layout/GeneralContent";
+import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useOrders } from "@Features/orders/context/OrderContext";
 import CustomerOrderCard from "@Features/orders/components/customer/CustomerOrderCard";
