@@ -8,7 +8,6 @@ import { VitePWA } from "vite-plugin-pwa";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -17,7 +16,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["logo.png"],
       workbox: {
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
         name: "qsCome",
@@ -52,17 +51,7 @@ export default defineConfig({
       "@App": path.resolve(__dirname, "src/app"),
       "@Features": path.resolve(__dirname, "src/features"),
       "@Shared": path.resolve(__dirname, "src/shared"),
-      "@Api": path.resolve(__dirname, "src/api"),
       "@Assets": path.resolve(__dirname, "src/assets"),
-      "@Components": path.resolve(__dirname, "src/components"),
-      "@Config": path.resolve(__dirname, "src/config"),
-      "@Const": path.resolve(__dirname, "src/const"),
-      "@Context": path.resolve(__dirname, "src/context"),
-      "@Hooks": path.resolve(__dirname, "src/hooks"),
-      "@Pages": path.resolve(__dirname, "src/pages"),
-      "@Redux": path.resolve(__dirname, "src/redux"),
-      "@Services": path.resolve(__dirname, "src/services"),
-      "@Utils": path.resolve(__dirname, "src/utils"),
     },
     extensions: [".js", ".jsx", ".json"],
   },
