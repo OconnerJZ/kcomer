@@ -14,8 +14,24 @@ const normalizeAddress = (address = {}, index = 0) => ({
   longitude: address.longitude ?? "",
 });
 
+const normalizeBusinesses = (businesses = []) => {
+  if (!Array.isArray(businesses)) return [];
+  return businesses;
+};
+
+export const getUserBusinessIds = (user = {}) =>
+  normalizeBusinesses(user.businesses)
+    .map((business) =>
+      typeof business === "object"
+        ? business?.id ?? business?.businessId ?? business?.business_id
+        : business,
+    )
+    .filter((id) => id !== null && id !== undefined && id !== "")
+    .map(String);
+
 export const normalizeUser = (user = {}) => {
   const addresses = user.addresses || user.userAddresses || user.user_addresses || [];
+  const businesses = user.businesses || user.business || [];
 
   return {
     id: user.id ?? user.userId ?? user.user_id ?? null,
@@ -33,7 +49,7 @@ export const normalizeUser = (user = {}) => {
     addresses: Array.isArray(addresses)
       ? addresses.map((address, index) => normalizeAddress(address, index))
       : [],
-    businesses: user.businesses || user.business || [],
+    businesses: normalizeBusinesses(businesses),
   };
 };
 
