@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -26,6 +25,7 @@ import CardPlaceFront from "./CardPlaceFront";
 import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { normalizeBusiness } from "@Features/business/model/business";
+import { useMemo, useState } from "react";
 
 const getMediaUrl = (value = "") => {
   if (!value) return "";
@@ -76,12 +76,29 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
 
   return (
     <>
-      <StyledCard sx={{ width: 340, borderRadius: 4, position: "relative" }} elevation={0}>
+      <StyledCard
+        sx={{
+          width: 350,
+          borderRadius: 5,
+          position: "relative",
+          overflow: "hidden",
+          bgcolor: "rgba(255,255,255,.76)",
+          backdropFilter: "blur(14px)",
+          border: "1px solid rgba(255,255,255,.82)",
+          boxShadow: "0 18px 48px rgba(32,28,26,.10)",
+          transition: "transform .22s ease, box-shadow .22s ease",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: "0 26px 60px rgba(32,28,26,.14)",
+          },
+        }}
+        elevation={0}
+      >
         <Box onClick={expandCard} sx={{ cursor: "pointer" }}>
           <Box
             sx={{
               position: "relative",
-              height: 176,
+              height: 218,
               backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
               backgroundSize: "cover",
               backgroundPosition: "center",
@@ -89,39 +106,45 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
               overflow: "hidden",
             }}
           >
-            <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,.05) 15%, rgba(0,0,0,.68) 100%)" }} />
+            <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,.04) 25%, rgba(0,0,0,.78) 100%)" }} />
 
-            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ position: "absolute", inset: 12, bottom: "auto" }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ position: "absolute", inset: 14, bottom: "auto" }}>
               <Chip
                 size="small"
                 label={business.open ? "Abierto" : "Cerrado"}
                 sx={{
-                  bgcolor: business.open ? "rgba(255,255,255,.94)" : "rgba(22,22,22,.82)",
+                  bgcolor: business.open ? "rgba(255,255,255,.94)" : "rgba(22,22,22,.78)",
                   color: business.open ? "success.main" : "common.white",
                   fontWeight: 800,
                   backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255,255,255,.34)",
                 }}
               />
               <IconButton
                 size="small"
                 aria-label="ver horarios"
                 onClick={handleScheduleOpen}
-                sx={{ bgcolor: "rgba(255,255,255,.9)", backdropFilter: "blur(8px)", "&:hover": { bgcolor: "common.white" } }}
+                sx={{
+                  bgcolor: "rgba(255,255,255,.90)",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: "0 5px 16px rgba(0,0,0,.12)",
+                  "&:hover": { bgcolor: "common.white", transform: "scale(1.04)" },
+                }}
               >
                 <AccessTime fontSize="small" />
               </IconButton>
             </Stack>
 
-            <Box sx={{ position: "absolute", left: 16, right: 16, bottom: 14 }}>
-              <Stack direction="row" spacing={1.25} alignItems="flex-end">
+            <Box sx={{ position: "absolute", left: 18, right: 18, bottom: 17 }}>
+              <Stack direction="row" spacing={1.35} alignItems="center">
                 <Avatar
                   src={logoUrl}
                   alt={business.name || "Negocio"}
                   sx={{
-                    width: 52,
-                    height: 52,
-                    border: "2px solid rgba(255,255,255,.92)",
-                    boxShadow: "0 4px 14px rgba(0,0,0,.18)",
+                    width: 58,
+                    height: 58,
+                    border: "2px solid rgba(255,255,255,.94)",
+                    boxShadow: "0 5px 18px rgba(0,0,0,.2)",
                     bgcolor: "background.paper",
                     color: "text.primary",
                     flexShrink: 0,
@@ -129,48 +152,56 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
                 >
                   {business.name?.charAt(0) || "N"}
                 </Avatar>
-                <Box minWidth={0} sx={{ pb: 0.2 }}>
-                  <Typography variant="h5" noWrap sx={{ color: "common.white", fontWeight: 900, lineHeight: 1.05, textShadow: "0 2px 12px rgba(0,0,0,.2)" }}>
+                <Box minWidth={0} sx={{ flex: 1 }}>
+                  <Typography variant="h5" noWrap sx={{ color: "common.white", fontWeight: 900, lineHeight: 1.05, textShadow: "0 2px 14px rgba(0,0,0,.22)" }}>
                     {business.name || "Negocio"}
                   </Typography>
-                  {business.location?.city && (
-                    <Typography variant="caption" sx={{ color: "rgba(255,255,255,.82)", fontWeight: 600 }}>
-                      {business.location.city}
-                    </Typography>
-                  )}
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: .45 }}>
+                    {business.location?.city && (
+                      <Typography variant="caption" sx={{ color: "rgba(255,255,255,.82)", fontWeight: 600 }}>
+                        {business.location.city}
+                      </Typography>
+                    )}
+                    {business.hasDelivery && (
+                      <Stack direction="row" spacing={0.35} alignItems="center">
+                        <DeliveryDining sx={{ fontSize: 16, color: "rgba(255,255,255,.82)" }} />
+                        <Typography variant="caption" sx={{ color: "rgba(255,255,255,.82)" }}>Delivery</Typography>
+                      </Stack>
+                    )}
+                  </Stack>
                 </Box>
               </Stack>
             </Box>
           </Box>
 
-          <Box sx={{ px: 2, py: 1.55 }}>
+          <Box sx={{ px: 2.1, py: 1.45 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1.5}>
-              <Stack direction="row" spacing={1.5} alignItems="center" minWidth={0}>
-                <Stack direction="row" spacing={0.45} alignItems="center">
-                  <FavoriteRounded sx={{ fontSize: 17, color: "warning.main" }} />
-                  <Typography variant="caption" color="text.secondary">{business.likes || 0}</Typography>
-                </Stack>
-                {business.hasDelivery && (
-                  <Stack direction="row" spacing={0.45} alignItems="center">
-                    <DeliveryDining sx={{ fontSize: 19, color: "text.secondary" }} />
-                    <Typography variant="caption" color="text.secondary">Delivery</Typography>
-                  </Stack>
-                )}
+              <Stack direction="row" spacing={1.1} alignItems="center" minWidth={0}>
+                <FavoriteRounded sx={{ fontSize: 18, color: "warning.main" }} />
+                <Typography variant="caption" color="text.secondary">{business.likes || 0}</Typography>
+                {(business.tags || []).slice(0, 1).map((tag) => (
+                  <Chip key={tag.label} label={tag.label} size="small" variant="outlined" sx={{ height: 24, borderRadius: 999, fontSize: ".68rem", bgcolor: "rgba(255,255,255,.46)" }} />
+                ))}
               </Stack>
 
-              <IconButton
-                size="small"
-                aria-label={expanded ? "contraer negocio" : "ver negocio"}
-                sx={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s ease" }}
-              >
-                <KeyboardArrowDown />
-              </IconButton>
+              <Stack direction="row" spacing={0.35} alignItems="center">
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  {expanded ? "Cerrar" : "Descubrir"}
+                </Typography>
+                <IconButton
+                  size="small"
+                  aria-label={expanded ? "contraer negocio" : "ver negocio"}
+                  sx={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s ease" }}
+                >
+                  <KeyboardArrowDown />
+                </IconButton>
+              </Stack>
             </Stack>
           </Box>
         </Box>
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+          <Box sx={{ borderTop: "1px solid rgba(0,0,0,.06)", px: .3, pb: .5 }}>
             <CardPlaceFront flipped={flipped} onMovement={onMovement} data={business} />
             <MovementContent movement={movement} flipped={flipped} onMovement={onMovement} business={business} />
           </Box>
