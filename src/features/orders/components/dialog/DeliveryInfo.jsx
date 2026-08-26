@@ -2,9 +2,10 @@ import { Box, Stack, Typography } from "@mui/material";
 import { LocationOn, StickyNote2, CreditCard } from "@mui/icons-material";
 
 const DeliveryInfo = ({ order }) => {
+  const deliveryAddress = order.address || order.deliveryAddress || "Recoger en tienda";
+
   return (
     <Stack spacing={2} sx={{ height: "100%" }}>
-      {/* Ubicación */}
       <Box sx={{ border: "1px solid #e0e0e0", p: 2.5 }}>
         <Typography
           variant="overline"
@@ -22,12 +23,11 @@ const DeliveryInfo = ({ order }) => {
         <Stack direction="row" spacing={1} alignItems="start">
           <LocationOn sx={{ fontSize: 16, color: "#666" }} />
           <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
-            {order.deliveryAddress}
+            {deliveryAddress}
           </Typography>
         </Stack>
       </Box>
 
-      {/* Notas */}
       {order.notes && (
         <Box sx={{ border: "1px solid #e0e0e0", p: 2.5, bgcolor: "#fafafa" }}>
           <Typography
@@ -45,21 +45,13 @@ const DeliveryInfo = ({ order }) => {
           </Typography>
           <Stack direction="row" spacing={1} alignItems="start">
             <StickyNote2 sx={{ fontSize: 16, color: "#666" }} />
-            <Typography
-              variant="body2"
-              sx={{
-                fontStyle: "italic",
-                color: "#666",
-                lineHeight: 1.6,
-              }}
-            >
+            <Typography variant="body2" sx={{ fontStyle: "italic", color: "#666", lineHeight: 1.6 }}>
               {order.notes}
             </Typography>
           </Stack>
         </Box>
       )}
 
-      {/* Método de Pago */}
       <Box sx={{ border: "1px solid #e0e0e0", p: 2.5 }}>
         <Typography
           variant="overline"
