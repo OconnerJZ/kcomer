@@ -1,5 +1,5 @@
-import { api, createEndpointBuilder } from "@Utils/api";
-import { ENDPOINTS } from "@Const/api";
+import { api, createEndpointBuilder } from "@Shared/api/rtk/api";
+import { ENDPOINTS } from "@Shared/api/endpoints";
 
 const paymentsEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
