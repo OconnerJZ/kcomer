@@ -36,6 +36,14 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
   const { createOrder } = useOrders();
 
   const checkout = useCheckoutForm(user);
+  const {
+    form,
+    orderType,
+    addressType,
+    setErrors,
+    resetCheckout,
+  } = checkout;
+
   const [activeTab, setActiveTab] = useState(0);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
 
@@ -95,13 +103,13 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
     }
 
     const validation = validateCheckout({
-      form: checkout.form,
-      orderType: checkout.orderType,
-      addressType: checkout.addressType,
+      form,
+      orderType,
+      addressType,
       currentBusiness,
     });
 
-    checkout.setErrors(validation.errors);
+    setErrors(validation.errors);
 
     if (!validation.valid) {
       return {
@@ -115,9 +123,9 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
       businessId: currentBusinessId,
       business: currentBusiness,
       user,
-      form: checkout.form,
-      orderType: checkout.orderType,
-      addressType: checkout.addressType,
+      form,
+      orderType,
+      addressType,
       addresses,
     });
 
@@ -129,19 +137,23 @@ export const useCheckoutController = (addresses = DEFAULT_ADDRESSES) => {
 
     clearBusiness(currentBusinessId);
     closeCheckout();
-    checkout.resetCheckout();
+    resetCheckout();
     navigate("/mis-ordenes");
 
     return result;
   }, [
+    addressType,
     addresses,
-    checkout,
     clearBusiness,
     closeCheckout,
     createOrder,
     currentBusiness,
     currentBusinessId,
+    form,
     navigate,
+    orderType,
+    resetCheckout,
+    setErrors,
     user,
   ]);
 
