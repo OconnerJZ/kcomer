@@ -19,7 +19,7 @@ const urgencyProps = {
 
 const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
   const urgency = getOrderUrgency(order, now);
-  const nextStatus = getNextStatus(order.status);
+  const nextStatus = getNextStatus(order.status, order.orderType);
   const actionLabel = getActionLabels(order.orderType)?.[nextStatus];
   const chip = urgencyProps[urgency.level] || urgencyProps.normal;
 
