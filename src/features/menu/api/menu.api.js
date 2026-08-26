@@ -4,18 +4,15 @@ import { ENDPOINTS } from "@Shared/api/endpoints";
 const dynamicEndpoints = {
   business: {
     path: ({ businessId }) => `${ENDPOINTS.menus.business}/${businessId}`,
-    cacheKey: ({ businessId }) => businessId,
   },
   toggle: {
     path: ({ id }) => `${ENDPOINTS.menus.base}/${id}/toggle-availability`,
-    cacheKey: ({ businessId }) => businessId,
   },
 };
 
 const dynamicEndpoint = (builder, key, method) =>
   createEndpointBuilder(api, builder)(key, method, {
     dynamicPath: dynamicEndpoints[key].path,
-    getCacheKey: dynamicEndpoints[key].cacheKey,
     tagType: "Menu",
   });
 
