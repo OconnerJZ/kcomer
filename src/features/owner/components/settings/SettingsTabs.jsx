@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardActions,
-  CardContent,
   CardMedia,
   Chip,
   CircularProgress,
@@ -21,15 +20,18 @@ import {
 } from "@mui/material";
 import {
   Add,
+  AccountBalance,
   Business,
-  Category,
+  CreditCard,
   Delete,
   Edit,
   ExpandMore,
+  LocalAtm,
   LocalShipping,
   LocationOn,
-  Payment,
+  Payments,
   PhotoLibrary,
+  Smartphone,
 } from "@mui/icons-material";
 import { useMemo, useState } from "react";
 import ScheduleField from "@Features/owner/components/registration/ScheduleField";
@@ -50,6 +52,15 @@ const buildMapsEmbedUrl = ({ latitude, longitude, address, city }) => {
     ? `${latitude},${longitude}`
     : [address, city].filter(Boolean).join(", ");
   return query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : "";
+};
+
+const paymentIcon = (method = "") => {
+  const key = String(method).toLowerCase();
+  if (key.includes("cash") || key.includes("efect")) return <LocalAtm fontSize="small" />;
+  if (key.includes("card") || key.includes("tarjet")) return <CreditCard fontSize="small" />;
+  if (key.includes("wallet") || key.includes("billetera")) return <Smartphone fontSize="small" />;
+  if (key.includes("transfer")) return <AccountBalance fontSize="small" />;
+  return <Payments fontSize="small" />;
 };
 
 export const BasicInfoTab = ({ basicInfo, setBasicInfo, logoFile, logoPreview, onLogoChange, onSave, loading }) => (
@@ -83,21 +94,14 @@ export const LocationTab = ({ locationInfo, setLocationInfo, onSave, loading }) 
         <Stack spacing={2}>
           <TextField label="Dirección" placeholder="Calle, número, colonia" value={locationInfo.address} onChange={(e) => setLocationInfo({ ...locationInfo, address: e.target.value })} fullWidth />
           <Grid container spacing={2}><Grid item xs={12} md={7}><TextField label="Ciudad" value={locationInfo.city} onChange={(e) => setLocationInfo({ ...locationInfo, city: e.target.value })} fullWidth /></Grid><Grid item xs={12} md={5}><TextField label="Código postal" value={locationInfo.postalCode} onChange={(e) => setLocationInfo({ ...locationInfo, postalCode: e.target.value })} fullWidth /></Grid></Grid>
-
           <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
             <Button fullWidth onClick={() => setShowCoordinates((current) => !current)} endIcon={<ExpandMore sx={{ transform: showCoordinates ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s" }} />} sx={{ justifyContent: "space-between", px: 1.5, py: 1.25, textTransform: "none", color: "text.primary" }}>
               <Box sx={{ textAlign: "left" }}><Typography variant="body2" fontWeight={800}>Coordenadas avanzadas</Typography><Typography variant="caption" color="text.secondary">Úsalas solo si necesitas precisión exacta.</Typography></Box>
             </Button>
-            <Collapse in={showCoordinates}>
-              <Box sx={{ p: 1.5, pt: 0 }}>
-                <Grid container spacing={1.5}><Grid item xs={12} sm={6}><TextField size="small" label="Latitud" type="number" value={locationInfo.latitude} onChange={(e) => setLocationInfo({ ...locationInfo, latitude: e.target.value })} fullWidth placeholder="19.4326" /></Grid><Grid item xs={12} sm={6}><TextField size="small" label="Longitud" type="number" value={locationInfo.longitude} onChange={(e) => setLocationInfo({ ...locationInfo, longitude: e.target.value })} fullWidth placeholder="-99.1332" /></Grid></Grid>
-              </Box>
-            </Collapse>
+            <Collapse in={showCoordinates}><Box sx={{ p: 1.5, pt: 0 }}><Grid container spacing={1.5}><Grid item xs={12} sm={6}><TextField size="small" label="Latitud" type="number" value={locationInfo.latitude} onChange={(e) => setLocationInfo({ ...locationInfo, latitude: e.target.value })} fullWidth placeholder="19.4326" /></Grid><Grid item xs={12} sm={6}><TextField size="small" label="Longitud" type="number" value={locationInfo.longitude} onChange={(e) => setLocationInfo({ ...locationInfo, longitude: e.target.value })} fullWidth placeholder="-99.1332" /></Grid></Grid></Box></Collapse>
           </Box>
-
           <Stack direction="row" justifyContent="flex-end"><Button variant="contained" disableElevation onClick={onSave} disabled={loading} sx={{ textTransform: "none", borderRadius: 2, minWidth: 150 }}>{loading ? <CircularProgress size={22} color="inherit" /> : "Guardar ubicación"}</Button></Stack>
         </Stack>
-
         <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden", bgcolor: "grey.50", minHeight: 300 }}>
           {mapUrl ? <iframe src={mapUrl} title="Vista previa de la ubicación" width="100%" height="300" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /> : <Stack alignItems="center" justifyContent="center" spacing={1} sx={{ minHeight: 300, px: 3, textAlign: "center" }}><LocationOn sx={{ fontSize: 38, color: "text.disabled" }} /><Typography variant="body2" fontWeight={800}>Agrega tu dirección</Typography><Typography variant="caption" color="text.secondary">La vista previa del mapa aparecerá aquí.</Typography></Stack>}
         </Box>
@@ -113,13 +117,86 @@ export const SchedulesTab = ({ schedules, setSchedules, onSave, loading }) => (
   </SectionShell>
 );
 
-export const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading }) => (
-  <SectionShell eyebrow="DELIVERY" title="Entrega a domicilio" description="Define cobertura, costo y tiempos estimados para que el cliente sepa qué esperar antes de ordenar."><Stack spacing={2}><Grid container spacing={2}><Grid item xs={12} md={6}><TextField label="Radio de entrega (km)" type="number" value={deliverySettings.deliveryRadiusKm} onChange={(e) => setDeliverySettings({ ...deliverySettings, deliveryRadiusKm: parseFloat(e.target.value) || 0 })} fullWidth /></Grid><Grid item xs={12} md={6}><TextField label="Tiempo estimado (min)" type="number" value={deliverySettings.estimatedTimeMin} onChange={(e) => setDeliverySettings({ ...deliverySettings, estimatedTimeMin: parseInt(e.target.value, 10) || 0 })} fullWidth /></Grid></Grid><Grid container spacing={2}><Grid item xs={12} md={6}><TextField label="Costo de envío" type="number" value={deliverySettings.deliveryFee} onChange={(e) => setDeliverySettings({ ...deliverySettings, deliveryFee: parseFloat(e.target.value) || 0 })} fullWidth InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>$</Typography> }} /></Grid><Grid item xs={12} md={6}><TextField label="Monto mínimo de orden" type="number" value={deliverySettings.minOrderAmount} onChange={(e) => setDeliverySettings({ ...deliverySettings, minOrderAmount: parseFloat(e.target.value) || 0 })} fullWidth InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>$</Typography> }} /></Grid></Grid><FormControlLabel control={<Switch checked={deliverySettings.useOwnDelivery} onChange={(e) => setDeliverySettings({ ...deliverySettings, useOwnDelivery: e.target.checked })} />} label="Usar repartidores propios" /><Stack direction="row" justifyContent="flex-end"><Button variant="contained" disableElevation onClick={onSave} disabled={loading} sx={{ textTransform: "none", borderRadius: 2 }}>{loading ? <CircularProgress size={22} /> : "Guardar delivery"}</Button></Stack></Stack></SectionShell>
-);
+export const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading }) => {
+  const radius = Number(deliverySettings.deliveryRadiusKm || 0);
+  const fee = Number(deliverySettings.deliveryFee || 0);
+  const minimum = Number(deliverySettings.minOrderAmount || 0);
+  const eta = Number(deliverySettings.estimatedTimeMin || 0);
 
-export const PaymentMethodsTab = ({ paymentMethods, onToggle, onSave, loading }) => (
-  <SectionShell eyebrow="PAGOS" title="Métodos aceptados" description="Activa únicamente las opciones que realmente puedes recibir en este negocio."><Stack spacing={1.25}>{paymentMethods.map((method) => <Box key={method.method} sx={{ px: 1.5, py: 1.15, border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}><Box><Typography variant="body2" fontWeight={800}>{method.label}</Typography><Typography variant="caption" color="text.secondary">{method.active ? "Disponible para clientes" : "Desactivado"}</Typography></Box><Switch checked={method.active} onChange={() => onToggle(method.method)} /></Box>)}<Stack direction="row" justifyContent="flex-end" sx={{ pt: 1 }}><Button variant="contained" disableElevation onClick={onSave} disabled={loading} sx={{ textTransform: "none", borderRadius: 2 }}>{loading ? <CircularProgress size={22} /> : "Guardar métodos"}</Button></Stack></Stack></SectionShell>
-);
+  return (
+    <SectionShell eyebrow="DELIVERY" title="Entrega a domicilio" description="Configura lo que el cliente necesita saber antes de ordenar: cobertura, costo, mínimo y tiempo estimado.">
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0,1fr) 300px" }, gap: 3, alignItems: "start" }}>
+        <Stack spacing={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}><TextField label="Radio de entrega" helperText="Kilómetros alrededor del negocio" type="number" value={deliverySettings.deliveryRadiusKm} onChange={(e) => setDeliverySettings({ ...deliverySettings, deliveryRadiusKm: parseFloat(e.target.value) || 0 })} fullWidth InputProps={{ endAdornment: <Typography variant="caption" color="text.secondary">km</Typography> }} /></Grid>
+            <Grid item xs={12} md={6}><TextField label="Tiempo estimado" helperText="Promedio desde que sale el pedido" type="number" value={deliverySettings.estimatedTimeMin} onChange={(e) => setDeliverySettings({ ...deliverySettings, estimatedTimeMin: parseInt(e.target.value, 10) || 0 })} fullWidth InputProps={{ endAdornment: <Typography variant="caption" color="text.secondary">min</Typography> }} /></Grid>
+          </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}><TextField label="Costo de envío" type="number" value={deliverySettings.deliveryFee} onChange={(e) => setDeliverySettings({ ...deliverySettings, deliveryFee: parseFloat(e.target.value) || 0 })} fullWidth InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>$</Typography> }} /></Grid>
+            <Grid item xs={12} md={6}><TextField label="Monto mínimo" type="number" value={deliverySettings.minOrderAmount} onChange={(e) => setDeliverySettings({ ...deliverySettings, minOrderAmount: parseFloat(e.target.value) || 0 })} fullWidth InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>$</Typography> }} /></Grid>
+          </Grid>
+
+          <Box sx={{ px: 1.5, py: 1.15, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+            <FormControlLabel
+              sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
+              control={<Switch checked={deliverySettings.useOwnDelivery} onChange={(e) => setDeliverySettings({ ...deliverySettings, useOwnDelivery: e.target.checked })} />}
+              label={<Box><Typography variant="body2" fontWeight={800}>Repartidores propios</Typography><Typography variant="caption" color="text.secondary">{deliverySettings.useOwnDelivery ? "Tu negocio gestiona directamente las entregas." : "La entrega no se marca como operada por tu propio equipo."}</Typography></Box>}
+            />
+          </Box>
+
+          <Stack direction="row" justifyContent="flex-end"><Button variant="contained" disableElevation onClick={onSave} disabled={loading} sx={{ textTransform: "none", borderRadius: 2, minWidth: 150 }}>{loading ? <CircularProgress size={22} color="inherit" /> : "Guardar delivery"}</Button></Stack>
+        </Stack>
+
+        <Box sx={{ p: 2.25, borderRadius: 3, border: "1px solid", borderColor: "divider", bgcolor: "rgba(248,248,248,.72)" }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}><LocalShipping sx={{ color: "text.secondary" }} /><Box><Typography variant="body2" fontWeight={800}>Vista para el cliente</Typography><Typography variant="caption" color="text.secondary">Resumen de tu configuración actual</Typography></Box></Stack>
+          <Stack spacing={1.5}>
+            <Box><Typography variant="caption" color="text.secondary">Cobertura</Typography><Typography variant="h6" fontWeight={800}>{radius || 0} km</Typography></Box>
+            <Box sx={{ height: 1, bgcolor: "divider" }} />
+            <Stack direction="row" justifyContent="space-between" gap={2}><Box><Typography variant="caption" color="text.secondary">Envío</Typography><Typography variant="body2" fontWeight={800}>{fee > 0 ? `$${fee.toFixed(2)}` : "Sin costo"}</Typography></Box><Box sx={{ textAlign: "right" }}><Typography variant="caption" color="text.secondary">Tiempo</Typography><Typography variant="body2" fontWeight={800}>{eta || 0} min</Typography></Box></Stack>
+            <Box sx={{ height: 1, bgcolor: "divider" }} />
+            <Box><Typography variant="caption" color="text.secondary">Pedido mínimo</Typography><Typography variant="body2" fontWeight={800}>{minimum > 0 ? `$${minimum.toFixed(2)}` : "Sin mínimo"}</Typography></Box>
+          </Stack>
+        </Box>
+      </Box>
+    </SectionShell>
+  );
+};
+
+export const PaymentMethodsTab = ({ paymentMethods, onToggle, onSave, loading }) => {
+  const activeCount = paymentMethods.filter((method) => method.active).length;
+
+  return (
+    <SectionShell eyebrow="PAGOS" title="Métodos aceptados" description="Activa únicamente las opciones que realmente puedes recibir. El cliente solo verá los métodos disponibles.">
+      <Stack spacing={2.5}>
+        <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+          <Typography variant="h5" fontWeight={800}>{activeCount}</Typography>
+          <Typography variant="body2" color="text.secondary">{activeCount === 1 ? "método activo" : "métodos activos"}</Typography>
+        </Box>
+
+        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden" }}>
+          {paymentMethods.map((method, index) => (
+            <Box key={method.method} sx={{ px: { xs: 1.5, sm: 2 }, py: 1.4, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, borderBottom: index < paymentMethods.length - 1 ? "1px solid" : "none", borderColor: "divider", bgcolor: method.active ? "rgba(255,75,69,.025)" : "transparent" }}>
+              <Stack direction="row" spacing={1.4} alignItems="center" minWidth={0}>
+                <Box sx={{ width: 36, height: 36, borderRadius: 2, display: "grid", placeItems: "center", bgcolor: method.active ? "rgba(255,75,69,.08)" : "grey.100", color: method.active ? "primary.main" : "text.secondary" }}>
+                  {paymentIcon(method.method || method.label)}
+                </Box>
+                <Box minWidth={0}>
+                  <Typography variant="body2" fontWeight={800}>{method.label}</Typography>
+                  <Typography variant="caption" color="text.secondary">{method.active ? "Disponible al pagar" : "No se mostrará al cliente"}</Typography>
+                </Box>
+              </Stack>
+              <Switch checked={method.active} onChange={() => onToggle(method.method)} inputProps={{ "aria-label": `activar ${method.label}` }} />
+            </Box>
+          ))}
+        </Box>
+
+        {activeCount === 0 && <Alert severity="warning" sx={{ borderRadius: 2 }}>Activa al menos un método para que el cliente tenga una opción de pago disponible.</Alert>}
+
+        <Stack direction="row" justifyContent="flex-end"><Button variant="contained" disableElevation onClick={onSave} disabled={loading || activeCount === 0} sx={{ textTransform: "none", borderRadius: 2, minWidth: 150 }}>{loading ? <CircularProgress size={22} color="inherit" /> : "Guardar métodos"}</Button></Stack>
+      </Stack>
+    </SectionShell>
+  );
+};
 
 export const FoodTypesTab = ({ availableFoodTypes, selectedFoodTypes, loadingCatalogs, onToggle, onSave, loading }) => (
   <SectionShell eyebrow="CATEGORÍAS" title="Qué tipo de comida ofreces" description="Ayuda a que los clientes entiendan rápidamente qué encontrarán en tu negocio.">{loadingCatalogs ? <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}><CircularProgress /></Box> : <Stack spacing={2.5}><Stack direction="row" gap={1} flexWrap="wrap">{availableFoodTypes.map((type) => { const selected = selectedFoodTypes.includes(type.id); return <Chip key={type.id} label={type.name} clickable onClick={() => onToggle(type.id)} variant={selected ? "filled" : "outlined"} color={selected ? "primary" : "default"} sx={{ fontWeight: selected ? 700 : 500 }} />; })}</Stack><Stack direction="row" justifyContent="flex-end"><Button variant="contained" disableElevation onClick={onSave} disabled={loading} sx={{ textTransform: "none", borderRadius: 2 }}>{loading ? <CircularProgress size={22} /> : "Guardar categorías"}</Button></Stack></Stack>}</SectionShell>
