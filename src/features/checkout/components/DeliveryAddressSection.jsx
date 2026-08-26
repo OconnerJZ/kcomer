@@ -1,6 +1,11 @@
 import { Box, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 
 export default function DeliveryAddressSection({ addressType, onAddressTypeChange, form, errors, addresses, onChange, onNewAddressChange }) {
+  const hasSavedAddresses = addresses.length > 0;
+  const options = hasSavedAddresses
+    ? [{ value: "saved", label: "Guardada" }, { value: "new", label: "Nueva" }]
+    : [{ value: "new", label: "Nueva" }];
+
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1.5} mb={2}>
@@ -9,7 +14,7 @@ export default function DeliveryAddressSection({ addressType, onAddressTypeChang
       </Box>
 
       <Box sx={{ display: "flex", gap: 1, p: 0.5, bgcolor: "#f5f5f5", borderRadius: 2, mb: 2 }}>
-        {[{ value: "saved", label: "Guardada" }, { value: "new", label: "Nueva" }].map((option) => {
+        {options.map((option) => {
           const selected = addressType === option.value;
           return (
             <Box
@@ -36,7 +41,7 @@ export default function DeliveryAddressSection({ addressType, onAddressTypeChang
         })}
       </Box>
 
-      {addressType === "saved" && (
+      {addressType === "saved" && hasSavedAddresses && (
         <Select
           value={form.userAddressId}
           onChange={(e) => onChange("userAddressId", e.target.value)}
