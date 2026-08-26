@@ -32,7 +32,7 @@ import LogoClassic from "/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@Features/cart/context/CartContext";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { isCustomer, isOwner } from "@Features/auth/model/roles";
+import { isOwner } from "@Features/auth/model/roles";
 
 const BASE_NAV_ITEMS = [
   { title: "Explorar", icon: <Fastfood />, link: "explorar" },
@@ -46,7 +46,6 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
 
   const owner = isOwner(user);
-  const customer = isCustomer(user);
 
   const navItems = React.useMemo(() => {
     const items = [...BASE_NAV_ITEMS];
@@ -56,18 +55,17 @@ export default function Navbar() {
       return items;
     }
 
+    // Todo usuario autenticado puede comprar, sin importar si también es owner.
+    items.push({ title: "Mi pedido", icon: <ReceiptLong />, link: "orden", cartBadge: true });
+    items.push({ title: "Órdenes", icon: <ShoppingBag />, link: "mis-ordenes" });
+
+    // Owner es una capacidad adicional, no un rol excluyente del flujo cliente.
     if (owner) {
       items.push({ title: "Negocio", icon: <Store />, link: "owner" });
-      return items;
-    }
-
-    if (customer) {
-      items.push({ title: "Mi pedido", icon: <ReceiptLong />, link: "orden", cartBadge: true });
-      items.push({ title: "Órdenes", icon: <ShoppingBag />, link: "mis-ordenes" });
     }
 
     return items;
-  }, [customer, isAuthenticated, owner]);
+  }, [isAuthenticated, owner]);
 
   const [value, setValue] = React.useState(-1);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -115,7 +113,8 @@ export default function Navbar() {
                   <MenuItem disabled><ListItemText primary={user?.name} secondary={user?.email} primaryTypographyProps={{ fontWeight: 700, fontSize: ".9rem" }} secondaryTypographyProps={{ fontSize: ".75rem" }} /></MenuItem>
                   <Divider />
                   <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
-                  {customer && <MenuItem onClick={() => goFromMenu("/mis-ordenes")}><ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon><ListItemText>Mis Órdenes</ListItemText></MenuItem>}
+                  <MenuItem onClick={() => goFromMenu("/orden")}><ListItemIcon><ReceiptLong fontSize="small" /></ListItemIcon><ListItemText>Mi pedido</ListItemText></MenuItem>
+                  <MenuItem onClick={() => goFromMenu("/mis-ordenes")}><ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon><ListItemText>Mis Órdenes</ListItemText></MenuItem>
                   {owner && <MenuItem onClick={() => goFromMenu("/owner")}><ListItemIcon><Dashboard fontSize="small" /></ListItemIcon><ListItemText>Panel de Negocio</ListItemText></MenuItem>}
                   <Divider />
                   <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}><ListItemIcon><Logout fontSize="small" color="error" /></ListItemIcon><ListItemText>Cerrar Sesión</ListItemText></MenuItem>
@@ -129,7 +128,7 @@ export default function Navbar() {
       </AppBar>
 
       <Box sx={{ width: "100%", position: "fixed", bottom: 0, left: 0, zIndex: 1000, display: { xs: "flex", sm: "none" }, borderTop: "1px solid", borderColor: "divider", backgroundColor: "rgba(255,255,255,.96)", backdropFilter: "blur(14px)" }}>
-        <BottomNavigation showLabels value={value} onChange={(_, newValue) => { const toGo = navItems[newValue]?.link; if (!toGo) return; setValue(newValue); navigate(`/${toGo}`); }} sx={{ width: "100%", "& .MuiBottomNavigationAction-root": { minWidth: "auto", px: .5 }, "& .MuiBottomNavigationAction-label": { fontSize: ".68rem" } }}>
+        <BottomNavigation showLabels value={value} onChange={(_, newValue) => { const toGo = navItems[newValue]?.link; if (!toGo) return; setValue(newValue); navigate(`/${toGo}`); }} sx={{ width: "100%", overflowX: "auto", justifyContent: "flex-start", "& .MuiBottomNavigationAction-root": { minWidth: 72, px: .5 }, "& .MuiBottomNavigationAction-label": { fontSize: ".65rem" } }}>
           {navItems.map((item) => (
             <BottomNavigationAction key={item.title} label={item.title} icon={<Badge badgeContent={item.cartBadge ? cartCount : 0} color="error">{item.icon}</Badge>} />
           ))}
