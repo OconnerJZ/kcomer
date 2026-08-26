@@ -1,21 +1,11 @@
 import { api, createEndpointBuilder } from "@Shared/api/rtk/api";
 import { ENDPOINTS } from "@Shared/api/endpoints";
-
-const MAX_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-
-const validateImage = (file) => {
-  if (file.size > MAX_SIZE) {
-    throw new Error("La imagen debe pesar menos de 5MB");
-  }
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    throw new Error("Solo se permiten imágenes JPG, PNG, WebP o GIF");
-  }
-};
-
-const validateImages = (files) => {
-  files.forEach(validateImage);
-};
+import {
+  IMAGE_ALLOWED_TYPES,
+  IMAGE_MAX_SIZE,
+  validateImageFile,
+  validateImageFiles,
+} from "@Shared/media/images";
 
 const uploadEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
@@ -42,18 +32,23 @@ export const {
 
 export const uploadHelpers = {
   uploadImage: async (file, uploadMutation) => {
-    validateImage(file);
+    validateImageFile(file);
     const formData = new FormData();
     formData.append("file", file);
     return uploadMutation(formData);
   },
 
   uploadMultiple: async (files, uploadMutation) => {
-    validateImages(files);
+    validateImageFiles(files);
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     return uploadMutation(formData);
   },
 };
 
-export { MAX_SIZE, ALLOWED_TYPES, validateImage, validateImages };
+export {
+  IMAGE_MAX_SIZE as MAX_SIZE,
+  IMAGE_ALLOWED_TYPES as ALLOWED_TYPES,
+  validateImageFile as validateImage,
+  validateImageFiles as validateImages,
+};
