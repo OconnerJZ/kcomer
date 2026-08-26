@@ -5,7 +5,7 @@ import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
 const Explorar = lazy(() => import("@Features/explore/pages/ExplorePage"));
-const Nosotros = lazy(() => import("@Pages/Nosotros"));
+const Nosotros = lazy(() => import("@Features/about/pages/AboutPage"));
 const Login = lazy(() => import("@Features/auth/pages/Login"));
 const Pedidos = lazy(() => import("@Features/checkout/pages/CheckoutPage"));
 const MisOrdenes = lazy(() => import("@Features/orders/pages/MyOrders"));
