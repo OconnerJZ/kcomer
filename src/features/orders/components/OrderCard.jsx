@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import StatusChip from "./StatusChip";
 import ActionButton from "./ActionButton";
+import PendingOrderActions from "./PendingOrderActions";
 import {
   formatOrderDate,
   formatCurrency,
@@ -64,7 +65,7 @@ const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = 
             <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.75 }}>{formatCurrency(order.total)}</Typography>
           </Box>
 
-          <Stack direction="row" spacing={1}>
+          <Stack spacing={1}>
             <Button
               size="small"
               variant="outlined"
@@ -73,7 +74,11 @@ const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = 
             >
               Ver detalles
             </Button>
-            <ActionButton order={order} onClick={onUpdateStatus} isSmall={isSmall} />
+            {order.status === "pending" ? (
+              <PendingOrderActions order={order} onUpdateStatus={onUpdateStatus} fullWidth />
+            ) : (
+              <ActionButton order={order} onClick={onUpdateStatus} isSmall={isSmall} />
+            )}
           </Stack>
         </Stack>
       </CardContent>
