@@ -1,78 +1,59 @@
-import { Box, Stack, Typography } from "@mui/material";
-import { LocationOn, StickyNote2, CreditCard } from "@mui/icons-material";
+import { useMemo, useState } from "react";
+import { Box, ButtonBase, Stack, Typography } from "@mui/material";
+import { CreditCard, LocationOn, MapRounded, StickyNote2 } from "@mui/icons-material";
+
+const buildMapUrl = (location, address) => {
+  const query = location?.latitude && location?.longitude
+    ? `${location.latitude},${location.longitude}`
+    : address;
+  return query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : "";
+};
 
 const DeliveryInfo = ({ order }) => {
+  const [view, setView] = useState("address");
   const deliveryAddress = order.address || order.deliveryAddress || "Recoger en tienda";
+  const isDelivery = order.orderType === "delivery";
+  const mapUrl = useMemo(() => buildMapUrl(order.deliveryLocation, deliveryAddress), [order.deliveryLocation, deliveryAddress]);
 
   return (
-    <Stack spacing={2} sx={{ height: "100%" }}>
-      <Box sx={{ border: "1px solid #e0e0e0", p: 2.5 }}>
-        <Typography
-          variant="overline"
-          sx={{
-            color: "#666",
-            letterSpacing: "0.15em",
-            fontSize: "0.688rem",
-            fontWeight: 600,
-            display: "block",
-            mb: 2,
-          }}
-        >
-          Dirección de Entrega
-        </Typography>
-        <Stack direction="row" spacing={1} alignItems="start">
-          <LocationOn sx={{ fontSize: 16, color: "#666" }} />
-          <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
-            {deliveryAddress}
-          </Typography>
-        </Stack>
-      </Box>
-
-      {order.notes && (
-        <Box sx={{ border: "1px solid #e0e0e0", p: 2.5, bgcolor: "#fafafa" }}>
-          <Typography
-            variant="overline"
-            sx={{
-              color: "#666",
-              letterSpacing: "0.15em",
-              fontSize: "0.688rem",
-              fontWeight: 600,
-              display: "block",
-              mb: 2,
-            }}
-          >
-            Notas del Cliente
-          </Typography>
-          <Stack direction="row" spacing={1} alignItems="start">
-            <StickyNote2 sx={{ fontSize: 16, color: "#666" }} />
-            <Typography variant="body2" sx={{ fontStyle: "italic", color: "#666", lineHeight: 1.6 }}>
-              {order.notes}
-            </Typography>
-          </Stack>
+    <Stack spacing={1.5} sx={{ height: "100%" }}>
+      <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden", bgcolor: "background.paper" }}>
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".64rem" }}>ENTREGA</Typography>
+          <Typography variant="subtitle1" fontWeight={850}>{isDelivery ? "Dirección del cliente" : "Recoger en tienda"}</Typography>
         </Box>
-      )}
 
-      <Box sx={{ border: "1px solid #e0e0e0", p: 2.5 }}>
-        <Typography
-          variant="overline"
-          sx={{
-            color: "#666",
-            letterSpacing: "0.15em",
-            fontSize: "0.688rem",
-            fontWeight: 600,
-            display: "block",
-            mb: 2,
-          }}
-        >
-          Método de Pago
-        </Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <CreditCard sx={{ fontSize: 16, color: "#666" }} />
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
-            {order.paymentMethod || "Efectivo"}
-          </Typography>
-        </Stack>
+        {isDelivery && (
+          <Box sx={{ display: "flex", gap: .5, mx: 2, mt: 1.5, p: .4, bgcolor: "action.hover", borderRadius: 2 }}>
+            {[{ key: "address", label: "Dirección", icon: LocationOn }, { key: "map", label: "Mapa", icon: MapRounded }].map(({ key, label, icon: Icon }) => (
+              <ButtonBase key={key} onClick={() => setView(key)} sx={{ flex: 1, py: .8, borderRadius: 1.7, bgcolor: view === key ? "background.paper" : "transparent", boxShadow: view === key ? "0 4px 12px rgba(0,0,0,.06)" : 0 }}>
+                <Icon sx={{ fontSize: 16, mr: .6 }} />
+                <Typography variant="caption" fontWeight={800}>{label}</Typography>
+              </ButtonBase>
+            ))}
+          </Box>
+        )}
+
+        <Box sx={{ p: 2 }}>
+          {!isDelivery || view === "address" ? (
+            <Stack direction="row" spacing={1.2} alignItems="flex-start">
+              <LocationOn sx={{ fontSize: 19, color: "primary.main", mt: .2 }} />
+              <Box>
+                <Typography variant="body2" fontWeight={750} sx={{ lineHeight: 1.6 }}>{deliveryAddress}</Typography>
+                {order.deliveryLocation?.city && <Typography variant="caption" color="text.secondary">{order.deliveryLocation.city}{order.deliveryLocation.postalCode ? ` · CP ${order.deliveryLocation.postalCode}` : ""}</Typography>}
+              </Box>
+            </Stack>
+          ) : mapUrl ? (
+            <Box sx={{ height: 230, borderRadius: 2.5, overflow: "hidden", border: "1px solid", borderColor: "divider" }}>
+              <iframe src={mapUrl} title={`Ubicación de entrega de orden ${order.id}`} width="100%" height="100%" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+            </Box>
+          ) : <Typography variant="body2" color="text.secondary">No hay coordenadas disponibles para esta orden.</Typography>}
+        </Box>
       </Box>
+
+      {order.notes && <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: 2, bgcolor: "rgba(248,248,248,.72)" }}><Stack direction="row" spacing={1}><StickyNote2 sx={{ fontSize: 18, color: "text.secondary" }} /><Box><Typography variant="caption" color="text.secondary" fontWeight={800}>NOTAS DEL CLIENTE</Typography><Typography variant="body2" sx={{ mt: .35 }}>{order.notes}</Typography></Box></Stack></Box>}
+
+      <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: 2 }}><Stack direction="row" spacing={1} alignItems="center"><CreditCard sx={{ fontSize: 18, color: "text.secondary" }} /><Box><Typography variant="caption" color="text.secondary">MÉTODO DE PAGO</Typography><Typography variant="body2" fontWeight={800}>{order.paymentMethod || "Efectivo"}</Typography></Box></Stack></Box>
     </Stack>
   );
 };
