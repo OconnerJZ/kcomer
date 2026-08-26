@@ -13,9 +13,11 @@ import { normalizeBusiness, toBasicInfoPayload, toDeliveryPayload, toLocationPay
 import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
 import { normalizeCatalogOptions } from "@Features/catalogs/model/catalogOption";
 import { uploadHelpers, useUploadImageMutation } from "@Shared/api/uploads/upload.api";
+import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 
 const getMutationError = (err, fallback) => err?.data?.message || err?.message || fallback;
 const getPhotoUrl = (photo) => typeof photo === "string" ? photo : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || "";
+const mediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? value : `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
 
 export const useBusinessSettings = (businessData) => {
   const [error, setError] = useState(null);
@@ -30,7 +32,7 @@ export const useBusinessSettings = (businessData) => {
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
 
-  const [basicInfo, setBasicInfo] = useState({ name: "", phone: "", email: "", description: "", open: true, prepTimeMin: 30, estimatedDeliveryMin: 45, logo: "" });
+  const [basicInfo, setBasicInfo] = useState({ name: "", phone: "", email: "", description: "", open: true, prepTimeMin: 30, estimatedDeliveryMin: 45, logo: "", storedLogo: "" });
   const [locationInfo, setLocationInfo] = useState({ address: "", city: "", postalCode: "", latitude: "", longitude: "" });
   const [schedules, setSchedules] = useState([]);
   const [deliverySettings, setDeliverySettings] = useState({ deliveryRadiusKm: 5, deliveryFee: 0, minOrderAmount: 0, estimatedTimeMin: 30, useOwnDelivery: false });
@@ -42,7 +44,17 @@ export const useBusinessSettings = (businessData) => {
   useEffect(() => {
     if (!businessData) return;
     const business = normalizeBusiness(businessData);
-    setBasicInfo({ name: business.name, phone: business.phone, email: business.email, description: business.description, open: business.open, prepTimeMin: business.prepTimeMin, estimatedDeliveryMin: business.estimatedDeliveryMin, logo: business.logo });
+    setBasicInfo({
+      name: business.name,
+      phone: business.phone,
+      email: business.email,
+      description: business.description,
+      open: business.open,
+      prepTimeMin: business.prepTimeMin,
+      estimatedDeliveryMin: business.estimatedDeliveryMin,
+      logo: mediaUrl(business.logo),
+      storedLogo: business.logo,
+    });
     setLocationInfo(business.location);
     setSchedules(business.schedules);
     setDeliverySettings(business.deliverySettings);
@@ -52,10 +64,7 @@ export const useBusinessSettings = (businessData) => {
     setCoverImage(business.bannerUrl || "");
   }, [businessData]);
 
-  const availableFoodTypes = useMemo(
-    () => normalizeCatalogOptions(foodTypesResponse?.data || foodTypesResponse || []),
-    [foodTypesResponse],
-  );
+  const availableFoodTypes = useMemo(() => normalizeCatalogOptions(foodTypesResponse?.data || foodTypesResponse || []), [foodTypesResponse]);
   const businessId = businessData?.id;
 
   const runMutation = useCallback(async (mutation, args, fallback) => {
@@ -66,13 +75,15 @@ export const useBusinessSettings = (businessData) => {
   }, [businessId]);
 
   const updateBasicInfo = useCallback(async (logoFile = null) => {
-    let logo = basicInfo.logo;
+    let storedLogo = basicInfo.storedLogo || basicInfo.logo;
     if (logoFile) {
       const uploadResult = await uploadHelpers.uploadImage(logoFile, uploadImage);
       const uploaded = uploadResult?.data?.data || uploadResult?.data;
-      logo = uploaded?.url || uploaded?.filename || logo;
+      storedLogo = uploaded?.url || uploaded?.filename || storedLogo;
     }
-    return runMutation(updateBusiness, { id: businessId, body: toBasicInfoPayload({ ...basicInfo, logo }) }, "Error al actualizar información general");
+    const result = await runMutation(updateBusiness, { id: businessId, body: toBasicInfoPayload({ ...basicInfo, logo: storedLogo }) }, "Error al actualizar información general");
+    if (result.success && logoFile) setBasicInfo((current) => ({ ...current, logo: mediaUrl(storedLogo), storedLogo }));
+    return result;
   }, [basicInfo, businessId, runMutation, updateBusiness, uploadImage]);
 
   const updateLocation = useCallback(() => runMutation(updateBusinessLocation, { id: businessId, body: toLocationPayload(locationInfo) }, "Error al actualizar ubicación"), [businessId, locationInfo, runMutation, updateBusinessLocation]);
