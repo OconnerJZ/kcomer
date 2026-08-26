@@ -6,14 +6,17 @@ const customEndpoints = (builder) => {
 
   return {
     getReviewsByBusiness: endpoint("reviews", "getAll", {
-      dynamicPath: ({ businessId }) => `${ENDPOINTS.reviews.base}/business/${businessId}`,
+      dynamicPath: ({ businessId }) => `${ENDPOINTS.reviews.business}/${businessId}`,
       tagType: "Reviews",
     }),
   };
 };
 
 const reviewsEndpoints = (builder) => ({
-  ...crudEndpoints(ENDPOINTS.reviews.base, { tagType: "Reviews" })(builder),
+  ...crudEndpoints(ENDPOINTS.reviews.base, {
+    prefix: "Review",
+    tagType: "Reviews",
+  })(builder),
   ...customEndpoints(builder),
 });
 
@@ -23,8 +26,11 @@ const apiReviews = api.injectEndpoints({
 });
 
 export const {
-  useCreateMutation,
-  useUpdateMutation,
-  useDeleteMutation,
+  useCreateReviewMutation,
+  useGetAllReviewQuery,
+  useGetOneReviewQuery,
+  useUpdateReviewMutation,
+  usePatchReviewMutation,
+  useDeleteReviewMutation,
   useGetReviewsByBusinessQuery,
 } = apiReviews;
