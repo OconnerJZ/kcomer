@@ -30,7 +30,7 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <Typography variant="subtitle2" color="success.main" sx={{ fontWeight: 700, ml: 1 }}>${Number(order.total || 0).toFixed(2)}</Typography>
           </Stack>
 
-          {!isMobile && ![ORDER_STATUS.CANCELLED, "rejected"].includes(order.status) && (
+          {!isMobile && order.status !== ORDER_STATUS.CANCELLED && (
             <OrderProgressTracker status={order.status} />
           )}
 
