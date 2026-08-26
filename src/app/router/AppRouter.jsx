@@ -7,7 +7,7 @@ import ScrollToTop from "@Components/ScrollToTop";
 const Explorar = lazy(() => import("@Pages/Explorar"));
 const Nosotros = lazy(() => import("@Pages/Nosotros"));
 const Login = lazy(() => import("@Features/auth/pages/Login"));
-const Pedidos = lazy(() => import("@Pages/Pedidos"));
+const Pedidos = lazy(() => import("@Features/checkout/pages/CheckoutPage"));
 const MisOrdenes = lazy(() => import("@Features/orders/pages/MyOrders"));
 const Perfil = lazy(() => import("@Pages/Perfil"));
 const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
