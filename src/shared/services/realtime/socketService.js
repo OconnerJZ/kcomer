@@ -1,19 +1,10 @@
-// src/services/socketService.js
 import { io } from "socket.io-client";
-import { API_URL_SERVER } from "@Utils/enviroments";
-
-// ============================================================================
-// LOGGING (silenciado en producción)
-// ============================================================================
+import { API_URL_SERVER } from "@Shared/config/env";
 
 const DEV = import.meta.env?.DEV ?? false;
 const log = (...a) => DEV && console.log(...a);
 const warn = (...a) => DEV && console.warn(...a);
 const logError = (...a) => DEV && console.error(...a);
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
 
 const SOCKET_CONFIG = {
   transports: ["websocket", "polling"],
@@ -22,17 +13,13 @@ const SOCKET_CONFIG = {
   reconnectionDelayMax: 5000,
   reconnectionAttempts: 10,
   timeout: 20000,
-  autoConnect: false, // Conectar manualmente para mejor control
+  autoConnect: false,
 };
 
 const RECONNECT_STRATEGIES = {
   EXPONENTIAL: "exponential",
   LINEAR: "linear",
 };
-
-// ============================================================================
-// SOCKET SERVICE CLASS
-// ============================================================================
 
 class SocketService {
   constructor() {
@@ -43,39 +30,17 @@ class SocketService {
     this.maxReconnectAttempts = 10;
     this.currentUser = null;
     this.reconnectStrategy = RECONNECT_STRATEGIES.EXPONENTIAL;
-
-    // Event handlers registry
     this.eventHandlers = new Map();
-
-    // Suscriptores del estado de conexión (para useSyncExternalStore)
     this._statusListeners = new Set();
   }
 
-  // ==========================================================================
-  // REACTIVE STATUS STORE (para React vía useSyncExternalStore)
-  // ==========================================================================
-
-  /**
-   * Suscribe un listener a los cambios de estado de conexión.
-   * Devuelve la función de limpieza (unsubscribe). Referencia estable.
-   * @param {Function} listener
-   * @returns {Function} unsubscribe
-   */
   subscribeStatus = (listener) => {
     this._statusListeners.add(listener);
     return () => this._statusListeners.delete(listener);
   };
 
-  /**
-   * Snapshot del estado de conexión. Devuelve un primitivo (boolean),
-   * por lo que es seguro para useSyncExternalStore.
-   * @returns {boolean}
-   */
   getStatusSnapshot = () => this.connected;
 
-  /**
-   * Notifica a los suscriptores que el estado de conexión cambió.
-   */
   _emitStatus = () => {
     this._statusListeners.forEach((listener) => {
       try {
@@ -86,28 +51,17 @@ class SocketService {
     });
   };
 
-  // ==========================================================================
-  // CONNECTION MANAGEMENT
-  // ==========================================================================
-
-  /**
-   * Connect to socket server
-   * @param {Object} user - User object with token
-   * @returns {Socket} Socket instance
-   */
   connect(user) {
     if (!user || !user.token) {
       logError("❌ No se puede conectar sin usuario o token");
       return null;
     }
 
-    // If already connected with same user, return existing socket
     if (this.socket?.connected && this.currentUser?.id === user.id) {
       log("✅ Socket ya conectado para este usuario");
       return this.socket;
     }
 
-    // Disconnect existing connection if different user
     if (this.socket && this.currentUser?.id !== user.id) {
       log("🔄 Cambiando usuario, desconectando socket anterior");
       this.disconnect();
@@ -115,7 +69,6 @@ class SocketService {
 
     this.currentUser = user;
 
-    // Create new socket connection
     this.socket = io(API_URL_SERVER, {
       ...SOCKET_CONFIG,
       auth: {
@@ -132,36 +85,24 @@ class SocketService {
     return this.socket;
   }
 
-  /**
-   * Setup all socket event handlers
-   */
   setupEventHandlers() {
     if (!this.socket) return;
 
-    // Connection successful
     this.socket.on("connect", () => {
       this.connected = true;
       this.reconnectAttempts = 0;
-      this._emitStatus(); // ⟵ avisa a React que ya hay conexión
+      this._emitStatus();
       log("✅ Socket.IO conectado:", this.socket.id);
-
-      // Auto-join rooms based on user role
       this.autoJoinRooms();
-
-      // Notify listeners
       this.notifyListeners("connected", { socketId: this.socket.id });
     });
 
-    // Disconnection
     this.socket.on("disconnect", (reason) => {
       this.connected = false;
-      this._emitStatus(); // ⟵ avisa a React que se perdió la conexión
+      this._emitStatus();
       log("❌ Socket.IO desconectado:", reason);
-
-      // Notify listeners
       this.notifyListeners("disconnected", { reason });
 
-      // Handle different disconnect reasons
       if (reason === "io server disconnect") {
         warn("⚠️ Servidor cerró la conexión");
       } else if (reason === "transport close" || reason === "ping timeout") {
@@ -169,7 +110,6 @@ class SocketService {
       }
     });
 
-    // Connection error
     this.socket.on("connect_error", (error) => {
       logError("❌ Error de conexión Socket.IO:", error.message);
       this.reconnectAttempts++;
@@ -186,29 +126,23 @@ class SocketService {
       }
     });
 
-    // Reconnection attempt
     this.socket.on("reconnect_attempt", (attemptNumber) => {
       log(`🔄 Intento de reconexión #${attemptNumber}`);
       this.notifyListeners("reconnect_attempt", { attemptNumber });
     });
 
-    // Reconnection successful
     this.socket.on("reconnect", (attemptNumber) => {
       log("🎉 Socket.IO reconectado (intento:", attemptNumber, ")");
       this.reconnectAttempts = 0;
       this.notifyListeners("reconnected", { attemptNumber });
-
-      // Re-join rooms after reconnection
       this.autoJoinRooms();
     });
 
-    // Reconnection failed
     this.socket.on("reconnect_failed", () => {
       logError("❌ Falló la reconexión después de todos los intentos");
       this.notifyListeners("reconnect_failed");
     });
 
-    // Authentication error
     this.socket.on("auth_error", (error) => {
       logError("❌ Error de autenticación:", error);
       this.notifyListeners("auth_error", error);
@@ -216,9 +150,6 @@ class SocketService {
     });
   }
 
-  /**
-   * Auto-join rooms based on user role
-   */
   autoJoinRooms() {
     if (!this.currentUser) return;
 
@@ -234,9 +165,6 @@ class SocketService {
     }
   }
 
-  /**
-   * Disconnect from socket server
-   */
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -247,36 +175,20 @@ class SocketService {
       this.reconnectAttempts = 0;
       this.listeners.clear();
       this.eventHandlers.clear();
-      this.clearActiveBusiness(); // ⟵ no dejar el negocio persistido tras logout
-      this._emitStatus(); // ⟵ avisa a React que ya no hay conexión
+      this.clearActiveBusiness();
+      this._emitStatus();
       log("👋 Socket.IO desconectado manualmente");
     }
   }
 
-  /**
-   * Check if socket is connected
-   * @returns {boolean}
-   */
   isConnected() {
     return this.socket?.connected || false;
   }
 
-  /**
-   * Get socket ID
-   * @returns {string|null}
-   */
   getSocketId() {
     return this.socket?.id || null;
   }
 
-  // ==========================================================================
-  // ROOM MANAGEMENT
-  // ==========================================================================
-
-  /**
-   * Join business room (for owners/admins)
-   * @param {string} businessId
-   */
   joinBusiness(businessId) {
     if (!this.socket?.connected) {
       warn("⚠️ Socket no conectado, no se puede unir a sala");
@@ -299,10 +211,6 @@ class SocketService {
     });
   }
 
-  /**
-   * Join user room (for customers)
-   * @param {string} userId
-   */
   joinUser(userId) {
     if (!this.socket?.connected) {
       warn("⚠️ Socket no conectado, no se puede unir a sala");
@@ -325,10 +233,6 @@ class SocketService {
     });
   }
 
-  /**
-   * Leave a room
-   * @param {string} room
-   */
   leaveRoom(room) {
     if (this.socket?.connected) {
       this.socket.emit("leave:room", room);
@@ -336,15 +240,6 @@ class SocketService {
     }
   }
 
-  /**
-   * Define el negocio activo del owner y lo persiste para que autoJoinRooms()
-   * pueda re-unirse a la sala tras un reconnect o un reload (cuando el dashboard
-   * aún no ha montado). Si ya hay conexión, se une de inmediato.
-   *
-   * Es la API que deben usar los componentes en lugar de tocar localStorage
-   * directamente.
-   * @param {string} businessId
-   */
   setActiveBusiness(businessId) {
     if (!businessId) return;
 
@@ -359,9 +254,6 @@ class SocketService {
     }
   }
 
-  /**
-   * Limpia el negocio activo persistido (al cerrar sesión / cambiar de usuario).
-   */
   clearActiveBusiness() {
     try {
       localStorage.removeItem("owner_business_id");
@@ -369,10 +261,6 @@ class SocketService {
       /* noop */
     }
   }
-
-  // ==========================================================================
-  // ORDER MANAGEMENT
-  // ==========================================================================
 
   createOrder(orderData, callback) {
     if (!this.socket?.connected) {
@@ -419,10 +307,6 @@ class SocketService {
   offOrderStatusUpdate() {
     this.off("order:status_update");
   }
-
-  // ==========================================================================
-  // GENERIC EVENT MANAGEMENT
-  // ==========================================================================
 
   on(event, callback) {
     if (!this.socket) {
@@ -484,10 +368,6 @@ class SocketService {
     }
   }
 
-  // ==========================================================================
-  // NOTIFICATION MANAGEMENT
-  // ==========================================================================
-
   async requestNotificationPermission() {
     if (!("Notification" in window)) {
       log("ℹ️ Este navegador no soporta notificaciones");
@@ -544,10 +424,6 @@ class SocketService {
     }
   }
 
-  // ==========================================================================
-  // UTILITY METHODS
-  // ==========================================================================
-
   getStatus() {
     return {
       connected: this.connected,
@@ -583,10 +459,5 @@ class SocketService {
   }
 }
 
-// ============================================================================
-// SINGLETON INSTANCE
-// ============================================================================
-
 export const socketService = new SocketService();
-
 export default socketService;
