@@ -1,14 +1,19 @@
 import { useMemo, useState } from "react";
 import {
-  CardHeader,
   Avatar,
-  Typography,
-  Collapse,
   Box,
-  Stack,
+  Chip,
+  Collapse,
   IconButton,
+  Stack,
+  Typography,
 } from "@mui/material";
-import { ThumbUp, DeliveryDining, AccessTime } from "@mui/icons-material";
+import {
+  AccessTime,
+  DeliveryDining,
+  FavoriteRounded,
+  KeyboardArrowDown,
+} from "@mui/icons-material";
 import { StyledCard } from "./CardPlaceStyled";
 import useCardPlace from "@Features/explore/hooks/useCardPlace";
 import {
@@ -22,68 +27,11 @@ import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { normalizeBusiness } from "@Features/business/model/business";
 
-const MEDIA_PATH = API_URL_MEDIA_SERVER;
-
-const getMediaUrl = (logo = "") => {
-  if (!logo) return "";
-  if (/^https?:\/\//i.test(logo)) return logo;
-  return `${MEDIA_PATH.replace(/\/$/, "")}/${String(logo).replace(/^\/+/, "")}`;
+const getMediaUrl = (value = "") => {
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
 };
-
-const TitlePlace = ({ text = "Negocio" }) => (
-  <Typography className="titlePrimary" sx={{ fontWeight: 900, fontSize: "23px" }} level="title-sm">
-    {text}
-  </Typography>
-);
-
-const BusinessAvatar = ({ business }) => (
-  <Avatar
-    className="card-avatar"
-    sx={{
-      width: 110,
-      height: 110,
-      border: business.open
-        ? "2px solid rgba(13, 158, 61, 1)"
-        : "2px solid rgb(255,64,59)",
-      borderStyle: "dashed",
-      padding: "2px",
-      cursor: "pointer",
-    }}
-    aria-label={business.name || "negocio"}
-    src={getMediaUrl(business.logo)}
-  >
-    {business.name?.charAt(0) || "N"}
-  </Avatar>
-);
-
-const BusinessStats = ({ likes, hasDelivery }) => (
-  <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
-    <Stack direction="row" spacing={1} alignItems="center">
-      <ThumbUp sx={{ fontSize: "23px", color: "#efb810" }} />
-      <Typography variant="body2">{likes || 0}</Typography>
-      {hasDelivery && <DeliveryDining sx={{ fontSize: "27px" }} />}
-    </Stack>
-  </Box>
-);
-
-const ScheduleButton = ({ onClick }) => (
-  <IconButton
-    color="default"
-    aria-label="ver horarios"
-    onClick={onClick}
-    sx={{
-      fontSize: "18px",
-      bgcolor: "rgba(255,255,255,0.9)",
-      "&:hover": {
-        bgcolor: "rgba(255,255,255,1)",
-        transform: "scale(1.1)",
-      },
-      transition: "all 0.2s",
-    }}
-  >
-    <AccessTime />
-  </IconButton>
-);
 
 const MovementContent = ({ movement, flipped, onMovement, business }) => {
   const movementMap = {
@@ -126,29 +74,100 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
 
   return (
     <>
-      <StyledCard sx={{ width: 340, borderRadius: "20px", position: "relative" }} elevation={7}>
-        <CardHeader
-          onClick={expandCard}
-          avatar={<BusinessAvatar business={business} />}
-          title={<TitlePlace text={business.name} />}
-          subheader={
-            <Stack direction="row" spacing={1} justifyContent="center">
-              <ScheduleButton onClick={handleScheduleOpen} />
-              <BusinessStats likes={business.likes} hasDelivery={business.hasDelivery} />
+      <StyledCard sx={{ width: 340, borderRadius: 4, position: "relative" }} elevation={0}>
+        <Box onClick={expandCard} sx={{ cursor: "pointer" }}>
+          <Box
+            sx={{
+              position: "relative",
+              height: 168,
+              backgroundImage: business.logo ? `url(${getMediaUrl(business.logo)})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              bgcolor: "grey.200",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(180deg, rgba(0,0,0,.04) 20%, rgba(0,0,0,.58) 100%)",
+              }}
+            />
+
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ position: "absolute", inset: 12, bottom: "auto" }}>
+              <Chip
+                size="small"
+                label={business.open ? "Abierto" : "Cerrado"}
+                sx={{
+                  bgcolor: business.open ? "rgba(255,255,255,.93)" : "rgba(22,22,22,.78)",
+                  color: business.open ? "success.main" : "common.white",
+                  fontWeight: 800,
+                  backdropFilter: "blur(8px)",
+                }}
+              />
+              <IconButton
+                size="small"
+                aria-label="ver horarios"
+                onClick={handleScheduleOpen}
+                sx={{ bgcolor: "rgba(255,255,255,.9)", backdropFilter: "blur(8px)", "&:hover": { bgcolor: "common.white" } }}
+              >
+                <AccessTime fontSize="small" />
+              </IconButton>
             </Stack>
-          }
-          sx={{
-            padding: expanded
-              ? "16px 16px 0px 16px"
-              : { xs: "16px 16px 16px 16px", sm: "16px 16px 0px 16px" },
-            textAlign: "center",
-            cursor: "pointer",
-          }}
-        />
+
+            <Box sx={{ position: "absolute", left: 16, right: 16, bottom: 14 }}>
+              <Typography variant="h5" sx={{ color: "common.white", fontWeight: 900, lineHeight: 1.1, textShadow: "0 2px 12px rgba(0,0,0,.2)" }}>
+                {business.name || "Negocio"}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ px: 2, py: 1.75 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1.5}>
+              <Stack direction="row" spacing={1.4} alignItems="center" minWidth={0}>
+                <Avatar
+                  src={getMediaUrl(business.logo)}
+                  alt={business.name || "Negocio"}
+                  sx={{ width: 42, height: 42, border: "1px solid", borderColor: "divider" }}
+                >
+                  {business.name?.charAt(0) || "N"}
+                </Avatar>
+                <Box minWidth={0}>
+                  <Typography variant="body2" fontWeight={800} noWrap>
+                    {business.name || "Negocio"}
+                  </Typography>
+                  <Stack direction="row" spacing={1.25} alignItems="center" sx={{ mt: 0.35 }}>
+                    <Stack direction="row" spacing={0.4} alignItems="center">
+                      <FavoriteRounded sx={{ fontSize: 16, color: "warning.main" }} />
+                      <Typography variant="caption" color="text.secondary">{business.likes || 0}</Typography>
+                    </Stack>
+                    {business.hasDelivery && (
+                      <Stack direction="row" spacing={0.4} alignItems="center">
+                        <DeliveryDining sx={{ fontSize: 18, color: "text.secondary" }} />
+                        <Typography variant="caption" color="text.secondary">Delivery</Typography>
+                      </Stack>
+                    )}
+                  </Stack>
+                </Box>
+              </Stack>
+
+              <IconButton
+                size="small"
+                aria-label={expanded ? "contraer negocio" : "ver negocio"}
+                sx={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform .2s ease" }}
+              >
+                <KeyboardArrowDown />
+              </IconButton>
+            </Stack>
+          </Box>
+        </Box>
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardPlaceFront flipped={flipped} onMovement={onMovement} data={business} />
-          <MovementContent movement={movement} flipped={flipped} onMovement={onMovement} business={business} />
+          <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+            <CardPlaceFront flipped={flipped} onMovement={onMovement} data={business} />
+            <MovementContent movement={movement} flipped={flipped} onMovement={onMovement} business={business} />
+          </Box>
         </Collapse>
       </StyledCard>
 
