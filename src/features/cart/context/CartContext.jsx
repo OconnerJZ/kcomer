@@ -1,7 +1,20 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const CartContext = createContext();
 const STORAGE_KEY = "qscome_cart";
+
+const calculateBusinessTotal = (items) =>
+  Object.values(items).reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
@@ -17,88 +30,122 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = ({ itemId, businessId, businessName, item }) => {
-    const completeItem = {
-      id: item.id,
-      name: item.name || "",
-      description: item.description || "",
-      price: Number(item.price) || 0,
-      quantity: item.quantity || 0,
-      note: item.note || "",
-      image: item.image || "",
-    };
+  const addToCart = useCallback(
+    ({ itemId, businessId, businessName, item }) => {
+      const completeItem = {
+        id: item.id,
+        name: item.name || "",
+        description: item.description || "",
+        price: Number(item.price) || 0,
+        quantity: item.quantity || 0,
+        note: item.note || "",
+        image: item.image || "",
+      };
 
-    setCart((prev) => {
-      const newCart = { ...prev };
-      if (!newCart[businessId]) {
-        newCart[businessId] = { businessName, items: {}, total: 0 };
-      }
-      newCart[businessId].items[itemId] = completeItem;
-      newCart[businessId].total = Object.values(newCart[businessId].items).reduce(
-        (sum, i) => sum + i.price * i.quantity,
-        0,
-      );
-      return newCart;
-    });
-  };
+      setCart((prev) => {
+        const currentBusiness = prev[businessId] || {
+          businessName,
+          items: {},
+          total: 0,
+        };
+        const items = {
+          ...currentBusiness.items,
+          [itemId]: completeItem,
+        };
 
-  const removeFromCart = (businessId, itemId) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      if (newCart[businessId]) {
-        delete newCart[businessId].items[itemId];
-        if (Object.keys(newCart[businessId].items).length === 0) {
-          delete newCart[businessId];
-        } else {
-          newCart[businessId].total = Object.values(newCart[businessId].items).reduce(
-            (sum, i) => sum + i.price * i.quantity,
-            0,
-          );
-        }
-      }
-      return newCart;
-    });
-  };
-
-  const clearBusiness = (businessId) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      delete newCart[businessId];
-      return newCart;
-    });
-  };
-
-  const clearAll = () => setCart({});
-
-  const getCartCount = () =>
-    Object.values(cart).reduce(
-      (total, business) =>
-        total +
-        Object.values(business.items).reduce(
-          (sum, item) => sum + item.quantity,
-          0,
-        ),
-      0,
-    );
-
-  const getGrandTotal = () =>
-    Object.values(cart).reduce((total, business) => total + business.total, 0);
-
-  return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        clearBusiness,
-        clearAll,
-        getCartCount,
-        getGrandTotal,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+        return {
+          ...prev,
+          [businessId]: {
+            ...currentBusiness,
+            businessName: businessName || currentBusiness.businessName,
+            items,
+            total: calculateBusinessTotal(items),
+          },
+        };
+      });
+    },
+    [],
   );
+
+  const removeFromCart = useCallback((businessId, itemId) => {
+    setCart((prev) => {
+      const currentBusiness = prev[businessId];
+      if (!currentBusiness) return prev;
+
+      const items = Object.fromEntries(
+        Object.entries(currentBusiness.items).filter(([id]) => String(id) !== String(itemId)),
+      );
+
+      if (Object.keys(items).length === 0) {
+        const { [businessId]: _removed, ...remainingCart } = prev;
+        return remainingCart;
+      }
+
+      return {
+        ...prev,
+        [businessId]: {
+          ...currentBusiness,
+          items,
+          total: calculateBusinessTotal(items),
+        },
+      };
+    });
+  }, []);
+
+  const clearBusiness = useCallback((businessId) => {
+    setCart((prev) => {
+      if (!prev[businessId]) return prev;
+      const { [businessId]: _removed, ...remainingCart } = prev;
+      return remainingCart;
+    });
+  }, []);
+
+  const clearAll = useCallback(() => setCart({}), []);
+
+  const cartCount = useMemo(
+    () =>
+      Object.values(cart).reduce(
+        (total, business) =>
+          total +
+          Object.values(business.items).reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          ),
+        0,
+      ),
+    [cart],
+  );
+
+  const grandTotal = useMemo(
+    () => Object.values(cart).reduce((total, business) => total + business.total, 0),
+    [cart],
+  );
+
+  const getCartCount = useCallback(() => cartCount, [cartCount]);
+  const getGrandTotal = useCallback(() => grandTotal, [grandTotal]);
+
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      clearBusiness,
+      clearAll,
+      getCartCount,
+      getGrandTotal,
+    }),
+    [
+      cart,
+      addToCart,
+      removeFromCart,
+      clearBusiness,
+      clearAll,
+      getCartCount,
+      getGrandTotal,
+    ],
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
