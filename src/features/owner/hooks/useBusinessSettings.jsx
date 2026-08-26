@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useUpdateBusinessMutation } from "@Features/business/api/business.api";
+import {
+  useAddBusinessPhotoMutation,
+  useDeleteBusinessPhotoMutation,
+  useUpdateBusinessDeliverySettingsMutation,
+  useUpdateBusinessFoodTypesMutation,
+  useUpdateBusinessLocationMutation,
+  useUpdateBusinessMutation,
+  useUpdateBusinessPaymentMethodsMutation,
+  useUpdateBusinessSchedulesMutation,
+} from "@Features/business/api/business.api";
 import {
   normalizeBusiness,
   toBasicInfoPayload,
@@ -17,9 +26,19 @@ import {
   useUploadImageMutation,
 } from "@Shared/api/uploads/upload.api";
 
+const getMutationError = (err, fallback) =>
+  err?.data?.message || err?.message || fallback;
+
 export const useBusinessSettings = (businessData) => {
   const [error, setError] = useState(null);
-  const [updateBusiness, { isLoading: updating }] = useUpdateBusinessMutation();
+  const [updateBusiness, updateBusinessState] = useUpdateBusinessMutation();
+  const [updateBusinessLocation, locationState] = useUpdateBusinessLocationMutation();
+  const [updateBusinessSchedules, schedulesState] = useUpdateBusinessSchedulesMutation();
+  const [updateBusinessDeliverySettings, deliveryState] = useUpdateBusinessDeliverySettingsMutation();
+  const [updateBusinessPaymentMethods, paymentState] = useUpdateBusinessPaymentMethodsMutation();
+  const [updateBusinessFoodTypes, foodTypesState] = useUpdateBusinessFoodTypesMutation();
+  const [addBusinessPhoto, addPhotoState] = useAddBusinessPhotoMutation();
+  const [deleteBusinessPhoto, deletePhotoState] = useDeleteBusinessPhotoMutation();
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
 
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
@@ -90,21 +109,20 @@ export const useBusinessSettings = (businessData) => {
     [paymentMethodsResponse],
   );
 
-  const saveBusinessSection = useCallback(
-    async (body) => {
-      if (!businessData?.id) return { success: false, error: "Negocio no disponible" };
-      setError(null);
-      try {
-        const data = await updateBusiness({ id: businessData.id, body }).unwrap();
-        return { success: true, data };
-      } catch (err) {
-        const message = err?.data?.message || err?.message || "Error al actualizar negocio";
-        setError(message);
-        return { success: false, error: message };
-      }
-    },
-    [businessData?.id, updateBusiness],
-  );
+  const businessId = businessData?.id;
+
+  const runMutation = useCallback(async (mutation, args, fallback) => {
+    if (!businessId) return { success: false, error: "Negocio no disponible" };
+    setError(null);
+    try {
+      const data = await mutation(args).unwrap();
+      return { success: true, data };
+    } catch (err) {
+      const message = getMutationError(err, fallback);
+      setError(message);
+      return { success: false, error: message };
+    }
+  }, [businessId]);
 
   const updateBasicInfo = useCallback(
     async (logoFile = null) => {
@@ -114,30 +132,58 @@ export const useBusinessSettings = (businessData) => {
         const uploaded = uploadResult?.data?.data || uploadResult?.data;
         logo = uploaded?.url || uploaded?.filename || logo;
       }
-      return saveBusinessSection(toBasicInfoPayload({ ...basicInfo, logo }));
+      return runMutation(
+        updateBusiness,
+        { id: businessId, body: toBasicInfoPayload({ ...basicInfo, logo }) },
+        "Error al actualizar información general",
+      );
     },
-    [basicInfo, saveBusinessSection, uploadImage],
+    [basicInfo, businessId, runMutation, updateBusiness, uploadImage],
   );
 
   const updateLocation = useCallback(
-    () => saveBusinessSection({ location: toLocationPayload(locationInfo) }),
-    [locationInfo, saveBusinessSection],
+    () => runMutation(
+      updateBusinessLocation,
+      { id: businessId, body: toLocationPayload(locationInfo) },
+      "Error al actualizar ubicación",
+    ),
+    [businessId, locationInfo, runMutation, updateBusinessLocation],
   );
+
   const updateSchedules = useCallback(
-    () => saveBusinessSection({ schedules }),
-    [schedules, saveBusinessSection],
+    () => runMutation(
+      updateBusinessSchedules,
+      { id: businessId, body: { schedules } },
+      "Error al actualizar horarios",
+    ),
+    [businessId, runMutation, schedules, updateBusinessSchedules],
   );
+
   const updateDelivery = useCallback(
-    () => saveBusinessSection({ delivery_settings: toDeliveryPayload(deliverySettings) }),
-    [deliverySettings, saveBusinessSection],
+    () => runMutation(
+      updateBusinessDeliverySettings,
+      { id: businessId, body: toDeliveryPayload(deliverySettings) },
+      "Error al actualizar delivery",
+    ),
+    [businessId, deliverySettings, runMutation, updateBusinessDeliverySettings],
   );
+
   const updatePayments = useCallback(
-    () => saveBusinessSection({ payment_methods: toPaymentMethodsPayload(paymentMethods) }),
-    [paymentMethods, saveBusinessSection],
+    () => runMutation(
+      updateBusinessPaymentMethods,
+      { id: businessId, body: { payment_methods: toPaymentMethodsPayload(paymentMethods) } },
+      "Error al actualizar métodos de pago",
+    ),
+    [businessId, paymentMethods, runMutation, updateBusinessPaymentMethods],
   );
+
   const updateFoodTypes = useCallback(
-    () => saveBusinessSection({ food_type_ids: selectedFoodTypes }),
-    [selectedFoodTypes, saveBusinessSection],
+    () => runMutation(
+      updateBusinessFoodTypes,
+      { id: businessId, body: { food_type_ids: selectedFoodTypes } },
+      "Error al actualizar categorías",
+    ),
+    [businessId, runMutation, selectedFoodTypes, updateBusinessFoodTypes],
   );
 
   const uploadPhoto = useCallback(
@@ -149,28 +195,53 @@ export const useBusinessSettings = (businessData) => {
         const photoUrl = uploaded?.url || uploaded?.filename;
         if (!photoUrl) throw new Error("Error al subir foto");
 
-        const result = await saveBusinessSection({ add_photo: photoUrl });
+        const result = await runMutation(
+          addBusinessPhoto,
+          { id: businessId, body: { photo_url: photoUrl } },
+          "Error al guardar fotografía",
+        );
         if (result.success) {
-          setPhotos((prev) => [...prev, { url: photoUrl, id: Date.now() }]);
+          const saved = result.data?.data || result.data;
+          setPhotos((prev) => [...prev, saved || { photoUrl, url: photoUrl }]);
         }
-        return result.success ? { success: true, data: photoUrl } : result;
+        return result;
       } catch (err) {
-        const message = err?.data?.message || err?.message || "Error al subir foto";
+        const message = getMutationError(err, "Error al subir foto");
         setError(message);
         return { success: false, error: message };
       }
     },
-    [saveBusinessSection, uploadImage],
+    [addBusinessPhoto, businessId, runMutation, uploadImage],
   );
 
   const deletePhoto = useCallback(
     async (photoId) => {
-      const result = await saveBusinessSection({ remove_photo: photoId });
-      if (result.success) setPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
+      const result = await runMutation(
+        deleteBusinessPhoto,
+        { id: businessId, photoId },
+        "Error al eliminar fotografía",
+      );
+      if (result.success) {
+        setPhotos((prev) => prev.filter((photo) => {
+          const id = typeof photo === "object" ? photo.id ?? photo.photoId : null;
+          return String(id) !== String(photoId);
+        }));
+      }
       return result;
     },
-    [saveBusinessSection],
+    [businessId, deleteBusinessPhoto, runMutation],
   );
+
+  const mutationLoading = [
+    updateBusinessState,
+    locationState,
+    schedulesState,
+    deliveryState,
+    paymentState,
+    foodTypesState,
+    addPhotoState,
+    deletePhotoState,
+  ].some((state) => state.isLoading);
 
   return {
     basicInfo,
@@ -198,7 +269,7 @@ export const useBusinessSettings = (businessData) => {
     updateFoodTypes,
     uploadPhoto,
     deletePhoto,
-    loading: updating || uploading,
+    loading: mutationLoading || uploading,
     error,
     clearError: () => setError(null),
   };
