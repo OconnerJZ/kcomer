@@ -62,8 +62,8 @@ const MenuItemDialog = ({
 
         <TextField
           label="Nombre del Platillo"
-          value={form.item_name}
-          onChange={(event) => onFormChange("item_name", event.target.value)}
+          value={form.name}
+          onChange={(event) => onFormChange("name", event.target.value)}
           fullWidth
           required
         />
@@ -93,8 +93,8 @@ const MenuItemDialog = ({
         <FormControlLabel
           control={
             <Switch
-              checked={form.is_available}
-              onChange={(event) => onFormChange("is_available", event.target.checked)}
+              checked={form.available}
+              onChange={(event) => onFormChange("available", event.target.checked)}
             />
           }
           label="Disponible"
