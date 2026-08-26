@@ -27,10 +27,10 @@ const MEDIA_PATH = API_URL_MEDIA_SERVER;
 const getMediaUrl = (logo = "") => {
   if (!logo) return "";
   if (/^https?:\/\//i.test(logo)) return logo;
-  return `${MEDIA_PATH}/${String(logo).replace(/^\/+/, "")}`;
+  return `${MEDIA_PATH.replace(/\/$/, "")}/${String(logo).replace(/^\/+/, "")}`;
 };
 
-const TitlePlace = ({ text = "Tacos el pariente" }) => (
+const TitlePlace = ({ text = "Negocio" }) => (
   <Typography className="titlePrimary" sx={{ fontWeight: 900, fontSize: "23px" }} level="title-sm">
     {text}
   </Typography>
@@ -52,7 +52,7 @@ const BusinessAvatar = ({ business }) => (
     aria-label={business.name || "negocio"}
     src={getMediaUrl(business.logo)}
   >
-    {business.name?.charAt(0) || "T"}
+    {business.name?.charAt(0) || "N"}
   </Avatar>
 );
 
@@ -98,7 +98,13 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => {
         menu={business.menu}
       />
     ),
-    review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} business={business} />,
+    review: (
+      <CardPlaceReviews
+        flipped={flipped}
+        onMovement={onMovement}
+        businessId={business.id}
+      />
+    ),
   };
 
   return movementMap[movement] || null;
