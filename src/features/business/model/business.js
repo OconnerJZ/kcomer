@@ -8,6 +8,11 @@ const DEFAULT_PAYMENT_METHODS = [
 const compactValues = (values = []) =>
   Array.from(new Set(values.filter((value) => value !== null && value !== undefined && value !== "")));
 
+const getPhotoValue = (photo) =>
+  typeof photo === "string"
+    ? photo
+    : photo?.url || photo?.image || photo?.imageUrl || photo?.image_url || "";
+
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
   const delivery = business.deliverySettings || business.delivery_settings || {};
@@ -15,6 +20,23 @@ export const normalizeBusiness = (business = {}) => {
   const foodTypes = business.foodTypes || business.food_types || [];
   const phone = business.phone || business.phones?.[0] || "";
   const email = business.email || business.emails?.[0] || "";
+  const photos = business.photos || [];
+  const logo =
+    business.logo ||
+    business.logoUrl ||
+    business.logo_url ||
+    business.urlImage ||
+    business.image ||
+    "";
+  const coverImage =
+    business.coverImage ||
+    business.cover_image ||
+    business.coverUrl ||
+    business.cover_url ||
+    business.heroImage ||
+    business.hero_image ||
+    getPhotoValue(photos[0]) ||
+    logo;
 
   return {
     id: business.id ?? null,
@@ -29,13 +51,8 @@ export const normalizeBusiness = (business = {}) => {
     estimatedDeliveryMin: Number(
       business.estimatedDeliveryMin ?? business.estimated_delivery_min ?? 45,
     ),
-    logo:
-      business.logo ||
-      business.logoUrl ||
-      business.logo_url ||
-      business.urlImage ||
-      business.image ||
-      "",
+    logo,
+    coverImage,
     likes: Number(business.likes ?? business.rating_count ?? business.ratingCount ?? 0),
     rating: Number(business.rating ?? business.average_rating ?? business.averageRating ?? 0),
     hasDelivery: Boolean(
@@ -71,7 +88,7 @@ export const normalizeBusiness = (business = {}) => {
       };
     }),
     foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
-    photos: business.photos || [],
+    photos,
   };
 };
 
