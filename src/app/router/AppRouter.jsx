@@ -4,7 +4,7 @@ import { useAuth } from "@Features/auth/context/AuthContext";
 import Layout from "@Shared/components/layout/Layout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
-const Explorar = lazy(() => import("@Pages/Explorar"));
+const Explorar = lazy(() => import("@Features/explore/pages/ExplorePage"));
 const Nosotros = lazy(() => import("@Pages/Nosotros"));
 const Login = lazy(() => import("@Features/auth/pages/Login"));
 const Pedidos = lazy(() => import("@Features/checkout/pages/CheckoutPage"));
