@@ -55,12 +55,12 @@ const endpoints = (builder) => {
   return {
     getMenu: createEndpoint("menu", "getAll"),
     getByOwner: createEndpoint("owner", "getAll"),
-    updateBusinessLocation: createEndpoint("location", "put"),
-    updateBusinessSchedules: createEndpoint("schedules", "put"),
-    updateBusinessDeliverySettings: createEndpoint("deliverySettings", "put"),
-    updateBusinessPaymentMethods: createEndpoint("paymentMethods", "put"),
-    updateBusinessFoodTypes: createEndpoint("foodTypes", "put"),
-    addBusinessPhoto: createEndpoint("photos", "post"),
+    updateBusinessLocation: createEndpoint("location", "update"),
+    updateBusinessSchedules: createEndpoint("schedules", "update"),
+    updateBusinessDeliverySettings: createEndpoint("deliverySettings", "update"),
+    updateBusinessPaymentMethods: createEndpoint("paymentMethods", "update"),
+    updateBusinessFoodTypes: createEndpoint("foodTypes", "update"),
+    addBusinessPhoto: createEndpoint("photos", "create"),
     deleteBusinessPhoto: createEndpoint("photo", "delete"),
   };
 };
