@@ -243,19 +243,32 @@ class SocketService {
   setActiveBusiness(businessId) {
     if (!businessId) return;
 
+    const nextBusinessId = String(businessId);
+    let previousBusinessId = null;
+
     try {
-      localStorage.setItem("owner_business_id", String(businessId));
+      previousBusinessId = localStorage.getItem("owner_business_id");
+      localStorage.setItem("owner_business_id", nextBusinessId);
     } catch (error) {
       logError("No se pudo persistir owner_business_id:", error);
     }
 
     if (this.socket?.connected) {
-      this.joinBusiness(businessId);
+      if (previousBusinessId && previousBusinessId !== nextBusinessId) {
+        this.leaveRoom(`business:${previousBusinessId}`);
+      }
+      if (previousBusinessId !== nextBusinessId) {
+        this.joinBusiness(nextBusinessId);
+      }
     }
   }
 
   clearActiveBusiness() {
     try {
+      const activeBusinessId = localStorage.getItem("owner_business_id");
+      if (activeBusinessId && this.socket?.connected) {
+        this.leaveRoom(`business:${activeBusinessId}`);
+      }
       localStorage.removeItem("owner_business_id");
     } catch {
       /* noop */
@@ -419,45 +432,10 @@ class SocketService {
 
       return notification;
     } catch (error) {
-      logError("❌ Error al mostrar notificación:", error);
-      return null;
+      logError("❌ Error mostrando notificación:", error);
     }
-  }
-
-  getStatus() {
-    return {
-      connected: this.connected,
-      socketId: this.getSocketId(),
-      reconnectAttempts: this.reconnectAttempts,
-      currentUser: this.currentUser
-        ? { id: this.currentUser.id, role: this.currentUser.role }
-        : null,
-    };
-  }
-
-  reconnect() {
-    if (this.socket) {
-      log("🔄 Reconexión manual iniciada");
-      this.socket.connect();
-    } else if (this.currentUser) {
-      log("🔄 Creando nueva conexión");
-      this.connect(this.currentUser);
-    } else {
-      logError("❌ No se puede reconectar sin usuario");
-    }
-  }
-
-  clearAllListeners() {
-    this.listeners.clear();
-    this.eventHandlers.clear();
-
-    if (this.socket) {
-      this.socket.removeAllListeners();
-    }
-
-    log("🧹 Todos los listeners eliminados");
   }
 }
 
-export const socketService = new SocketService();
+const socketService = new SocketService();
 export default socketService;
