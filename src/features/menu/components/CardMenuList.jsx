@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
-import AspectRatio from "@mui/joy/AspectRatio";
-import Card from "@mui/joy/Card";
-import CardContent from "@mui/joy/CardContent";
-import Chip from "@mui/joy/Chip";
-import Typography from "@mui/joy/Typography";
 import {
-  Stack,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
   Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
   TextField,
+  Typography,
 } from "@mui/material";
-import { Remove, NoteAdd } from "@mui/icons-material";
+import { Add, EditNote, Image as ImageIcon, Remove } from "@mui/icons-material";
 import { normalizeCartItem } from "@Features/cart/model/cartItem";
 
 const CardMenuList = ({
@@ -66,70 +66,120 @@ const CardMenuList = ({
   return (
     <>
       <Card
-        variant="outlined"
-        orientation="horizontal"
+        elevation={0}
         sx={{
           width: "100%",
-          padding: "5px 2px",
-          alignItems: "center",
-          mb: 0.5,
+          mb: 1,
+          overflow: "hidden",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2.5,
+          bgcolor: "rgba(255,255,255,.82)",
+          transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease",
           "&:hover": {
-            boxShadow: "md",
-            borderColor: "neutral.outlinedHoverBorder",
+            transform: "translateY(-1px)",
+            boxShadow: "0 10px 28px rgba(0,0,0,.06)",
+            borderColor: "rgba(255, 75, 69, .28)",
           },
         }}
       >
-        <AspectRatio ratio="1" sx={{ width: 90, borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px" }}>
-          <img src={menuItem.image} srcSet={menuItem.image} loading="lazy" alt={menuItem.name} />
-        </AspectRatio>
+        <Box sx={{ display: "grid", gridTemplateColumns: "104px minmax(0, 1fr)" }}>
+          <Box
+            sx={{
+              minHeight: 112,
+              bgcolor: "grey.100",
+              backgroundImage: menuItem.image ? `url(${menuItem.image})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            {!menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 34 }} />}
+          </Box>
 
-        <CardContent sx={{ flex: 1 }}>
-          <Typography level="title-md">{menuItem.name}</Typography>
-          <Typography sx={{ fontSize: "11px", mb: "3px" }}>{menuItem.description}</Typography>
+          <CardContent sx={{ p: 1.75, "&:last-child": { pb: 1.75 } }}>
+            <Stack spacing={1.15}>
+              <Box>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
+                  <Typography variant="subtitle2" fontWeight={800} sx={{ lineHeight: 1.25 }}>
+                    {menuItem.name}
+                  </Typography>
+                  <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+                    ${menuItem.price.toFixed(2)}
+                  </Typography>
+                </Stack>
+                {menuItem.description && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      mt: 0.4,
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    {menuItem.description}
+                  </Typography>
+                )}
+              </Box>
 
-          {hasNote && note && (
-            <Chip size="sm" variant="soft" color="warning" sx={{ mt: 0.5, fontSize: "10px" }}>
-              📝 {note.length > 20 ? `${note.substring(0, 20)}...` : note}
-            </Chip>
-          )}
+              {hasNote && note && (
+                <Chip
+                  size="small"
+                  label={note.length > 26 ? `${note.slice(0, 26)}…` : note}
+                  icon={<EditNote sx={{ fontSize: "16px !important" }} />}
+                  sx={{ alignSelf: "flex-start", maxWidth: "100%", borderRadius: 999 }}
+                />
+              )}
 
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-            <Chip
-              variant="outlined"
-              color="success"
-              size="sm"
-              sx={{ pointerEvents: "none", minHeight: 0, height: "23px", fontSize: "13px" }}
-              startDecorator="$"
-            >
-              {menuItem.price.toFixed(2)}
-            </Chip>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+                {quantity > 0 ? (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <IconButton size="small" onClick={handleDecrement} sx={{ border: "1px solid", borderColor: "divider" }}>
+                      <Remove fontSize="small" />
+                    </IconButton>
+                    <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 800 }}>
+                      {quantity}
+                    </Typography>
+                    <IconButton size="small" onClick={handleIncrement} color="primary" sx={{ border: "1px solid", borderColor: "primary.main" }}>
+                      <Add fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                ) : (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    disableElevation
+                    startIcon={<Add />}
+                    onClick={handleIncrement}
+                    sx={{ textTransform: "none", borderRadius: 999, fontWeight: 700, px: 1.5 }}
+                  >
+                    Agregar
+                  </Button>
+                )}
 
-            {quantity > 0 && (
-              <IconButton
-                size="small"
-                color={hasNote ? "warning" : "default"}
-                onClick={() => setNoteDialogOpen(true)}
-                sx={{ border: "1px solid", borderColor: hasNote ? "warning.main" : "divider" }}
-              >
-                <NoteAdd fontSize="small" />
-              </IconButton>
-            )}
-
-            {quantity > 0 && (
-              <IconButton size="small" onClick={handleDecrement}>
-                <Remove fontSize="small" />
-              </IconButton>
-            )}
-            <Chip onClick={handleIncrement} variant="solid" color="primary">Si quiero</Chip>
-            <Typography sx={{ fontWeight: 600, minWidth: 20, textAlign: "center", mx: 0.5 }}>
-              {quantity}
-            </Typography>
-          </Stack>
-        </CardContent>
+                {quantity > 0 && (
+                  <Button
+                    size="small"
+                    startIcon={<EditNote />}
+                    onClick={() => setNoteDialogOpen(true)}
+                    sx={{ textTransform: "none", color: "text.secondary", minWidth: 0 }}
+                  >
+                    Nota
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Box>
       </Card>
 
       <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Agregar nota especial</DialogTitle>
+        <DialogTitle>Nota para cocina</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{menuItem.name}</Typography>
           <TextField
@@ -137,16 +187,16 @@ const CardMenuList = ({
             fullWidth
             multiline
             rows={3}
-            placeholder="Ej: Sin cebolla, sin crema, extra salsa..."
+            placeholder="Ej. Sin cebolla, extra salsa…"
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(event) => setNote(event.target.value)}
             inputProps={{ maxLength: 100 }}
             helperText={`${note.length}/100 caracteres`}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNoteDialogOpen(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={handleSaveNote}>Guardar</Button>
+          <Button onClick={() => setNoteDialogOpen(false)} sx={{ textTransform: "none" }}>Cancelar</Button>
+          <Button variant="contained" disableElevation onClick={handleSaveNote} sx={{ textTransform: "none" }}>Guardar nota</Button>
         </DialogActions>
       </Dialog>
     </>
