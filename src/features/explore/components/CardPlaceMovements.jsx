@@ -69,7 +69,14 @@ export const CardPlacePhotos = ({ flipped, onMovement, business }) => {
   );
 };
 
-export const CardPlaceMenu = ({ flipped, onMovement, businessId, businessName, menu = [] }) => {
+export const CardPlaceMenu = ({
+  flipped,
+  onMovement,
+  businessId,
+  businessName,
+  paymentMethods = [],
+  menu = [],
+}) => {
   const { addToCart } = useCart();
 
   if (!menu || menu.length === 0) {
@@ -95,6 +102,7 @@ export const CardPlaceMenu = ({ flipped, onMovement, businessId, businessName, m
                 item={item}
                 businessId={businessId}
                 businessName={businessName}
+                paymentMethods={paymentMethods}
                 onAddToCart={addToCart}
               />
             ))}
