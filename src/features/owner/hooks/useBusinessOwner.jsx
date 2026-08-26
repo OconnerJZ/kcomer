@@ -6,6 +6,8 @@ import {
   useDeleteBusinessMutation,
 } from "@Features/business/api/business.api";
 import { useAuth } from "@Features/auth/context/AuthContext";
+import { normalizeBusiness } from "@Features/business/model/business";
+import { normalizeMenuItems } from "@Features/menu/model/menuItem";
 
 export const useBusinessOwner = (selectedBusinessId = null) => {
   const { user } = useAuth();
@@ -42,18 +44,24 @@ export const useBusinessOwner = (selectedBusinessId = null) => {
   const [deleteBusiness, { isLoading: deleting }] = useDeleteBusinessMutation();
 
   const myBusinesses = useMemo(() => {
-    if (Array.isArray(businessesResponse)) return businessesResponse;
-    return businessesResponse?.data || businessesResponse || [];
+    const raw = Array.isArray(businessesResponse)
+      ? businessesResponse
+      : businessesResponse?.data || businessesResponse || [];
+    return Array.isArray(raw) ? raw.map(normalizeBusiness) : [];
   }, [businessesResponse]);
 
   const menu = useMemo(() => {
-    if (Array.isArray(menuResponse)) return menuResponse;
-    return menuResponse?.data || menuResponse || [];
+    const raw = Array.isArray(menuResponse)
+      ? menuResponse
+      : menuResponse?.data || menuResponse || [];
+    return normalizeMenuItems(Array.isArray(raw) ? raw : []);
   }, [menuResponse]);
 
   const selectedBusiness = useMemo(() => {
     if (!selectedBusinessId) return null;
-    const business = myBusinesses.find((item) => item.id === selectedBusinessId);
+    const business = myBusinesses.find(
+      (item) => String(item.id) === String(selectedBusinessId),
+    );
     if (!business) return null;
     return {
       ...business,
@@ -92,11 +100,11 @@ export const useBusinessOwner = (selectedBusinessId = null) => {
   const selectors = useMemo(
     () => ({
       getBusinessById: (businessId) =>
-        myBusinesses.find((item) => item.id === businessId) || null,
+        myBusinesses.find((item) => String(item.id) === String(businessId)) || null,
       getBusinessesByStatus: (isActive) =>
-        myBusinesses.filter((item) => item.isActive === isActive),
+        myBusinesses.filter((item) => item.active === isActive),
       getActiveBusinesses: () =>
-        myBusinesses.filter((item) => item.isActive !== false),
+        myBusinesses.filter((item) => item.active !== false),
       hasBusinesses: () => myBusinesses.length > 0,
       getTotalBusinesses: () => myBusinesses.length,
     }),
