@@ -11,6 +11,7 @@ export const useBusinessOrders = (businessId) => {
   const {
     data: ordersResponse,
     isLoading: loading,
+    isFetching,
     error: queryError,
     refetch: refreshOrders,
   } = useGetOrdersByBusinessQuery(
@@ -56,6 +57,8 @@ export const useBusinessOrders = (businessId) => {
     "order:new",
     (newOrder) => {
       if (!newOrder?.id) return;
+      const eventBusinessId = newOrder.businessId ?? newOrder.business_id;
+      if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
       refreshOrders();
     },
     {
@@ -66,7 +69,7 @@ export const useBusinessOrders = (businessId) => {
 
   const selectors = useMemo(
     () => ({
-      getOrderById: (orderId) => orders.find((order) => order.id === orderId),
+      getOrderById: (orderId) => orders.find((order) => String(order.id) === String(orderId)),
       getOrdersByStatus: (status) => orders.filter((order) => order.status === status),
       getPendingOrders: () => orders.filter((order) => order.status === "pending"),
       getAcceptedOrders: () => orders.filter((order) => order.status === "accepted"),
@@ -90,8 +93,8 @@ export const useBusinessOrders = (businessId) => {
 
   return {
     orders,
-    loading: loading || updating,
-    error: error || queryError?.message,
+    loading: loading || isFetching || updating,
+    error: error || queryError?.data?.message || queryError?.message,
     updateOrderStatus,
     refreshOrders,
     clearError: () => setError(null),
