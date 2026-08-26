@@ -94,7 +94,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   const handleSaveBasicInfo = async () => {
     const result = await updateBasicInfo(logo.file);
     handleResult(result, "Información actualizada exitosamente", {
-      afterSuccess: () => logo.resetImage(basicInfo.logo_url || ""),
+      afterSuccess: () => logo.resetImage(basicInfo.logo || ""),
     });
   };
 
@@ -122,7 +122,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   const togglePaymentMethod = (method) => {
     setPaymentMethods((current) => current.map((paymentMethod) =>
       paymentMethod.method === method
-        ? { ...paymentMethod, is_active: !paymentMethod.is_active }
+        ? { ...paymentMethod, active: !paymentMethod.active }
         : paymentMethod));
   };
 
