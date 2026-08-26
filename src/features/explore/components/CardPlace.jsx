@@ -66,6 +66,8 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
     loadBusinessMenu,
   });
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const coverUrl = getMediaUrl(business.coverImage);
+  const logoUrl = getMediaUrl(business.logo);
 
   const handleScheduleOpen = (event) => {
     event.stopPropagation();
@@ -79,28 +81,22 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
           <Box
             sx={{
               position: "relative",
-              height: 168,
-              backgroundImage: business.logo ? `url(${getMediaUrl(business.logo)})` : "none",
+              height: 176,
+              backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
               backgroundSize: "cover",
               backgroundPosition: "center",
               bgcolor: "grey.200",
               overflow: "hidden",
             }}
           >
-            <Box
-              sx={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(180deg, rgba(0,0,0,.04) 20%, rgba(0,0,0,.58) 100%)",
-              }}
-            />
+            <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,.05) 15%, rgba(0,0,0,.68) 100%)" }} />
 
             <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ position: "absolute", inset: 12, bottom: "auto" }}>
               <Chip
                 size="small"
                 label={business.open ? "Abierto" : "Cerrado"}
                 sx={{
-                  bgcolor: business.open ? "rgba(255,255,255,.93)" : "rgba(22,22,22,.78)",
+                  bgcolor: business.open ? "rgba(255,255,255,.94)" : "rgba(22,22,22,.82)",
                   color: business.open ? "success.main" : "common.white",
                   fontWeight: 800,
                   backdropFilter: "blur(8px)",
@@ -117,39 +113,49 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
             </Stack>
 
             <Box sx={{ position: "absolute", left: 16, right: 16, bottom: 14 }}>
-              <Typography variant="h5" sx={{ color: "common.white", fontWeight: 900, lineHeight: 1.1, textShadow: "0 2px 12px rgba(0,0,0,.2)" }}>
-                {business.name || "Negocio"}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ px: 2, py: 1.75 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1.5}>
-              <Stack direction="row" spacing={1.4} alignItems="center" minWidth={0}>
+              <Stack direction="row" spacing={1.25} alignItems="flex-end">
                 <Avatar
-                  src={getMediaUrl(business.logo)}
+                  src={logoUrl}
                   alt={business.name || "Negocio"}
-                  sx={{ width: 42, height: 42, border: "1px solid", borderColor: "divider" }}
+                  sx={{
+                    width: 52,
+                    height: 52,
+                    border: "2px solid rgba(255,255,255,.92)",
+                    boxShadow: "0 4px 14px rgba(0,0,0,.18)",
+                    bgcolor: "background.paper",
+                    color: "text.primary",
+                    flexShrink: 0,
+                  }}
                 >
                   {business.name?.charAt(0) || "N"}
                 </Avatar>
-                <Box minWidth={0}>
-                  <Typography variant="body2" fontWeight={800} noWrap>
+                <Box minWidth={0} sx={{ pb: 0.2 }}>
+                  <Typography variant="h5" noWrap sx={{ color: "common.white", fontWeight: 900, lineHeight: 1.05, textShadow: "0 2px 12px rgba(0,0,0,.2)" }}>
                     {business.name || "Negocio"}
                   </Typography>
-                  <Stack direction="row" spacing={1.25} alignItems="center" sx={{ mt: 0.35 }}>
-                    <Stack direction="row" spacing={0.4} alignItems="center">
-                      <FavoriteRounded sx={{ fontSize: 16, color: "warning.main" }} />
-                      <Typography variant="caption" color="text.secondary">{business.likes || 0}</Typography>
-                    </Stack>
-                    {business.hasDelivery && (
-                      <Stack direction="row" spacing={0.4} alignItems="center">
-                        <DeliveryDining sx={{ fontSize: 18, color: "text.secondary" }} />
-                        <Typography variant="caption" color="text.secondary">Delivery</Typography>
-                      </Stack>
-                    )}
-                  </Stack>
+                  {business.location?.city && (
+                    <Typography variant="caption" sx={{ color: "rgba(255,255,255,.82)", fontWeight: 600 }}>
+                      {business.location.city}
+                    </Typography>
+                  )}
                 </Box>
+              </Stack>
+            </Box>
+          </Box>
+
+          <Box sx={{ px: 2, py: 1.55 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1.5}>
+              <Stack direction="row" spacing={1.5} alignItems="center" minWidth={0}>
+                <Stack direction="row" spacing={0.45} alignItems="center">
+                  <FavoriteRounded sx={{ fontSize: 17, color: "warning.main" }} />
+                  <Typography variant="caption" color="text.secondary">{business.likes || 0}</Typography>
+                </Stack>
+                {business.hasDelivery && (
+                  <Stack direction="row" spacing={0.45} alignItems="center">
+                    <DeliveryDining sx={{ fontSize: 19, color: "text.secondary" }} />
+                    <Typography variant="caption" color="text.secondary">Delivery</Typography>
+                  </Stack>
+                )}
               </Stack>
 
               <IconButton
