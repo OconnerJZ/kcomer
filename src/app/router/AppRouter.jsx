@@ -9,7 +9,7 @@ const Nosotros = lazy(() => import("@Pages/Nosotros"));
 const Login = lazy(() => import("@Features/auth/pages/Login"));
 const Pedidos = lazy(() => import("@Features/checkout/pages/CheckoutPage"));
 const MisOrdenes = lazy(() => import("@Features/orders/pages/MyOrders"));
-const Perfil = lazy(() => import("@Pages/Perfil"));
+const Perfil = lazy(() => import("@Features/profile/pages/ProfilePage"));
 const LandingRegister = lazy(() => import("@Pages/LandingRegister"));
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 
