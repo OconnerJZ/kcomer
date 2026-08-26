@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { Swiper } from "antd-mobile";
 import { Avatar, List } from "antd";
 import { Box, Typography } from "@mui/material";
@@ -95,14 +94,3 @@ export const CardPlaceReviews = ({ flipped, onMovement }) => {
     </CardPlaceBack>
   );
 };
-
-CardPlaceLocation.propTypes = { flipped: PropTypes.bool.isRequired, onMovement: PropTypes.func.isRequired };
-CardPlacePhotos.propTypes = { flipped: PropTypes.bool.isRequired, onMovement: PropTypes.func.isRequired };
-CardPlaceMenu.propTypes = {
-  flipped: PropTypes.bool.isRequired,
-  onMovement: PropTypes.func.isRequired,
-  businessId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  businessName: PropTypes.string.isRequired,
-  menu: PropTypes.arrayOf(PropTypes.object),
-};
-CardPlaceReviews.propTypes = { flipped: PropTypes.bool.isRequired, onMovement: PropTypes.func.isRequired };
