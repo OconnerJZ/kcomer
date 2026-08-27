@@ -21,10 +21,10 @@ import {
   BasicInfoTab,
   DeliveryTab,
   FoodTypesTab,
+  LocationTab,
   PaymentMethodsTab,
   SchedulesTab,
 } from "@Features/owner/components/settings/SettingsTabs";
-import LocationSettingsTab from "@Features/owner/components/settings/LocationSettingsTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
@@ -145,7 +145,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
   const tabs = [
     <BasicInfoTab key="basic" basicInfo={basicInfo} setBasicInfo={setBasicInfo} logoFile={logo.file} logoPreview={logo.preview} onLogoChange={handleLogoChange} onSave={handleSaveBasicInfo} loading={loading} />,
-    <LocationSettingsTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
+    <LocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
     <SchedulesTab key="schedules" schedules={schedules} setSchedules={setSchedules} onSave={handleSaveSchedules} loading={loading} />,
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
     <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onSave={handleSavePayments} loading={loading} />,
@@ -156,9 +156,13 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>CONFIGURACIÓN</Typography>
+        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
+          CONFIGURACIÓN
+        </Typography>
         <Typography variant="h4" fontWeight={800} sx={{ mt: 0.2 }}>Tu negocio</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>Mantén la información que ven tus clientes y la operación diaria en un solo lugar.</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>
+          Mantén la información que ven tus clientes y la operación diaria en un solo lugar.
+        </Typography>
       </Box>
 
       <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: 3, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
@@ -166,7 +170,25 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           const Icon = item.icon;
           const selected = activeTab === index;
           return (
-            <Button key={item.label} onClick={() => setActiveTab(index)} startIcon={<Icon fontSize="small" />} sx={{ flex: "0 0 auto", minWidth: 145, justifyContent: "flex-start", textTransform: "none", borderRadius: 2, px: 1.6, py: 1.1, color: selected ? "text.primary" : "text.secondary", bgcolor: selected ? "rgba(255,75,69,.08)" : "transparent", border: "1px solid", borderColor: selected ? "rgba(255,75,69,.22)" : "divider", "&:hover": { bgcolor: selected ? "rgba(255,75,69,.11)" : "action.hover" } }}>
+            <Button
+              key={item.label}
+              onClick={() => setActiveTab(index)}
+              startIcon={<Icon fontSize="small" />}
+              sx={{
+                flex: "0 0 auto",
+                minWidth: 145,
+                justifyContent: "flex-start",
+                textTransform: "none",
+                borderRadius: 2,
+                px: 1.6,
+                py: 1.1,
+                color: selected ? "text.primary" : "text.secondary",
+                bgcolor: selected ? "rgba(255,75,69,.08)" : "transparent",
+                border: "1px solid",
+                borderColor: selected ? "rgba(255,75,69,.22)" : "divider",
+                "&:hover": { bgcolor: selected ? "rgba(255,75,69,.11)" : "action.hover" },
+              }}
+            >
               <Stack alignItems="flex-start" spacing={0}>
                 <Typography variant="body2" fontWeight={selected ? 800 : 600}>{item.label}</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>{item.description}</Typography>

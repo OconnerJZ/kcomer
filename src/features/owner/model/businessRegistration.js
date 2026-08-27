@@ -19,10 +19,6 @@ export const toBusinessRegistrationPayload = ({ form, userId, logoUrl = "" }) =>
   locale: {
     latitude: form.location?.latitude,
     longitude: form.location?.longitude,
-    address: form.location?.address || form.location?.formatted_address || "",
-    city: form.location?.city || "",
-    postalCode: form.location?.postalCode || "",
-    state: form.location?.state || "",
-    country: form.location?.country || "",
+    address: form.location?.address || "",
   },
 });

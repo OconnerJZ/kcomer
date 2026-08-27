@@ -17,14 +17,18 @@ export const StyledCardContent = styled(CardContent)({
   height: "auto",
 });
 
-export const StyledFront = styled(StyledCardContent, { shouldForwardProp: (prop) => prop !== "flipped" })(({ flipped }) => ({
+export const StyledFront = styled(StyledCardContent, {
+  shouldForwardProp: (prop) => prop !== "flipped",
+})(({ flipped }) => ({
   display: flipped ? "none" : "flex",
   position: "relative",
   opacity: flipped ? 0 : 1,
   transition: "opacity .16s ease",
 }));
 
-export const StyledBack = styled(StyledCardContent, { shouldForwardProp: (prop) => prop !== "flipped" })(({ flipped }) => ({
+export const StyledBack = styled(StyledCardContent, {
+  shouldForwardProp: (prop) => prop !== "flipped",
+})(({ flipped }) => ({
   display: flipped ? "flex" : "none",
   position: "relative",
   opacity: flipped ? 1 : 0,

@@ -1,6 +1,33 @@
 import * as React from "react";
-import { AppBar, Box, CssBaseline, Toolbar, Typography, Button, BottomNavigation, BottomNavigationAction, Badge, Avatar, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
-import { Fastfood, Info, Store, ReceiptLong, Login as LoginIcon, Person, ShoppingBag, Logout, Dashboard, AddBusinessRounded } from "@mui/icons-material";
+import {
+  AppBar,
+  Box,
+  CssBaseline,
+  Toolbar,
+  Typography,
+  Button,
+  BottomNavigation,
+  BottomNavigationAction,
+  Badge,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from "@mui/material";
+import {
+  Fastfood,
+  Info,
+  Store,
+  ReceiptLong,
+  Login as LoginIcon,
+  Person,
+  ShoppingBag,
+  Logout,
+  Dashboard,
+} from "@mui/icons-material";
 import LogoClassic from "/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@Features/cart/context/CartContext";
@@ -25,19 +52,39 @@ export default function Navbar() {
       items.push({ title: "Registro", icon: <Store />, link: "registro" });
       return items;
     }
+
+    // Todo usuario autenticado puede comprar, sin importar si también es owner.
     items.push({ title: "Mi pedido", icon: <ReceiptLong />, link: "orden", cartBadge: true });
     items.push({ title: "Órdenes", icon: <ShoppingBag />, link: "mis-ordenes" });
-    if (owner) items.push({ title: "Negocio", icon: <Store />, link: "owner" });
-    else items.push({ title: "Crear negocio", icon: <AddBusinessRounded />, link: "crear-negocio" });
+
+    // Owner es una capacidad adicional, no un rol excluyente del flujo cliente.
+    if (owner) {
+      items.push({ title: "Negocio", icon: <Store />, link: "owner" });
+    }
+
     return items;
   }, [isAuthenticated, owner]);
 
   const [value, setValue] = React.useState(-1);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
   const cartCount = getCartCount();
-  React.useEffect(() => { const currentPath = location.pathname.split("/")[1]; setValue(navItems.findIndex((item) => item.link === currentPath)); }, [location.pathname, navItems]);
-  const goFromMenu = (path) => { setAnchorEl(null); navigate(path); };
-  const handleLogout = () => { setAnchorEl(null); logout(); navigate("/login"); };
+
+  React.useEffect(() => {
+    const currentPath = location.pathname.split("/")[1];
+    setValue(navItems.findIndex((item) => item.link === currentPath));
+  }, [location.pathname, navItems]);
+
+  const goFromMenu = (path) => {
+    setAnchorEl(null);
+    navigate(path);
+  };
+
+  const handleLogout = () => {
+    setAnchorEl(null);
+    logout();
+    navigate("/login");
+  };
 
   return (
     <Box>
@@ -47,24 +94,43 @@ export default function Navbar() {
           <img src={LogoClassic} alt="logo" width={50} style={{ marginRight: 20, cursor: "pointer" }} onClick={() => navigate("/explorar")} />
           <Typography variant="h6" sx={{ flexGrow: 1 }} />
           <Box sx={{ display: "flex", alignItems: "center", gap: .5 }}>
-            {navItems.map((item) => <Badge key={item.title} badgeContent={item.cartBadge ? cartCount : 0} color="error"><Button sx={{ color: "text.primary", textTransform: "none", borderRadius: 2, fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>{item.title}</Button></Badge>)}
-            {isAuthenticated ? <>
-              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}><Avatar src={user?.avatar} sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>{user?.name?.charAt(0)}</Avatar></IconButton>
-              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 220, mt: 1, borderRadius: 2.5 } }}>
-                <MenuItem disabled><ListItemText primary={user?.name} secondary={user?.email} /></MenuItem><Divider />
-                <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
-                <MenuItem onClick={() => goFromMenu("/mis-ordenes")}><ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon><ListItemText>Mis Órdenes</ListItemText></MenuItem>
-                {owner ? <MenuItem onClick={() => goFromMenu("/owner")}><ListItemIcon><Dashboard fontSize="small" /></ListItemIcon><ListItemText>Panel de Negocio</ListItemText></MenuItem> : <MenuItem onClick={() => goFromMenu("/crear-negocio")}><ListItemIcon><AddBusinessRounded fontSize="small" /></ListItemIcon><ListItemText>Crear mi negocio</ListItemText></MenuItem>}
-                <Divider /><MenuItem onClick={handleLogout} sx={{ color: "error.main" }}><ListItemIcon><Logout fontSize="small" color="error" /></ListItemIcon><ListItemText>Cerrar Sesión</ListItemText></MenuItem>
-              </Menu>
-            </> : <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")}>Entrar</Button>}
+            {navItems.map((item) => (
+              <Badge key={item.title} badgeContent={item.cartBadge ? cartCount : 0} color="error" sx={{ "& .MuiBadge-badge": { right: -3, top: 2 } }}>
+                <Button sx={{ color: "text.primary", textTransform: "none", borderRadius: 2, fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>
+                  {item.title}
+                </Button>
+              </Badge>
+            ))}
+
+            {isAuthenticated ? (
+              <>
+                <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+                  <Avatar src={user?.avatar} sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>{user?.name?.charAt(0)}</Avatar>
+                </IconButton>
+                <Menu anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 210, mt: 1, borderRadius: 2.5 } }}>
+                  <MenuItem disabled><ListItemText primary={user?.name} secondary={user?.email} primaryTypographyProps={{ fontWeight: 700, fontSize: ".9rem" }} secondaryTypographyProps={{ fontSize: ".75rem" }} /></MenuItem>
+                  <Divider />
+                  <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
+                  <MenuItem onClick={() => goFromMenu("/orden")}><ListItemIcon><ReceiptLong fontSize="small" /></ListItemIcon><ListItemText>Mi pedido</ListItemText></MenuItem>
+                  <MenuItem onClick={() => goFromMenu("/mis-ordenes")}><ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon><ListItemText>Mis Órdenes</ListItemText></MenuItem>
+                  {owner && <MenuItem onClick={() => goFromMenu("/owner")}><ListItemIcon><Dashboard fontSize="small" /></ListItemIcon><ListItemText>Panel de Negocio</ListItemText></MenuItem>}
+                  <Divider />
+                  <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}><ListItemIcon><Logout fontSize="small" color="error" /></ListItemIcon><ListItemText>Cerrar Sesión</ListItemText></MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")} sx={{ ml: 1, textTransform: "none", borderRadius: 2 }}>Entrar</Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
+
       <Box sx={{ width: "100%", position: "fixed", bottom: 0, left: 0, zIndex: 1000, display: { xs: "flex", sm: "none" }, borderTop: "1px solid", borderColor: "divider", backgroundColor: "rgba(255,255,255,.96)", backdropFilter: "blur(14px)" }}>
-        <BottomNavigation showLabels value={value} onChange={(_, newValue) => { const toGo = navItems[newValue]?.link; if (toGo) navigate(`/${toGo}`); }} sx={{ width: "100%", overflowX: "auto", justifyContent: "flex-start", "& .MuiBottomNavigationAction-root": { minWidth: 72, px: .5 }, "& .MuiBottomNavigationAction-label": { fontSize: ".65rem" } }}>
-          {navItems.map((item) => <BottomNavigationAction key={item.title} label={item.title} icon={<Badge badgeContent={item.cartBadge ? cartCount : 0} color="error">{item.icon}</Badge>} />)}
-          <BottomNavigationAction label={isAuthenticated ? "Perfil" : "Entrar"} icon={isAuthenticated ? <Avatar src={user?.avatar} sx={{ width: 24, height: 24 }}>{user?.name?.charAt(0)}</Avatar> : <LoginIcon />} onClick={() => navigate(isAuthenticated ? "/perfil" : "/login/perfil")} />
+        <BottomNavigation showLabels value={value} onChange={(_, newValue) => { const toGo = navItems[newValue]?.link; if (!toGo) return; setValue(newValue); navigate(`/${toGo}`); }} sx={{ width: "100%", overflowX: "auto", justifyContent: "flex-start", "& .MuiBottomNavigationAction-root": { minWidth: 72, px: .5 }, "& .MuiBottomNavigationAction-label": { fontSize: ".65rem" } }}>
+          {navItems.map((item) => (
+            <BottomNavigationAction key={item.title} label={item.title} icon={<Badge badgeContent={item.cartBadge ? cartCount : 0} color="error">{item.icon}</Badge>} />
+          ))}
+          <BottomNavigationAction label={isAuthenticated ? "Perfil" : "Entrar"} icon={isAuthenticated ? <Avatar src={user?.avatar} sx={{ width: 24, height: 24, bgcolor: "primary.main" }}>{user?.name?.charAt(0)}</Avatar> : <LoginIcon />} onClick={() => navigate(isAuthenticated ? "/perfil" : "/login/perfil")} />
         </BottomNavigation>
       </Box>
     </Box>
