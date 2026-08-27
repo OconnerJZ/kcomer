@@ -69,8 +69,9 @@ export const OrdersProvider = ({ children }) => {
     return normalizeOrders(rawOrders);
   }, [ordersResponse]);
 
-  const isCustomer =
-    !!user?.id && user?.role !== "owner" && user?.role !== "admin";
+  // Todo usuario autenticado puede ser cliente, incluso si también es owner/admin.
+  // Por eso siempre debe escuchar su sala personal para órdenes propias.
+  const hasUserRealtimeRoom = Boolean(user?.id);
 
   useSocketEvent(
     "order:status_update",
@@ -79,7 +80,19 @@ export const OrdersProvider = ({ children }) => {
       refreshOrders();
     },
     {
-      enabled: isCustomer,
+      enabled: hasUserRealtimeRoom,
+      room: { type: "user", id: user?.id },
+    },
+  );
+
+  useSocketEvent(
+    "order:kitchen_item_update",
+    (data) => {
+      if (!data?.orderId || !data?.detailId) return;
+      refreshOrders();
+    },
+    {
+      enabled: hasUserRealtimeRoom,
       room: { type: "user", id: user?.id },
     },
   );
