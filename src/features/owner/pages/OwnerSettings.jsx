@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Snackbar,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import {
   Business,
   Category,
@@ -20,14 +13,15 @@ import useBusinessSettings from "@Features/owner/hooks/useBusinessSettings";
 import {
   BasicInfoTab,
   DeliveryTab,
-  FoodTypesTab,
-  LocationTab,
   PaymentMethodsTab,
   SchedulesTab,
 } from "@Features/owner/components/settings/SettingsTabs";
+import OwnerLocationTab from "@Features/owner/components/settings/OwnerLocationTab";
+import OwnerFoodTypesTab from "@Features/owner/components/settings/OwnerFoodTypesTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
+import { useFeedback } from "@Shared/feedback/FeedbackProvider";
 
 const NAV_ITEMS = [
   { label: "General", icon: Business, description: "Identidad y operación" },
@@ -41,8 +35,8 @@ const NAV_ITEMS = [
 
 const OwnerSettings = ({ businessData, onRefresh }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const logo = useImagePreview();
+  const feedback = useFeedback();
 
   const {
     basicInfo,
@@ -74,15 +68,12 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     error,
   } = useBusinessSettings(businessData);
 
-  const showSnackbar = (message, severity = "success") => setSnackbar({ open: true, message, severity });
-  const closeSnackbar = () => setSnackbar((current) => ({ ...current, open: false }));
-
   const handleResult = (result, successMessage, options = {}) => {
     if (!result?.success) {
-      showSnackbar(result?.error || "Ocurrió un error", "error");
+      feedback.error(result?.error || "Ocurrió un error");
       return false;
     }
-    showSnackbar(successMessage);
+    feedback.success(successMessage);
     options.afterSuccess?.();
     if (options.refresh !== false) onRefresh?.();
     return true;
@@ -91,18 +82,13 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   const handleLogoChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    try {
-      await logo.selectImage(file);
-    } catch (err) {
-      showSnackbar(err.message, "error");
-    }
+    try { await logo.selectImage(file); }
+    catch (err) { feedback.error(err.message); }
   };
 
   const handleSaveBasicInfo = async () => {
     const result = await updateBasicInfo(logo.file);
-    handleResult(result, "Información actualizada", {
-      afterSuccess: () => logo.resetImage(basicInfo.logo || ""),
-    });
+    handleResult(result, "Información actualizada", { afterSuccess: () => logo.resetImage(basicInfo.logo || "") });
   };
 
   const handleSaveLocation = async () => handleResult(await updateLocation(), "Ubicación actualizada");
@@ -117,52 +103,40 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     try {
       validateImageFile(file);
       handleResult(await uploadPhoto(file), "Foto agregada", { refresh: false });
-    } catch (err) {
-      showSnackbar(err.message, "error");
-    }
+    } catch (err) { feedback.error(err.message); }
   };
 
-  const handleDeletePhoto = async (photoId) => {
-    handleResult(await deletePhoto(photoId), "Foto eliminada", { refresh: false });
-  };
-
-  const handleSetCover = async (photoUrl) => {
-    handleResult(await updateCoverImage(photoUrl), "Portada actualizada", { refresh: false });
-  };
+  const handleDeletePhoto = async (photoId) => handleResult(await deletePhoto(photoId), "Foto eliminada", { refresh: false });
+  const handleSetCover = async (photoUrl) => handleResult(await updateCoverImage(photoUrl), "Portada actualizada", { refresh: false });
 
   const togglePaymentMethod = (method) => {
-    setPaymentMethods((current) => current.map((paymentMethod) =>
-      paymentMethod.method === method
-        ? { ...paymentMethod, active: !paymentMethod.active }
-        : paymentMethod));
+    setPaymentMethods((current) => current.map((paymentMethod) => paymentMethod.method === method ? { ...paymentMethod, active: !paymentMethod.active } : paymentMethod));
   };
 
   const toggleFoodType = (typeId) => {
-    setSelectedFoodTypes((current) => current.includes(typeId)
-      ? current.filter((id) => id !== typeId)
-      : [...current, typeId]);
+    const normalizedId = Number(typeId);
+    setSelectedFoodTypes((current) => {
+      const normalized = current.map(Number);
+      return normalized.includes(normalizedId) ? normalized.filter((id) => id !== normalizedId) : [...normalized, normalizedId];
+    });
   };
 
   const tabs = [
     <BasicInfoTab key="basic" basicInfo={basicInfo} setBasicInfo={setBasicInfo} logoFile={logo.file} logoPreview={logo.preview} onLogoChange={handleLogoChange} onSave={handleSaveBasicInfo} loading={loading} />,
-    <LocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
+    <OwnerLocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
     <SchedulesTab key="schedules" schedules={schedules} setSchedules={setSchedules} onSave={handleSaveSchedules} loading={loading} />,
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
     <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onSave={handleSavePayments} loading={loading} />,
-    <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
+    <OwnerFoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
     <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
   ];
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
-          CONFIGURACIÓN
-        </Typography>
-        <Typography variant="h4" fontWeight={800} sx={{ mt: 0.2 }}>Tu negocio</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>
-          Mantén la información que ven tus clientes y la operación diaria en un solo lugar.
-        </Typography>
+      <Box sx={{ mb: 3, p: { xs: 2, sm: 2.4 }, borderRadius: 3, background: "linear-gradient(120deg, rgba(255,75,69,.08), rgba(255,171,64,.05) 55%, rgba(255,255,255,0))" }}>
+        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>CONFIGURACIÓN</Typography>
+        <Typography variant="h4" fontWeight={850} sx={{ mt: .2 }}>Tu negocio</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: .6 }}>Mantén la información que ven tus clientes y la operación diaria en un solo lugar.</Typography>
       </Box>
 
       <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: 3, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
@@ -170,27 +144,9 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
           const Icon = item.icon;
           const selected = activeTab === index;
           return (
-            <Button
-              key={item.label}
-              onClick={() => setActiveTab(index)}
-              startIcon={<Icon fontSize="small" />}
-              sx={{
-                flex: "0 0 auto",
-                minWidth: 145,
-                justifyContent: "flex-start",
-                textTransform: "none",
-                borderRadius: 2,
-                px: 1.6,
-                py: 1.1,
-                color: selected ? "text.primary" : "text.secondary",
-                bgcolor: selected ? "rgba(255,75,69,.08)" : "transparent",
-                border: "1px solid",
-                borderColor: selected ? "rgba(255,75,69,.22)" : "divider",
-                "&:hover": { bgcolor: selected ? "rgba(255,75,69,.11)" : "action.hover" },
-              }}
-            >
+            <Button key={item.label} onClick={() => setActiveTab(index)} startIcon={<Icon fontSize="small" />} sx={{ flex: "0 0 auto", minWidth: 145, justifyContent: "flex-start", textTransform: "none", borderRadius: 2.3, px: 1.6, py: 1.1, color: selected ? "text.primary" : "text.secondary", bgcolor: selected ? "rgba(255,75,69,.09)" : "rgba(255,255,255,.56)", border: "1px solid", borderColor: selected ? "rgba(255,75,69,.24)" : "divider", "&:hover": { bgcolor: selected ? "rgba(255,75,69,.13)" : "action.hover" } }}>
               <Stack alignItems="flex-start" spacing={0}>
-                <Typography variant="body2" fontWeight={selected ? 800 : 600}>{item.label}</Typography>
+                <Typography variant="body2" fontWeight={selected ? 850 : 650}>{item.label}</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>{item.description}</Typography>
               </Stack>
             </Button>
@@ -200,10 +156,6 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
       <Box>{tabs[activeTab]}</Box>
-
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity={snackbar.severity} onClose={closeSnackbar} sx={{ borderRadius: 2 }}>{snackbar.message}</Alert>
-      </Snackbar>
     </Box>
   );
 };
