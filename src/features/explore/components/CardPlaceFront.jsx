@@ -52,16 +52,10 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
         </ButtonBase>
       ))}
     </Box>
-<<<<<<< HEAD
     <Box sx={{ mt: 1.25 }}>
       <CardPlaceAccordion data={data} />
     </Box>
   </StyledFront>
 );
 
-=======
-    <Box sx={{ mt: 1.25 }}><CardPlaceAccordion data={data} /></Box>
-  </StyledFront>
-);
->>>>>>> origin/main
 export default CardPlaceFront;
