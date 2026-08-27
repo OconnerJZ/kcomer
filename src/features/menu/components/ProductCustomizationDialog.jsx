@@ -16,12 +16,18 @@ import {
   Typography,
 } from "@mui/material";
 
-const buildInitialSelection = (groups = []) => {
+const buildInitialSelection = (groups = [], modifiers = []) => {
   const selected = new Map();
   groups.forEach((group) => {
     (group.choices || []).forEach((choice) => {
       if (choice.defaultSelected) selected.set(Number(choice.id), true);
     });
+  });
+
+  modifiers.forEach((modifier) => {
+    const choiceId = Number(modifier.choiceId);
+    if (modifier.state === "removed") selected.delete(choiceId);
+    else selected.set(choiceId, true);
   });
   return selected;
 };
@@ -40,20 +46,10 @@ const resolveStatePayload = (groups, selected) => {
       if (isSelected) {
         modifiers.push({ choiceId, state: "selected" });
         extra += Number(choice.priceExtra || 0);
-        summary.push({
-          group: group.title,
-          name: choice.name,
-          state: "selected",
-          priceExtra: Number(choice.priceExtra || 0),
-        });
+        summary.push({ group: group.title, name: choice.name, state: "selected", priceExtra: Number(choice.priceExtra || 0) });
       } else if (wasDefault) {
         modifiers.push({ choiceId, state: "removed" });
-        summary.push({
-          group: group.title,
-          name: choice.name,
-          state: "removed",
-          priceExtra: 0,
-        });
+        summary.push({ group: group.title, name: choice.name, state: "removed", priceExtra: 0 });
       }
     });
   });
@@ -63,13 +59,13 @@ const resolveStatePayload = (groups, selected) => {
 
 export default function ProductCustomizationDialog({ open, item, onClose, onConfirm }) {
   const groups = item?.modifierGroups || [];
-  const [selected, setSelected] = useState(() => buildInitialSelection(groups));
+  const [selected, setSelected] = useState(() => buildInitialSelection(groups, item?.modifiers || []));
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!open) return;
-    setSelected(buildInitialSelection(groups));
+    setSelected(buildInitialSelection(groups, item?.modifiers || []));
     setNote(item?.note || "");
     setError("");
   }, [open, item?.id]);
@@ -161,9 +157,7 @@ export default function ProductCustomizationDialog({ open, item, onClose, onConf
                         label={
                           <Stack direction="row" spacing={1} alignItems="center">
                             <Typography variant="body2">{choice.name}</Typography>
-                            {Number(choice.priceExtra || 0) > 0 && (
-                              <Typography variant="caption" color="primary.main" fontWeight={800}>+${Number(choice.priceExtra).toFixed(2)}</Typography>
-                            )}
+                            {Number(choice.priceExtra || 0) > 0 && <Typography variant="caption" color="primary.main" fontWeight={800}>+${Number(choice.priceExtra).toFixed(2)}</Typography>}
                           </Stack>
                         }
                         sx={{ width: "100%", m: 0, py: .25 }}
@@ -178,16 +172,7 @@ export default function ProductCustomizationDialog({ open, item, onClose, onConf
 
           <Box>
             <Typography fontWeight={800} sx={{ mb: 1 }}>Indicaciones especiales</Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="Ej. Salsa aparte…"
-              inputProps={{ maxLength: 120 }}
-              helperText={`${note.length}/120`}
-            />
+            <TextField fullWidth multiline rows={2} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Ej. Salsa aparte…" inputProps={{ maxLength: 120 }} helperText={`${note.length}/120`} />
           </Box>
 
           {error && <Typography variant="body2" color="error.main" fontWeight={700}>{error}</Typography>}
@@ -197,7 +182,7 @@ export default function ProductCustomizationDialog({ open, item, onClose, onConf
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} sx={{ textTransform: "none" }}>Cancelar</Button>
         <Button variant="contained" disableElevation onClick={handleConfirm} sx={{ textTransform: "none", borderRadius: 999, px: 2.5 }}>
-          Agregar · ${finalPrice.toFixed(2)}
+          {item?.modifiers?.length ? "Actualizar" : "Agregar"} · ${finalPrice.toFixed(2)}
         </Button>
       </DialogActions>
     </Dialog>
