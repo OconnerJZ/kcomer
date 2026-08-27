@@ -12,7 +12,8 @@ export const createSessionUser = (authResponse) => {
 };
 
 export const refreshSessionUser = ({ currentUser, userData }) => {
-  if (!currentUser?.token) {
+  const refreshedToken = userData?.token || currentUser?.token;
+  if (!refreshedToken) {
     throw new Error("Sesión no válida");
   }
 
@@ -21,7 +22,7 @@ export const refreshSessionUser = ({ currentUser, userData }) => {
       ...normalizeUser(currentUser),
       ...normalizeUser(userData),
     },
-    token: currentUser.token,
+    token: refreshedToken,
   });
 };
 
