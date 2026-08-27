@@ -45,7 +45,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const { orders, loading, updateOrderStatus, refreshOrders } = useBusinessOrders(businessId);
+  const { orders, loading, updateOrderStatus, updateKitchenItemStatus, refreshOrders } = useBusinessOrders(businessId);
   const { filterStatus, setFilterStatus, filteredOrders: statusFilteredOrders } = useOrderFilters(orders);
 
   useEffect(() => {
@@ -53,40 +53,35 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
     return () => window.clearInterval(interval);
   }, []);
 
-  const operationalCounts = useMemo(
-    () => ({
-      new: orders.filter((order) => matchesOperationalFilter(order, "new", now)).length,
-      preparing: orders.filter((order) => matchesOperationalFilter(order, "preparing", now)).length,
-      ready: orders.filter((order) => matchesOperationalFilter(order, "ready", now)).length,
-      overdue: orders.filter((order) => matchesOperationalFilter(order, "overdue", now)).length,
-    }),
-    [orders, now],
-  );
+  const operationalCounts = useMemo(() => ({
+    new: orders.filter((order) => matchesOperationalFilter(order, "new", now)).length,
+    preparing: orders.filter((order) => matchesOperationalFilter(order, "preparing", now)).length,
+    ready: orders.filter((order) => matchesOperationalFilter(order, "ready", now)).length,
+    overdue: orders.filter((order) => matchesOperationalFilter(order, "overdue", now)).length,
+  }), [orders, now]);
 
   const filteredOrders = useMemo(
     () => statusFilteredOrders.filter((order) => matchesOperationalFilter(order, operationalFilter, now)),
     [statusFilteredOrders, operationalFilter, now],
   );
 
-  const productionOrders = useMemo(
-    () => orders.filter((order) => PRODUCTION_STATUSES.includes(order.status)),
-    [orders],
+  const productionOrders = useMemo(() => orders.filter((order) => PRODUCTION_STATUSES.includes(order.status)), [orders]);
+  const { isOpen, order: selectedOrderSnapshot, openDialog, closeDialog } = useOrderDialog();
+  const selectedOrder = useMemo(
+    () => selectedOrderSnapshot ? orders.find((order) => String(order.id) === String(selectedOrderSnapshot.id)) || selectedOrderSnapshot : null,
+    [orders, selectedOrderSnapshot],
   );
-
-  const { isOpen, order: selectedOrder, openDialog, closeDialog } = useOrderDialog();
 
   useEffect(() => {
     if (focusedOrderId == null || loading || orders.length === 0) return;
     const targetOrder = orders.find((order) => String(order.id) === String(focusedOrderId));
     if (!targetOrder) return;
-
     setViewMode("list");
     setFilterStatus("all");
     setOperationalFilter(null);
     setHighlightedOrderId(targetOrder.id);
     openDialog(targetOrder);
     onFocusHandled?.();
-
     const timeout = window.setTimeout(() => setHighlightedOrderId(null), 4500);
     return () => window.clearTimeout(timeout);
   }, [focusedOrderId, loading, orders, openDialog, onFocusHandled, setFilterStatus]);
@@ -118,6 +113,15 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
     }
   };
 
+  const handleUpdateKitchenStatus = async (orderId, detailId, status) => {
+    try {
+      await updateKitchenItemStatus(orderId, detailId, status);
+      showSnackbar(status === "ready" ? "Producto marcado como listo" : "Preparación iniciada", "success");
+    } catch (error) {
+      showSnackbar(error?.message || "No pudimos actualizar el producto", "error");
+    }
+  };
+
   const handleRefresh = async () => {
     try {
       await refreshOrders();
@@ -133,9 +137,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
 
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1.5} sx={{ mb: 1 }}>
         <Box sx={{ flex: 1 }}>
-          {viewMode === "list" && (
-            <OrderFilters filterStatus={filterStatus} onFilterChange={handleStatusFilter} orderCount={filteredOrders.length} onRefresh={handleRefresh} loading={loading} />
-          )}
+          {viewMode === "list" && <OrderFilters filterStatus={filterStatus} onFilterChange={handleStatusFilter} orderCount={filteredOrders.length} onRefresh={handleRefresh} loading={loading} />}
         </Box>
         <ButtonGroup size="small" variant="outlined" aria-label="vista de órdenes" sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}>
           <Button startIcon={<ViewList />} variant={viewMode === "list" ? "contained" : "outlined"} onClick={() => setViewMode("list")} sx={{ textTransform: "none" }}>Lista</Button>
@@ -144,33 +146,23 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
       </Stack>
 
       {viewMode === "production" ? (
-        productionOrders.length > 0 ? (
-          <KitchenBoard orders={productionOrders} now={now} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} />
-        ) : (
-          <EmptyState />
-        )
+        productionOrders.length > 0 ? <KitchenBoard orders={productionOrders} now={now} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} /> : <EmptyState />
       ) : (
         <>
           {filteredOrders.length === 0 && <EmptyState />}
-          {!isMobile && filteredOrders.length > 0 && (
-            <OrderTable orders={filteredOrders} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlightedOrderId={highlightedOrderId} now={now} />
-          )}
+          {!isMobile && filteredOrders.length > 0 && <OrderTable orders={filteredOrders} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlightedOrderId={highlightedOrderId} now={now} />}
           {isMobile && filteredOrders.length > 0 && (
             <Stack spacing={{ xs: 0, sm: 2 }}>
-              {filteredOrders.map((order) => (
-                <OrderCard key={order.id} order={order} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlighted={String(order.id) === String(highlightedOrderId)} now={now} />
-              ))}
+              {filteredOrders.map((order) => <OrderCard key={order.id} order={order} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlighted={String(order.id) === String(highlightedOrderId)} now={now} />)}
             </Stack>
           )}
         </>
       )}
 
-      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} />
+      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={handleUpdateStatus} onUpdateKitchenStatus={handleUpdateKitchenStatus} isSmall={isSmall} />
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((current) => ({ ...current, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((current) => ({ ...current, open: false }))} sx={{ border: "1px solid #e0e0e0", borderRadius: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
-          {snackbar.message}
-        </Alert>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar((current) => ({ ...current, open: false }))}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );
