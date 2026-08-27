@@ -34,6 +34,8 @@ const getTodayIndex = () => {
   return today === 0 ? 6 : today - 1;
 };
 
+const hasScheduleRows = (value) => Array.isArray(value) && value.length > 0;
+
 const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
   const controlledSchedule = useMemo(
     () => schedules ?? formValues?.schedule,
@@ -43,33 +45,39 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
 
   const updateSchedule = (updater) => {
     if (onChange) {
-      onChange((current) => updater(current || createDefaultSchedule()));
+      onChange((current) => updater(hasScheduleRows(current) ? current : createDefaultSchedule()));
       return;
     }
 
     if (setFormValues) {
       setFormValues((prev) => ({
         ...prev,
-        schedule: updater(prev.schedule || createDefaultSchedule()),
+        schedule: updater(hasScheduleRows(prev.schedule) ? prev.schedule : createDefaultSchedule()),
       }));
     }
   };
 
   useEffect(() => {
-    if (controlledSchedule) return;
+    if (hasScheduleRows(controlledSchedule)) return;
+
+    const initialSchedule = createDefaultSchedule();
 
     if (onChange) {
-      onChange(createDefaultSchedule());
+      onChange(initialSchedule);
       return;
     }
 
     if (setFormValues) {
       setFormValues((prev) => ({
         ...prev,
-        schedule: createDefaultSchedule(),
+        schedule: initialSchedule,
       }));
     }
   }, [controlledSchedule, onChange, setFormValues]);
+
+  const scheduleRows = hasScheduleRows(controlledSchedule)
+    ? controlledSchedule
+    : createDefaultSchedule();
 
   const updateDay = (index, changes) => {
     updateSchedule((current) => {
@@ -80,7 +88,7 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
   };
 
   const copyReferenceDay = () => {
-    const reference = controlledSchedule?.find(
+    const reference = scheduleRows.find(
       (day) => !day.isClosed && day.opened && day.closed,
     );
 
@@ -94,8 +102,6 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
       ),
     );
   };
-
-  if (!controlledSchedule) return null;
 
   return (
     <Box>
@@ -117,7 +123,7 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
           size="small"
           startIcon={<ContentCopy />}
           onClick={copyReferenceDay}
-          disabled={!controlledSchedule.some((day) => !day.isClosed && day.opened && day.closed)}
+          disabled={!scheduleRows.some((day) => !day.isClosed && day.opened && day.closed)}
           sx={{ textTransform: "none", borderRadius: 2, alignSelf: { xs: "flex-start", sm: "center" } }}
         >
           Copiar horario al resto
@@ -125,7 +131,7 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
       </Stack>
 
       <Stack spacing={1}>
-        {controlledSchedule.map((day, index) => {
+        {scheduleRows.map((day, index) => {
           const isToday = index === todayIndex;
           return (
             <Box
