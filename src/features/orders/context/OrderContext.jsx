@@ -87,15 +87,16 @@ export const OrdersProvider = ({ children }) => {
     }
   }, [user, createOrderMutation]);
 
-  const editPendingOrder = useCallback(async (orderId, items) => {
+  const editPendingOrder = useCallback(async (orderId, items, expectedVersion) => {
     if (!orderId) throw new Error("ID de orden requerido");
     if (!Array.isArray(items) || items.length === 0) throw new Error("La orden debe conservar al menos un producto");
+    if (!Number.isInteger(Number(expectedVersion)) || Number(expectedVersion) < 1) throw new Error("Versión de orden requerida");
     setError(null);
     try {
       const response = await editPendingItemsMutation({
         id: orderId,
         userId: user?.id,
-        body: { items },
+        body: { items, expectedVersion: Number(expectedVersion) },
       }).unwrap();
       await refreshOrders();
       return { success: true, data: response?.data || response };
