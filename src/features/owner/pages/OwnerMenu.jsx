@@ -21,14 +21,16 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Add, Delete, Edit, Image as ImageIcon, Restaurant } from "@mui/icons-material";
+import { Add, Delete, Edit, Image as ImageIcon, Restaurant, TuneRounded } from "@mui/icons-material";
 import useBusinessMenu from "@Features/menu/hooks/useBusinessMenu";
 import DeleteMenuDialog from "@Features/owner/components/menu/DeleteMenuDialog";
 import MenuItemDialog from "@Features/owner/components/menu/MenuItemDialog";
+import MenuModifierDialog from "@Features/owner/components/menu/MenuModifierDialog";
 import MenuToolbar from "@Features/owner/components/menu/MenuToolbar";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 
@@ -53,6 +55,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
   } = useBusinessMenu(businessId);
 
   const [menuDialog, setMenuDialog] = useState({ open: false, item: null });
+  const [modifierDialog, setModifierDialog] = useState({ open: false, item: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, itemId: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [menuForm, setMenuForm] = useState(EMPTY_MENU_FORM);
@@ -176,6 +179,22 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
     }
   };
 
+  const ActionButtons = ({ item }) => (
+    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+      <Tooltip title="Personalización">
+        <IconButton size="small" color="primary" onClick={() => setModifierDialog({ open: true, item })}>
+          <TuneRounded fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Editar platillo">
+        <IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton>
+      </Tooltip>
+      <Tooltip title="Eliminar">
+        <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton>
+      </Tooltip>
+    </Stack>
+  );
+
   return (
     <Box>
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 2, bgcolor: "rgba(255,255,255,.72)", backdropFilter: "blur(10px)" }}>
@@ -183,22 +202,14 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
           <Box>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.16em", fontSize: "0.68rem" }}>Menú del negocio</Typography>
             <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>Tu catálogo, simple y vivo</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Actualiza disponibilidad, precios y presentación sin interrumpir la operación.</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Actualiza disponibilidad, precios, presentación y opciones de personalización.</Typography>
           </Box>
           <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenMenuDialog()} disableElevation sx={{ textTransform: "none", borderRadius: 2, px: 2.25, py: 1 }}>Agregar platillo</Button>
         </Stack>
       </Paper>
 
       {hasItems() && (
-        <MenuToolbar
-          search={search}
-          onSearchChange={setSearch}
-          categories={categories}
-          selectedCategory={category}
-          onCategoryChange={setCategory}
-          total={menu.length}
-          available={availableCount}
-        />
+        <MenuToolbar search={search} onSearchChange={setSearch} categories={categories} selectedCategory={category} onCategoryChange={setCategory} total={menu.length} available={availableCount} />
       )}
 
       {loading && !hasItems() && <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}><CircularProgress /></Box>}
@@ -232,6 +243,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="body2" fontWeight={800}>{item.name}</Typography>
                         {item.description && <Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden", maxWidth: 420 }}>{item.description}</Typography>}
+                        {item.modifierGroups?.length > 0 && <Typography variant="caption" color="primary.main" fontWeight={750}>{item.modifierGroups.length} grupos de personalización</Typography>}
                       </Box>
                     </Stack>
                   </TableCell>
@@ -243,7 +255,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                       <Typography variant="caption" color={item.available ? "success.main" : "text.secondary"}>{item.available ? "Disponible" : "Pausado"}</Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell align="right"><Stack direction="row" spacing={0.5} justifyContent="flex-end"><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack></TableCell>
+                  <TableCell align="right"><ActionButtons item={item} /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -275,7 +287,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                           <Switch checked={item.available} onChange={() => handleToggleAvailability(item.id)} size="small" />
                           <Typography variant="caption" color={item.available ? "success.main" : "text.secondary"}>{item.available ? "Disponible" : "Pausado"}</Typography>
                         </Stack>
-                        <Stack direction="row" spacing={0.5}><IconButton size="small" onClick={() => handleOpenMenuDialog(item)}><Edit fontSize="small" /></IconButton><IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, itemId: item.id })}><Delete fontSize="small" /></IconButton></Stack>
+                        <ActionButtons item={item} />
                       </Stack>
                     </Stack>
                   </CardContent>
@@ -287,6 +299,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
       )}
 
       <MenuItemDialog open={menuDialog.open} editing={!!menuDialog.item} fullScreen={isSmall} loading={loading} form={menuForm} imagePreview={image.preview} onClose={handleCloseMenuDialog} onSave={handleSaveMenuItem} onImageChange={handleImageChange} onFormChange={handleFormChange} />
+      <MenuModifierDialog open={modifierDialog.open} item={modifierDialog.item} fullScreen={isSmall} onClose={() => setModifierDialog({ open: false, item: null })} />
       <DeleteMenuDialog open={deleteDialog.open} loading={loading} onClose={() => setDeleteDialog({ open: false, itemId: null })} onConfirm={handleDeleteMenuItem} />
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}><Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert></Snackbar>
     </Box>
