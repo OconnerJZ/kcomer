@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Fade, LinearProgress, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import { Box, Button, Fade, LinearProgress, Paper, Stack, Typography } from "@mui/material";
 import { StorefrontRounded } from "@mui/icons-material";
 import { Result } from "antd";
 import "antd/dist/reset.css";
@@ -13,17 +13,18 @@ import FormField from "@Features/owner/components/registration/FormField";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { isOwner } from "@Features/auth/model/roles";
+import { useFeedback } from "@Shared/feedback/FeedbackProvider";
 import Bg from "@Assets/images/qscome-bg-6.png";
 
 const RegisterBusiness = ({ onSuccess }) => {
   const navigate = useNavigate();
+  const feedback = useFeedback();
   const { user, refreshUser } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [formValues, setFormValues] = useState(createBusinessRegistrationForm);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [ownerReady, setOwnerReady] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const { data: foodTypesResponse, isLoading: loadingFoodTypes } = useGetFoodTypesQuery();
   const [createBusiness, { isLoading: creating }] = useCreateBusinessMutation();
   const [uploadImage, { isLoading: uploading }] = useUploadImageMutation();
@@ -41,8 +42,6 @@ const RegisterBusiness = ({ onSuccess }) => {
     { label: "Cuándo te encuentran", subtitle: "Configura los horarios que verán tus clientes.", fields: [{ name: "schedule", type: "schedule", required: true }] },
     { label: "Dónde estás", subtitle: "Marca tu ubicación para que llegar sea sencillo.", fields: [{ name: "location", label: "Ubicación en mapa", type: "map", required: true }] },
   ], [foodTypes]);
-
-  const showSnackbar = (message, severity = "success") => setSnackbar({ open: true, message, severity });
 
   const validateForm = () => {
     let valid = true;
@@ -68,24 +67,32 @@ const RegisterBusiness = ({ onSuccess }) => {
         const uploadResult = await uploadHelpers.uploadImage(formValues.logo, uploadImage);
         const uploaded = uploadResult?.data?.data || uploadResult?.data;
         logoUrl = uploaded?.url || uploaded?.filename || "";
-        if (!logoUrl) return showSnackbar("Error al subir el logo", "error");
+        if (!logoUrl) {
+          feedback.error("No pudimos subir el logo. Intenta nuevamente.", { title: "Logo no disponible" });
+          return;
+        }
       }
+
       const businessData = toBusinessRegistrationPayload({ form: formValues, userId: user?.id, logoUrl });
       const result = await createBusiness(businessData).unwrap();
       if (!result) return;
+
       const refreshResult = await refreshUser();
       const ready = isOwner(refreshResult?.user);
       setOwnerReady(ready);
       setSubmitted(true);
-      showSnackbar("Negocio registrado exitosamente", "success");
+      feedback.success("Tu negocio quedó registrado correctamente.", { title: "Negocio creado" });
       if (onSuccess) await onSuccess();
     } catch (error) {
-      showSnackbar(error?.data?.message || error?.message || "Error al registrar negocio", "error");
+      feedback.error(error?.data?.message || error?.message || "Error al registrar negocio", { title: "No pudimos crear el negocio" });
     }
   };
 
   const nextPrev = async (direction) => {
-    if (direction === 1 && !validateForm()) return showSnackbar("Completa los campos requeridos", "error");
+    if (direction === 1 && !validateForm()) {
+      feedback.warning("Revisa los campos marcados antes de continuar.", { title: "Falta información" });
+      return;
+    }
     const next = currentTab + direction;
     if (next >= steps.length) return handleSubmit();
     setCurrentTab(next);
@@ -119,7 +126,6 @@ const RegisterBusiness = ({ onSuccess }) => {
           </Box>
         </Paper>
       </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: "top", horizontal: "center" }}><Alert severity={snackbar.severity}>{snackbar.message}</Alert></Snackbar>
     </GeneralContent>
   );
 };
