@@ -6,6 +6,10 @@ const dynamicEndpoints = {
     path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/status`,
     cacheKey: ({ businessId, userId }) => businessId || userId || undefined,
   },
+  editItems: {
+    path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/items`,
+    cacheKey: ({ userId }) => userId || undefined,
+  },
   kitchenItem: {
     path: ({ id, detailId }) => `${ENDPOINTS.orders.base}/${id}/items/${detailId}/kitchen-status`,
     cacheKey: ({ businessId, userId }) => businessId || userId || undefined,
@@ -30,6 +34,7 @@ const customEndpoints = (builder) => {
 
   return {
     orderUpdateStatus: createEndpoint("status", "patch"),
+    orderEditPendingItems: createEndpoint("editItems", "put"),
     orderUpdateKitchenItem: createEndpoint("kitchenItem", "patch"),
     getOrdersByUser: createEndpoint("user", "getAll"),
     getOrdersByBusiness: createEndpoint("business", "getAll"),
@@ -54,6 +59,7 @@ export const {
   usePatchOrdersMutation,
   useDeleteOrdersMutation,
   useOrderUpdateStatusMutation,
+  useOrderEditPendingItemsMutation,
   useOrderUpdateKitchenItemMutation,
   useGetOrdersByUserQuery,
   useGetOrdersByBusinessQuery,
