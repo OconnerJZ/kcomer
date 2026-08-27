@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -33,6 +33,25 @@ export default function MyOrders() {
     setFeedback({ open: true, message, severity });
   };
 
+  useEffect(() => {
+    if (!editingOrder) return;
+    const current = userOrders.find((order) => String(order.id) === String(editingOrder.id));
+    if (!current) return;
+
+    const statusChanged = current.status !== "pending";
+    const versionChanged = Number(current.version) !== Number(editingOrder.version);
+
+    if (statusChanged || versionChanged) {
+      setEditingOrder(null);
+      showFeedback(
+        statusChanged
+          ? "La orden cambió de estado y quedó bloqueada para edición."
+          : "La orden fue modificada en otra sesión. Se cargó la versión más reciente.",
+        "warning",
+      );
+    }
+  }, [userOrders, editingOrder]);
+
   const handleCancel = async () => {
     if (!cancelOrderId) return;
     const result = await cancelOrder(cancelOrderId);
@@ -47,7 +66,7 @@ export default function MyOrders() {
 
   const handleSaveEdit = async (items) => {
     if (!editingOrder) return;
-    const result = await editPendingOrder(editingOrder.id, items);
+    const result = await editPendingOrder(editingOrder.id, items, editingOrder.version);
 
     if (result.success) {
       setEditingOrder(null);
@@ -59,7 +78,7 @@ export default function MyOrders() {
       setEditingOrder(null);
       await refreshOrders();
       showFeedback(
-        "Esta orden acaba de ser aceptada y ya no puede modificarse.",
+        "La orden cambió mientras la editabas. Se cargó la versión más reciente y tus cambios no sobrescribieron los nuevos datos.",
         "warning",
       );
       return;
@@ -93,7 +112,7 @@ export default function MyOrders() {
                 onToggle={() => setExpandedOrder((current) => current === order.id ? null : order.id)}
                 onToggleHistory={() => setExpandedHistory((current) => current === order.id ? null : order.id)}
                 onCancel={() => setCancelOrderId(order.id)}
-                onEdit={() => setEditingOrder(order)}
+                onEdit={() => setEditingOrder({ ...order })}
               />
             </Grid>
           ))}
