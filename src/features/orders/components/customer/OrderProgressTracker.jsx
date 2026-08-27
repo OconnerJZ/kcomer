@@ -34,17 +34,13 @@ export default function OrderProgressTracker({ status, orderType = "pickup", com
 
   if (compact) {
     return (
-      <Stack direction="row" spacing={1.25} alignItems="center">
-        <Box sx={{ position: "relative", width: 48, height: 48, display: "grid", placeItems: "center" }}>
-          <CircularProgress variant="determinate" value={100} size={48} thickness={3.6} sx={{ position: "absolute", color: "action.hover" }} />
-          <CircularProgress variant="determinate" value={progress} size={48} thickness={3.6} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
-          <Typography variant="caption" fontWeight={900} sx={{ fontSize: ".66rem" }}>{progress}%</Typography>
+      <Box sx={{ display: "flex", justifyContent: "center", py: .25 }}>
+        <Box sx={{ position: "relative", width: 64, height: 64, display: "grid", placeItems: "center" }}>
+          <CircularProgress variant="determinate" value={100} size={64} thickness={3.7} sx={{ position: "absolute", color: "action.hover" }} />
+          <CircularProgress variant="determinate" value={progress} size={64} thickness={3.7} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
+          {status === "completed" ? <CheckRounded color="success" sx={{ fontSize: 24 }} /> : <Typography variant="caption" fontWeight={900} sx={{ fontSize: ".72rem" }}>{progress}%</Typography>}
         </Box>
-        <Box minWidth={0}>
-          <Typography variant="caption" color="text.secondary">Progreso</Typography>
-          <Typography variant="body2" fontWeight={800} noWrap>{currentLabel}</Typography>
-        </Box>
-      </Stack>
+      </Box>
     );
   }
 
