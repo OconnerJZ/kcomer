@@ -9,7 +9,7 @@ import {
   useUpdateBusinessPaymentMethodsMutation,
   useUpdateBusinessSchedulesMutation,
 } from "@Features/business/api/business.api";
-import { normalizeBusiness, toBasicInfoPayload, toDeliveryPayload, toLocationPayload, toPaymentMethodsPayload } from "@Features/business/model/business";
+import { normalizeBusiness, toBasicInfoPayload, toDeliveryPayload, toLocationPayload, toPaymentMethodsPayload, toSocialPayload } from "@Features/business/model/business";
 import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
 import { uploadHelpers, useUploadImageMutation } from "@Shared/api/uploads/upload.api";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
@@ -21,7 +21,6 @@ const mediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? val
 const normalizeFoodTypeCatalog = (response) => {
   const source = response?.data || response || [];
   if (!Array.isArray(source)) return [];
-
   return source
     .map((item) => ({
       id: Number(item?.id ?? item?.foodTypeId ?? item?.food_type_id),
@@ -49,6 +48,7 @@ export const useBusinessSettings = (businessData) => {
   const [deliverySettings, setDeliverySettings] = useState({ deliveryRadiusKm: 5, deliveryFee: 0, minOrderAmount: 0, estimatedTimeMin: 30, useOwnDelivery: false });
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedFoodTypes, setSelectedFoodTypes] = useState([]);
+  const [socialInfo, setSocialInfo] = useState({ facebook: "", instagram: "" });
   const [photos, setPhotos] = useState([]);
   const [coverImage, setCoverImage] = useState("");
 
@@ -71,16 +71,12 @@ export const useBusinessSettings = (businessData) => {
     setDeliverySettings(business.deliverySettings);
     setPaymentMethods(business.paymentMethods);
     setSelectedFoodTypes((business.foodTypeIds || []).map(Number).filter((id) => Number.isInteger(id) && id > 0));
+    setSocialInfo({ facebook: business.social?.facebook || "", instagram: business.social?.instagram || "" });
     setPhotos(business.photos);
     setCoverImage(business.bannerUrl || "");
   }, [businessData]);
 
-  // La tab Categorías usa exclusivamente GET /api/catalogs/food-types.
-  // El backend entrega { id, value }; lo convertimos al contrato visual { id, label }.
-  const availableFoodTypes = useMemo(
-    () => normalizeFoodTypeCatalog(foodTypesResponse),
-    [foodTypesResponse],
-  );
+  const availableFoodTypes = useMemo(() => normalizeFoodTypeCatalog(foodTypesResponse), [foodTypesResponse]);
   const businessId = businessData?.id;
 
   const runMutation = useCallback(async (mutation, args, fallback) => {
@@ -102,6 +98,7 @@ export const useBusinessSettings = (businessData) => {
     return result;
   }, [basicInfo, businessId, runMutation, updateBusiness, uploadImage]);
 
+  const updateSocial = useCallback(() => runMutation(updateBusiness, { id: businessId, body: toSocialPayload(socialInfo) }, "Error al actualizar redes sociales"), [businessId, runMutation, socialInfo, updateBusiness]);
   const updateLocation = useCallback(() => runMutation(updateBusinessLocation, { id: businessId, body: toLocationPayload(locationInfo) }, "Error al actualizar ubicación"), [businessId, locationInfo, runMutation, updateBusinessLocation]);
   const updateSchedules = useCallback(() => runMutation(updateBusinessSchedules, { id: businessId, body: { schedules } }, "Error al actualizar horarios"), [businessId, runMutation, schedules, updateBusinessSchedules]);
   const updateDelivery = useCallback(() => runMutation(updateBusinessDeliverySettings, { id: businessId, body: toDeliveryPayload(deliverySettings) }, "Error al actualizar delivery"), [businessId, deliverySettings, runMutation, updateBusinessDeliverySettings]);
@@ -142,10 +139,10 @@ export const useBusinessSettings = (businessData) => {
   const mutationLoading = [updateBusinessState, locationState, schedulesState, deliveryState, paymentState, foodTypesState, addPhotoState, deletePhotoState].some((state) => state.isLoading);
 
   return {
-    basicInfo, locationInfo, schedules, deliverySettings, paymentMethods, selectedFoodTypes, photos, coverImage,
-    setBasicInfo, setLocationInfo, setSchedules, setDeliverySettings, setPaymentMethods, setSelectedFoodTypes,
+    basicInfo, locationInfo, schedules, deliverySettings, paymentMethods, selectedFoodTypes, socialInfo, photos, coverImage,
+    setBasicInfo, setLocationInfo, setSchedules, setDeliverySettings, setPaymentMethods, setSelectedFoodTypes, setSocialInfo,
     availableFoodTypes, loadingCatalogs: loadingFoodTypes,
-    updateBasicInfo, updateLocation, updateSchedules, updateDelivery, updatePayments, updateFoodTypes, updateCoverImage, uploadPhoto, deletePhoto,
+    updateBasicInfo, updateSocial, updateLocation, updateSchedules, updateDelivery, updatePayments, updateFoodTypes, updateCoverImage, uploadPhoto, deletePhoto,
     loading: mutationLoading || uploading, error, clearError: () => setError(null),
   };
 };
