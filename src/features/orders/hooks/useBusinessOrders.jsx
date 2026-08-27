@@ -87,6 +87,7 @@ export const useBusinessOrders = (businessId) => {
       const target = order.items?.find((item) => String(item.detailId) === String(detailId));
       if (!target) return;
       target.kitchenStatus = status;
+      if (status === "preparing" && order.status === "accepted") order.status = "preparing";
       recalcKitchenProgress(order);
     }));
 
@@ -123,6 +124,7 @@ export const useBusinessOrders = (businessId) => {
       if (!order) return;
       const target = order.items?.find((item) => String(item.detailId) === String(payload.detailId));
       if (target) target.kitchenStatus = payload.status;
+      if (payload.orderStatus) order.status = payload.orderStatus;
       if (payload.kitchenProgress) order.kitchenProgress = payload.kitchenProgress;
       else recalcKitchenProgress(order);
     }));
