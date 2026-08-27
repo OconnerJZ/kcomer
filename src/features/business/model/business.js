@@ -5,40 +5,31 @@ const DEFAULT_PAYMENT_METHODS = [
   { method: "transfer", active: false, label: "Transferencia" },
 ];
 
-const compactValues = (values = []) =>
-  Array.from(new Set(values.filter((value) => value !== null && value !== undefined && value !== "")));
+const compactValues = (values = []) => Array.from(new Set(values.filter((value) => value !== null && value !== undefined && value !== "")));
+const getPhotoValue = (photo) => typeof photo === "string" ? photo : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || photo?.image_url || "";
 
-const getPhotoValue = (photo) =>
-  typeof photo === "string"
-    ? photo
-    : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || photo?.image_url || "";
+const normalizeFoodType = (item) => {
+  if (item == null) return null;
+  if (typeof item !== "object") {
+    const id = Number(item);
+    return Number.isFinite(id) ? { id, label: "" } : { id: null, label: String(item) };
+  }
+  const id = Number(item.id ?? item.foodTypeId ?? item.food_type_id ?? item.valueId);
+  const label = item.label || item.name || item.typeName || item.type_name || (typeof item.value === "string" ? item.value : "") || "";
+  return { ...item, id: Number.isFinite(id) ? id : null, label };
+};
 
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
   const delivery = business.deliverySettings || business.delivery_settings || {};
   const methods = business.paymentMethods || business.payment_methods || [];
-  const foodTypes = business.foodTypes || business.food_types || [];
+  const rawFoodTypes = business.foodTypes || business.food_types || business.tags || [];
+  const foodTypes = (Array.isArray(rawFoodTypes) ? rawFoodTypes : []).map(normalizeFoodType).filter(Boolean);
   const phone = business.phone || business.phones?.[0] || "";
   const email = business.email || business.emails?.[0] || "";
   const photos = business.photos || business.businessPhotos || business.business_photos || [];
-  const logo =
-    business.logo ||
-    business.logoUrl ||
-    business.logo_url ||
-    business.urlImage ||
-    business.image ||
-    "";
-  const coverImage =
-    business.coverImage ||
-    business.cover_image ||
-    business.bannerUrl ||
-    business.banner_url ||
-    business.coverUrl ||
-    business.cover_url ||
-    business.heroImage ||
-    business.hero_image ||
-    getPhotoValue(photos[0]) ||
-    logo;
+  const logo = business.logo || business.logoUrl || business.logo_url || business.urlImage || business.image || "";
+  const coverImage = business.coverImage || business.cover_image || business.bannerUrl || business.banner_url || business.coverUrl || business.cover_url || business.heroImage || business.hero_image || getPhotoValue(photos[0]) || logo;
 
   return {
     id: business.id ?? business.businessId ?? business.business_id ?? null,
@@ -50,21 +41,13 @@ export const normalizeBusiness = (business = {}) => {
     description: business.description || "",
     open: business.open ?? business.isOpen ?? business.is_open ?? true,
     prepTimeMin: Number(business.prepTimeMin ?? business.prep_time_min ?? 30),
-    estimatedDeliveryMin: Number(
-      business.estimatedDeliveryMin ?? business.estimated_delivery_min ?? 45,
-    ),
+    estimatedDeliveryMin: Number(business.estimatedDeliveryMin ?? business.estimated_delivery_min ?? 45),
     logo,
     coverImage,
     bannerUrl: business.bannerUrl || business.banner_url || "",
     likes: Number(business.likes ?? business.rating_count ?? business.ratingCount ?? 0),
     rating: Number(business.rating ?? business.average_rating ?? business.averageRating ?? 0),
-    hasDelivery: Boolean(
-      business.hasDelivery ??
-        business.has_delivery ??
-        business.deliveryEnabled ??
-        business.delivery_enabled ??
-        false,
-    ),
+    hasDelivery: Boolean(business.hasDelivery ?? business.has_delivery ?? business.deliveryEnabled ?? business.delivery_enabled ?? false),
     location: {
       address: location.address || "",
       city: location.city || "",
@@ -75,7 +58,8 @@ export const normalizeBusiness = (business = {}) => {
     schedules: business.schedules || business.schedule || business.businessSchedules || [],
     schedule: business.schedule || business.schedules || business.businessSchedules || [],
     menu: business.menu || [],
-    tags: business.tags || foodTypes,
+    tags: foodTypes.filter((item) => item.label),
+    foodTypes,
     deliverySettings: {
       deliveryRadiusKm: Number(delivery.deliveryRadiusKm ?? delivery.delivery_radius_km ?? 5),
       deliveryFee: Number(delivery.deliveryFee ?? delivery.delivery_fee ?? 0),
@@ -85,18 +69,14 @@ export const normalizeBusiness = (business = {}) => {
     },
     paymentMethods: DEFAULT_PAYMENT_METHODS.map((method) => {
       const current = methods.find((item) => item.method === method.method);
-      return {
-        ...method,
-        active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active,
-      };
+      return { ...method, active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active };
     }),
-    foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
+    foodTypeIds: foodTypes.map((item) => Number(item.id)).filter((id) => Number.isInteger(id) && id > 0),
     photos,
   };
 };
 
-export const normalizeBusinesses = (businesses = []) =>
-  Array.isArray(businesses) ? businesses.map(normalizeBusiness) : [];
+export const normalizeBusinesses = (businesses = []) => Array.isArray(businesses) ? businesses.map(normalizeBusiness) : [];
 
 export const toBasicInfoPayload = (business) => ({
   business_name: business.name,
@@ -125,9 +105,4 @@ export const toDeliveryPayload = (delivery) => ({
   use_own_delivery: Boolean(delivery.useOwnDelivery),
 });
 
-export const toPaymentMethodsPayload = (methods = []) =>
-  methods.map((method) => ({
-    method: method.method,
-    is_active: Boolean(method.active),
-    label: method.label,
-  }));
+export const toPaymentMethodsPayload = (methods = []) => methods.map((method) => ({ method: method.method, is_active: Boolean(method.active), label: method.label }));
