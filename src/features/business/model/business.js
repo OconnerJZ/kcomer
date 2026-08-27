@@ -30,6 +30,7 @@ export const normalizeBusiness = (business = {}) => {
   const photos = business.photos || business.businessPhotos || business.business_photos || [];
   const logo = business.logo || business.logoUrl || business.logo_url || business.urlImage || business.image || "";
   const coverImage = business.coverImage || business.cover_image || business.bannerUrl || business.banner_url || business.coverUrl || business.cover_url || business.heroImage || business.hero_image || getPhotoValue(photos[0]) || logo;
+  const social = business.social || {};
 
   return {
     id: business.id ?? business.businessId ?? business.business_id ?? null,
@@ -60,6 +61,11 @@ export const normalizeBusiness = (business = {}) => {
     menu: business.menu || [],
     tags: foodTypes.filter((item) => item.label),
     foodTypes,
+    social: {
+      facebook: social.facebook || business.facebookUrl || business.facebook_url || "",
+      instagram: social.instagram || business.instagramUrl || business.instagram_url || "",
+      whats: social.whats || "",
+    },
     deliverySettings: {
       deliveryRadiusKm: Number(delivery.deliveryRadiusKm ?? delivery.delivery_radius_km ?? 5),
       deliveryFee: Number(delivery.deliveryFee ?? delivery.delivery_fee ?? 0),
@@ -87,6 +93,11 @@ export const toBasicInfoPayload = (business) => ({
   prep_time_min: Number(business.prepTimeMin),
   estimated_delivery_min: Number(business.estimatedDeliveryMin),
   logo_url: business.logo,
+});
+
+export const toSocialPayload = (social = {}) => ({
+  facebook_url: social.facebook || "",
+  instagram_url: social.instagram || "",
 });
 
 export const toLocationPayload = (location) => ({
