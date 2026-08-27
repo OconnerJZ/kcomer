@@ -19,7 +19,7 @@ import {
   useGetMenuModifiersQuery,
   useUpdateMenuModifiersMutation,
 } from "@Features/menu/api/menu.api";
-import { useFeedback } from "@Shared/feedback/FeedbackContext";
+import { useFeedback } from "@Shared/feedback/FeedbackProvider";
 
 const newChoice = () => ({ name: "", priceExtra: 0, defaultSelected: false });
 const newGroup = () => ({ title: "", minSelect: 0, maxSelect: 0, choices: [newChoice()] });
