@@ -11,13 +11,24 @@ import {
 } from "@Features/business/api/business.api";
 import { normalizeBusiness, toBasicInfoPayload, toDeliveryPayload, toLocationPayload, toPaymentMethodsPayload } from "@Features/business/model/business";
 import { useGetFoodTypesQuery } from "@Features/catalogs/api/catalogs.api";
-import { normalizeCatalogOptions } from "@Features/catalogs/model/catalogOption";
 import { uploadHelpers, useUploadImageMutation } from "@Shared/api/uploads/upload.api";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 
 const getMutationError = (err, fallback) => err?.data?.message || err?.message || fallback;
 const getPhotoUrl = (photo) => typeof photo === "string" ? photo : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || "";
 const mediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? value : `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
+
+const normalizeFoodTypeCatalog = (response) => {
+  const source = response?.data || response || [];
+  if (!Array.isArray(source)) return [];
+
+  return source
+    .map((item) => ({
+      id: Number(item?.id ?? item?.foodTypeId ?? item?.food_type_id),
+      label: String(item?.value ?? item?.typeName ?? item?.type_name ?? item?.label ?? "").trim(),
+    }))
+    .filter((item) => Number.isInteger(item.id) && item.id > 0 && item.label);
+};
 
 export const useBusinessSettings = (businessData) => {
   const [error, setError] = useState(null);
@@ -59,12 +70,17 @@ export const useBusinessSettings = (businessData) => {
     setSchedules(business.schedules);
     setDeliverySettings(business.deliverySettings);
     setPaymentMethods(business.paymentMethods);
-    setSelectedFoodTypes(business.foodTypeIds);
+    setSelectedFoodTypes((business.foodTypeIds || []).map(Number).filter((id) => Number.isInteger(id) && id > 0));
     setPhotos(business.photos);
     setCoverImage(business.bannerUrl || "");
   }, [businessData]);
 
-  const availableFoodTypes = useMemo(() => normalizeCatalogOptions(foodTypesResponse?.data || foodTypesResponse || []), [foodTypesResponse]);
+  // La tab Categorías usa exclusivamente GET /api/catalogs/food-types.
+  // El backend entrega { id, value }; lo convertimos al contrato visual { id, label }.
+  const availableFoodTypes = useMemo(
+    () => normalizeFoodTypeCatalog(foodTypesResponse),
+    [foodTypesResponse],
+  );
   const businessId = businessData?.id;
 
   const runMutation = useCallback(async (mutation, args, fallback) => {
@@ -90,7 +106,7 @@ export const useBusinessSettings = (businessData) => {
   const updateSchedules = useCallback(() => runMutation(updateBusinessSchedules, { id: businessId, body: { schedules } }, "Error al actualizar horarios"), [businessId, runMutation, schedules, updateBusinessSchedules]);
   const updateDelivery = useCallback(() => runMutation(updateBusinessDeliverySettings, { id: businessId, body: toDeliveryPayload(deliverySettings) }, "Error al actualizar delivery"), [businessId, deliverySettings, runMutation, updateBusinessDeliverySettings]);
   const updatePayments = useCallback(() => runMutation(updateBusinessPaymentMethods, { id: businessId, body: { payment_methods: toPaymentMethodsPayload(paymentMethods) } }, "Error al actualizar métodos de pago"), [businessId, paymentMethods, runMutation, updateBusinessPaymentMethods]);
-  const updateFoodTypes = useCallback(() => runMutation(updateBusinessFoodTypes, { id: businessId, body: { food_type_ids: selectedFoodTypes } }, "Error al actualizar categorías"), [businessId, runMutation, selectedFoodTypes, updateBusinessFoodTypes]);
+  const updateFoodTypes = useCallback(() => runMutation(updateBusinessFoodTypes, { id: businessId, body: { food_type_ids: selectedFoodTypes.map(Number) } }, "Error al actualizar categorías"), [businessId, runMutation, selectedFoodTypes, updateBusinessFoodTypes]);
 
   const updateCoverImage = useCallback(async (photoUrl) => {
     const result = await runMutation(updateBusiness, { id: businessId, body: { banner_url: photoUrl || "" } }, "Error al actualizar portada");
