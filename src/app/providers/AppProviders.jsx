@@ -10,6 +10,7 @@ import { OrdersProvider } from "@Features/orders/context/OrderContext";
 import { NotificationProvider, useNotifications } from "@Features/notifications/context/NotificationContext";
 import { useSocketConnected, useSocketEvent } from "@Shared/hooks/useSocket";
 import socketService from "@Shared/services/realtime/socketService";
+import { FeedbackProvider } from "@Shared/feedback/FeedbackProvider";
 
 const SocketInitializer = () => {
   const { user, isAuthenticated } = useAuth();
@@ -71,16 +72,18 @@ const SocketInitializer = () => {
 export default function AppProviders({ children }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <AuthProvider>
-        <NotificationProvider>
-          <SocketInitializer />
-          <OrdersProvider>
-            <CartProvider>
-              <FilterMenuProvider>{children}</FilterMenuProvider>
-            </CartProvider>
-          </OrdersProvider>
-        </NotificationProvider>
-      </AuthProvider>
+      <FeedbackProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <SocketInitializer />
+            <OrdersProvider>
+              <CartProvider>
+                <FilterMenuProvider>{children}</FilterMenuProvider>
+              </CartProvider>
+            </OrdersProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </FeedbackProvider>
     </LocalizationProvider>
   );
 }
