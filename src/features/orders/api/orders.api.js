@@ -6,6 +6,10 @@ const dynamicEndpoints = {
     path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/status`,
     cacheKey: ({ businessId, userId }) => businessId || userId || undefined,
   },
+  kitchenItem: {
+    path: ({ id, detailId }) => `${ENDPOINTS.orders.base}/${id}/items/${detailId}/kitchen-status`,
+    cacheKey: ({ businessId, userId }) => businessId || userId || undefined,
+  },
   user: {
     path: ({ userId }) => `${ENDPOINTS.orders.user}/${userId}`,
     cacheKey: ({ userId }) => userId,
@@ -18,15 +22,15 @@ const dynamicEndpoints = {
 
 const customEndpoints = (builder) => {
   const endpoint = createEndpointBuilder(api, builder);
-  const createEndpoint = (key, method) =>
-    endpoint(key, method, {
-      dynamicPath: dynamicEndpoints[key].path,
-      getCacheKey: dynamicEndpoints[key].cacheKey,
-      tagType: "Orders",
-    });
+  const createEndpoint = (key, method) => endpoint(key, method, {
+    dynamicPath: dynamicEndpoints[key].path,
+    getCacheKey: dynamicEndpoints[key].cacheKey,
+    tagType: "Orders",
+  });
 
   return {
     orderUpdateStatus: createEndpoint("status", "patch"),
+    orderUpdateKitchenItem: createEndpoint("kitchenItem", "patch"),
     getOrdersByUser: createEndpoint("user", "getAll"),
     getOrdersByBusiness: createEndpoint("business", "getAll"),
   };
@@ -50,6 +54,7 @@ export const {
   usePatchOrdersMutation,
   useDeleteOrdersMutation,
   useOrderUpdateStatusMutation,
+  useOrderUpdateKitchenItemMutation,
   useGetOrdersByUserQuery,
   useGetOrdersByBusinessQuery,
 } = apiOrders;
