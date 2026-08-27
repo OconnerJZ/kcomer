@@ -1,30 +1,17 @@
 import { Button, Card, CardContent, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { EditRounded, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { ORDER_STATUS } from "@Features/orders/context/OrderContext";
 import StatusChip from "@Features/orders/components/StatusChip";
 import OrderProgressTracker from "./OrderProgressTracker";
 import OrderItemsList from "./OrderItemsList";
 import OrderHistory from "./OrderHistory";
 
-export default function CustomerOrderCard({ order, expanded, historyExpanded, onToggle, onToggleHistory, onCancel }) {
+export default function CustomerOrderCard({ order, expanded, historyExpanded, onToggle, onToggleHistory, onCancel, onEdit }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Card
-      elevation={0}
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 3,
-        bgcolor: "rgba(255,255,255,.68)",
-        backdropFilter: "blur(10px)",
-        overflow: "hidden",
-      }}
-    >
+    <Card elevation={0} sx={{ height: "100%", display: "flex", flexDirection: "column", border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "rgba(255,255,255,.68)", backdropFilter: "blur(10px)", overflow: "hidden" }}>
       <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } }, flex: 1 }}>
         <Stack spacing={isMobile ? 1.75 : 2.25} height="100%">
           <Stack direction="row" justifyContent="space-between" alignItems="center" onClick={onToggle} sx={{ cursor: "pointer" }}>
@@ -43,9 +30,7 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <Typography variant="subtitle2" sx={{ fontWeight: 900, ml: 1 }}>${Number(order.total || 0).toFixed(2)}</Typography>
           </Stack>
 
-          {order.status !== ORDER_STATUS.CANCELLED && (
-            <OrderProgressTracker status={order.status} orderType={order.orderType} compact={isMobile} />
-          )}
+          {order.status !== ORDER_STATUS.CANCELLED && <OrderProgressTracker status={order.status} orderType={order.orderType} compact={isMobile} />}
 
           <Collapse in={expanded}>
             <Divider sx={{ mb: 2 }} />
@@ -55,7 +40,13 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             {order.status === ORDER_STATUS.PENDING && (
               <>
                 <Divider sx={{ my: 2 }} />
-                <Button variant="outlined" color="error" fullWidth onClick={onCancel} sx={{ borderRadius: 2, py: 1, textTransform: "none", fontWeight: 700 }}>Cancelar Orden</Button>
+                <Stack spacing={1}>
+                  <Button variant="contained" disableElevation fullWidth startIcon={<EditRounded />} onClick={onEdit} sx={{ borderRadius: 2, py: 1, textTransform: "none", fontWeight: 750 }}>
+                    Modificar orden
+                  </Button>
+                  <Typography variant="caption" color="text.secondary" textAlign="center">Puedes cambiar productos y cantidades hasta que el negocio acepte la orden.</Typography>
+                  <Button variant="outlined" color="error" fullWidth onClick={onCancel} sx={{ borderRadius: 2, py: 1, textTransform: "none", fontWeight: 700 }}>Cancelar Orden</Button>
+                </Stack>
               </>
             )}
           </Collapse>
