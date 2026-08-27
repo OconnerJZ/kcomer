@@ -24,16 +24,14 @@ const normalizeOrderItem = (item = {}) => ({
 export const normalizeOrder = (order = {}) => {
   const items = Array.isArray(order.items) ? order.items.map(normalizeOrderItem) : [];
   const derivedKitchenProgress = {
-    ready: items.reduce(
-      (sum, item) => sum + (item.kitchenStatus === "ready" ? Number(item.quantity || 0) : 0),
-      0,
-    ),
+    ready: items.reduce((sum, item) => sum + (item.kitchenStatus === "ready" ? Number(item.quantity || 0) : 0), 0),
     total: items.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
   };
 
   return {
     ...order,
     id: order.id ?? null,
+    version: Number(order.version ?? 1),
     businessId: order.businessId ?? order.business_id ?? null,
     userId: order.userId ?? order.user_id ?? null,
     businessName: order.businessName ?? order.business_name ?? "",
@@ -62,8 +60,7 @@ export const normalizeOrder = (order = {}) => {
   };
 };
 
-export const normalizeOrders = (orders = []) =>
-  Array.isArray(orders) ? orders.map(normalizeOrder) : [];
+export const normalizeOrders = (orders = []) => Array.isArray(orders) ? orders.map(normalizeOrder) : [];
 
 export const toOrderPayload = (order = {}) => ({
   business_id: order.businessId,
