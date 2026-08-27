@@ -102,15 +102,24 @@ export const useBusinessOrders = (businessId) => {
     }
   }, [businessId, dispatch, queryArg, updateKitchenItemMutation]);
 
+  const roomOptions = {
+    enabled: !!businessId,
+    room: hasGlobalRealtimeScope ? undefined : { type: "business", id: businessId },
+  };
+
   useSocketEvent("order:new", (newOrder) => {
     if (!newOrder?.id) return;
     const eventBusinessId = newOrder.businessId ?? newOrder.business_id;
     if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
     refreshOrders();
-  }, {
-    enabled: !!businessId,
-    room: hasGlobalRealtimeScope ? undefined : { type: "business", id: businessId },
-  });
+  }, roomOptions);
+
+  useSocketEvent("order:updated", (updatedOrder) => {
+    if (!updatedOrder?.id) return;
+    const eventBusinessId = updatedOrder.businessId ?? updatedOrder.business_id;
+    if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
+    refreshOrders();
+  }, roomOptions);
 
   useSocketEvent("order:kitchen_item_update", (payload) => {
     if (!payload?.orderId || !payload?.detailId) return;
@@ -128,10 +137,7 @@ export const useBusinessOrders = (businessId) => {
       if (payload.kitchenProgress) order.kitchenProgress = payload.kitchenProgress;
       else recalcKitchenProgress(order);
     }));
-  }, {
-    enabled: !!businessId,
-    room: hasGlobalRealtimeScope ? undefined : { type: "business", id: businessId },
-  });
+  }, roomOptions);
 
   const selectors = useMemo(() => ({
     getOrderById: (orderId) => orders.find((order) => String(order.id) === String(orderId)),
