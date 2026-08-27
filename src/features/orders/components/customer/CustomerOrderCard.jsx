@@ -26,29 +26,31 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } }, flex: 1 }}>
-        <Stack spacing={2.25} height="100%">
+        <Stack spacing={isMobile ? 1.75 : 2.25} height="100%">
           <Stack direction="row" justifyContent="space-between" alignItems="center" onClick={onToggle} sx={{ cursor: "pointer" }}>
-            <Stack spacing={.8} flex={1} minWidth={0}>
+            <Stack spacing={.65} flex={1} minWidth={0}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.businessName}</Typography>
                 {expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
               </Stack>
-              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                <StatusChip status={order.status} />
-                {!isMobile && <Typography variant="caption" color="text.secondary">{new Date(order.createdAt).toLocaleString("es-MX")}</Typography>}
-              </Stack>
+              {!isMobile && (
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                  <StatusChip status={order.status} />
+                  <Typography variant="caption" color="text.secondary">{new Date(order.createdAt).toLocaleString("es-MX")}</Typography>
+                </Stack>
+              )}
             </Stack>
             <Typography variant="subtitle2" sx={{ fontWeight: 900, ml: 1 }}>${Number(order.total || 0).toFixed(2)}</Typography>
           </Stack>
 
           {order.status !== ORDER_STATUS.CANCELLED && (
-            <OrderProgressTracker status={order.status} orderType={order.orderType} compact={isMobile && !expanded} />
+            <OrderProgressTracker status={order.status} orderType={order.orderType} compact={isMobile} />
           )}
 
           <Collapse in={expanded}>
             <Divider sx={{ mb: 2 }} />
             <OrderItemsList order={order} />
-            <Divider sx={{ my: 1 }} />
+            <Divider sx={{ my: 1.25 }} />
             <OrderHistory order={order} expanded={historyExpanded} onToggle={onToggleHistory} />
             {order.status === ORDER_STATUS.PENDING && (
               <>
