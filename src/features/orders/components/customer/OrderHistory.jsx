@@ -1,51 +1,82 @@
-import { Box, Button, Chip, Collapse, Paper, Stack, Typography } from "@mui/material";
-import { AccessTime, ExpandLess, ExpandMore, History as HistoryIcon } from "@mui/icons-material";
+import { Box, Button, Collapse, Stack, Typography } from "@mui/material";
+import { ExpandLess, ExpandMore, HistoryRounded } from "@mui/icons-material";
 import { STATUS_LABELS } from "../../context/OrderContext";
 import { getStatusColor, getStatusIcon } from "../../model/orderPresentation";
 
+const formatMoment = (value) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString("es-MX", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export default function OrderHistory({ order, expanded, onToggle }) {
+  const history = order.statusHistory || [];
+
   return (
-    <Box sx={{ pb: 2 }}>
-      <Button onClick={onToggle} fullWidth variant="text" sx={{ justifyContent: "space-between", textTransform: "none", py: 1.5, px: 2, borderRadius: 2, bgcolor: "background.default", "&:hover": { bgcolor: "action.hover" } }}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <HistoryIcon sx={{ fontSize: 22, color: "info.main" }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Ver historial del pedido</Typography>
-          <Chip label={order.statusHistory.length} size="small" color="info" sx={{ ml: 0.5 }} />
+    <Box sx={{ pb: 1 }}>
+      <Button
+        onClick={onToggle}
+        fullWidth
+        variant="text"
+        sx={{
+          justifyContent: "space-between",
+          textTransform: "none",
+          py: 1.2,
+          px: 0,
+          borderRadius: 0,
+          color: "text.primary",
+          "&:hover": { bgcolor: "transparent", color: "primary.main" },
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={1.1}>
+          <Box sx={{ width: 32, height: 32, borderRadius: 2, display: "grid", placeItems: "center", bgcolor: "rgba(255,75,69,.08)", color: "primary.main" }}>
+            <HistoryRounded sx={{ fontSize: 18 }} />
+          </Box>
+          <Box sx={{ textAlign: "left" }}>
+            <Typography variant="body2" fontWeight={850}>Historial del pedido</Typography>
+            <Typography variant="caption" color="text.secondary">{history.length} {history.length === 1 ? "movimiento" : "movimientos"}</Typography>
+          </Box>
         </Stack>
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </Button>
 
       <Collapse in={expanded}>
-        <Box sx={{ mt: 2, position: "relative", pl: 3 }}>
-          <Box sx={{ position: "absolute", left: "20px", top: "20px", bottom: "20px", width: "2px", bgcolor: "divider" }} />
-          <Stack spacing={2}>
-            {order.statusHistory.map((history, idx) => {
-              const isLast = idx === order.statusHistory.length - 1;
-              return (
-                <Box key={`${order.id}-history-${idx}`} sx={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 2 }}>
-                  <Box sx={{ position: "absolute", left: "-28px", top: "8px", width: isLast ? 40 : 36, height: isLast ? 40 : 36, borderRadius: "50%", bgcolor: `${getStatusColor(history.status)}.main`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", boxShadow: isLast ? 3 : 1, transform: isLast ? "scale(1.05)" : "scale(1)", zIndex: 1, border: "3px solid white" }}>
-                    {getStatusIcon(history.status, true)}
+        <Box sx={{ mt: 1.2, pl: .5 }}>
+          {history.map((item, index) => {
+            const latest = index === history.length - 1;
+            const color = getStatusColor(item.status);
+            return (
+              <Box key={`${order.id}-history-${index}`} sx={{ display: "grid", gridTemplateColumns: "34px minmax(0,1fr)", gap: 1.25, position: "relative", pb: index === history.length - 1 ? .5 : 2.1 }}>
+                <Box sx={{ position: "relative", display: "flex", justifyContent: "center" }}>
+                  {index < history.length - 1 && <Box sx={{ position: "absolute", top: 28, bottom: -17, width: 1.5, bgcolor: "divider" }} />}
+                  <Box sx={{ width: latest ? 30 : 26, height: latest ? 30 : 26, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: latest ? `${color}.main` : "background.paper", color: latest ? "common.white" : `${color}.main`, border: "1.5px solid", borderColor: `${color}.main`, boxShadow: latest ? "0 5px 16px rgba(0,0,0,.12)" : "none", zIndex: 1 }}>
+                    {getStatusIcon(item.status, true)}
                   </Box>
-                  <Paper elevation={0} sx={{ flex: 1, p: 1.5, bgcolor: isLast ? "action.selected" : "background.default", borderRadius: 2, border: "1px solid", borderColor: isLast ? "primary.main" : "divider", ml: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
-                      <Typography variant="body2" sx={{ fontWeight: isLast ? 600 : 500, color: isLast ? "primary.main" : "text.primary" }}>{STATUS_LABELS[history.status]}</Typography>
-                      <Stack direction="row" alignItems="center" gap={0.3}>
-                        <AccessTime sx={{ fontSize: 12, color: "text.secondary" }} />
-                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
-                          {new Date(history.timestamp).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                    {history.note && (
-                      <Box sx={{ mt: 1, p: 0.8, bgcolor: "info.lighter", borderRadius: 1, borderLeft: "3px solid", borderColor: "info.main" }}>
-                        <Typography variant="caption" sx={{ fontStyle: "italic", color: "info.dark" }}>💬 {history.note}</Typography>
-                      </Box>
-                    )}
-                  </Paper>
                 </Box>
-              );
-            })}
-          </Stack>
+
+                <Box sx={{ minWidth: 0, pt: .1 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="baseline" spacing={1}>
+                    <Typography variant="body2" fontWeight={latest ? 850 : 700}>{STATUS_LABELS[item.status] || item.status}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontSize: ".68rem" }}>{formatMoment(item.timestamp || item.createdAt)}</Typography>
+                  </Stack>
+                  {item.note && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: .45, lineHeight: 1.55 }}>
+                      {item.note}
+                    </Typography>
+                  )}
+                  {latest && (
+                    <Typography variant="caption" sx={{ display: "inline-block", mt: .65, px: .8, py: .2, borderRadius: 999, bgcolor: `${color}.main`, color: "common.white", fontWeight: 750, fontSize: ".62rem" }}>
+                      Estado actual
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
       </Collapse>
     </Box>
