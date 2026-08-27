@@ -10,7 +10,6 @@ import { normalizeBusiness } from "@Features/business/model/business";
 import { useMemo, useState } from "react";
 
 const getMediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? value : `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
-
 const MovementContent = ({ movement, flipped, onMovement, business }) => ({
   location: <CardPlaceLocation flipped={flipped} onMovement={onMovement} business={business} />,
   photo: <CardPlacePhotos flipped={flipped} onMovement={onMovement} business={business} />,

@@ -123,5 +123,4 @@ const RegisterBusiness = ({ onSuccess }) => {
     </GeneralContent>
   );
 };
-
 export default RegisterBusiness;

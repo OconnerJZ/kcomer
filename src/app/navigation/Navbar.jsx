@@ -44,12 +44,10 @@ export default function Navbar() {
   const location = useLocation();
   const { getCartCount } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
-
   const owner = isOwner(user);
 
   const navItems = React.useMemo(() => {
     const items = [...BASE_NAV_ITEMS];
-
     if (!isAuthenticated) {
       items.push({ title: "Registro", icon: <Store />, link: "registro" });
       return items;
