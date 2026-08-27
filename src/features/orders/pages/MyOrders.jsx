@@ -5,18 +5,26 @@ import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useOrders } from "@Features/orders/context/OrderContext";
 import CustomerOrderCard from "@Features/orders/components/customer/CustomerOrderCard";
+import EditPendingOrderDialog from "@Features/orders/components/customer/EditPendingOrderDialog";
 
 export default function MyOrders() {
   const { user } = useAuth();
-  const { getOrdersByUser, cancelOrder } = useOrders();
+  const { getOrdersByUser, cancelOrder, editPendingOrder, loading } = useOrders();
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [expandedHistory, setExpandedHistory] = useState(null);
+  const [editingOrder, setEditingOrder] = useState(null);
 
   const userOrders = getOrdersByUser(user?.id);
 
   const handleCancel = async (orderId) => {
     if (!window.confirm("¿Estás seguro de cancelar esta orden?")) return;
     await cancelOrder(orderId);
+  };
+
+  const handleSaveEdit = async (items) => {
+    if (!editingOrder) return;
+    const result = await editPendingOrder(editingOrder.id, items);
+    if (result.success) setEditingOrder(null);
   };
 
   if (userOrders.length === 0) {
@@ -44,11 +52,20 @@ export default function MyOrders() {
                 onToggle={() => setExpandedOrder((current) => current === order.id ? null : order.id)}
                 onToggleHistory={() => setExpandedHistory((current) => current === order.id ? null : order.id)}
                 onCancel={() => handleCancel(order.id)}
+                onEdit={() => setEditingOrder(order)}
               />
             </Grid>
           ))}
         </Grid>
       </Box>
+
+      <EditPendingOrderDialog
+        open={Boolean(editingOrder)}
+        order={editingOrder}
+        onClose={() => setEditingOrder(null)}
+        onSave={handleSaveEdit}
+        saving={loading}
+      />
     </GeneralContent>
   );
 }
