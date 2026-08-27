@@ -1,5 +1,5 @@
-import { Box, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import { HistoryToggleOffRounded } from "@mui/icons-material";
+import { Alert, Box, Button, Chip, CircularProgress, Stack, Typography } from "@mui/material";
+import { HistoryToggleOffRounded, RefreshRounded } from "@mui/icons-material";
 import { useGetOrderAuditQuery } from "@Features/orders/api/orders.api";
 import { formatOrderDate } from "@Features/orders/model/orderFormatters";
 
@@ -11,9 +11,29 @@ const LABELS = {
   KITCHEN_ITEM_STATUS_CHANGED: "Producto actualizado en cocina",
 };
 
+const ROLE_LABELS = {
+  admin: "Administrador",
+  owner: "Negocio",
+  customer: "Cliente",
+  system: "Sistema",
+};
+
+const STATUS_LABELS = {
+  pending: "Pendiente",
+  accepted: "Aceptada",
+  preparing: "En preparación",
+  ready: "Lista",
+  in_delivery: "En camino",
+  completed: "Completada",
+  cancelled: "Cancelada",
+};
+
+const getErrorMessage = (error) => error?.data?.message || error?.data?.error || "No fue posible cargar la bitácora.";
+const getTransitionLabel = (value) => STATUS_LABELS[value] || value;
+
 export default function OrderAuditTrail({ orderId, enabled = true }) {
-  const { data, isFetching } = useGetOrderAuditQuery({ id: orderId }, { skip: !enabled || !orderId });
-  const events = data?.data || data || [];
+  const { data, error, isError, isFetching, refetch } = useGetOrderAuditQuery({ id: orderId }, { skip: !enabled || !orderId });
+  const events = Array.isArray(data) ? data : [];
 
   return (
     <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
@@ -26,30 +46,40 @@ export default function OrderAuditTrail({ orderId, enabled = true }) {
       </Stack>
 
       {isFetching && <Stack alignItems="center" py={2}><CircularProgress size={22} /></Stack>}
-      {!isFetching && !events.length && <Typography variant="body2" color="text.secondary">Aún no hay eventos auditables para esta orden.</Typography>}
+      {!isFetching && isError && (
+        <Alert
+          severity="error"
+          action={<Button color="inherit" size="small" startIcon={<RefreshRounded />} onClick={refetch}>Reintentar</Button>}
+        >
+          {getErrorMessage(error)}
+        </Alert>
+      )}
+      {!isFetching && !isError && !events.length && <Typography variant="body2" color="text.secondary">Aún no hay eventos auditables para esta orden.</Typography>}
 
       <Stack spacing={1.4}>
         {events.map((event) => (
-          <Box key={event.id} sx={{ display: "grid", gridTemplateColumns: "12px minmax(0,1fr) auto", gap: 1.2, alignItems: "start" }}>
+          <Box key={event.id} sx={{ display: "grid", gridTemplateColumns: "12px minmax(0,1fr)", gap: 1.2, alignItems: "start" }}>
             <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "primary.main", mt: .75 }} />
             <Box minWidth={0}>
-              <Stack direction="row" spacing={.75} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Typography variant="body2" fontWeight={800}>{LABELS[event.action] || event.action}</Typography>
-                {event.orderVersion && <Chip size="small" label={`v${event.orderVersion}`} sx={{ height: 20, fontSize: ".62rem" }} />}
+              <Stack direction="row" spacing={.75} alignItems="center" justifyContent="space-between" flexWrap="wrap" useFlexGap>
+                <Stack direction="row" spacing={.75} alignItems="center" flexWrap="wrap" useFlexGap>
+                  <Typography variant="body2" fontWeight={800}>{LABELS[event.action] || event.action}</Typography>
+                  {event.orderVersion != null && <Chip size="small" label={`v${event.orderVersion}`} sx={{ height: 20, fontSize: ".62rem" }} />}
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  {event.createdAt ? formatOrderDate(event.createdAt, true) : ""}
+                </Typography>
               </Stack>
               <Typography variant="caption" color="text.secondary">
-                {event.actorRole || "sistema"}{event.actorUserId ? ` · usuario #${event.actorUserId}` : ""}
+                {ROLE_LABELS[event.actorRole] || event.actorRole || "Sistema"}{event.actorUserId ? ` · usuario #${event.actorUserId}` : ""}
               </Typography>
               {event.metadata?.from && event.metadata?.to && (
-                <Typography variant="caption" sx={{ display: "block", mt: .3 }}>{event.metadata.from} → {event.metadata.to}</Typography>
+                <Typography variant="caption" sx={{ display: "block", mt: .3 }}>{getTransitionLabel(event.metadata.from)} → {getTransitionLabel(event.metadata.to)}</Typography>
               )}
               {event.metadata?.itemName && (
                 <Typography variant="caption" sx={{ display: "block", mt: .3 }}>{event.metadata.itemName}</Typography>
               )}
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
-              {event.createdAt ? formatOrderDate(event.createdAt, true) : ""}
-            </Typography>
           </Box>
         ))}
       </Stack>

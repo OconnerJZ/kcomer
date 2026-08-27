@@ -5,7 +5,6 @@ const dynamicEndpoints = {
   status: { path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/status`, cacheKey: ({ businessId, userId }) => businessId || userId || undefined },
   editItems: { path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/items`, cacheKey: ({ userId }) => userId || undefined },
   kitchenItem: { path: ({ id, detailId }) => `${ENDPOINTS.orders.base}/${id}/items/${detailId}/kitchen-status`, cacheKey: ({ businessId, userId }) => businessId || userId || undefined },
-  audit: { path: ({ id }) => `${ENDPOINTS.orders.base}/${id}/audit`, cacheKey: ({ id }) => id },
   user: { path: ({ userId }) => `${ENDPOINTS.orders.user}/${userId}`, cacheKey: ({ userId }) => userId },
   business: { path: ({ businessId }) => `${ENDPOINTS.orders.business}/${businessId}`, cacheKey: ({ businessId }) => businessId },
 };
@@ -17,7 +16,10 @@ const customEndpoints = (builder) => {
     orderUpdateStatus: createEndpoint("status", "patch"),
     orderEditPendingItems: createEndpoint("editItems", "put"),
     orderUpdateKitchenItem: createEndpoint("kitchenItem", "patch"),
-    getOrderAudit: createEndpoint("audit", "getAll"),
+    getOrderAudit: builder.query({
+      query: ({ id }) => `${ENDPOINTS.orders.base}/${id}/audit`,
+      providesTags: (result, error, { id }) => [{ type: "Orders", id }],
+    }),
     getOrdersByUser: createEndpoint("user", "getAll"),
     getOrdersByBusiness: createEndpoint("business", "getAll"),
   };
