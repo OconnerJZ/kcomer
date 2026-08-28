@@ -1,0 +1,10 @@
+/* eslint-disable react/prop-types */
+import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
+import { EmptyReport, ReportPanel } from "./ReportPrimitives";
+import { integer, money } from "../model/statsPresentation";
+
+const ProductRow = ({ product, index, slow = false }) => <Stack direction="row" alignItems="center" gap={1.4} sx={{ py: 1.3 }}><Avatar src={product.image} variant="rounded" sx={{ width: 45, height: 45, borderRadius: 2 }}>{product.name?.charAt(0)}</Avatar><Box minWidth={0} flex={1}><Stack direction="row" justifyContent="space-between" gap={1}><Typography variant="body2" fontWeight={850} noWrap>{product.name}</Typography>{!slow && <Chip label={`#${index + 1}`} size="small" sx={{ height: 20, fontSize: ".65rem" }}/>}</Stack><Typography variant="caption" color="text.secondary">{product.category} · {integer(product.quantity)} vendidos{product.orderCount ? ` en ${product.orderCount} órdenes` : ""}</Typography></Box><Box textAlign="right"><Typography variant="body2" fontWeight={900}>{money(product.revenue)}</Typography>{!slow && <Typography variant="caption" color="text.secondary">{product.revenueShare}% de ventas</Typography>}</Box></Stack>;
+
+export default function ProductInsights({ products, slowMovers }) {
+  return <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0,1.5fr) minmax(300px,1fr)" }, gap: 2 }}><ReportPanel title="Productos que impulsan el negocio" subtitle="Ranking por ventas brutas, unidades y presencia en órdenes">{products.length ? <Stack divider={<Box sx={{ borderTop: "1px solid", borderColor: "divider" }}/>}>{products.slice(0, 10).map((product, index) => <ProductRow key={`${product.id}-${product.name}`} product={product} index={index}/>)}</Stack> : <EmptyReport />}</ReportPanel><ReportPanel title="Baja rotación" subtitle="Productos disponibles con menor movimiento en el periodo">{slowMovers.length ? <Stack divider={<Box sx={{ borderTop: "1px solid", borderColor: "divider" }}/>}>{slowMovers.map((product, index) => <ProductRow key={product.id} product={product} index={index} slow/>)}</Stack> : <EmptyReport />}</ReportPanel></Box>;
+}
