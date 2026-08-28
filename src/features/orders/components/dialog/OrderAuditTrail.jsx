@@ -9,6 +9,7 @@ const LABELS = {
   ORDER_STATUS_CHANGED: "Estado actualizado",
   ORDER_CANCELLED: "Orden cancelada",
   KITCHEN_ITEM_STATUS_CHANGED: "Producto actualizado en cocina",
+  ORDER_EDIT_BLOCKED: "Edición bloqueada",
 };
 
 const ROLE_LABELS = {
@@ -33,7 +34,7 @@ const getTransitionLabel = (value) => STATUS_LABELS[value] || value;
 
 export default function OrderAuditTrail({ orderId, enabled = true }) {
   const { data, error, isError, isFetching, refetch } = useGetOrderAuditQuery({ id: orderId }, { skip: !enabled || !orderId });
-  const events = Array.isArray(data) ? data : [];
+  const events = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
 
   return (
     <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
@@ -78,6 +79,13 @@ export default function OrderAuditTrail({ orderId, enabled = true }) {
               )}
               {event.metadata?.itemName && (
                 <Typography variant="caption" sx={{ display: "block", mt: .3 }}>{event.metadata.itemName}</Typography>
+              )}
+              {event.action === "ORDER_EDIT_BLOCKED" && (
+                <Typography variant="caption" color="warning.main" sx={{ display: "block", mt: .3 }}>
+                  {event.metadata?.reason === "VERSION_CONFLICT"
+                    ? `Conflicto de versión: editor v${event.metadata?.expectedVersion ?? "?"}, orden v${event.metadata?.actualVersion ?? "?"}`
+                    : `Orden bloqueada en estado ${getTransitionLabel(event.metadata?.currentStatus || "desconocido")}`}
+                </Typography>
               )}
             </Box>
           </Box>
