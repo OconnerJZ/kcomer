@@ -146,6 +146,13 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         : paymentMethod));
   };
 
+  const updatePaymentConfig = (method, field, value) => {
+    setPaymentMethods((current) => current.map((paymentMethod) =>
+      paymentMethod.method === method
+        ? { ...paymentMethod, config: { ...(paymentMethod.config || {}), [field]: value } }
+        : paymentMethod));
+  };
+
   const toggleFoodType = (typeId) => {
     setSelectedFoodTypes((current) => current.includes(typeId)
       ? current.filter((id) => id !== typeId)
@@ -162,7 +169,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     <LocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
     <SchedulesTab key="schedules" schedules={schedules} setSchedules={setSchedules} onSave={handleSaveSchedules} loading={loading} />,
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
-    <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onSave={handleSavePayments} loading={loading} />,
+    <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onConfigChange={updatePaymentConfig} onSave={handleSavePayments} loading={loading} />,
     <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
     <SocialLinksTab key="social" socialInfo={socialInfo} setSocialInfo={setSocialInfo} onSave={handleSaveSocial} loading={loading} />,
     <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,

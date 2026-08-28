@@ -14,6 +14,7 @@ test("cocina ve órdenes y producción, pero no acepta órdenes", () => {
     canAcceptOrders: false,
     canViewKitchen: true,
     canUpdateKitchen: true,
+    canReviewPayments: false,
   });
 });
 
@@ -23,6 +24,6 @@ test("caja acepta órdenes sin acceder al tablero de cocina", () => {
     canAcceptOrders: true,
     canViewKitchen: false,
     canUpdateKitchen: false,
+    canReviewPayments: true,
   });
 });
-

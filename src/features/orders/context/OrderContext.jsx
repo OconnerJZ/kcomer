@@ -73,6 +73,10 @@ export const OrdersProvider = ({ children }) => {
     if (data?.id) refreshOrders();
   }, { enabled: hasUserRealtimeRoom, room: { type: "user", id: user?.id } });
 
+  useSocketEvent("order:transfer_payment_updated", (data) => {
+    if (data?.orderId) refreshOrders();
+  }, { enabled: hasUserRealtimeRoom, room: { type: "user", id: user?.id } });
+
   const createOrder = useCallback(async (orderData) => {
     setError(null);
     try {

@@ -45,7 +45,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permis
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-  const { canAcceptOrders, canViewKitchen, canUpdateKitchen } = getOrderCapabilities(permissions, { isAdmin });
+  const { canAcceptOrders, canViewKitchen, canUpdateKitchen, canReviewPayments } = getOrderCapabilities(permissions, { isAdmin });
   const displayedViewMode = canViewKitchen ? viewMode : "list";
 
   const { orders, loading, updateOrderStatus, updateKitchenItemStatus, refreshOrders } = useBusinessOrders(businessId);
@@ -162,7 +162,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permis
         </>
       )}
 
-      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} onUpdateKitchenStatus={canUpdateKitchen ? handleUpdateKitchenStatus : undefined} isSmall={isSmall} />
+      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} onUpdateKitchenStatus={canUpdateKitchen ? handleUpdateKitchenStatus : undefined} canReviewPayments={canReviewPayments} isSmall={isSmall} />
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((current) => ({ ...current, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} onClose={() => setSnackbar((current) => ({ ...current, open: false }))}>{snackbar.message}</Alert>

@@ -26,6 +26,7 @@ import DeliveryInfo from "./dialog/DeliveryInfo";
 import OrderItems from "./dialog/OrderItems";
 import OrderAuditTrail from "./dialog/OrderAuditTrail";
 import ActionButton from "./ActionButton";
+import TransferPaymentReviewPanel from "@Features/payments/components/TransferPaymentReviewPanel";
 
 const SummaryPill = ({ icon: Icon, label, value }) => (
   <Box sx={{ px: 1.4, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.78)" }}>
@@ -64,7 +65,7 @@ const StatusHistory = ({ history = [] }) => {
   );
 };
 
-const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStatus, isSmall }) => {
+const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStatus, canReviewPayments = false, isSmall }) => {
   if (!order) return null;
   const statusColor = getStatusColor(order.status);
   const typeLabel = order.orderType === "delivery" ? "Delivery" : "Recoger";
@@ -101,6 +102,7 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
             <Grid item xs={12} md={6}><CustomerInfo order={order} /></Grid>
             <Grid item xs={12} md={6}><DeliveryInfo order={order} /></Grid>
             <Grid item xs={12}><OrderItems items={order.items} kitchenEnabled={kitchenEnabled} onUpdateKitchenStatus={(detailId, status) => onUpdateKitchenStatus?.(order.id, detailId, status)} /></Grid>
+            {order.paymentMethod === "transfer" && canReviewPayments && <Grid item xs={12}><TransferPaymentReviewPanel order={order} /></Grid>}
             {order.statusHistory?.length > 0 && <Grid item xs={12}><StatusHistory history={order.statusHistory} /></Grid>}
             <Grid item xs={12}><OrderAuditTrail orderId={order.id} enabled={open} /></Grid>
           </Grid>

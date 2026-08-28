@@ -20,6 +20,22 @@ const customEndpoints = (builder) => {
       query: ({ id }) => `${ENDPOINTS.orders.base}/${id}/audit`,
       providesTags: (result, error, { id }) => [{ type: "Orders", id }],
     }),
+    getTransferPayment: builder.query({
+      query: ({ id }) => `${ENDPOINTS.orders.base}/${id}/transfer-payment`,
+      providesTags: (_result, _error, { id }) => [{ type: "Orders", id }],
+    }),
+    submitTransferPaymentEvidence: builder.mutation({
+      query: ({ id, file }) => {
+        const data = new FormData();
+        data.append("file", file);
+        return { url: `${ENDPOINTS.orders.base}/${id}/transfer-payment/evidence`, method: "POST", data };
+      },
+      invalidatesTags: (_result, _error, { id }) => [{ type: "Orders", id }, { type: "Orders", id: "LIST" }],
+    }),
+    reviewTransferPayment: builder.mutation({
+      query: ({ id, status, message, expectedVersion }) => ({ url: `${ENDPOINTS.orders.base}/${id}/transfer-payment/review`, method: "PATCH", data: { status, message, expectedVersion } }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: "Orders", id }, { type: "Orders", id: "LIST" }],
+    }),
     getOrdersByUser: createEndpoint("user", "getAll"),
     getOrdersByBusiness: createEndpoint("business", "getAll"),
   };
@@ -39,6 +55,9 @@ export const {
   useOrderEditPendingItemsMutation,
   useOrderUpdateKitchenItemMutation,
   useGetOrderAuditQuery,
+  useGetTransferPaymentQuery,
+  useSubmitTransferPaymentEvidenceMutation,
+  useReviewTransferPaymentMutation,
   useGetOrdersByUserQuery,
   useGetOrdersByBusinessQuery,
 } = apiOrders;

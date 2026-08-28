@@ -5,6 +5,7 @@ import StatusChip from "@Features/orders/components/StatusChip";
 import OrderProgressTracker from "./OrderProgressTracker";
 import OrderItemsList from "./OrderItemsList";
 import OrderHistory from "./OrderHistory";
+import TransferPaymentPanel from "@Features/payments/components/TransferPaymentPanel";
 
 export default function CustomerOrderCard({ order, expanded, historyExpanded, onToggle, onToggleHistory, onCancel, onEdit }) {
   const theme = useTheme();
@@ -37,6 +38,7 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <OrderItemsList order={order} />
             <Divider sx={{ my: 1.25 }} />
             <OrderHistory order={order} expanded={historyExpanded} onToggle={onToggleHistory} />
+            <TransferPaymentPanel order={order} />
             {order.status === ORDER_STATUS.PENDING && (
               <>
                 <Divider sx={{ my: 2 }} />

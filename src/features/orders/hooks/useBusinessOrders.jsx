@@ -135,6 +135,10 @@ export const useBusinessOrders = (businessId) => {
     }));
   }, roomOptions);
 
+  useSocketEvent("order:transfer_payment_updated", (payload) => {
+    if (payload?.orderId) refreshOrders();
+  }, roomOptions);
+
   const selectors = useMemo(() => ({
     getOrderById: (orderId) => orders.find((order) => String(order.id) === String(orderId)),
     getOrdersByStatus: (status) => orders.filter((order) => order.status === status),

@@ -60,7 +60,7 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
         })}
       </Box>
 
-      {paymentMethod === "transfer" && <TransferPaymentInfo />}
+      {paymentMethod === "transfer" && <TransferPaymentInfo config={availableMethods.find((method) => method.method === "transfer")?.config} />}
     </Box>
   );
 }

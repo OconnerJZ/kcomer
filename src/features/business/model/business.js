@@ -95,6 +95,7 @@ export const normalizeBusiness = (business = {}) => {
       return {
         ...method,
         active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active,
+        config: current?.config && typeof current.config === "object" ? current.config : {},
       };
     }),
     foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
@@ -144,4 +145,11 @@ export const toPaymentMethodsPayload = (methods = []) =>
     method: method.method,
     is_active: Boolean(method.active),
     label: method.label,
+    config: method.method === "transfer" ? {
+      accountHolder: method.config?.accountHolder || "",
+      bankName: method.config?.bankName || "",
+      clabe: method.config?.clabe || "",
+      accountNumber: method.config?.accountNumber || "",
+      referenceInstructions: method.config?.referenceInstructions || "",
+    } : undefined,
   }));

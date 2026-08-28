@@ -17,5 +17,5 @@ export const getOrderCapabilities = (permissions = [], { isAdmin = false } = {})
   canAcceptOrders: isAdmin || permissions.includes("orders.accept"),
   canViewKitchen: isAdmin || permissions.includes("kitchen.read"),
   canUpdateKitchen: isAdmin || permissions.includes("kitchen.update"),
+  canReviewPayments: isAdmin || permissions.includes("payments.review"),
 });
-
