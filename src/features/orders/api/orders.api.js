@@ -14,7 +14,7 @@ const customEndpoints = (builder) => {
   const createEndpoint = (key, method) => endpoint(key, method, { dynamicPath: dynamicEndpoints[key].path, getCacheKey: dynamicEndpoints[key].cacheKey, tagType: "Orders" });
   return {
     orderUpdateStatus: createEndpoint("status", "patch"),
-    orderEditPendingItems: createEndpoint("editItems", "put"),
+    orderEditPendingItems: createEndpoint("editItems", "update"),
     orderUpdateKitchenItem: createEndpoint("kitchenItem", "patch"),
     getOrderAudit: builder.query({
       query: ({ id }) => `${ENDPOINTS.orders.base}/${id}/audit`,
