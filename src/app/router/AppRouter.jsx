@@ -32,6 +32,7 @@ const routes = [
   { path: "orden", element: <Pedidos />, isProtected: true },
   { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true },
   { path: "owner", element: <OwnerDashboard />, isProtected: true },
+  { path: "business-invitations", element: <BusinessInvitation />, isProtected: true },
   { path: "business-invitations/:token", element: <BusinessInvitation />, isProtected: true },
 ];
 
