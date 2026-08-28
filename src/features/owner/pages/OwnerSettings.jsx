@@ -14,6 +14,7 @@ import {
   LocationOn,
   Payment,
   PhotoLibrary,
+  Public,
   Schedule,
 } from "@mui/icons-material";
 import useBusinessSettings from "@Features/owner/hooks/useBusinessSettings";
@@ -25,6 +26,7 @@ import {
   PaymentMethodsTab,
   SchedulesTab,
 } from "@Features/owner/components/settings/SettingsTabs";
+import SocialLinksTab from "@Features/owner/components/settings/SocialLinksTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
@@ -36,6 +38,7 @@ const NAV_ITEMS = [
   { label: "Delivery", icon: LocalShipping, description: "Cobertura y tiempos" },
   { label: "Pagos", icon: Payment, description: "Métodos aceptados" },
   { label: "Categorías", icon: Category, description: "Tipo de comida" },
+  { label: "Redes", icon: Public, description: "Presencia digital" },
   { label: "Galería", icon: PhotoLibrary, description: "Fotos y portada" },
 ];
 
@@ -51,6 +54,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     deliverySettings,
     paymentMethods,
     selectedFoodTypes,
+    socialInfo,
     photos,
     coverImage,
     setBasicInfo,
@@ -59,9 +63,11 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     setDeliverySettings,
     setPaymentMethods,
     setSelectedFoodTypes,
+    setSocialInfo,
     availableFoodTypes,
     loadingCatalogs,
     updateBasicInfo,
+    updateSocial,
     updateLocation,
     updateSchedules,
     updateDelivery,
@@ -110,6 +116,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   const handleSaveDelivery = async () => handleResult(await updateDelivery(), "Configuración de delivery actualizada");
   const handleSavePayments = async () => handleResult(await updatePayments(), "Métodos de pago actualizados");
   const handleSaveFoodTypes = async () => handleResult(await updateFoodTypes(), "Categorías actualizadas");
+  const handleSaveSocial = async () => handleResult(await updateSocial(), "Redes sociales actualizadas");
 
   const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -150,6 +157,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
     <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onSave={handleSavePayments} loading={loading} />,
     <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
+    <SocialLinksTab key="social" socialInfo={socialInfo} setSocialInfo={setSocialInfo} onSave={handleSaveSocial} loading={loading} />,
     <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
   ];
 
