@@ -4,7 +4,7 @@ import { getNextStatus, getActionLabels, STATUS_COLORS } from "@Features/orders/
 const ActionButton = ({ order, onClick, isSmall }) => {
   const nextStatus = getNextStatus(order.status, order.orderType);
   const actionLabel = getActionLabels(order.orderType);
-  if (!nextStatus || !actionLabel?.[nextStatus]) return null;
+  if (!onClick || !nextStatus || !actionLabel?.[nextStatus]) return null;
 
   const colors = STATUS_COLORS[order.status] || {
     bg: "#1a1a1a",

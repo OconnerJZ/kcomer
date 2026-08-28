@@ -16,7 +16,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { canAccessBusinessDashboard, hasBusinessPermission } from "@Features/auth/model/roles";
+import { canAccessBusinessDashboard } from "@Features/auth/model/roles";
+import { getAllowedDashboardTabs } from "@Features/auth/model/businessPermissions";
 import DashboardNavbar from "@Features/owner/components/navigation/DashboardNavbar";
 import DashboardMobileNav from "@Features/owner/components/navigation/DashboardMobileNav";
 import OrdersTab from "@Features/owner/pages/OwnerOrders";
@@ -84,13 +85,7 @@ export default function OwnerDashboard() {
 
   const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
   const allowedTabs = useMemo(() => {
-    if (!selectedBusiness || user?.role === "admin") return [0, 1, 2, 3];
-    return [
-      hasBusinessPermission(selectedBusiness, "orders.read") && 0,
-      hasBusinessPermission(selectedBusiness, "menu.manage") && 1,
-      hasBusinessPermission(selectedBusiness, "reports.read") && 2,
-      (hasBusinessPermission(selectedBusiness, "settings.update") || hasBusinessPermission(selectedBusiness, "team.manage")) && 3,
-    ].filter((value) => value !== false);
+    return getAllowedDashboardTabs(selectedBusiness, { isAdmin: user?.role === "admin" });
   }, [selectedBusiness, user?.role]);
 
   const displayedTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0] ?? 0;
@@ -183,6 +178,8 @@ export default function OwnerDashboard() {
                 loading={loadingOrders}
                 focusedOrderId={focusedOrderId}
                 onFocusHandled={() => setFocusedOrderId(null)}
+                permissions={selectedBusiness.permissions}
+                isAdmin={user?.role === "admin"}
               />
             )}
             {displayedTab === 1 && allowedTabs.includes(1) && <MenuTab businessId={selectedBusinessId} />}

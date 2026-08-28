@@ -68,7 +68,7 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
           <Button size="small" startIcon={<Visibility />} onClick={() => onViewOrder(order)} sx={{ textTransform: "none", color: "text.secondary" }}>Detalle</Button>
         </Stack>
 
-        {nextStatus && actionLabel && (
+        {onUpdateStatus && nextStatus && actionLabel && (
           <Button fullWidth variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => onUpdateStatus(order.id, nextStatus)} sx={{ textTransform: "none", borderRadius: 1.5, fontWeight: 700, py: 0.9 }}>
             {actionLabel}
           </Button>
@@ -78,7 +78,7 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
   );
 };
 
-export default function KitchenBoard({ orders = [], now = Date.now(), onViewOrder, onUpdateStatus }) {
+export default function KitchenBoard({ orders = [], now, onViewOrder, onUpdateStatus }) {
   return (
     <Box sx={{ overflowX: { xs: "auto", lg: "visible" }, pb: 1 }}>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(3, minmax(280px, 1fr))", lg: "repeat(3, minmax(0, 1fr))" }, gap: 2, minWidth: { xs: 880, lg: 0 } }}>

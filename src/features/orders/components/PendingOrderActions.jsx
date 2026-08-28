@@ -17,7 +17,7 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
   const [rejectOpen, setRejectOpen] = useState(false);
   const [reason, setReason] = useState("");
 
-  if (order?.status !== "pending") return null;
+  if (!onUpdateStatus || order?.status !== "pending") return null;
 
   const handleReject = async () => {
     const detail = reason.trim();

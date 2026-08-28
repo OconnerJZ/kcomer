@@ -22,6 +22,7 @@ import KitchenBoard from "@Features/orders/components/KitchenBoard";
 import EmptyState from "@Features/orders/components/EmptyState";
 import { ORDER_STATUS } from "@Features/orders/model/orderStatus";
 import { getOrderUrgency } from "@Features/orders/model/orderPriority";
+import { getOrderCapabilities } from "@Features/auth/model/businessPermissions";
 
 const matchesOperationalFilter = (order, filter, now) => {
   if (!filter) return true;
@@ -34,7 +35,7 @@ const matchesOperationalFilter = (order, filter, now) => {
 
 const PRODUCTION_STATUSES = ["accepted", "preparing", "ready"];
 
-const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
+const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permissions = [], isAdmin = false }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [highlightedOrderId, setHighlightedOrderId] = useState(null);
   const [operationalFilter, setOperationalFilter] = useState(null);
@@ -44,6 +45,8 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const { canAcceptOrders, canViewKitchen, canUpdateKitchen } = getOrderCapabilities(permissions, { isAdmin });
+  const displayedViewMode = canViewKitchen ? viewMode : "list";
 
   const { orders, loading, updateOrderStatus, updateKitchenItemStatus, refreshOrders } = useBusinessOrders(businessId);
   const { filterStatus, setFilterStatus, filteredOrders: statusFilteredOrders } = useOrderFilters(orders);
@@ -137,29 +140,29 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled }) => {
 
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1.5} sx={{ mb: 1 }}>
         <Box sx={{ flex: 1 }}>
-          {viewMode === "list" && <OrderFilters filterStatus={filterStatus} onFilterChange={handleStatusFilter} orderCount={filteredOrders.length} onRefresh={handleRefresh} loading={loading} />}
+          {displayedViewMode === "list" && <OrderFilters filterStatus={filterStatus} onFilterChange={handleStatusFilter} orderCount={filteredOrders.length} onRefresh={handleRefresh} loading={loading} />}
         </Box>
         <ButtonGroup size="small" variant="outlined" aria-label="vista de órdenes" sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}>
-          <Button startIcon={<ViewList />} variant={viewMode === "list" ? "contained" : "outlined"} onClick={() => setViewMode("list")} sx={{ textTransform: "none" }}>Lista</Button>
-          <Button startIcon={<ViewKanban />} variant={viewMode === "production" ? "contained" : "outlined"} onClick={() => setViewMode("production")} sx={{ textTransform: "none" }}>Producción</Button>
+          <Button startIcon={<ViewList />} variant={displayedViewMode === "list" ? "contained" : "outlined"} onClick={() => setViewMode("list")} sx={{ textTransform: "none" }}>Lista</Button>
+          {canViewKitchen && <Button startIcon={<ViewKanban />} variant={displayedViewMode === "production" ? "contained" : "outlined"} onClick={() => setViewMode("production")} sx={{ textTransform: "none" }}>Producción</Button>}
         </ButtonGroup>
       </Stack>
 
-      {viewMode === "production" ? (
-        productionOrders.length > 0 ? <KitchenBoard orders={productionOrders} now={now} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} /> : <EmptyState />
+      {displayedViewMode === "production" ? (
+        productionOrders.length > 0 ? <KitchenBoard orders={productionOrders} now={now} onViewOrder={openDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} /> : <EmptyState />
       ) : (
         <>
           {filteredOrders.length === 0 && <EmptyState />}
-          {!isMobile && filteredOrders.length > 0 && <OrderTable orders={filteredOrders} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlightedOrderId={highlightedOrderId} now={now} />}
+          {!isMobile && filteredOrders.length > 0 && <OrderTable orders={filteredOrders} onViewOrder={openDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} isSmall={isSmall} highlightedOrderId={highlightedOrderId} now={now} />}
           {isMobile && filteredOrders.length > 0 && (
             <Stack spacing={{ xs: 0, sm: 2 }}>
-              {filteredOrders.map((order) => <OrderCard key={order.id} order={order} onViewOrder={openDialog} onUpdateStatus={handleUpdateStatus} isSmall={isSmall} highlighted={String(order.id) === String(highlightedOrderId)} now={now} />)}
+              {filteredOrders.map((order) => <OrderCard key={order.id} order={order} onViewOrder={openDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} isSmall={isSmall} highlighted={String(order.id) === String(highlightedOrderId)} now={now} />)}
             </Stack>
           )}
         </>
       )}
 
-      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={handleUpdateStatus} onUpdateKitchenStatus={handleUpdateKitchenStatus} isSmall={isSmall} />
+      <OrderDialog open={isOpen} order={selectedOrder} onClose={closeDialog} onUpdateStatus={canAcceptOrders ? handleUpdateStatus : undefined} onUpdateKitchenStatus={canUpdateKitchen ? handleUpdateKitchenStatus : undefined} isSmall={isSmall} />
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((current) => ({ ...current, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} onClose={() => setSnackbar((current) => ({ ...current, open: false }))}>{snackbar.message}</Alert>

@@ -68,7 +68,7 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
   if (!order) return null;
   const statusColor = getStatusColor(order.status);
   const typeLabel = order.orderType === "delivery" ? "Delivery" : "Recoger";
-  const kitchenEnabled = ["accepted", "preparing", "ready"].includes(order.status);
+  const kitchenEnabled = Boolean(onUpdateKitchenStatus) && ["accepted", "preparing", "ready"].includes(order.status);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isSmall} TransitionComponent={Fade}
