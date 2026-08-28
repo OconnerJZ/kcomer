@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useDispatch } from "react-redux";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import FilterMenuProvider from "@Features/explore/context/FilterMenuContext";
@@ -10,9 +11,11 @@ import { NotificationProvider, useNotifications } from "@Features/notifications/
 import { useSocketConnected, useSocketEvent } from "@Shared/hooks/useSocket";
 import socketService from "@Shared/services/realtime/socketService";
 import { FeedbackProvider } from "@Shared/feedback/FeedbackProvider";
+import { api } from "@Shared/api/rtk/api";
 
 const SocketInitializer = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
+  const dispatch = useDispatch();
   const { addOrderNotification } = useNotifications();
   const connected = useSocketConnected();
   const userId = user?.id;
@@ -63,6 +66,28 @@ const SocketInitializer = () => {
       });
     },
     { enabled: connected && hasBusinessScope },
+  );
+
+  useSocketEvent(
+    "business:access_changed",
+    async (payload) => {
+      const businessId = String(payload?.businessId || "");
+      if (!businessId) return;
+      if (payload.revoked) {
+        joinedBusinessIdsRef.current.delete(businessId);
+        socketService.leaveBusiness(businessId);
+        try {
+          if (localStorage.getItem("owner_business_id") === businessId) socketService.clearActiveBusiness();
+        } catch { /* storage no disponible */ }
+      }
+      dispatch(api.util.invalidateTags(["Business", "BusinessTeam"]));
+      await updateUser();
+      socketService.showNotification(payload.revoked ? "Acceso actualizado" : "Permisos actualizados", {
+        body: payload.revoked ? "Tu acceso a un negocio fue retirado." : "Tus permisos del negocio cambiaron.",
+        data: { businessId: payload.businessId },
+      });
+    },
+    { enabled: connected },
   );
 
   return null;
