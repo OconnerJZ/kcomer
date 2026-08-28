@@ -14,6 +14,7 @@ const LandingRegister = lazy(() => import("@Features/owner/pages/OwnerRegistrati
 const RegisterBusiness = lazy(() => import("@Features/owner/pages/RegisterBusiness"));
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvitation"));
+const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -34,6 +35,8 @@ const routes = [
   { path: "owner", element: <OwnerDashboard />, isProtected: true },
   { path: "business-invitations", element: <BusinessInvitation />, isProtected: true },
   { path: "business-invitations/:token", element: <BusinessInvitation />, isProtected: true },
+  { path: "orden-compartida/:id", element: <SharedOrder />, isProtected: true },
+  { path: "orden-compartida/unirse/:token", element: <SharedOrder />, isProtected: true },
 ];
 
 export default function AppRouter() {

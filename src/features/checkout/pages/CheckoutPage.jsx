@@ -17,6 +17,7 @@ import EmptyCartState from "@Features/cart/components/EmptyCartState";
 import MyOrders from "@Features/orders/pages/MyOrders";
 import CheckoutDialog from "../components/CheckoutDialog";
 import useCheckoutController from "../hooks/useCheckoutController";
+import SharedOrderLauncher from "@Features/shared-orders/components/SharedOrderLauncher";
 
 const VIEW_OPTIONS = [
   { label: "Pedidos", value: "pedidos" },
@@ -48,6 +49,8 @@ export default function CheckoutPage() {
           onChange={setView}
           options={VIEW_OPTIONS}
         />
+
+        {view === "pedidos" && <SharedOrderLauncher />}
 
         {view === "ordenes" && <MyOrders />}
 

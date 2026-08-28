@@ -210,6 +210,17 @@ class SocketService {
     }
   }
 
+  joinSharedOrder(sessionId) {
+    if (!this.socket?.connected || !sessionId) return;
+    this.socket.emit("join:shared-order", sessionId, (response) => {
+      if (!response?.success) logError("No se pudo entrar al realtime compartido:", response?.error);
+    });
+  }
+
+  leaveSharedOrder(sessionId) {
+    if (this.socket?.connected && sessionId) this.socket.emit("leave:shared-order", sessionId);
+  }
+
   setActiveBusiness(businessId) {
     if (!businessId) return;
 
