@@ -23,7 +23,8 @@ export const useSocketEvent = (event, handler, { enabled = true, room } = {}) =>
     if (!socket) return;
 
     if (roomType === "business" && roomId) socketService.setActiveBusiness(roomId);
-    if (roomType === "user" && roomId) socketService.joinUser(roomId);
+    // La sala personal se asigna en el servidor desde el JWT; el cliente nunca
+    // elige un userId para evitar suscripciones a notificaciones ajenas.
 
     const listener = (data) => handlerRef.current?.(data);
     socket.on(event, listener);

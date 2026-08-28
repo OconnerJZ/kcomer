@@ -11,7 +11,7 @@ import {
   Settings,
 } from "@mui/icons-material";
 
-const DashboardMobileNav = ({ activeTab, onTabChange, pendingOrders = 0 }) => {
+const DashboardMobileNav = ({ activeTab, onTabChange, pendingOrders = 0, allowedTabs = [0, 1, 2, 3] }) => {
   const tabs = [
     { id: 0, label: "Órdenes", icon: <Dashboard />, badge: pendingOrders },
     { id: 1, label: "Menú", icon: <Restaurant /> },
@@ -43,7 +43,7 @@ const DashboardMobileNav = ({ activeTab, onTabChange, pendingOrders = 0 }) => {
           "& .MuiBottomNavigationAction-root": { minWidth: "auto" },
         }}
       >
-        {tabs.map((tab) => (
+        {tabs.filter((tab) => allowedTabs.includes(tab.id)).map((tab) => (
           <BottomNavigationAction
             key={tab.id}
             label={tab.label}

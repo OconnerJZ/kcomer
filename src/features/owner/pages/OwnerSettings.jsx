@@ -16,6 +16,7 @@ import {
   PhotoLibrary,
   Public,
   Schedule,
+  Groups,
 } from "@mui/icons-material";
 import useBusinessSettings from "@Features/owner/hooks/useBusinessSettings";
 import {
@@ -28,6 +29,7 @@ import {
 } from "@Features/owner/components/settings/SettingsTabs";
 import SocialLinksTab from "@Features/owner/components/settings/SocialLinksTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
+import TeamAccessTab from "@Features/owner/components/settings/TeamAccessTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
 
@@ -150,6 +152,11 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
       : [...current, typeId]);
   };
 
+  const canManageTeam = businessData?.membershipRole === "primary_owner" || businessData?.permissions?.includes("team.manage");
+  const navItems = canManageTeam
+    ? [...NAV_ITEMS, { label: "Equipo", icon: Groups, description: "Roles y acceso" }]
+    : NAV_ITEMS;
+
   const tabs = [
     <BasicInfoTab key="basic" basicInfo={basicInfo} setBasicInfo={setBasicInfo} logoFile={logo.file} logoPreview={logo.preview} onLogoChange={handleLogoChange} onSave={handleSaveBasicInfo} loading={loading} />,
     <LocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
@@ -159,6 +166,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
     <SocialLinksTab key="social" socialInfo={socialInfo} setSocialInfo={setSocialInfo} onSave={handleSaveSocial} loading={loading} />,
     <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
+    ...(canManageTeam ? [<TeamAccessTab key="team" businessId={businessData?.id} />] : []),
   ];
 
   return (
@@ -174,7 +182,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
       </Box>
 
       <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: 3, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
-        {NAV_ITEMS.map((item, index) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const selected = activeTab === index;
           return (

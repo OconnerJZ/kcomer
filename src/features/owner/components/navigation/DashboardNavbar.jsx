@@ -51,6 +51,7 @@ const DashboardNavbar = ({
   pendingOrders = 0,
   selectBusiness,
   businesses,
+  allowedTabs = [0, 1, 2, 3],
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -163,7 +164,7 @@ const DashboardNavbar = ({
 
         {!isMobile && (
           <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
-            {tabs.map((tab) => (
+            {tabs.filter((tab) => allowedTabs.includes(tab.id)).map((tab) => (
               <Badge key={tab.id} badgeContent={tab.badge || 0} color="error" sx={{ "& .MuiBadge-badge": { right: -3, top: 2 } }}>
                 <Button startIcon={tab.icon} onClick={() => onTabChange(tab.id)} sx={{ color: activeTab === tab.id ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.65)", textTransform: "none", fontWeight: activeTab === tab.id ? 600 : 300, borderRadius: 0, px: 2 }}>
                   {tab.label}

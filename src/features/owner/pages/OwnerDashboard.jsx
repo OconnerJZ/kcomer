@@ -16,7 +16,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { AddBusiness } from "@mui/icons-material";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { isOwner } from "@Features/auth/model/roles";
+import { canAccessBusinessDashboard, hasBusinessPermission } from "@Features/auth/model/roles";
 import DashboardNavbar from "@Features/owner/components/navigation/DashboardNavbar";
 import DashboardMobileNav from "@Features/owner/components/navigation/DashboardMobileNav";
 import OrdersTab from "@Features/owner/pages/OwnerOrders";
@@ -83,6 +83,17 @@ export default function OwnerDashboard() {
   }, [businesses, selectedBusinessId]);
 
   const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
+  const allowedTabs = useMemo(() => {
+    if (!selectedBusiness || user?.role === "admin") return [0, 1, 2, 3];
+    return [
+      hasBusinessPermission(selectedBusiness, "orders.read") && 0,
+      hasBusinessPermission(selectedBusiness, "menu.manage") && 1,
+      hasBusinessPermission(selectedBusiness, "reports.read") && 2,
+      (hasBusinessPermission(selectedBusiness, "settings.update") || hasBusinessPermission(selectedBusiness, "team.manage")) && 3,
+    ].filter((value) => value !== false);
+  }, [selectedBusiness, user?.role]);
+
+  const displayedTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0] ?? 0;
 
   const handleBusinessCreated = async () => {
     handleClose();
@@ -95,7 +106,7 @@ export default function OwnerDashboard() {
     }
   };
 
-  if (!isOwner(user)) {
+  if (!canAccessBusinessDashboard(user)) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2, mt: -6 }}>
         <RegisterBusiness />
@@ -138,7 +149,7 @@ export default function OwnerDashboard() {
   return (
     <Box sx={{ minHeight: "100vh", backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`, backgroundSize: "contain", backgroundPosition: "center", pb: { xs: 10, md: 0 } }}>
       <DashboardNavbar
-        activeTab={activeTab}
+        activeTab={displayedTab}
         onTabChange={handleTabChange}
         onNotificationNavigate={handleNotificationNavigate}
         businessName={selectedBusiness.name}
@@ -146,6 +157,7 @@ export default function OwnerDashboard() {
         pendingOrders={pendingOrdersCount}
         selectBusiness={selectBusiness}
         businesses={businesses}
+        allowedTabs={allowedTabs}
       />
 
       <Fab sx={{ position: "fixed", bottom: 100, right: 16 }} color="primary" size="small" onClick={handleClickOpen}><AddBusiness /></Fab>
@@ -165,7 +177,7 @@ export default function OwnerDashboard() {
       <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
         <Fade in timeout={500}>
           <Box>
-            {activeTab === 0 && (
+            {displayedTab === 0 && allowedTabs.includes(0) && (
               <OrdersTab
                 businessId={selectedBusinessId}
                 loading={loadingOrders}
@@ -173,14 +185,14 @@ export default function OwnerDashboard() {
                 onFocusHandled={() => setFocusedOrderId(null)}
               />
             )}
-            {activeTab === 1 && <MenuTab businessId={selectedBusinessId} />}
-            {activeTab === 2 && <ReportsTab businessId={selectedBusinessId} />}
-            {activeTab === 3 && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
+            {displayedTab === 1 && allowedTabs.includes(1) && <MenuTab businessId={selectedBusinessId} />}
+            {displayedTab === 2 && allowedTabs.includes(2) && <ReportsTab businessId={selectedBusinessId} />}
+            {displayedTab === 3 && allowedTabs.includes(3) && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
           </Box>
         </Fade>
       </Container>
 
-      <DashboardMobileNav activeTab={activeTab} onTabChange={handleTabChange} pendingOrders={pendingOrdersCount} />
+      <DashboardMobileNav activeTab={displayedTab} onTabChange={handleTabChange} pendingOrders={pendingOrdersCount} allowedTabs={allowedTabs} />
     </Box>
   );
 }

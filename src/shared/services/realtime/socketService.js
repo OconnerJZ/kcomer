@@ -73,8 +73,6 @@ class SocketService {
       ...SOCKET_CONFIG,
       auth: {
         token: user.token,
-        userId: user.id,
-        role: user.role,
       },
     });
 
@@ -153,15 +151,9 @@ class SocketService {
   autoJoinRooms() {
     if (!this.currentUser) return;
 
-    const { role, id } = this.currentUser;
-
-    if (role === "owner" || role === "admin") {
-      const businessIdToJoin = localStorage.getItem("owner_business_id");
-      if (businessIdToJoin) {
-        this.joinBusiness(businessIdToJoin);
-      }
-    } else if (role === "customer" || role === "user") {
-      this.joinUser(id);
+    const businessIdToJoin = localStorage.getItem("owner_business_id");
+    if (businessIdToJoin) {
+      this.joinBusiness(businessIdToJoin);
     }
   }
 
@@ -211,32 +203,10 @@ class SocketService {
     });
   }
 
-  joinUser(userId) {
-    if (!this.socket?.connected) {
-      warn("⚠️ Socket no conectado, no se puede unir a sala");
-      return;
-    }
-
-    if (!userId) {
-      logError("❌ userId requerido para unirse a sala");
-      return;
-    }
-
-    log("📤 Emitiendo join:user con ID:", userId);
-
-    this.socket.emit("join:user", userId, (response) => {
-      if (response?.success) {
-        log("✅ Unido a sala user:", userId);
-      } else {
-        logError("❌ Error al unirse a sala user:", response?.error);
-      }
-    });
-  }
-
-  leaveRoom(room) {
+  leaveBusiness(businessId) {
     if (this.socket?.connected) {
-      this.socket.emit("leave:room", room);
-      log("👋 Saliendo de sala:", room);
+      this.socket.emit("leave:business", businessId);
+      log("👋 Saliendo de sala business:", businessId);
     }
   }
 
@@ -255,7 +225,7 @@ class SocketService {
 
     if (this.socket?.connected) {
       if (previousBusinessId && previousBusinessId !== nextBusinessId) {
-        this.leaveRoom(`business:${previousBusinessId}`);
+        this.leaveBusiness(previousBusinessId);
       }
       if (previousBusinessId !== nextBusinessId) {
         this.joinBusiness(nextBusinessId);
@@ -267,7 +237,7 @@ class SocketService {
     try {
       const activeBusinessId = localStorage.getItem("owner_business_id");
       if (activeBusinessId && this.socket?.connected) {
-        this.leaveRoom(`business:${activeBusinessId}`);
+        this.leaveBusiness(activeBusinessId);
       }
       localStorage.removeItem("owner_business_id");
     } catch {

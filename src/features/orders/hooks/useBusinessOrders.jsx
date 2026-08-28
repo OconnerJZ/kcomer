@@ -7,8 +7,6 @@ import {
 } from "@Features/orders/api/orders.api";
 import { api } from "@Shared/api/rtk/api";
 import { normalizeOrders } from "@Features/orders/model/order";
-import { useAuth } from "@Features/auth/context/AuthContext";
-import { hasGlobalBusinessRealtimeScope } from "@Features/auth/model/roles";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 
 const getDraftOrders = (draft) => {
@@ -26,9 +24,7 @@ const recalcKitchenProgress = (order) => {
 
 export const useBusinessOrders = (businessId) => {
   const dispatch = useDispatch();
-  const { user } = useAuth();
   const [error, setError] = useState(null);
-  const hasGlobalRealtimeScope = hasGlobalBusinessRealtimeScope(user);
   const queryArg = useMemo(() => ({ businessId }), [businessId]);
 
   const {
@@ -104,7 +100,7 @@ export const useBusinessOrders = (businessId) => {
 
   const roomOptions = {
     enabled: !!businessId,
-    room: hasGlobalRealtimeScope ? undefined : { type: "business", id: businessId },
+    room: { type: "business", id: businessId },
   };
 
   useSocketEvent("order:new", (newOrder) => {

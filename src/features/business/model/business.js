@@ -99,6 +99,8 @@ export const normalizeBusiness = (business = {}) => {
     }),
     foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
     photos,
+    membershipRole: business.membershipRole || business.roleInBusiness || business.role_in_business || "",
+    permissions: Array.isArray(business.permissions) ? business.permissions : [],
   };
 };
 

@@ -14,6 +14,10 @@ export const CUSTOMER_ROLES = [ROLES.CUSTOMER, ROLES.USER];
 export const GLOBAL_BUSINESS_REALTIME_ROLES = [ROLES.OWNER, ROLES.ADMIN];
 
 export const isOwner = (user) => !!user && OWNER_ROLES.includes(user.role);
+export const hasBusinessMembership = (user) => Boolean(user?.businesses?.length);
+export const canAccessBusinessDashboard = (user) => isOwner(user) || hasBusinessMembership(user);
+export const hasBusinessPermission = (business, permission) =>
+  business?.membershipRole === "primary_owner" || business?.permissions?.includes(permission);
 export const isCustomer = (user) => !!user && !isOwner(user);
 export const hasGlobalBusinessRealtimeScope = (user) =>
   !!user && GLOBAL_BUSINESS_REALTIME_ROLES.includes(user.role);

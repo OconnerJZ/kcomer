@@ -4,7 +4,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import FilterMenuProvider from "@Features/explore/context/FilterMenuContext";
 import { CartProvider } from "@Features/cart/context/CartContext";
 import { AuthProvider, useAuth } from "@Features/auth/context/AuthContext";
-import { hasGlobalBusinessRealtimeScope } from "@Features/auth/model/roles";
 import { getUserBusinessIds } from "@Features/users/model/user";
 import { OrdersProvider } from "@Features/orders/context/OrderContext";
 import { NotificationProvider, useNotifications } from "@Features/notifications/context/NotificationContext";
@@ -21,9 +20,9 @@ const SocketInitializer = () => {
   const role = user?.role;
   const joinedBusinessIdsRef = useRef(new Set());
 
-  const businessIds = useMemo(() => getUserBusinessIds(user), [user?.businesses]);
+  const businessIds = useMemo(() => getUserBusinessIds(user), [user]);
   const businessIdsKey = businessIds.join("|");
-  const hasGlobalScope = hasGlobalBusinessRealtimeScope(user);
+  const hasBusinessScope = businessIds.length > 0 || user?.role === "admin";
 
   useEffect(() => {
     if (isAuthenticated && userId && token) {
@@ -33,10 +32,10 @@ const SocketInitializer = () => {
       socketService.disconnect();
       joinedBusinessIdsRef.current.clear();
     }
-  }, [isAuthenticated, userId, token, role]);
+  }, [isAuthenticated, userId, token, role, user]);
 
   useEffect(() => {
-    if (!connected || !hasGlobalScope) return undefined;
+    if (!connected || !hasBusinessScope) return undefined;
 
     const joinedIds = joinedBusinessIdsRef.current;
     businessIds.map(String).forEach((businessId) => {
@@ -47,12 +46,12 @@ const SocketInitializer = () => {
     });
 
     return undefined;
-  }, [businessIdsKey, connected, hasGlobalScope]);
+  }, [businessIdsKey, businessIds, connected, hasBusinessScope]);
 
   useSocketEvent(
     "order:new",
     (order) => {
-      if (!hasGlobalScope) return;
+      if (!hasBusinessScope) return;
 
       const notification = addOrderNotification(order);
       socketService.showNotification(notification.title, {
@@ -63,7 +62,7 @@ const SocketInitializer = () => {
         },
       });
     },
-    { enabled: connected && hasGlobalScope },
+    { enabled: connected && hasBusinessScope },
   );
 
   return null;
