@@ -38,8 +38,8 @@ export default function OwnerReports({ businessId }) {
 
     <Alert severity="info" variant="outlined" sx={{ mt: 2, borderRadius: 2.5 }}>{accountingNote}</Alert>
     <Tabs value={section} onChange={(_event, value) => setSection(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2, minHeight: 42 }}><Tab value="finance" label="Finanzas y clientes"/><Tab value="products" label="Productos"/><Tab value="operations" label="Operación"/></Tabs>
-    {section === "finance" && <FinancialOverview salesByDay={salesByDay} paymentMix={paymentMix} orderTypeMix={orderTypeMix} categoryPerformance={categoryPerformance}/>} 
-    {section === "products" && <ProductInsights products={productPerformance} slowMovers={slowMovers}/>} 
-    {section === "operations" && <OperationalInsights operations={operations} peakHours={peakHours} ordersByStatus={ordersByStatus} summary={summary}/>} 
+    {section === "finance" && <FinancialOverview salesByDay={salesByDay} paymentMix={paymentMix} orderTypeMix={orderTypeMix} categoryPerformance={categoryPerformance}/>}
+    {section === "products" && <ProductInsights products={productPerformance} slowMovers={slowMovers}/>}
+    {section === "operations" && <OperationalInsights operations={operations} peakHours={peakHours} ordersByStatus={ordersByStatus} summary={summary}/>}
   </Box>;
 }

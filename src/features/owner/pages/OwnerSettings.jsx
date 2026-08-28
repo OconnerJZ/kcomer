@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import {
   Alert,
@@ -17,6 +18,7 @@ import {
   Public,
   Schedule,
   Groups,
+  WorkspacePremium,
 } from "@mui/icons-material";
 import useBusinessSettings from "@Features/owner/hooks/useBusinessSettings";
 import {
@@ -30,6 +32,7 @@ import {
 import SocialLinksTab from "@Features/owner/components/settings/SocialLinksTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import TeamAccessTab from "@Features/owner/components/settings/TeamAccessTab";
+import BusinessPlanTab from "@Features/plans/components/BusinessPlanTab";
 import useImagePreview from "@Shared/hooks/useImagePreview";
 import { validateImageFile } from "@Shared/media/images";
 
@@ -42,6 +45,7 @@ const NAV_ITEMS = [
   { label: "Categorías", icon: Category, description: "Tipo de comida" },
   { label: "Redes", icon: Public, description: "Presencia digital" },
   { label: "Galería", icon: PhotoLibrary, description: "Fotos y portada" },
+  { label: "Plan", icon: WorkspacePremium, description: "Nivel y capacidad" },
 ];
 
 const OwnerSettings = ({ businessData, onRefresh }) => {
@@ -173,6 +177,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
     <FoodTypesTab key="food-types" availableFoodTypes={availableFoodTypes} selectedFoodTypes={selectedFoodTypes} loadingCatalogs={loadingCatalogs} onToggle={toggleFoodType} onSave={handleSaveFoodTypes} loading={loading} />,
     <SocialLinksTab key="social" socialInfo={socialInfo} setSocialInfo={setSocialInfo} onSave={handleSaveSocial} loading={loading} />,
     <GalleryTab key="gallery" photos={photos} coverImage={coverImage} onSetCover={handleSetCover} onUpload={handlePhotoUpload} onDelete={handleDeletePhoto} loading={loading} />,
+    <BusinessPlanTab key="plan" businessId={businessData?.id} />,
     ...(canManageTeam ? [<TeamAccessTab key="team" businessId={businessData?.id} />] : []),
   ];
 

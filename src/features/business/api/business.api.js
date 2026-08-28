@@ -75,6 +75,10 @@ const businessEndpoint = (builder) => ({
     query: ({ businessId }) => `${ENDPOINTS.businesses.base}/${businessId}/team`,
     providesTags: (_result, _error, { businessId }) => [{ type: "BusinessTeam", id: businessId }],
   }),
+  getBusinessPlan: builder.query({
+    query: ({ businessId }) => `${ENDPOINTS.businesses.base}/${businessId}/plan`,
+    providesTags: (_result, _error, { businessId }) => [{ type: "BusinessPlan", id: businessId }],
+  }),
   inviteBusinessMember: builder.mutation({
     query: ({ businessId, ...data }) => ({ url: `${ENDPOINTS.businesses.base}/${businessId}/invitations`, method: "POST", data }),
     invalidatesTags: (_result, _error, { businessId }) => [{ type: "BusinessTeam", id: businessId }],
@@ -129,6 +133,7 @@ export const {
   useAddBusinessPhotoMutation,
   useDeleteBusinessPhotoMutation,
   useGetBusinessTeamQuery,
+  useGetBusinessPlanQuery,
   useInviteBusinessMemberMutation,
   useCancelBusinessInvitationMutation,
   useUpdateBusinessMemberMutation,
