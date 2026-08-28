@@ -39,6 +39,7 @@ export const normalizeBusiness = (business = {}) => {
     business.hero_image ||
     getPhotoValue(photos[0]) ||
     logo;
+  const social = business.social || {};
 
   return {
     id: business.id ?? business.businessId ?? business.business_id ?? null,
@@ -76,6 +77,12 @@ export const normalizeBusiness = (business = {}) => {
     schedule: business.schedule || business.schedules || business.businessSchedules || [],
     menu: business.menu || [],
     tags: business.tags || foodTypes,
+    foodTypes,
+    social: {
+      facebook: social.facebook || business.facebookUrl || business.facebook_url || "",
+      instagram: social.instagram || business.instagramUrl || business.instagram_url || "",
+      whats: social.whats || "",
+    },
     deliverySettings: {
       deliveryRadiusKm: Number(delivery.deliveryRadiusKm ?? delivery.delivery_radius_km ?? 5),
       deliveryFee: Number(delivery.deliveryFee ?? delivery.delivery_fee ?? 0),
@@ -107,6 +114,11 @@ export const toBasicInfoPayload = (business) => ({
   prep_time_min: Number(business.prepTimeMin),
   estimated_delivery_min: Number(business.estimatedDeliveryMin),
   logo_url: business.logo,
+});
+
+export const toSocialPayload = (social = {}) => ({
+  facebook_url: social.facebook || "",
+  instagram_url: social.instagram || "",
 });
 
 export const toLocationPayload = (location) => ({
