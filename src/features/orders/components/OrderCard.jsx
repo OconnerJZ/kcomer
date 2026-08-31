@@ -3,11 +3,10 @@ import {
   CardContent,
   Stack,
   Typography,
-  Divider,
   Box,
   Button,
-  Chip,
 } from "@mui/material";
+import { ArrowForwardRounded, RestaurantMenuRounded } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
 import ActionButton from "./ActionButton";
 import PendingOrderActions from "./PendingOrderActions";
@@ -25,66 +24,46 @@ const ProductionReminder = ({ order }) => {
   return <Box sx={{ px: 1.2, py: .8, borderRadius: 1.5, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
 };
 
-const urgencyChip = {
-  overdue: { color: "error", variant: "filled" },
-  warning: { color: "warning", variant: "filled" },
-  new: { color: "success", variant: "outlined" },
-  normal: { color: "default", variant: "outlined" },
-};
-
 const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = false, now = Date.now() }) => {
   const urgency = getOrderUrgency(order, now);
-  const chip = urgencyChip[urgency.level] || urgencyChip.normal;
+  const itemUnits = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const urgencyColor = urgency.level === "overdue" ? "error.main" : urgency.level === "warning" ? "warning.dark" : "text.secondary";
 
   return (
     <Card
       elevation={0}
       sx={{
-        backgroundColor: highlighted ? "rgba(255, 75, 69, 0.08)" : { xs: "rgba(255,255,255,0.4)", sm: "rgba(255,255,255,0.6)" },
-        backdropFilter: "blur(1.6px)",
-        border: { xs: "", sm: highlighted ? "1px solid rgba(255, 75, 69, 0.55)" : "1px solid #e0e0e0" },
-        borderBottom: { xs: highlighted ? "2px solid rgba(255, 75, 69, 0.75)" : "1px solid #c0c0c0" },
+        backgroundColor: highlighted ? "rgba(255,75,69,.065)" : "rgba(255,255,255,.76)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid",
+        borderColor: highlighted ? "rgba(255,75,69,.48)" : "divider",
         borderLeft: highlighted ? "4px solid rgba(255, 75, 69, 0.9)" : undefined,
-        borderRadius: { xs: 0, sm: 1 },
-        transition: "border-color 0.2s, background-color 0.2s",
-        "&:hover": { borderColor: highlighted ? "rgba(255, 75, 69, 0.8)" : "#1a1a1a41" },
+        borderRadius: 3,
+        transition: "border-color .18s ease, transform .18s ease, box-shadow .18s ease",
+        "&:hover": { borderColor: highlighted ? "rgba(255,75,69,.8)" : "rgba(0,0,0,.2)", transform: "translateY(-1px)", boxShadow: "0 10px 28px rgba(0,0,0,.055)" },
       }}
     >
-      <CardContent sx={{ p: 2.5 }}>
-        <Stack spacing={2}>
-          <Stack direction="row" justifyContent="space-between" alignItems="start">
-            <Stack spacing={0.5}>
-              <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600, fontSize: "0.875rem" }}>#{order.id}</Typography>
-              <Typography variant="button" sx={{ fontWeight: 400, fontSize: "0.825rem" }}>{order.orderType}</Typography>
-            </Stack>
-            <Stack spacing={0.75} alignItems="flex-end">
-              <StatusChip status={order.status} />
-              <Chip size="small" label={urgency.label} color={chip.color} variant={chip.variant} />
-            </Stack>
+      <CardContent sx={{ p: 2.1, "&:last-child": { pb: 2.1 } }}>
+        <Stack spacing={1.45}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+            <Box><Typography variant="caption" color="text.secondary" sx={{ letterSpacing: ".08em" }}>ORDEN</Typography><Typography variant="subtitle1" sx={{ fontFamily: "monospace", fontWeight: 900, lineHeight: 1.15 }}>#{order.id}</Typography></Box>
+            <StatusChip status={order.status} />
           </Stack>
 
-          <Divider sx={{ borderColor: "#f0f0f0" }} />
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-end" gap={2}>
+            <Box minWidth={0}><Typography variant="body2" fontWeight={800} noWrap>{order.customerName || "Cliente"}</Typography><Typography variant="caption" color="text.secondary">{order.orderType === "delivery" ? "Delivery" : "Recoger"} · {formatOrderDate(order.createdAt)}</Typography></Box>
+            <Typography variant="subtitle1" fontWeight={900} whiteSpace="nowrap">{formatCurrency(order.total)}</Typography>
+          </Stack>
 
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>{order.customerName}</Typography>
-            <Typography variant="caption" sx={{ color: "#999", display: "block", mb: 1 }}>{formatOrderDate(order.createdAt)}</Typography>
-            <Stack spacing={.35} sx={{ mb: 1 }}>
-              {order.items.slice(0, 3).map((item) => <Typography key={item.detailId || item.id || item.name} variant="body2"><Box component="span" fontWeight={850}>{item.quantity}×</Box> {item.name}</Typography>)}
-              {order.items.length > 3 && <Typography variant="caption" color="text.secondary">+{order.items.length - 3} productos más</Typography>}
-            </Stack>
-            <ProductionReminder order={order} />
-            <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.75 }}>{formatCurrency(order.total)}</Typography>
-          </Box>
+          {urgency.level !== "normal" && <Typography variant="caption" color={urgencyColor} fontWeight={800}>{urgency.label}</Typography>}
+
+          <Button fullWidth onClick={() => onViewOrder(order)} startIcon={<RestaurantMenuRounded />} endIcon={<ArrowForwardRounded />} sx={{ justifyContent: "space-between", px: 1.4, py: 1.05, borderRadius: 2, textTransform: "none", color: "text.primary", bgcolor: "rgba(0,0,0,.032)", border: "1px solid", borderColor: "rgba(0,0,0,.055)", "&:hover": { bgcolor: "rgba(255,75,69,.055)", borderColor: "rgba(255,75,69,.18)" } }}>
+            <Box sx={{ textAlign: "left", flex: 1 }}><Typography variant="body2" fontWeight={850}>Ver productos y detalle</Typography><Typography variant="caption" color="text.secondary">{itemUnits} {itemUnits === 1 ? "producto" : "productos"}</Typography></Box>
+          </Button>
+
+          <ProductionReminder order={order} />
 
           <Stack spacing={1}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => onViewOrder(order)}
-              sx={{ borderColor: "#e0e0e0", color: "#1a1a1a", textTransform: "none", fontWeight: 500, borderRadius: 1, fontSize: "0.813rem", "&:hover": { borderColor: "#1a1a1a", bgcolor: "transparent" } }}
-            >
-              Ver detalles
-            </Button>
             {order.status === "pending" ? (
               <PendingOrderActions order={order} onUpdateStatus={onUpdateStatus} fullWidth />
             ) : (

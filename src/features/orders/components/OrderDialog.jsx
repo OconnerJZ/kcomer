@@ -1,6 +1,9 @@
 import {
   Dialog,
   DialogContent,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Stack,
   Typography,
@@ -13,13 +16,12 @@ import {
 } from "@mui/material";
 import {
   Close,
-  LocalShipping,
+  ExpandMoreRounded,
   PaidRounded,
   Payments,
-  Storefront,
 } from "@mui/icons-material";
 import { ORDER_STATUS } from "@Features/orders/model/orderStatus";
-import { formatCurrency, formatOrderDate, getStatusColor } from "@Features/orders/model/orderFormatters";
+import { formatCurrency, formatOrderDate, formatPaymentMethod, getStatusColor } from "@Features/orders/model/orderFormatters";
 import CustomerInfo from "./dialog/CustomerInfo";
 import DeliveryInfo from "./dialog/DeliveryInfo";
 import OrderItems from "./dialog/OrderItems";
@@ -40,12 +42,9 @@ const SummaryPill = ({ icon: Icon, label, value }) => (
 );
 
 const StatusHistory = ({ history = [] }) => {
-  if (!history?.length) return null;
+  if (!history?.length) return <Typography variant="body2" color="text.secondary">Aún no hay cambios de estado registrados.</Typography>;
   return (
-    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
-      <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".64rem" }}>SEGUIMIENTO</Typography>
-      <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2 }}>Historial de la orden</Typography>
-      <Stack spacing={0}>
+      <Stack spacing={0} sx={{ pt: .25 }}>
         {history.map((entry, index) => (
           <Box key={entry.id ?? `${entry.status}-${entry.createdAt || index}`} sx={{ display: "grid", gridTemplateColumns: "18px minmax(0,1fr) auto", gap: 1.25, alignItems: "start", pb: index === history.length - 1 ? 0 : 1.8 }}>
             <Box sx={{ position: "relative", display: "flex", justifyContent: "center", pt: .55 }}>
@@ -60,14 +59,21 @@ const StatusHistory = ({ history = [] }) => {
           </Box>
         ))}
       </Stack>
-    </Box>
   );
 };
+
+const ActivityAccordion = ({ eyebrow, title, children }) => (
+  <Accordion disableGutters elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", bgcolor: "rgba(255,255,255,.82)", "&:before": { display: "none" } }}>
+    <AccordionSummary expandIcon={<ExpandMoreRounded />} sx={{ minHeight: 66, px: 2, "& .MuiAccordionSummary-content": { my: 1.2 } }}>
+      <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".62rem", lineHeight: 1.1 }}>{eyebrow}</Typography><Typography variant="subtitle2" fontWeight={850}>{title}</Typography></Box>
+    </AccordionSummary>
+    <AccordionDetails sx={{ px: 2, pt: 0, pb: 2, maxHeight: 330, overflowY: "auto" }}>{children}</AccordionDetails>
+  </Accordion>
+);
 
 const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStatus, canReviewPayments = false, isSmall }) => {
   if (!order) return null;
   const statusColor = getStatusColor(order.status);
-  const typeLabel = order.orderType === "delivery" ? "Delivery" : "Recoger";
   const kitchenEnabled = Boolean(onUpdateKitchenStatus) && ["accepted", "preparing", "ready"].includes(order.status);
 
   return (
@@ -89,9 +95,8 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
           </Stack>
 
           <Typography variant="body2" fontWeight={800} sx={{ mt: .9 }}>{order.customerName || "Cliente"}</Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3,minmax(0,1fr))" }, gap: 1.1, mt: 1.6 }}>
-            <SummaryPill icon={order.orderType === "delivery" ? LocalShipping : Storefront} label="Entrega" value={typeLabel} />
-            <SummaryPill icon={Payments} label="Pago" value={order.paymentMethod || "Efectivo"} />
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(2,minmax(0,220px))" }, gap: 1.1, mt: 1.6 }}>
+            <SummaryPill icon={Payments} label="Pago" value={formatPaymentMethod(order.paymentMethod)} />
             <SummaryPill icon={PaidRounded} label="Total" value={formatCurrency(order.total)} />
           </Box>
         </Box>
@@ -102,8 +107,8 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
             <Grid item xs={12} md={6}><CustomerInfo order={order} /></Grid>
             <Grid item xs={12} md={6}><DeliveryInfo order={order} /></Grid>
             {order.paymentMethod === "transfer" && canReviewPayments && <Grid item xs={12}><TransferPaymentReviewPanel order={order} /></Grid>}
-            {order.statusHistory?.length > 0 && <Grid item xs={12}><StatusHistory history={order.statusHistory} /></Grid>}
-            <Grid item xs={12}><OrderAuditTrail orderId={order.id} enabled={open} /></Grid>
+            <Grid item xs={12} md={6}><ActivityAccordion eyebrow="SEGUIMIENTO" title="Historial de la orden"><StatusHistory history={order.statusHistory} /></ActivityAccordion></Grid>
+            <Grid item xs={12} md={6}><ActivityAccordion eyebrow="AUDITORÍA" title="Bitácora de actividad"><OrderAuditTrail orderId={order.id} enabled={open} compact /></ActivityAccordion></Grid>
           </Grid>
 
           <Divider sx={{ my: 2.5 }} />

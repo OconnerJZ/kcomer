@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Box, ButtonBase, Stack, Typography } from "@mui/material";
-import { CreditCard, LocationOn, MapRounded, StickyNote2 } from "@mui/icons-material";
+import { LocationOn, MapRounded, StickyNote2 } from "@mui/icons-material";
 
 const buildMapUrl = (location, address) => {
   const query = location?.latitude && location?.longitude
@@ -52,8 +52,6 @@ const DeliveryInfo = ({ order }) => {
       </Box>
 
       {order.notes && <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: 2, bgcolor: "rgba(248,248,248,.72)" }}><Stack direction="row" spacing={1}><StickyNote2 sx={{ fontSize: 18, color: "text.secondary" }} /><Box><Typography variant="caption" color="text.secondary" fontWeight={800}>NOTAS DEL CLIENTE</Typography><Typography variant="body2" sx={{ mt: .35 }}>{order.notes}</Typography></Box></Stack></Box>}
-
-      <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: 2 }}><Stack direction="row" spacing={1} alignItems="center"><CreditCard sx={{ fontSize: 18, color: "text.secondary" }} /><Box><Typography variant="caption" color="text.secondary">MÉTODO DE PAGO</Typography><Typography variant="body2" fontWeight={800}>{order.paymentMethod || "Efectivo"}</Typography></Box></Stack></Box>
     </Stack>
   );
 };
