@@ -1,7 +1,6 @@
 import { Button, Card, CardContent, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { EditRounded, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { ORDER_STATUS } from "@Features/orders/context/OrderContext";
-import StatusChip from "@Features/orders/components/StatusChip";
 import OrderProgressTracker from "./OrderProgressTracker";
 import OrderItemsList from "./OrderItemsList";
 import OrderHistory from "./OrderHistory";
@@ -23,7 +22,6 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
               </Stack>
               {!isMobile && (
                 <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                  <StatusChip status={order.status} />
                   <Typography variant="caption" color="text.secondary">{new Date(order.createdAt).toLocaleString("es-MX")}</Typography>
                 </Stack>
               )}

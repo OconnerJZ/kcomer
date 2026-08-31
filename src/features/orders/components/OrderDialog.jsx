@@ -12,11 +12,10 @@ import {
   Divider,
 } from "@mui/material";
 import {
-  AccessTime,
   Close,
   LocalShipping,
+  PaidRounded,
   Payments,
-  Person,
   Storefront,
 } from "@mui/icons-material";
 import { ORDER_STATUS } from "@Features/orders/model/orderStatus";
@@ -89,30 +88,23 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
             <IconButton onClick={onClose} size="small" aria-label="cerrar detalle de orden" sx={{ bgcolor: "rgba(255,255,255,.75)", border: "1px solid", borderColor: "divider" }}><Close fontSize="small" /></IconButton>
           </Stack>
 
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4,minmax(0,1fr))" }, gap: 1.1, mt: 2.2 }}>
-            <SummaryPill icon={Person} label="Cliente" value={order.customerName || "Cliente"} />
+          <Typography variant="body2" fontWeight={800} sx={{ mt: .9 }}>{order.customerName || "Cliente"}</Typography>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3,minmax(0,1fr))" }, gap: 1.1, mt: 1.6 }}>
             <SummaryPill icon={order.orderType === "delivery" ? LocalShipping : Storefront} label="Entrega" value={typeLabel} />
             <SummaryPill icon={Payments} label="Pago" value={order.paymentMethod || "Efectivo"} />
-            <SummaryPill icon={AccessTime} label="Total" value={formatCurrency(order.total)} />
+            <SummaryPill icon={PaidRounded} label="Total" value={formatCurrency(order.total)} />
           </Box>
         </Box>
 
         <Box sx={{ p: { xs: 2, sm: 3 } }}>
           <Grid container spacing={2}>
+            <Grid item xs={12}><OrderItems items={order.items} kitchenEnabled={kitchenEnabled} onUpdateKitchenStatus={(detailId, status) => onUpdateKitchenStatus?.(order.id, detailId, status)} /></Grid>
             <Grid item xs={12} md={6}><CustomerInfo order={order} /></Grid>
             <Grid item xs={12} md={6}><DeliveryInfo order={order} /></Grid>
-            <Grid item xs={12}><OrderItems items={order.items} kitchenEnabled={kitchenEnabled} onUpdateKitchenStatus={(detailId, status) => onUpdateKitchenStatus?.(order.id, detailId, status)} /></Grid>
             {order.paymentMethod === "transfer" && canReviewPayments && <Grid item xs={12}><TransferPaymentReviewPanel order={order} /></Grid>}
             {order.statusHistory?.length > 0 && <Grid item xs={12}><StatusHistory history={order.statusHistory} /></Grid>}
             <Grid item xs={12}><OrderAuditTrail orderId={order.id} enabled={open} /></Grid>
           </Grid>
-
-          <Box sx={{ mt: 2.5, p: { xs: 2, sm: 2.4 }, borderRadius: 3, bgcolor: "#18181b", color: "common.white" }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box><Typography variant="caption" sx={{ color: "rgba(255,255,255,.62)", letterSpacing: ".1em" }}>TOTAL DE LA ORDEN</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,.74)", mt: .25 }}>Importe calculado al crear el pedido</Typography></Box>
-              <Typography variant="h4" fontWeight={900}>{formatCurrency(order.total)}</Typography>
-            </Stack>
-          </Box>
 
           <Divider sx={{ my: 2.5 }} />
           <Stack direction={{ xs: "column-reverse", sm: "row" }} spacing={1.5} justifyContent="flex-end" alignItems={{ xs: "stretch", sm: "center" }}>

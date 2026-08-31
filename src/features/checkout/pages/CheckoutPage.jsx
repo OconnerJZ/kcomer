@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -18,6 +19,8 @@ import MyOrders from "@Features/orders/pages/MyOrders";
 import CheckoutDialog from "../components/CheckoutDialog";
 import useCheckoutController from "../hooks/useCheckoutController";
 import SharedOrderLauncher from "@Features/shared-orders/components/SharedOrderLauncher";
+import SharedOrderPage from "@Features/shared-orders/pages/SharedOrderPage";
+import { useGetActiveSharedOrderQuery } from "@Features/shared-orders/api/sharedOrders.api";
 
 const VIEW_OPTIONS = [
   { label: "Pedidos", value: "pedidos" },
@@ -27,6 +30,8 @@ const VIEW_OPTIONS = [
 export default function CheckoutPage() {
   const [view, setView] = useState("pedidos");
   const checkout = useCheckoutController();
+  const { data: activeSharedOrder, isLoading: loadingSharedOrder } = useGetActiveSharedOrderQuery();
+  const sharedMode = Boolean(activeSharedOrder?.id);
 
   const handleConfirm = async () => {
     const result = await checkout.confirmCheckout();
@@ -50,15 +55,23 @@ export default function CheckoutPage() {
           options={VIEW_OPTIONS}
         />
 
-        {view === "pedidos" && <SharedOrderLauncher />}
+        {view === "pedidos" && loadingSharedOrder && <Box sx={{ py: 7 }}><CircularProgress /></Box>}
+
+        {view === "pedidos" && !loadingSharedOrder && sharedMode && (
+          <Box sx={{ mt: 2, textAlign: "left" }}>
+            <SharedOrderPage embedded sessionIdOverride={activeSharedOrder.id} />
+          </Box>
+        )}
+
+        {view === "pedidos" && !loadingSharedOrder && !sharedMode && <SharedOrderLauncher />}
 
         {view === "ordenes" && <MyOrders />}
 
-        {view === "pedidos" && checkout.businesses.length === 0 && (
+        {view === "pedidos" && !loadingSharedOrder && !sharedMode && checkout.businesses.length === 0 && (
           <EmptyCartState />
         )}
 
-        {view === "pedidos" && checkout.currentBusiness && (
+        {view === "pedidos" && !loadingSharedOrder && !sharedMode && checkout.currentBusiness && (
           <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
             <CartBusinessTabs
               businesses={checkout.businesses}

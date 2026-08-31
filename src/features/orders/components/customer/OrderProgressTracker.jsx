@@ -31,31 +31,24 @@ export default function OrderProgressTracker({ status, orderType = "pickup", com
   const currentIndex = steps.findIndex((step) => step.key === status);
   const progress = getProgress(status, steps);
   const currentLabel = steps[currentIndex]?.label || "Procesando";
-
-  if (compact) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: .25 }}>
-        <Box sx={{ position: "relative", width: 64, height: 64, display: "grid", placeItems: "center" }}>
-          <CircularProgress variant="determinate" value={100} size={64} thickness={3.7} sx={{ position: "absolute", color: "action.hover" }} />
-          <CircularProgress variant="determinate" value={progress} size={64} thickness={3.7} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
-          {status === "completed" ? <CheckRounded color="success" sx={{ fontSize: 24 }} /> : <Typography variant="caption" fontWeight={900} sx={{ fontSize: ".72rem" }}>{progress}%</Typography>}
-        </Box>
-      </Box>
-    );
-  }
+  const pickupReady = orderType === "pickup" && status === "ready";
+  const size = compact ? 64 : 76;
 
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "auto minmax(0,1fr)", sm: "110px minmax(0,1fr)" }, gap: { xs: 2, sm: 2.5 }, alignItems: "center", py: .5 }}>
-      <Stack alignItems="center" spacing={.75}>
-        <Box sx={{ position: "relative", width: 76, height: 76, display: "grid", placeItems: "center" }}>
-          <CircularProgress variant="determinate" value={100} size={76} thickness={3.8} sx={{ position: "absolute", color: "action.hover" }} />
-          <CircularProgress variant="determinate" value={progress} size={76} thickness={3.8} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
+    <Box sx={{ display: "grid", gridTemplateColumns: `${size}px minmax(0,1fr)`, gap: { xs: 2, sm: 2.5 }, alignItems: "center", py: .5 }}>
+      <Box sx={{ position: "relative", width: size, height: size, display: "grid", placeItems: "center" }}>
+          <CircularProgress variant="determinate" value={100} size={size} thickness={3.8} sx={{ position: "absolute", color: "action.hover" }} />
+          <CircularProgress variant="determinate" value={progress} size={size} thickness={3.8} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
           {status === "completed" ? <CheckRounded color="success" /> : <Typography fontWeight={900}>{progress}%</Typography>}
-        </Box>
-        <Typography variant="caption" fontWeight={800}>{currentLabel}</Typography>
-      </Stack>
+      </Box>
 
-      <Stack direction="row" alignItems="flex-start" sx={{ width: "100%", minWidth: 0 }}>
+      <Stack spacing={pickupReady ? 1 : .65} minWidth={0}>
+        <Box>
+          <Typography variant={compact ? "body2" : "subtitle2"} fontWeight={900}>{currentLabel}</Typography>
+          {pickupReady && <Typography variant="caption" color="success.dark" fontWeight={750} sx={{ display: "block", mt: .25, lineHeight: 1.4 }}>Tu orden está lista. Ya puedes ir a recogerla.</Typography>}
+        </Box>
+
+        {!compact && <Stack direction="row" alignItems="flex-start" sx={{ width: "100%", minWidth: 0 }}>
         {steps.map((step, index) => {
           const completed = index < currentIndex || status === "completed";
           const active = index === currentIndex;
@@ -73,6 +66,7 @@ export default function OrderProgressTracker({ status, orderType = "pickup", com
             </Box>
           );
         })}
+        </Stack>}
       </Stack>
     </Box>
   );

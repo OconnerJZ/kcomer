@@ -58,6 +58,7 @@ const ModifierSummary = ({ modifiers = [] }) => {
 const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus }) => {
   const totalUnits = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const readyUnits = items.reduce((sum, item) => sum + (item.kitchenStatus === "ready" ? Number(item.quantity || 0) : 0), 0);
+  const hasPendingProduction = kitchenEnabled && totalUnits > 0 && readyUnits < totalUnits;
 
   return (
     <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.86)" }}>
@@ -71,6 +72,8 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
           <Chip size="small" label={`${totalUnits} ${totalUnits === 1 ? "producto" : "productos"}`} variant="outlined" sx={{ fontWeight: 700 }} />
         </Stack>
       </Stack>
+
+      {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: 2, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
 
       <Stack spacing={0}>
         {items.map((item, index) => {

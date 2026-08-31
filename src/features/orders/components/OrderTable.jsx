@@ -28,7 +28,7 @@ const urgencyChip = {
   normal: { color: "default", variant: "outlined" },
 };
 
-const columnWidths = { order: 82, customer: 170, items: 62, kitchen: 120, total: 102, status: 128, wait: 105, date: 128, actions: 145 };
+const columnWidths = { order: 82, customer: 160, items: 62, kitchen: 132, total: 102, status: 128, wait: 105, date: 128, actions: 145 };
 const terminalStatuses = new Set(["completed", "cancelled"]);
 
 const KitchenProgress = ({ order }) => {
@@ -42,6 +42,7 @@ const KitchenProgress = ({ order }) => {
     <Stack spacing={0.45} sx={{ width: 88 }}>
       <Typography variant="caption" fontWeight={800} color={complete ? "success.main" : "text.secondary"}>{ready} de {total}</Typography>
       <LinearProgress variant="determinate" value={(ready / total) * 100} color={complete ? "success" : "primary"} sx={{ height: 4, borderRadius: 999, bgcolor: "rgba(0,0,0,.06)" }} />
+      {!complete && <Typography variant="caption" color="warning.dark" fontWeight={800} sx={{ fontSize: ".62rem" }}>{order.status === "accepted" ? "Inicia productos" : "Avanza productos"}</Typography>}
     </Stack>
   );
 };

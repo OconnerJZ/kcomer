@@ -17,6 +17,14 @@ import {
 } from "@Features/orders/model/orderFormatters";
 import { getOrderUrgency } from "@Features/orders/model/orderPriority";
 
+const ProductionReminder = ({ order }) => {
+  if (!["accepted", "preparing"].includes(order.status)) return null;
+  const ready = Number(order.kitchenProgress?.ready || 0);
+  const total = Number(order.kitchenProgress?.total || 0);
+  if (!total || ready >= total) return null;
+  return <Box sx={{ px: 1.2, py: .8, borderRadius: 1.5, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
+};
+
 const urgencyChip = {
   overdue: { color: "error", variant: "filled" },
   warning: { color: "warning", variant: "filled" },
@@ -59,9 +67,12 @@ const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = 
 
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>{order.customerName}</Typography>
-            <Typography variant="caption" sx={{ color: "#999", display: "block" }}>
-              {order.items.length} producto{order.items.length !== 1 ? "s" : ""} • {formatOrderDate(order.createdAt)}
-            </Typography>
+            <Typography variant="caption" sx={{ color: "#999", display: "block", mb: 1 }}>{formatOrderDate(order.createdAt)}</Typography>
+            <Stack spacing={.35} sx={{ mb: 1 }}>
+              {order.items.slice(0, 3).map((item) => <Typography key={item.detailId || item.id || item.name} variant="body2"><Box component="span" fontWeight={850}>{item.quantity}×</Box> {item.name}</Typography>)}
+              {order.items.length > 3 && <Typography variant="caption" color="text.secondary">+{order.items.length - 3} productos más</Typography>}
+            </Stack>
+            <ProductionReminder order={order} />
             <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.75 }}>{formatCurrency(order.total)}</Typography>
           </Box>
 
