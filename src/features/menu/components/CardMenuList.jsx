@@ -19,6 +19,9 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [configuration, setConfiguration] = useState({ modifiers: [], modifierSummary: [], note: "", price: menuItem.price, basePrice: menuItem.price });
   const configurable = menuItem.modifierGroups.length > 0;
+  const includedIngredients = menuItem.modifierGroups
+    .flatMap((group) => group.choices || [])
+    .filter((choice) => choice.defaultSelected && Number(choice.priceExtra || 0) === 0);
 
   const updateCart = (qty, config = configuration) => {
     onAddToCart({
@@ -85,6 +88,12 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
                   <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>${Number(quantity > 0 ? configuration.price : menuItem.price).toFixed(2)}</Typography>
                 </Stack>
                 {menuItem.description && <Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: .4, lineHeight: 1.45 }}>{menuItem.description}</Typography>}
+                {includedIngredients.length > 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: .45, lineHeight: 1.35 }}>
+                    Incluye: {includedIngredients.slice(0, 4).map((choice) => choice.name).join(" · ")}
+                    {includedIngredients.length > 4 ? "…" : ""}
+                  </Typography>
+                )}
               </Box>
 
               {quantity > 0 && (removed.length > 0 || selectedExtras.length > 0) && (
