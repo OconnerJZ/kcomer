@@ -25,10 +25,10 @@ import {
   BasicInfoTab,
   DeliveryTab,
   FoodTypesTab,
-  LocationTab,
   PaymentMethodsTab,
   SchedulesTab,
 } from "@Features/owner/components/settings/SettingsTabs";
+import LocationSettingsTab from "@Features/owner/components/settings/LocationSettingsTab";
 import SocialLinksTab from "@Features/owner/components/settings/SocialLinksTab";
 import GalleryTab from "@Features/owner/components/settings/GalleryTab";
 import TeamAccessTab from "@Features/owner/components/settings/TeamAccessTab";
@@ -158,8 +158,8 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
   };
 
   const toggleFoodType = (typeId) => {
-    setSelectedFoodTypes((current) => current.includes(typeId)
-      ? current.filter((id) => id !== typeId)
+    setSelectedFoodTypes((current) => current.some((id) => String(id) === String(typeId))
+      ? current.filter((id) => String(id) !== String(typeId))
       : [...current, typeId]);
   };
 
@@ -170,7 +170,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
   const tabs = [
     <BasicInfoTab key="basic" basicInfo={basicInfo} setBasicInfo={setBasicInfo} logoFile={logo.file} logoPreview={logo.preview} onLogoChange={handleLogoChange} onSave={handleSaveBasicInfo} loading={loading} />,
-    <LocationTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
+    <LocationSettingsTab key="location" locationInfo={locationInfo} setLocationInfo={setLocationInfo} onSave={handleSaveLocation} loading={loading} />,
     <SchedulesTab key="schedules" schedules={schedules} setSchedules={setSchedules} onSave={handleSaveSchedules} loading={loading} />,
     <DeliveryTab key="delivery" deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} onSave={handleSaveDelivery} loading={loading} />,
     <PaymentMethodsTab key="payments" paymentMethods={paymentMethods} onToggle={togglePaymentMethod} onConfigChange={updatePaymentConfig} onSave={handleSavePayments} loading={loading} />,

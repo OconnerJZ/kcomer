@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Grid, Paper, Stack, TextField, Typography } from "@mui/material";
 import { LocationOnRounded, MyLocationRounded } from "@mui/icons-material";
-import GoogleMapField from "@Features/owner/components/registration/GoogleMapField";
+import GoogleMapField from "@Shared/components/maps/GoogleMapField";
 import { API_KEY_MAPS } from "@Shared/config/env";
 
 export default function LocationSettingsTab({ locationInfo, setLocationInfo, onSave, loading }) {

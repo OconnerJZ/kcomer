@@ -8,6 +8,7 @@ import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { normalizeBusiness } from "@Features/business/model/business";
 import { useMemo, useState } from "react";
+import { distanceLabel, foodTypeLabels } from "@Features/explore/model/placePresentation";
 
 const getMediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? value : `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
 
@@ -18,12 +19,17 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => ({
   review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} businessId={business.id} />,
 }[movement] || null);
 
-const CardPlace = ({ data, loadBusinessMenu }) => {
+const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
   const business = useMemo(() => normalizeBusiness(data), [data]);
   const { flipped, movement, expanded, onMovement, expandCard } = useCardPlace({ data: business, loadBusinessMenu });
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const backgroundUrl = getMediaUrl(business.coverImage || business.logo);
   const logoUrl = getMediaUrl(business.logo);
+  const foodTags = useMemo(() => foodTypeLabels(business).slice(0, 3), [business]);
+  const distance = useMemo(
+    () => distanceLabel(userLocation, business.location),
+    [business.location, userLocation],
+  );
 
   return (
     <>
@@ -73,9 +79,14 @@ const CardPlace = ({ data, loadBusinessMenu }) => {
                 </Stack>
               </Stack>
 
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1.45, lineHeight: 1.55 }}>
-                {business.description ? `${business.description.slice(0, 88)}${business.description.length > 88 ? "…" : ""}` : "Descubre su menú, ubicación, fotos y forma de contacto en un solo lugar."}
-              </Typography>
+              {(foodTags.length > 0 || distance) && (
+                <Stack direction="row" spacing={.65} flexWrap="wrap" useFlexGap sx={{ mt: 1.35 }}>
+                  {foodTags.map((label) => (
+                    <Chip key={label} size="small" label={label} variant="outlined" sx={{ height: 25, fontSize: ".67rem", bgcolor: "rgba(255,255,255,.52)" }} />
+                  ))}
+                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", bgcolor: "rgba(255,75,69,.08)", color: "primary.dark" }} />}
+                </Stack>
+              )}
 
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.25 }}>
                 <Typography variant="caption" color="text.secondary">Todo lo esencial, sin salir de la tarjeta</Typography>

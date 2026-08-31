@@ -220,7 +220,7 @@ export default function ExplorePage() {
             <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center" alignItems="flex-start">
               {businesses.map((data) => (
                 <Grid key={data.id} item xs={12} sm={6} md={4} lg={3} sx={{ display: "flex", justifyContent: "center" }}>
-                  <CardPlace data={data} loadBusinessMenu={loadBusinessMenu} />
+                  <CardPlace data={data} userLocation={geolocation.location} loadBusinessMenu={loadBusinessMenu} />
                 </Grid>
               ))}
             </Grid>

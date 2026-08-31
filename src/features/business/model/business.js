@@ -13,11 +13,20 @@ const getPhotoValue = (photo) =>
     ? photo
     : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || photo?.image_url || "";
 
+const normalizeFoodType = (item = {}) => {
+  if (typeof item !== "object") return { id: item, name: String(item), label: String(item) };
+  const id = item.id ?? item.foodTypeId ?? item.food_type_id ?? null;
+  const name = item.name || item.label || item.typeName || item.type_name || item.value || "";
+  return { ...item, id, name, label: name };
+};
+
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
   const delivery = business.deliverySettings || business.delivery_settings || {};
   const methods = business.paymentMethods || business.payment_methods || [];
-  const foodTypes = business.foodTypes || business.food_types || [];
+  const rawFoodTypes = business.foodTypes || business.food_types || [];
+  const foodTypes = (Array.isArray(rawFoodTypes) ? rawFoodTypes : []).map(normalizeFoodType);
+  const rawTags = business.tags || foodTypes;
   const phone = business.phone || business.phones?.[0] || "";
   const email = business.email || business.emails?.[0] || "";
   const photos = business.photos || business.businessPhotos || business.business_photos || [];
@@ -76,7 +85,7 @@ export const normalizeBusiness = (business = {}) => {
     schedules: business.schedules || business.schedule || business.businessSchedules || [],
     schedule: business.schedule || business.schedules || business.businessSchedules || [],
     menu: business.menu || [],
-    tags: business.tags || foodTypes,
+    tags: (Array.isArray(rawTags) ? rawTags : []).map(normalizeFoodType),
     foodTypes,
     social: {
       facebook: social.facebook || business.facebookUrl || business.facebook_url || "",
@@ -98,7 +107,7 @@ export const normalizeBusiness = (business = {}) => {
         config: current?.config && typeof current.config === "object" ? current.config : {},
       };
     }),
-    foodTypeIds: foodTypes.map((item) => (typeof item === "object" ? item.id : item)),
+    foodTypeIds: foodTypes.map((item) => item.id).filter((id) => id !== null && id !== undefined),
     photos,
     membershipRole: business.membershipRole || business.roleInBusiness || business.role_in_business || "",
     permissions: Array.isArray(business.permissions) ? business.permissions : [],
