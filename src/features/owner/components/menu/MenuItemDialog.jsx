@@ -18,6 +18,7 @@ import {
   AddPhotoAlternate,
   Close,
   Image as ImageIcon,
+  TuneRounded,
 } from "@mui/icons-material";
 
 const formatPreviewPrice = (value) => {
@@ -91,6 +92,7 @@ const MenuItemDialog = ({
   onSave,
   onImageChange,
   onFormChange,
+  onCustomize,
 }) => {
   const canSave = Boolean(form.name?.trim()) && Number(form.price) > 0;
 
@@ -205,6 +207,17 @@ const MenuItemDialog = ({
       </DialogContent>
 
       <DialogActions sx={{ px: { xs: 2, sm: 3 }, py: 2, gap: 1 }}>
+        {editing && (
+          <Button
+            onClick={onCustomize}
+            startIcon={<TuneRounded />}
+            variant="outlined"
+            disabled={loading}
+            sx={{ mr: "auto", textTransform: "none", borderRadius: 2, fontWeight: 700 }}
+          >
+            Ingredientes y opciones
+          </Button>
+        )}
         <Button onClick={onClose} disabled={loading} sx={{ textTransform: "none", color: "text.secondary" }}>
           Cancelar
         </Button>

@@ -148,6 +148,12 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
     image.resetImage();
   };
 
+  const handleOpenModifierDialog = (item) => {
+    if (!item?.id) return;
+    handleCloseMenuDialog();
+    setModifierDialog({ open: true, item });
+  };
+
   const handleFormChange = (field, value) => {
     setMenuForm((current) => ({ ...current, [field]: value }));
   };
@@ -216,15 +222,18 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
   };
 
   const ActionButtons = ({ item }) => (
-    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+    <Stack direction="row" spacing={0.5} justifyContent="flex-end" flexWrap="wrap" useFlexGap>
       <Tooltip title="Personalización">
-        <IconButton
+        <Button
           size="small"
+          variant="outlined"
           color="primary"
-          onClick={() => setModifierDialog({ open: true, item })}
+          startIcon={<TuneRounded />}
+          onClick={() => handleOpenModifierDialog(item)}
+          sx={{ textTransform: "none", borderRadius: 2, whiteSpace: "nowrap" }}
         >
-          <TuneRounded fontSize="small" />
-        </IconButton>
+          Ingredientes y opciones
+        </Button>
       </Tooltip>
       <Tooltip title="Editar platillo">
         <IconButton size="small" onClick={() => handleOpenMenuDialog(item)}>
@@ -543,6 +552,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         onSave={handleSaveMenuItem}
         onImageChange={handleImageChange}
         onFormChange={handleFormChange}
+        onCustomize={() => handleOpenModifierDialog(menuDialog.item)}
       />
       <MenuModifierDialog
         open={modifierDialog.open}
