@@ -1,93 +1,64 @@
-import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { Add, EditRounded, Image as ImageIcon, Remove, TuneRounded } from "@mui/icons-material";
-import { normalizeCartItem } from "@Features/cart/model/cartItem";
+import { Image as ImageIcon, TuneRounded } from "@mui/icons-material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import useMenuItemSelection from "../hooks/useMenuItemSelection";
+import MenuItemModifierSummary from "./MenuItemModifierSummary";
+import MenuItemSelectionControls from "./MenuItemSelectionControls";
 import ProductCustomizationDialog from "./ProductCustomizationDialog";
 
-const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onAddToCart, initialQuantity = 0, initialConfiguration = null, busy = false, targetLabel = "" }) => {
-  const menuItem = useMemo(() => normalizeCartItem(item), [item]);
-  const [quantity, setQuantity] = useState(initialQuantity);
-  const [customizerOpen, setCustomizerOpen] = useState(false);
-  const [configuration, setConfiguration] = useState(() => ({
-    modifiers: initialConfiguration?.modifiers || [],
-    modifierSummary: initialConfiguration?.modifierSummary || [],
-    note: initialConfiguration?.note || "",
-    price: Number(initialConfiguration?.price ?? menuItem.price),
-    basePrice: Number(initialConfiguration?.basePrice ?? menuItem.price),
-  }));
-  const configurable = menuItem.modifierGroups.length > 0;
-  const includedIngredients = menuItem.modifierGroups
-    .flatMap((group) => group.choices || [])
-    .filter((choice) => choice.defaultSelected && Number(choice.priceExtra || 0) === 0);
+const CARD_STYLES = {
+  width: "100%",
+  mb: 1,
+  overflow: "hidden",
+  border: "1px solid",
+  borderColor: "divider",
+  borderRadius: 2.5,
+  bgcolor: "rgba(255,255,255,.82)",
+  transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease",
+  "&:hover": {
+    transform: "translateY(-1px)",
+    boxShadow: "0 10px 28px rgba(0,0,0,.06)",
+    borderColor: "rgba(255, 75, 69, .28)",
+  },
+};
 
-  const updateCart = (qty, config = configuration) => onAddToCart({
-      itemId: menuItem.id,
-      businessId,
-      businessName,
-      paymentMethods,
-      item: {
-        ...menuItem,
-        quantity: qty,
-        note: config.note || "",
-        modifiers: config.modifiers || [],
-        modifierSummary: config.modifierSummary || [],
-        price: Number(config.price ?? menuItem.price),
-        basePrice: Number(config.basePrice ?? menuItem.price),
-      },
-    });
-
-  const commitQuantity = async (nextQuantity, config = configuration) => {
-    const previousQuantity = quantity;
-    setQuantity(nextQuantity);
-    try {
-      await updateCart(nextQuantity, config);
-      return true;
-    } catch {
-      setQuantity(previousQuantity);
-      return false;
-    }
-  };
-
-  const handleIncrement = async () => {
-    if (quantity === 0 && configurable) {
-      setCustomizerOpen(true);
-      return;
-    }
-    const newQty = quantity + 1;
-    await commitQuantity(newQty);
-  };
-
-  const handleDecrement = async () => {
-    if (quantity <= 0) return;
-    const newQty = quantity - 1;
-    await commitQuantity(newQty);
-  };
-
-  const handleConfiguredAdd = async (config) => {
-    setConfiguration(config);
-    const newQty = quantity > 0 ? quantity : 1;
-    if (await commitQuantity(newQty, config)) setCustomizerOpen(false);
-  };
-
-  const removed = configuration.modifierSummary.filter((modifier) => modifier.state === "removed");
-  const selectedExtras = configuration.modifierSummary.filter((modifier) => modifier.state === "selected" && Number(modifier.priceExtra || 0) > 0);
+const CardMenuList = ({
+  item,
+  businessId,
+  businessName,
+  paymentMethods = [],
+  onAddToCart,
+  initialQuantity = 0,
+  initialConfiguration = null,
+  busy = false,
+  targetLabel = "",
+}) => {
+  const selection = useMenuItemSelection({
+    item,
+    businessId,
+    businessName,
+    paymentMethods,
+    onAddToCart,
+    initialQuantity,
+    initialConfiguration,
+  });
 
   return (
     <>
-      <Card elevation={0} sx={{ width: "100%", mb: 1, overflow: "hidden", border: "1px solid", borderColor: "divider", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.82)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 10px 28px rgba(0,0,0,.06)", borderColor: "rgba(255, 75, 69, .28)" } }}>
+      <Card elevation={0} sx={CARD_STYLES}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "88px minmax(0, 1fr)", sm: "104px minmax(0, 1fr)" } }}>
-          <Box sx={{ minHeight: { xs: 104, sm: 112 }, bgcolor: "rgba(255,159,28,.08)", backgroundImage: menuItem.image ? `url(${menuItem.image})` : "none", backgroundSize: "cover", backgroundPosition: "center", display: "grid", placeItems: "center" }}>
-            {!menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 34 }} />}
+          <Box
+            sx={{
+              minHeight: { xs: 104, sm: 112 },
+              bgcolor: "rgba(255,159,28,.08)",
+              backgroundImage: selection.menuItem.image ? `url(${selection.menuItem.image})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            {!selection.menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 34 }} />}
           </Box>
 
           <CardContent sx={{ p: { xs: 1.25, sm: 1.75 }, "&:last-child": { pb: { xs: 1.25, sm: 1.75 } } }}>
@@ -95,61 +66,70 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
               <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
                   <Box minWidth={0}>
-                    <Typography variant="subtitle2" fontWeight={800} sx={{ lineHeight: 1.25 }}>{menuItem.name}</Typography>
-                    {configurable && <Stack direction="row" spacing={.5} alignItems="center" sx={{ mt: .35 }}><TuneRounded sx={{ fontSize: 14, color: "primary.main" }} /><Typography variant="caption" color="primary.main" fontWeight={750}>Personalizable</Typography></Stack>}
+                    <Typography variant="subtitle2" fontWeight={800} sx={{ lineHeight: 1.25 }}>
+                      {selection.menuItem.name}
+                    </Typography>
+                    {selection.configurable && (
+                      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.35 }}>
+                        <TuneRounded sx={{ fontSize: 14, color: "primary.main" }} />
+                        <Typography variant="caption" color="primary.main" fontWeight={750}>
+                          Personalizable
+                        </Typography>
+                      </Stack>
+                    )}
                   </Box>
-                  <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>${Number(quantity > 0 ? configuration.price : menuItem.price).toFixed(2)}</Typography>
+                  <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+                    ${selection.displayPrice.toFixed(2)}
+                  </Typography>
                 </Stack>
-                {menuItem.description && <Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: .4, lineHeight: 1.45 }}>{menuItem.description}</Typography>}
-                {includedIngredients.length > 0 && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: .45, lineHeight: 1.35 }}>
-                    Incluye: {includedIngredients.slice(0, 4).map((choice) => choice.name).join(" · ")}
-                    {includedIngredients.length > 4 ? "…" : ""}
+                {selection.menuItem.description && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: 0.4, lineHeight: 1.45 }}
+                  >
+                    {selection.menuItem.description}
+                  </Typography>
+                )}
+                {selection.includedIngredients.length > 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.45, lineHeight: 1.35 }}>
+                    Incluye: {selection.includedIngredients.slice(0, 4).map((choice) => choice.name).join(" · ")}
+                    {selection.includedIngredients.length > 4 ? "…" : ""}
                   </Typography>
                 )}
               </Box>
 
-              {quantity > 0 && (removed.length > 0 || selectedExtras.length > 0) && (
-                <Stack direction="row" spacing={.5} flexWrap="wrap" useFlexGap>
-                  {removed.slice(0, 2).map((modifier) => <Chip key={`removed-${modifier.group}-${modifier.name}`} size="small" label={`Sin ${modifier.name}`} variant="outlined" sx={{ height: 22, fontSize: ".65rem" }} />)}
-                  {selectedExtras.slice(0, 2).map((modifier) => <Chip key={`extra-${modifier.group}-${modifier.name}`} size="small" label={modifier.name} color="primary" variant="outlined" sx={{ height: 22, fontSize: ".65rem" }} />)}
-                </Stack>
+              {selection.quantity > 0
+                && (selection.removed.length > 0 || selection.selectedExtras.length > 0) && (
+                  <MenuItemModifierSummary
+                    removed={selection.removed}
+                    selectedExtras={selection.selectedExtras}
+                  />
               )}
 
-              <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1}>
-                {quantity > 0 ? (
-                  <Stack direction="row" spacing={0.5} alignItems="center" justifyContent={{ xs: "flex-end", sm: "flex-start" }}>
-                    <IconButton size="small" disabled={busy} onClick={handleDecrement} sx={{ border: "1px solid", borderColor: "divider" }}><Remove fontSize="small" /></IconButton>
-                    <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 800 }}>{quantity}</Typography>
-                    <IconButton size="small" disabled={busy} onClick={handleIncrement} color="primary" sx={{ border: "1px solid", borderColor: "primary.main" }}><Add fontSize="small" /></IconButton>
-                  </Stack>
-                ) : (
-                  <Button size="small" variant="contained" disableElevation disabled={busy} startIcon={configurable ? <TuneRounded /> : <Add />} onClick={handleIncrement} sx={{ textTransform: "none", borderRadius: 999, fontWeight: 700, px: 1.5 }}>
-                    {configurable ? "Personalizar" : targetLabel ? "Agregar a mi selección" : "Agregar"}
-                  </Button>
-                )}
-
-                {quantity > 0 && configurable && (
-                  <Button size="small" disabled={busy} startIcon={<EditRounded />} onClick={() => setCustomizerOpen(true)} sx={{ textTransform: "none", color: "text.secondary", minWidth: 0 }}>Editar</Button>
-                )}
-              </Stack>
-              {targetLabel && <Typography variant="caption" color="primary.main" fontWeight={750}>Se agregará directamente a {targetLabel}</Typography>}
+              <MenuItemSelectionControls
+                quantity={selection.quantity}
+                configurable={selection.configurable}
+                busy={busy}
+                targetLabel={targetLabel}
+                onIncrement={selection.increment}
+                onDecrement={selection.decrement}
+                onEdit={selection.openCustomizer}
+              />
             </Stack>
           </CardContent>
         </Box>
       </Card>
 
       <ProductCustomizationDialog
-        open={customizerOpen}
-        item={{ ...menuItem, ...configuration, price: menuItem.basePrice || menuItem.price }}
-        onClose={() => setCustomizerOpen(false)}
-        onConfirm={handleConfiguredAdd}
+        open={selection.customizerOpen}
+        item={selection.customizationItem}
+        onClose={selection.closeCustomizer}
+        onConfirm={selection.confirmConfiguration}
       />
     </>
   );
 };
-
-export default CardMenuList;
 
 CardMenuList.propTypes = {
   item: PropTypes.object.isRequired,
@@ -162,3 +142,5 @@ CardMenuList.propTypes = {
   busy: PropTypes.bool,
   targetLabel: PropTypes.string,
 };
+
+export default CardMenuList;
