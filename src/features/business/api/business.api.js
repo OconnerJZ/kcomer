@@ -60,7 +60,18 @@ const endpoints = (builder) => {
     updateBusinessDeliverySettings: createEndpoint("deliverySettings", "update"),
     updateBusinessPaymentMethods: createEndpoint("paymentMethods", "update"),
     updateBusinessFoodTypes: createEndpoint("foodTypes", "update"),
-    addBusinessPhoto: createEndpoint("photos", "create"),
+    addBusinessPhoto: builder.mutation({
+      query: ({ id, body }) => ({
+        url: dynamicEndpoints.photos.path({ id }),
+        method: "POST",
+        data: body,
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Business", id },
+        { type: "Business", id: "LIST" },
+      ],
+    }),
     deleteBusinessPhoto: createEndpoint("photo", "delete"),
   };
 };
