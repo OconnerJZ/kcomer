@@ -19,3 +19,64 @@ export const sharedOrderError = (error, fallback = "No se pudo actualizar la ord
   const message = error?.data?.message || error?.data?.error || error?.data?.errors?.[0]?.msg;
   return typeof message === "string" && message.trim() ? message : fallback;
 };
+
+export const findOwnSharedOrderItem = (session, businessId, menuId) => (
+  (session?.items || []).find((entry) => (
+    entry.mine
+    && Number(entry.menuId) === Number(menuId)
+    && Number(entry.businessId) === Number(businessId)
+  )) || null
+);
+
+export const createSharedOrderItemOperation = ({ session, businessId, payload }) => {
+  const menuId = Number(payload.itemId);
+  const quantity = Number(payload.item.quantity || 0);
+  const currentItem = findOwnSharedOrderItem(session, businessId, menuId);
+  const common = {
+    id: session.id,
+    expectedVersion: session.version,
+  };
+
+  if (currentItem && quantity <= 0) {
+    return {
+      type: "delete",
+      menuId,
+      quantity,
+      args: { ...common, itemId: currentItem.id },
+    };
+  }
+
+  const itemData = {
+    quantity,
+    note: payload.item.note || "",
+    modifiers: payload.item.modifiers || [],
+  };
+  if (currentItem) {
+    return {
+      type: "update",
+      menuId,
+      quantity,
+      args: { ...common, itemId: currentItem.id, ...itemData },
+    };
+  }
+
+  return {
+    type: "add",
+    menuId,
+    quantity,
+    args: {
+      ...common,
+      businessId: Number(businessId),
+      menuId,
+      ...itemData,
+    },
+  };
+};
+
+export const toSharedOrderItemConfiguration = (sharedItem, menuItem) => sharedItem ? ({
+  modifiers: sharedItem.modifiers,
+  note: sharedItem.note,
+  price: sharedItem.unitPrice,
+  basePrice: menuItem.price,
+  version: sharedItem.version,
+}) : null;
