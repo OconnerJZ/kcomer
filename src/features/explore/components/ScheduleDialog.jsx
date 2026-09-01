@@ -58,7 +58,7 @@ const ScheduleRow = ({ schedule, isToday }) => {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "22px minmax(88px,1fr) auto",
+        gridTemplateColumns: { xs: "16px minmax(0,1fr)", sm: "22px minmax(88px,1fr) auto" },
         alignItems: "center",
         gap: 1.2,
         px: 1.4,
@@ -94,6 +94,7 @@ const ScheduleRow = ({ schedule, isToday }) => {
         sx={{
           fontWeight: 750,
           color: closed ? "text.disabled" : "text.primary",
+          gridColumn: { xs: "2", sm: "3" },
           whiteSpace: "nowrap",
         }}
       >
@@ -165,7 +166,7 @@ const ScheduleDialog = ({ open, onClose, data }) => {
             <Typography variant="h5" fontWeight={900} noWrap sx={{ letterSpacing: "-.02em" }}>
               {data?.name || "Negocio"}
             </Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: .7 }}>
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: .7 }}>
               <Chip
                 size="small"
                 label={data?.open && !todayClosed ? "Abierto ahora" : "Cerrado ahora"}

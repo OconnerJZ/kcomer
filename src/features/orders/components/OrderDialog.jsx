@@ -46,7 +46,7 @@ const StatusHistory = ({ history = [] }) => {
   return (
       <Stack spacing={0} sx={{ pt: .25 }}>
         {history.map((entry, index) => (
-          <Box key={entry.id ?? `${entry.status}-${entry.createdAt || index}`} sx={{ display: "grid", gridTemplateColumns: "18px minmax(0,1fr) auto", gap: 1.25, alignItems: "start", pb: index === history.length - 1 ? 0 : 1.8 }}>
+          <Box key={entry.id ?? `${entry.status}-${entry.createdAt || index}`} sx={{ display: "grid", gridTemplateColumns: { xs: "18px minmax(0,1fr)", sm: "18px minmax(0,1fr) auto" }, columnGap: 1.25, rowGap: .25, alignItems: "start", pb: index === history.length - 1 ? 0 : 1.8 }}>
             <Box sx={{ position: "relative", display: "flex", justifyContent: "center", pt: .55 }}>
               <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: index === history.length - 1 ? "primary.main" : "grey.400", zIndex: 1 }} />
               {index !== history.length - 1 && <Box sx={{ position: "absolute", top: 12, width: 1.5, height: 28, bgcolor: "divider" }} />}
@@ -55,7 +55,7 @@ const StatusHistory = ({ history = [] }) => {
               <Typography variant="body2" fontWeight={750}>{ORDER_STATUS[entry.status]?.label || entry.status}</Typography>
               {(entry.note || entry.not) && <Typography variant="caption" color="text.secondary">{entry.note || entry.not}</Typography>}
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>{entry.createdAt ? formatOrderDate(entry.createdAt, true) : ""}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ gridColumn: { xs: "2", sm: "3" }, whiteSpace: "nowrap" }}>{entry.createdAt ? formatOrderDate(entry.createdAt, true) : ""}</Typography>
           </Box>
         ))}
       </Stack>
@@ -95,7 +95,7 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
           </Stack>
 
           <Typography variant="body2" fontWeight={800} sx={{ mt: .9 }}>{order.customerName || "Cliente"}</Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(2,minmax(0,220px))" }, gap: 1.1, mt: 1.6 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2,minmax(0,220px))" }, gap: 1.1, mt: 1.6 }}>
             <SummaryPill icon={Payments} label="Pago" value={formatPaymentMethod(order.paymentMethod)} />
             <SummaryPill icon={PaidRounded} label="Total" value={formatCurrency(order.total)} />
           </Box>
