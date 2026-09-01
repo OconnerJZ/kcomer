@@ -13,15 +13,16 @@ const ModifierSummary = ({ modifiers = [] }) => {
   </Stack>;
 };
 
-const groupOrderItemsBySelection = (items = [], enabled = false) => {
+const groupOrderItemsBySelection = (items = [], enabled = false, getGroupLabel) => {
   if (!enabled) return [{ label: null, items }];
   const groups = new Map();
   items.forEach((item) => {
-    const label = item.participantLabel || "Sin selección";
-    if (!groups.has(label)) groups.set(label, []);
-    groups.get(label).push(item);
+    const label = getGroupLabel?.(item) || item.participantLabel || "Sin selección";
+    const key = item.participantLabel || label;
+    if (!groups.has(key)) groups.set(key, { label, items: [] });
+    groups.get(key).items.push(item);
   });
-  return [...groups.entries()].map(([label, groupedItems]) => ({ label, items: groupedItems }));
+  return [...groups.values()];
 };
 
 export default function OrderProductList({
@@ -33,8 +34,9 @@ export default function OrderProductList({
   getMeta,
   renderStatus,
   renderActions,
+  getGroupLabel,
 }) {
-  const groups = groupOrderItemsBySelection(items, groupBySelection);
+  const groups = groupOrderItemsBySelection(items, groupBySelection, getGroupLabel);
   if (!items.length) return <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>{emptyMessage}</Typography>;
 
   return <Paper elevation={0} sx={{ border: "1px solid", borderColor: "divider", overflow: "hidden", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.78)" }}>
@@ -88,4 +90,5 @@ OrderProductList.propTypes = {
   getMeta: PropTypes.func,
   renderStatus: PropTypes.func,
   renderActions: PropTypes.func,
+  getGroupLabel: PropTypes.func,
 };

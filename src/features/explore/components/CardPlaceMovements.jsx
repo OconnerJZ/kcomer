@@ -92,6 +92,7 @@ export const CardPlaceMenu = ({
   const [updateSharedItem] = useUpdateSharedOrderItemMutation();
   const [deleteSharedItem] = useDeleteSharedOrderItemMutation();
   const sharedTarget = orderTarget === "shared" && activeSharedOrder?.status === "open";
+  const sharedTargetName = sessionSnapshot?.self?.name || activeSharedOrder?.self?.name || "tu pedido del grupo";
 
   useEffect(() => setSessionSnapshot(activeSharedOrder || null), [activeSharedOrder]);
 
@@ -115,7 +116,7 @@ export const CardPlaceMenu = ({
         updated = await addSharedItem({ id: sessionSnapshot.id, businessId: Number(businessId), menuId, quantity, note: payload.item.note || "", modifiers: payload.item.modifiers || [], expectedVersion: sessionSnapshot.version }).unwrap();
       }
       setSessionSnapshot(updated);
-      setFeedback({ open: true, message: quantity > 0 ? `Actualizamos ${updated.self.label}.` : "Producto retirado de tu selección.", severity: "success" });
+      setFeedback({ open: true, message: quantity > 0 ? `Actualizamos el pedido de ${updated.self.name || sharedTargetName}.` : "Producto retirado de tu pedido compartido.", severity: "success" });
       return updated;
     } catch (requestError) {
       setFeedback({ open: true, message: sharedOrderError(requestError, "No se pudo actualizar tu selección"), severity: "error" });
@@ -139,7 +140,7 @@ export const CardPlaceMenu = ({
   const groups = separateByGroups({ lista: menu, limited: 3 });
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
-      {sharedTarget && <Box sx={{ mx: 1, mb: 1.25, px: 1.4, py: 1, borderRadius: 2, bgcolor: "rgba(255,75,69,.07)", border: "1px solid rgba(255,75,69,.15)" }}><Typography variant="caption" color="primary.dark" fontWeight={800}>Los productos se agregarán directamente a {sessionSnapshot?.self?.label || "tu selección"}.</Typography></Box>}
+      {sharedTarget && <Box sx={{ mx: 1, mb: 1.25, px: 1.4, py: 1, borderRadius: 2, bgcolor: "rgba(255,75,69,.07)", border: "1px solid rgba(255,75,69,.15)" }}><Typography variant="caption" color="primary.dark" fontWeight={800}>Los productos se agregarán directamente al pedido de {sharedTargetName}.</Typography></Box>}
       <Swiper>
         {groups.map((items) => (
           <Swiper.Item key={items[0]?.id}>
@@ -155,7 +156,7 @@ export const CardPlaceMenu = ({
                 initialQuantity={Number(sharedItem?.quantity || 0)}
                 initialConfiguration={sharedItem ? { modifiers: sharedItem.modifiers, note: sharedItem.note, price: sharedItem.unitPrice, basePrice: item.price, version: sharedItem.version } : null}
                 busy={Number(busyMenuId) === Number(item.id)}
-                targetLabel={sharedTarget ? sessionSnapshot?.self?.label || "tu selección" : ""}
+                targetLabel={sharedTarget ? sharedTargetName : ""}
               />;
             })}
           </Swiper.Item>

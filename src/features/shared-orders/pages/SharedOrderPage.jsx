@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { AddRounded, Cancel, ContentCopy, DeleteOutlineRounded, ExitToApp, Refresh, RemoveRounded, Send } from "@mui/icons-material";
-import { QRCode } from "antd";
+import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { AddRounded, Cancel, DeleteOutlineRounded, ExitToApp, RemoveRounded, Send } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
@@ -13,6 +12,7 @@ import OrderProductList from "@Features/orders/components/items/OrderProductList
 import { useCancelSharedOrderMutation, useDeleteSharedOrderItemMutation, useGetSharedOrderQuery, useJoinSharedOrderByTokenMutation, useLeaveSharedOrderMutation, useRotateSharedOrderInviteMutation, useSubmitSharedOrderMutation, useUpdateSharedOrderItemMutation } from "../api/sharedOrders.api";
 import { createCheckoutDraft, sharedOrderError } from "../model/sharedOrder";
 import { writeOrderTarget } from "../hooks/useOrderTarget";
+import SharedOrderInvitePanel from "../components/SharedOrderInvitePanel";
 
 const methodLabel = { cash: "Efectivo", transfer: "Transferencia", card: "Tarjeta", wallet: "Wallet" };
 
@@ -45,7 +45,7 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
   const { data: session, isLoading, refetch } = useGetSharedOrderQuery(sessionId, { skip: !sessionId });
   const [updateItem] = useUpdateSharedOrderItemMutation();
   const [deleteItem] = useDeleteSharedOrderItemMutation();
-  const [rotateInvite] = useRotateSharedOrderInviteMutation();
+  const [rotateInvite, rotateState] = useRotateSharedOrderInviteMutation();
   const [leave] = useLeaveSharedOrderMutation();
   const [cancel] = useCancelSharedOrderMutation();
   const [submit, submitState] = useSubmitSharedOrderMutation();
@@ -62,6 +62,10 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
   const defaultCheckout = createCheckoutDraft(session?.businesses || [], user);
   const checkoutFor = (businessId) => ({ ...defaultCheckout[businessId], ...checkout[businessId] });
   const shareLink = secrets?.token ? `${window.location.origin}/orden-compartida/unirse/${secrets.token}` : "";
+  const participantName = (item) => item.participantName
+    || session?.participants?.find((participant) => participant.label === item.participantLabel)?.name
+    || (item.mine ? session?.self?.name || user?.name : null)
+    || "Participante";
   const act = async (operation, successMessage) => { setError(""); try { const result = await operation(); if (successMessage) setNotice(successMessage); return result; } catch (requestError) { setError(sharedOrderError(requestError)); return null; } };
 
   const changeQuantity = (item, delta) => act(() => updateItem({ id: session.id, itemId: item.id, quantity: item.quantity + delta, note: item.note || "", modifiers: item.modifiers || [], expectedVersion: session.version }).unwrap());
@@ -98,23 +102,24 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
   return <SharedOrderShell embedded={embedded} title={session.title}>
     <Box sx={{ maxWidth: 920, mx: "auto", px: 2, pb: 6 }}><Stack gap={2}>
       {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}{notice && <Alert severity="success" onClose={() => setNotice("")}>{notice}</Alert>}
-      <Paper sx={{ p: 2.5, borderRadius: 3 }}><Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2}>
-        <Box><Typography variant="h5">{session.title}</Typography><Typography color="text.secondary">Tú eres <Typography component="span" sx={{ fontWeight: 700 }}>{session.self.label}</Typography> · {session.participants.length} participante(s)</Typography></Box>
-        {session.status === "open" && <Button startIcon={session.isHost ? <Cancel /> : <ExitToApp />} color="inherit" onClick={exitSession}>{session.isHost ? "Cerrar grupo" : "Salir del grupo"}</Button>}
-      </Stack></Paper>
+      <Paper sx={{ overflow: "hidden", borderRadius: 3 }}>
+        <Box sx={{ px: 2.5, py: 2.4, textAlign: "center" }}><Typography variant="h5" fontWeight={900}>{session.title}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 0.45 }}>{session.participants.length} {session.participants.length === 1 ? "participante" : "participantes"}</Typography></Box>
+        {session.status === "open" && <><Divider /><Box sx={{ p: 1 }}><Button fullWidth startIcon={session.isHost ? <Cancel /> : <ExitToApp />} onClick={exitSession} sx={{ color: "error.main", bgcolor: "rgba(211,47,47,.055)", borderRadius: 2, textTransform: "none", fontWeight: 800, "&:hover": { bgcolor: "rgba(211,47,47,.11)" } }}>{session.isHost ? "Cerrar grupo" : "Salir del grupo"}</Button></Box></>}
+      </Paper>
 
-      {session.isHost && session.status === "open" && <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}><Typography variant="h6">Invitar al grupo</Typography><Stack direction={{ xs: "column", sm: "row" }} gap={3} alignItems="center" sx={{ mt: 2 }}><QRCode value={shareLink || "Invitación protegida"} size={150} /><Box sx={{ flex: 1 }}><Typography variant="overline">Código</Typography><Typography variant="h3" sx={{ letterSpacing: 5 }}>{secrets?.code || "••••••"}</Typography><Stack direction="row" gap={1} flexWrap="wrap"><Button size="small" disabled={!shareLink} startIcon={<ContentCopy />} onClick={() => navigator.clipboard.writeText(shareLink)}>Copiar enlace</Button><Button size="small" startIcon={<Refresh />} onClick={rotate}>Nueva invitación</Button></Stack>{!secrets && <Typography variant="caption" color="text.secondary">Por seguridad el código sólo se muestra al crearlo. Genera una nueva invitación si lo necesitas.</Typography>}</Box></Stack></Paper>}
+      {session.isHost && session.status === "open" && <SharedOrderInvitePanel code={secrets?.code || ""} shareLink={shareLink} onRotate={rotate} rotating={rotateState.isLoading} />}
 
-      {session.status === "open" && <Paper variant="outlined" sx={{ p: { xs: 1.75, sm: 2.5 }, borderRadius: 3, bgcolor: "rgba(255,75,69,.025)" }}><Typography variant="subtitle1" fontWeight={850}>Agrega desde el menú</Typography><Typography variant="body2" color="text.secondary">En Explorar, cada producto se añadirá directamente a {session.self.label}. Si prefieres un pedido aparte, cambia a “Pedido individual”.</Typography></Paper>}
+      {session.status === "open" && <Paper variant="outlined" sx={{ p: { xs: 1.75, sm: 2.5 }, borderRadius: 3, bgcolor: "rgba(255,75,69,.025)" }}><Typography variant="subtitle1" fontWeight={850}>Agrega desde el menú</Typography><Typography variant="body2" color="text.secondary">En Explorar, cada producto se añadirá directamente a tu pedido dentro del grupo. Si prefieres uno aparte, cambia a “Pedido individual”.</Typography></Paper>}
 
       <Paper sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: 3 }}>
         <Box sx={{ mb: 1.5 }}><Typography variant="h6">Productos del grupo</Typography><Typography variant="body2" color="text.secondary">Cada selección conserva juntos los productos que deben entregarse.</Typography></Box>
         <OrderProductList
           items={session.items}
           groupBySelection
+          getGroupLabel={participantName}
           total={session.grandTotal}
           emptyMessage="Todavía no hay productos en esta orden compartida."
-          getMeta={(item) => `${item.businessName} · Agregado por ${item.participantName || "Participante"}`}
+          getMeta={(item) => item.businessName}
           renderActions={(item) => item.mine && session.status === "open" ? <Stack direction="row" spacing={0.75} alignItems="center" justifyContent="flex-end" sx={{ width: { xs: "100%", sm: "auto" } }}><Stack direction="row" alignItems="center" sx={{ border: "1px solid", borderColor: "divider", borderRadius: 999, bgcolor: "background.paper", p: 0.25 }}><IconButton aria-label={`Quitar una unidad de ${item.name}`} size="small" disabled={item.quantity <= 1} onClick={() => changeQuantity(item, -1)} sx={{ width: { xs: 32, sm: 34 }, height: { xs: 32, sm: 34 } }}><RemoveRounded fontSize="small" /></IconButton><Typography variant="caption" fontWeight={900} sx={{ minWidth: 26, textAlign: "center" }}>{item.quantity}</Typography><IconButton aria-label={`Agregar una unidad de ${item.name}`} size="small" color="primary" onClick={() => changeQuantity(item, 1)} sx={{ width: { xs: 32, sm: 34 }, height: { xs: 32, sm: 34 } }}><AddRounded fontSize="small" /></IconButton></Stack><Tooltip title="Quitar de mi selección"><IconButton aria-label={`Quitar ${item.name} de mi selección`} color="error" size="small" onClick={() => setItemToRemove(item)} sx={{ width: { xs: 34, sm: 38 }, height: { xs: 34, sm: 38 }, bgcolor: "rgba(211,47,47,.07)", "&:hover": { bgcolor: "rgba(211,47,47,.13)" } }}><DeleteOutlineRounded fontSize="small" /></IconButton></Tooltip></Stack> : null}
         />
       </Paper>
@@ -123,7 +128,7 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
     </Stack></Box>
     <Dialog open={Boolean(itemToRemove)} onClose={() => setItemToRemove(null)} fullWidth maxWidth="xs">
       <DialogTitle>Quitar producto</DialogTitle>
-      <DialogContent><Typography>¿Quieres quitar <strong>{itemToRemove?.name}</strong> de {itemToRemove?.participantLabel || "tu selección"}? Los demás productos no cambiarán.</Typography></DialogContent>
+      <DialogContent><Typography>¿Quieres quitar <strong>{itemToRemove?.name}</strong> del pedido de {itemToRemove ? participantName(itemToRemove) : "este participante"}? Los demás productos no cambiarán.</Typography></DialogContent>
       <DialogActions><Button color="inherit" onClick={() => setItemToRemove(null)}>Conservar</Button><Button color="error" variant="contained" onClick={remove}>Sí, quitar</Button></DialogActions>
     </Dialog>
   </SharedOrderShell>;
