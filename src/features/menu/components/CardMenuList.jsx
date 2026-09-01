@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -13,18 +14,23 @@ import { Add, EditRounded, Image as ImageIcon, Remove, TuneRounded } from "@mui/
 import { normalizeCartItem } from "@Features/cart/model/cartItem";
 import ProductCustomizationDialog from "./ProductCustomizationDialog";
 
-const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onAddToCart }) => {
+const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onAddToCart, initialQuantity = 0, initialConfiguration = null, busy = false, targetLabel = "" }) => {
   const menuItem = useMemo(() => normalizeCartItem(item), [item]);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(initialQuantity);
   const [customizerOpen, setCustomizerOpen] = useState(false);
-  const [configuration, setConfiguration] = useState({ modifiers: [], modifierSummary: [], note: "", price: menuItem.price, basePrice: menuItem.price });
+  const [configuration, setConfiguration] = useState(() => ({
+    modifiers: initialConfiguration?.modifiers || [],
+    modifierSummary: initialConfiguration?.modifierSummary || [],
+    note: initialConfiguration?.note || "",
+    price: Number(initialConfiguration?.price ?? menuItem.price),
+    basePrice: Number(initialConfiguration?.basePrice ?? menuItem.price),
+  }));
   const configurable = menuItem.modifierGroups.length > 0;
   const includedIngredients = menuItem.modifierGroups
     .flatMap((group) => group.choices || [])
     .filter((choice) => choice.defaultSelected && Number(choice.priceExtra || 0) === 0);
 
-  const updateCart = (qty, config = configuration) => {
-    onAddToCart({
+  const updateCart = (qty, config = configuration) => onAddToCart({
       itemId: menuItem.id,
       businessId,
       businessName,
@@ -39,31 +45,38 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
         basePrice: Number(config.basePrice ?? menuItem.price),
       },
     });
+
+  const commitQuantity = async (nextQuantity, config = configuration) => {
+    const previousQuantity = quantity;
+    setQuantity(nextQuantity);
+    try {
+      await updateCart(nextQuantity, config);
+      return true;
+    } catch {
+      setQuantity(previousQuantity);
+      return false;
+    }
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = async () => {
     if (quantity === 0 && configurable) {
       setCustomizerOpen(true);
       return;
     }
     const newQty = quantity + 1;
-    setQuantity(newQty);
-    updateCart(newQty);
+    await commitQuantity(newQty);
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = async () => {
     if (quantity <= 0) return;
     const newQty = quantity - 1;
-    setQuantity(newQty);
-    updateCart(newQty);
+    await commitQuantity(newQty);
   };
 
-  const handleConfiguredAdd = (config) => {
+  const handleConfiguredAdd = async (config) => {
     setConfiguration(config);
     const newQty = quantity > 0 ? quantity : 1;
-    setQuantity(newQty);
-    updateCart(newQty, config);
-    setCustomizerOpen(false);
+    if (await commitQuantity(newQty, config)) setCustomizerOpen(false);
   };
 
   const removed = configuration.modifierSummary.filter((modifier) => modifier.state === "removed");
@@ -106,20 +119,21 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
               <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
                 {quantity > 0 ? (
                   <Stack direction="row" spacing={0.5} alignItems="center">
-                    <IconButton size="small" onClick={handleDecrement} sx={{ border: "1px solid", borderColor: "divider" }}><Remove fontSize="small" /></IconButton>
+                    <IconButton size="small" disabled={busy} onClick={handleDecrement} sx={{ border: "1px solid", borderColor: "divider" }}><Remove fontSize="small" /></IconButton>
                     <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 800 }}>{quantity}</Typography>
-                    <IconButton size="small" onClick={handleIncrement} color="primary" sx={{ border: "1px solid", borderColor: "primary.main" }}><Add fontSize="small" /></IconButton>
+                    <IconButton size="small" disabled={busy} onClick={handleIncrement} color="primary" sx={{ border: "1px solid", borderColor: "primary.main" }}><Add fontSize="small" /></IconButton>
                   </Stack>
                 ) : (
-                  <Button size="small" variant="contained" disableElevation startIcon={configurable ? <TuneRounded /> : <Add />} onClick={handleIncrement} sx={{ textTransform: "none", borderRadius: 999, fontWeight: 700, px: 1.5 }}>
-                    {configurable ? "Personalizar" : "Agregar"}
+                  <Button size="small" variant="contained" disableElevation disabled={busy} startIcon={configurable ? <TuneRounded /> : <Add />} onClick={handleIncrement} sx={{ textTransform: "none", borderRadius: 999, fontWeight: 700, px: 1.5 }}>
+                    {configurable ? "Personalizar" : targetLabel ? "Agregar a mi selección" : "Agregar"}
                   </Button>
                 )}
 
                 {quantity > 0 && configurable && (
-                  <Button size="small" startIcon={<EditRounded />} onClick={() => setCustomizerOpen(true)} sx={{ textTransform: "none", color: "text.secondary", minWidth: 0 }}>Editar</Button>
+                  <Button size="small" disabled={busy} startIcon={<EditRounded />} onClick={() => setCustomizerOpen(true)} sx={{ textTransform: "none", color: "text.secondary", minWidth: 0 }}>Editar</Button>
                 )}
               </Stack>
+              {targetLabel && <Typography variant="caption" color="primary.main" fontWeight={750}>Se agregará directamente a {targetLabel}</Typography>}
             </Stack>
           </CardContent>
         </Box>
@@ -136,3 +150,15 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
 };
 
 export default CardMenuList;
+
+CardMenuList.propTypes = {
+  item: PropTypes.object.isRequired,
+  businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  businessName: PropTypes.string,
+  paymentMethods: PropTypes.array,
+  onAddToCart: PropTypes.func.isRequired,
+  initialQuantity: PropTypes.number,
+  initialConfiguration: PropTypes.object,
+  busy: PropTypes.bool,
+  targetLabel: PropTypes.string,
+};

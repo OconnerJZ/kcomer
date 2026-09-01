@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import { Swiper } from "antd-mobile";
 import { Avatar, List, Rate, Spin } from "antd";
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import CardPlaceBack from "./CardPlaceBack";
 import MemoriesPhotos from "./MemoriesPhotos";
 import CardMenuList from "@Features/menu/components/CardMenuList";
@@ -9,6 +11,9 @@ import useCart from "@Features/cart/context/CartContext";
 import { useGetReviewsByBusinessQuery } from "@Features/reviews/api/reviews.api";
 import { normalizeReviews } from "@Features/reviews/model/review";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
+import { useAddSharedOrderItemMutation, useDeleteSharedOrderItemMutation, useGetActiveSharedOrderQuery, useUpdateSharedOrderItemMutation } from "@Features/shared-orders/api/sharedOrders.api";
+import useOrderTarget from "@Features/shared-orders/hooks/useOrderTarget";
+import { sharedOrderError } from "@Features/shared-orders/model/sharedOrder";
 
 const resolveMediaUrl = (value = "") => {
   if (!value) return "";
@@ -78,6 +83,47 @@ export const CardPlaceMenu = ({
   menu = [],
 }) => {
   const { addToCart } = useCart();
+  const [orderTarget] = useOrderTarget();
+  const { data: activeSharedOrder } = useGetActiveSharedOrderQuery();
+  const [sessionSnapshot, setSessionSnapshot] = useState(null);
+  const [busyMenuId, setBusyMenuId] = useState(null);
+  const [feedback, setFeedback] = useState({ open: false, message: "", severity: "success" });
+  const [addSharedItem] = useAddSharedOrderItemMutation();
+  const [updateSharedItem] = useUpdateSharedOrderItemMutation();
+  const [deleteSharedItem] = useDeleteSharedOrderItemMutation();
+  const sharedTarget = orderTarget === "shared" && activeSharedOrder?.status === "open";
+
+  useEffect(() => setSessionSnapshot(activeSharedOrder || null), [activeSharedOrder]);
+
+  const findOwnSharedItem = (menuId, snapshot = sessionSnapshot) => (snapshot?.items || []).find((entry) =>
+    entry.mine && Number(entry.menuId) === Number(menuId) && Number(entry.businessId) === Number(businessId));
+
+  const handleProductChange = async (payload) => {
+    if (!sharedTarget) return addToCart(payload);
+
+    const menuId = Number(payload.itemId);
+    const quantity = Number(payload.item.quantity || 0);
+    const currentItem = findOwnSharedItem(menuId);
+    setBusyMenuId(menuId);
+    try {
+      let updated;
+      if (currentItem && quantity <= 0) {
+        updated = await deleteSharedItem({ id: sessionSnapshot.id, itemId: currentItem.id, expectedVersion: sessionSnapshot.version }).unwrap();
+      } else if (currentItem) {
+        updated = await updateSharedItem({ id: sessionSnapshot.id, itemId: currentItem.id, quantity, note: payload.item.note || "", modifiers: payload.item.modifiers || [], expectedVersion: sessionSnapshot.version }).unwrap();
+      } else {
+        updated = await addSharedItem({ id: sessionSnapshot.id, businessId: Number(businessId), menuId, quantity, note: payload.item.note || "", modifiers: payload.item.modifiers || [], expectedVersion: sessionSnapshot.version }).unwrap();
+      }
+      setSessionSnapshot(updated);
+      setFeedback({ open: true, message: quantity > 0 ? `Actualizamos ${updated.self.label}.` : "Producto retirado de tu selección.", severity: "success" });
+      return updated;
+    } catch (requestError) {
+      setFeedback({ open: true, message: sharedOrderError(requestError, "No se pudo actualizar tu selección"), severity: "error" });
+      throw requestError;
+    } finally {
+      setBusyMenuId(null);
+    }
+  };
 
   if (!menu || menu.length === 0) {
     return (
@@ -93,22 +139,29 @@ export const CardPlaceMenu = ({
   const groups = separateByGroups({ lista: menu, limited: 3 });
   return (
     <CardPlaceBack flipped={flipped} onMovement={onMovement}>
+      {sharedTarget && <Box sx={{ mx: 1, mb: 1.25, px: 1.4, py: 1, borderRadius: 2, bgcolor: "rgba(255,75,69,.07)", border: "1px solid rgba(255,75,69,.15)" }}><Typography variant="caption" color="primary.dark" fontWeight={800}>Los productos se agregarán directamente a {sessionSnapshot?.self?.label || "tu selección"}.</Typography></Box>}
       <Swiper>
         {groups.map((items) => (
           <Swiper.Item key={items[0]?.id}>
-            {items.map((item) => (
-              <CardMenuList
-                key={item.id}
+            {items.map((item) => {
+              const sharedItem = sharedTarget ? findOwnSharedItem(item.id) : null;
+              return <CardMenuList
+                key={`${item.id}-${sharedTarget ? sharedItem?.version || "new" : "individual"}`}
                 item={item}
                 businessId={businessId}
                 businessName={businessName}
                 paymentMethods={paymentMethods}
-                onAddToCart={addToCart}
-              />
-            ))}
+                onAddToCart={handleProductChange}
+                initialQuantity={Number(sharedItem?.quantity || 0)}
+                initialConfiguration={sharedItem ? { modifiers: sharedItem.modifiers, note: sharedItem.note, price: sharedItem.unitPrice, basePrice: item.price, version: sharedItem.version } : null}
+                busy={Number(busyMenuId) === Number(item.id)}
+                targetLabel={sharedTarget ? sessionSnapshot?.self?.label || "tu selección" : ""}
+              />;
+            })}
           </Swiper.Item>
         ))}
       </Swiper>
+      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={() => setFeedback((current) => ({ ...current, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}><Alert severity={feedback.severity} variant="filled" onClose={() => setFeedback((current) => ({ ...current, open: false }))}>{feedback.message}</Alert></Snackbar>
     </CardPlaceBack>
   );
 };
@@ -152,4 +205,32 @@ export const CardPlaceReviews = ({ flipped, onMovement, businessId }) => {
       )}
     </CardPlaceBack>
   );
+};
+
+const movementProps = {
+  flipped: PropTypes.bool,
+  onMovement: PropTypes.func.isRequired,
+};
+
+CardPlaceLocation.propTypes = {
+  ...movementProps,
+  business: PropTypes.object.isRequired,
+};
+
+CardPlacePhotos.propTypes = {
+  ...movementProps,
+  business: PropTypes.object.isRequired,
+};
+
+CardPlaceMenu.propTypes = {
+  ...movementProps,
+  businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  businessName: PropTypes.string,
+  paymentMethods: PropTypes.array,
+  menu: PropTypes.array,
+};
+
+CardPlaceReviews.propTypes = {
+  ...movementProps,
+  businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };

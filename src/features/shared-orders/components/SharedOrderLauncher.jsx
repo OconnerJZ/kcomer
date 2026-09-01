@@ -4,9 +4,11 @@ import { GroupAdd, Login } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useCreateSharedOrderMutation, useJoinSharedOrderByCodeMutation } from "../api/sharedOrders.api";
 import { sharedOrderError } from "../model/sharedOrder";
+import useOrderTarget from "../hooks/useOrderTarget";
 
 export default function SharedOrderLauncher() {
   const navigate = useNavigate();
+  const [, setOrderTarget] = useOrderTarget();
   const [mode, setMode] = useState(null);
   const [title, setTitle] = useState("");
   const [codeLength, setCodeLength] = useState(6);
@@ -20,10 +22,12 @@ export default function SharedOrderLauncher() {
     try {
       if (mode === "create") {
         const result = await createSession({ title, codeLength }).unwrap();
+        setOrderTarget("shared");
         window.sessionStorage.setItem(`shared-order-secrets:${result.session.id}`, JSON.stringify(result.secrets));
         navigate(`/orden-compartida/${result.session.id}`);
       } else {
         const session = await joinCode(code).unwrap();
+        setOrderTarget("shared");
         navigate(`/orden-compartida/${session.id}`);
       }
     } catch (requestError) { setError(sharedOrderError(requestError)); }

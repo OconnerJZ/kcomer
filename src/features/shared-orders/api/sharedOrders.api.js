@@ -1,8 +1,8 @@
 import { api } from "@Shared/api/rtk/api";
 
 const base = "/api/shared-orders";
-const tags = (_result, _error, arg) => [{ type: "SharedOrder", id: arg?.id || "CURRENT" }];
 const activeTag = { type: "SharedOrder", id: "ACTIVE" };
+const tags = (_result, _error, arg) => [activeTag, { type: "SharedOrder", id: arg?.id || "CURRENT" }];
 const sessionTags = (_result, _error, arg) => [activeTag, ...tags(_result, _error, arg)];
 
 const sharedOrdersApi = api.injectEndpoints({

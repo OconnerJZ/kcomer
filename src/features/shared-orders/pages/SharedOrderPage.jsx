@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from "@mui/material";
-import { AddShoppingCart, Cancel, ContentCopy, ExitToApp, Refresh, Send } from "@mui/icons-material";
+import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { AddRounded, Cancel, ContentCopy, DeleteOutlineRounded, ExitToApp, Refresh, RemoveRounded, Send } from "@mui/icons-material";
 import { QRCode } from "antd";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { useCart } from "@Features/cart/context/CartContext";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 import { api } from "@Shared/api/rtk/api";
 import OrderProductList from "@Features/orders/components/items/OrderProductList";
-import { useAddSharedOrderItemsMutation, useCancelSharedOrderMutation, useDeleteSharedOrderItemMutation, useGetSharedOrderQuery, useJoinSharedOrderByTokenMutation, useLeaveSharedOrderMutation, useRotateSharedOrderInviteMutation, useSubmitSharedOrderMutation, useUpdateSharedOrderItemMutation } from "../api/sharedOrders.api";
-import { createCheckoutDraft, flattenCartForSharedOrder, sharedOrderError } from "../model/sharedOrder";
+import { useCancelSharedOrderMutation, useDeleteSharedOrderItemMutation, useGetSharedOrderQuery, useJoinSharedOrderByTokenMutation, useLeaveSharedOrderMutation, useRotateSharedOrderInviteMutation, useSubmitSharedOrderMutation, useUpdateSharedOrderItemMutation } from "../api/sharedOrders.api";
+import { createCheckoutDraft, sharedOrderError } from "../model/sharedOrder";
+import { writeOrderTarget } from "../hooks/useOrderTarget";
 
 const methodLabel = { cash: "Efectivo", transfer: "Transferencia", card: "Tarjeta", wallet: "Wallet" };
 
@@ -31,7 +31,6 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
-  const { cart, clearAll } = useCart();
   const [joinedSessionId, setJoinedSessionId] = useState(null);
   const sessionId = id || sessionIdOverride || joinedSessionId;
   const [notice, setNotice] = useState("");
@@ -44,7 +43,6 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
   const [itemToRemove, setItemToRemove] = useState(null);
   const [joinToken] = useJoinSharedOrderByTokenMutation();
   const { data: session, isLoading, refetch } = useGetSharedOrderQuery(sessionId, { skip: !sessionId });
-  const [addItems, addState] = useAddSharedOrderItemsMutation();
   const [updateItem] = useUpdateSharedOrderItemMutation();
   const [deleteItem] = useDeleteSharedOrderItemMutation();
   const [rotateInvite] = useRotateSharedOrderInviteMutation();
@@ -54,25 +52,18 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
 
   useEffect(() => {
     if (!token || sessionId) return;
-    joinToken(token).unwrap().then((joined) => { setJoinedSessionId(joined.id); navigate(`/orden-compartida/${joined.id}`, { replace: true }); }).catch((requestError) => setError(sharedOrderError(requestError, "El enlace ya no es válido")));
+    joinToken(token).unwrap().then((joined) => { writeOrderTarget("shared"); setJoinedSessionId(joined.id); navigate(`/orden-compartida/${joined.id}`, { replace: true }); }).catch((requestError) => setError(sharedOrderError(requestError, "El enlace ya no es válido")));
   }, [joinToken, navigate, sessionId, token]);
   useSocketEvent("shared-order:updated", (payload) => {
     refetch();
     if (payload?.reason === "submitted") dispatch(api.util.invalidateTags([{ type: "Orders", id: "LIST" }]));
   }, { enabled: Boolean(sessionId), room: { type: "shared-order", id: sessionId } });
 
-  const cartItems = useMemo(() => flattenCartForSharedOrder(cart), [cart]);
   const defaultCheckout = createCheckoutDraft(session?.businesses || [], user);
   const checkoutFor = (businessId) => ({ ...defaultCheckout[businessId], ...checkout[businessId] });
   const shareLink = secrets?.token ? `${window.location.origin}/orden-compartida/unirse/${secrets.token}` : "";
   const act = async (operation, successMessage) => { setError(""); try { const result = await operation(); if (successMessage) setNotice(successMessage); return result; } catch (requestError) { setError(sharedOrderError(requestError)); return null; } };
 
-  const importCart = async () => {
-    if (!cartItems.length || !session) return;
-    const updated = await act(() => addItems({ id: session.id, items: cartItems, expectedVersion: session.version }).unwrap());
-    if (!updated) return;
-    clearAll(); setNotice("Tu carrito se agregó a la orden compartida"); refetch();
-  };
   const changeQuantity = (item, delta) => act(() => updateItem({ id: session.id, itemId: item.id, quantity: item.quantity + delta, note: item.note || "", modifiers: item.modifiers || [], expectedVersion: session.version }).unwrap());
   const remove = async () => {
     if (!itemToRemove) return;
@@ -108,13 +99,13 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
     <Box sx={{ maxWidth: 920, mx: "auto", px: 2, pb: 6 }}><Stack gap={2}>
       {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}{notice && <Alert severity="success" onClose={() => setNotice("")}>{notice}</Alert>}
       <Paper sx={{ p: 2.5, borderRadius: 3 }}><Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2}>
-        <Box><Stack direction="row" gap={1} alignItems="center"><Typography variant="h5">{session.title}</Typography><Chip size="small" label={session.status === "open" ? "Abierta" : "Cerrada"} color={session.status === "open" ? "success" : "default"} /></Stack><Typography color="text.secondary">Tú eres <Typography component="span" sx={{ fontWeight: 700 }}>{session.self.label}</Typography> · {session.participants.length} participante(s)</Typography></Box>
+        <Box><Typography variant="h5">{session.title}</Typography><Typography color="text.secondary">Tú eres <Typography component="span" sx={{ fontWeight: 700 }}>{session.self.label}</Typography> · {session.participants.length} participante(s)</Typography></Box>
         {session.status === "open" && <Button startIcon={session.isHost ? <Cancel /> : <ExitToApp />} color="inherit" onClick={exitSession}>{session.isHost ? "Cerrar grupo" : "Salir del grupo"}</Button>}
       </Stack></Paper>
 
       {session.isHost && session.status === "open" && <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}><Typography variant="h6">Invitar al grupo</Typography><Stack direction={{ xs: "column", sm: "row" }} gap={3} alignItems="center" sx={{ mt: 2 }}><QRCode value={shareLink || "Invitación protegida"} size={150} /><Box sx={{ flex: 1 }}><Typography variant="overline">Código</Typography><Typography variant="h3" sx={{ letterSpacing: 5 }}>{secrets?.code || "••••••"}</Typography><Stack direction="row" gap={1} flexWrap="wrap"><Button size="small" disabled={!shareLink} startIcon={<ContentCopy />} onClick={() => navigator.clipboard.writeText(shareLink)}>Copiar enlace</Button><Button size="small" startIcon={<Refresh />} onClick={rotate}>Nueva invitación</Button></Stack>{!secrets && <Typography variant="caption" color="text.secondary">Por seguridad el código sólo se muestra al crearlo. Genera una nueva invitación si lo necesitas.</Typography>}</Box></Stack></Paper>}
 
-      {session.status === "open" && <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}><Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} gap={1}><Box><Typography variant="h6">Mi selección compartida</Typography><Typography color="text.secondary">{cartItems.length ? `${cartItems.length} producto(s) listos para sumar al grupo` : "Ve a Explorar, elige tus productos y vuelve aquí."}</Typography></Box><Button variant="contained" startIcon={<AddShoppingCart />} disabled={!cartItems.length || addState.isLoading} onClick={importCart}>Sumar a la orden</Button></Stack></Paper>}
+      {session.status === "open" && <Paper variant="outlined" sx={{ p: { xs: 1.75, sm: 2.5 }, borderRadius: 3, bgcolor: "rgba(255,75,69,.025)" }}><Typography variant="subtitle1" fontWeight={850}>Agrega desde el menú</Typography><Typography variant="body2" color="text.secondary">En Explorar, cada producto se añadirá directamente a {session.self.label}. Si prefieres un pedido aparte, cambia a “Pedido individual”.</Typography></Paper>}
 
       <Paper sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: 3 }}>
         <Box sx={{ mb: 1.5 }}><Typography variant="h6">Productos del grupo</Typography><Typography variant="body2" color="text.secondary">Cada selección conserva juntos los productos que deben entregarse.</Typography></Box>
@@ -123,8 +114,8 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
           groupBySelection
           total={session.grandTotal}
           emptyMessage="Todavía no hay productos en esta orden compartida."
-          getMeta={(item) => item.businessName}
-          renderActions={(item) => item.mine && session.status === "open" ? <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="flex-end"><Button size="small" variant="outlined" disabled={item.quantity <= 1} onClick={() => changeQuantity(item, -1)}>−</Button><Button size="small" variant="outlined" onClick={() => changeQuantity(item, 1)}>+</Button><Button size="small" color="error" onClick={() => setItemToRemove(item)}>Quitar</Button></Stack> : null}
+          getMeta={(item) => `${item.businessName} · Agregado por ${item.participantName || "Participante"}`}
+          renderActions={(item) => item.mine && session.status === "open" ? <Stack direction="row" spacing={0.75} alignItems="center" justifyContent="flex-end" sx={{ width: { xs: "100%", sm: "auto" } }}><Stack direction="row" alignItems="center" sx={{ border: "1px solid", borderColor: "divider", borderRadius: 999, bgcolor: "background.paper", p: 0.25 }}><IconButton aria-label={`Quitar una unidad de ${item.name}`} size="small" disabled={item.quantity <= 1} onClick={() => changeQuantity(item, -1)} sx={{ width: { xs: 32, sm: 34 }, height: { xs: 32, sm: 34 } }}><RemoveRounded fontSize="small" /></IconButton><Typography variant="caption" fontWeight={900} sx={{ minWidth: 26, textAlign: "center" }}>{item.quantity}</Typography><IconButton aria-label={`Agregar una unidad de ${item.name}`} size="small" color="primary" onClick={() => changeQuantity(item, 1)} sx={{ width: { xs: 32, sm: 34 }, height: { xs: 32, sm: 34 } }}><AddRounded fontSize="small" /></IconButton></Stack><Tooltip title="Quitar de mi selección"><IconButton aria-label={`Quitar ${item.name} de mi selección`} color="error" size="small" onClick={() => setItemToRemove(item)} sx={{ width: { xs: 34, sm: 38 }, height: { xs: 34, sm: 38 }, bgcolor: "rgba(211,47,47,.07)", "&:hover": { bgcolor: "rgba(211,47,47,.13)" } }}><DeleteOutlineRounded fontSize="small" /></IconButton></Tooltip></Stack> : null}
         />
       </Paper>
 

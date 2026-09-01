@@ -21,6 +21,7 @@ import useCheckoutController from "../hooks/useCheckoutController";
 import SharedOrderLauncher from "@Features/shared-orders/components/SharedOrderLauncher";
 import SharedOrderPage from "@Features/shared-orders/pages/SharedOrderPage";
 import { useGetActiveSharedOrderQuery } from "@Features/shared-orders/api/sharedOrders.api";
+import useOrderTarget from "@Features/shared-orders/hooks/useOrderTarget";
 
 const VIEW_OPTIONS = [
   { label: "Pedidos", value: "pedidos" },
@@ -34,11 +35,11 @@ const ORDER_MODE_OPTIONS = [
 
 export default function CheckoutPage() {
   const [view, setView] = useState("pedidos");
-  const [individualSessionId, setIndividualSessionId] = useState(null);
+  const [orderTarget, setOrderTarget] = useOrderTarget();
   const checkout = useCheckoutController();
   const { data: activeSharedOrder, isLoading: loadingSharedOrder } = useGetActiveSharedOrderQuery();
   const sharedMode = Boolean(activeSharedOrder?.id);
-  const orderMode = sharedMode && individualSessionId === activeSharedOrder.id ? "individual" : "shared";
+  const orderMode = sharedMode ? orderTarget : "individual";
   const showIndividualOrder = !sharedMode || orderMode === "individual";
 
   const handleConfirm = async () => {
@@ -67,7 +68,7 @@ export default function CheckoutPage() {
 
         {view === "pedidos" && !loadingSharedOrder && sharedMode && (
           <Box sx={{ mt: 2 }}>
-            <Segmented value={orderMode} onChange={(mode) => setIndividualSessionId(mode === "individual" ? activeSharedOrder.id : null)} options={ORDER_MODE_OPTIONS} block />
+            <Segmented value={orderMode} onChange={setOrderTarget} options={ORDER_MODE_OPTIONS} block />
           </Box>
         )}
 
