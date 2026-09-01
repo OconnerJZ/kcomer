@@ -1,5 +1,6 @@
 import { Box, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import PropTypes from "prop-types";
 
 export default function MenuToolbar({
   search,
@@ -68,3 +69,13 @@ export default function MenuToolbar({
     </Stack>
   );
 }
+
+MenuToolbar.propTypes = {
+  search: PropTypes.string.isRequired,
+  onSearchChange: PropTypes.func.isRequired,
+  categories: PropTypes.arrayOf(PropTypes.string),
+  selectedCategory: PropTypes.string,
+  onCategoryChange: PropTypes.func.isRequired,
+  total: PropTypes.number,
+  available: PropTypes.number,
+};

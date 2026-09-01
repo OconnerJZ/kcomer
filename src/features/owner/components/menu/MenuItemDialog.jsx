@@ -20,6 +20,16 @@ import {
   Image as ImageIcon,
   TuneRounded,
 } from "@mui/icons-material";
+import PropTypes from "prop-types";
+
+const menuFormShape = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  category: PropTypes.string.isRequired,
+  image: PropTypes.string.isRequired,
+  available: PropTypes.bool.isRequired,
+});
 
 const formatPreviewPrice = (value) => {
   const number = Number(value);
@@ -80,6 +90,11 @@ const MenuItemPreview = ({ form, imagePreview }) => (
     </Box>
   </Box>
 );
+
+MenuItemPreview.propTypes = {
+  form: menuFormShape.isRequired,
+  imagePreview: PropTypes.string,
+};
 
 const MenuItemDialog = ({
   open,
@@ -233,6 +248,20 @@ const MenuItemDialog = ({
       </DialogActions>
     </Dialog>
   );
+};
+
+MenuItemDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
+  fullScreen: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
+  form: menuFormShape.isRequired,
+  imagePreview: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onImageChange: PropTypes.func.isRequired,
+  onFormChange: PropTypes.func.isRequired,
+  onCustomize: PropTypes.func.isRequired,
 };
 
 export default MenuItemDialog;

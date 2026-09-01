@@ -6,6 +6,7 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import PropTypes from "prop-types";
 
 const DeleteMenuDialog = ({ open, loading, onClose, onConfirm }) => (
   <Dialog open={open} onClose={onClose}>
@@ -23,5 +24,12 @@ const DeleteMenuDialog = ({ open, loading, onClose, onConfirm }) => (
     </DialogActions>
   </Dialog>
 );
+
+DeleteMenuDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+};
 
 export default DeleteMenuDialog;

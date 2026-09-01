@@ -1,5 +1,6 @@
 import { Box, Dialog, DialogContent, IconButton, Stack, Typography } from "@mui/material";
 import { Close, TuneRounded } from "@mui/icons-material";
+import PropTypes from "prop-types";
 import MenuModifierManager from "./MenuModifierManager";
 
 export default function MenuModifierDialog({ open, item, fullScreen, onClose }) {
@@ -17,7 +18,7 @@ export default function MenuModifierDialog({ open, item, fullScreen, onClose }) 
               Define qué puede quitar, elegir o agregar el cliente. Los cambios futuros no alterarán las órdenes históricas.
             </Typography>
           </Box>
-          <IconButton onClick={onClose}><Close /></IconButton>
+          <IconButton onClick={onClose} aria-label="cerrar personalización"><Close /></IconButton>
         </Stack>
       </Box>
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 }, bgcolor: "rgba(248,248,248,.62)" }}>
@@ -26,3 +27,13 @@ export default function MenuModifierDialog({ open, item, fullScreen, onClose }) 
     </Dialog>
   );
 }
+
+MenuModifierDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  item: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    name: PropTypes.string,
+  }),
+  fullScreen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
