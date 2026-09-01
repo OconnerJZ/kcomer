@@ -1,4 +1,4 @@
-import { normalizeMenuItem } from "@Features/menu/model/menuItem";
+import { normalizeMenuItem } from "../../menu/model/menuItem.js";
 
 export const normalizeCartItem = (item = {}) => ({
   ...normalizeMenuItem(item),
