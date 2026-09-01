@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Box, Button, CircularProgress, Grid, Paper, Stack, TextField, Typography } from "@mui/material";
 import { LocationOnRounded, MyLocationRounded } from "@mui/icons-material";
 import GoogleMapField from "@Shared/components/maps/GoogleMapField";
@@ -114,3 +115,16 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
     </Paper>
   );
 }
+
+LocationSettingsTab.propTypes = {
+  locationInfo: PropTypes.shape({
+    address: PropTypes.string,
+    city: PropTypes.string,
+    postalCode: PropTypes.string,
+    latitude: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    longitude: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }).isRequired,
+  setLocationInfo: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};

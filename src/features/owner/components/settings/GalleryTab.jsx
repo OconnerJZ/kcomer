@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -155,3 +156,12 @@ export default function GalleryTab({
     </Paper>
   );
 }
+
+GalleryTab.propTypes = {
+  photos: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.object])),
+  coverImage: PropTypes.string,
+  onSetCover: PropTypes.func,
+  onUpload: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};
