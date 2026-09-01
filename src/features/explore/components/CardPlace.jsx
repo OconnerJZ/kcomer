@@ -8,6 +8,7 @@ import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { normalizeBusiness } from "@Features/business/model/business";
 import { useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import { distanceLabel, foodTypeLabels } from "@Features/explore/model/placePresentation";
 
 const getMediaUrl = (value = "") => !value ? "" : /^https?:\/\//i.test(value) ? value : `${API_URL_MEDIA_SERVER.replace(/\/$/, "")}/${String(value).replace(/^\/+/, "")}`;
@@ -19,17 +20,33 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => ({
   review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} businessId={business.id} />,
 }[movement] || null);
 
+const businessPropType = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  name: PropTypes.string,
+  paymentMethods: PropTypes.array,
+  menu: PropTypes.array,
+});
+
+MovementContent.propTypes = {
+  movement: PropTypes.string,
+  flipped: PropTypes.bool,
+  onMovement: PropTypes.func.isRequired,
+  business: businessPropType.isRequired,
+};
+
 const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
   const business = useMemo(() => normalizeBusiness(data), [data]);
   const { flipped, movement, expanded, onMovement, expandCard } = useCardPlace({ data: business, loadBusinessMenu });
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const backgroundUrl = getMediaUrl(business.coverImage || business.logo);
   const logoUrl = getMediaUrl(business.logo);
-  const foodTags = useMemo(() => foodTypeLabels(business).slice(0, 3), [business]);
   const distance = useMemo(
     () => distanceLabel(userLocation, business.location),
     [business.location, userLocation],
   );
+  const hasServiceTag = Boolean(business.hasDelivery);
+  const foodTagLimit = Math.max(1, 3 - (distance ? 1 : 0) - (hasServiceTag ? 1 : 0));
+  const foodTags = useMemo(() => foodTypeLabels(business).slice(0, foodTagLimit), [business, foodTagLimit]);
 
   return (
     <>
@@ -69,7 +86,6 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                     <Typography noWrap sx={{ fontSize: "1.12rem", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-.025em" }}>{business.name || "Negocio"}</Typography>
                     <Stack direction="row" spacing={.7} alignItems="center" sx={{ mt: .55, color: "text.secondary" }}>
                       {business.location?.city && <><PlaceRounded sx={{ fontSize: 13 }} /><Typography variant="caption" fontWeight={650}>{business.location.city}</Typography></>}
-                      {business.hasDelivery && <><DeliveryDiningRounded sx={{ fontSize: 14 }} /><Typography variant="caption">Delivery</Typography></>}
                     </Stack>
                   </Box>
                 </Stack>
@@ -79,12 +95,13 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                 </Stack>
               </Stack>
 
-              {(foodTags.length > 0 || distance) && (
+              {(foodTags.length > 0 || distance || hasServiceTag) && (
                 <Stack direction="row" spacing={.65} flexWrap="wrap" useFlexGap sx={{ mt: 1.35 }}>
                   {foodTags.map((label) => (
-                    <Chip key={label} size="small" label={label} variant="outlined" sx={{ height: 25, fontSize: ".67rem", bgcolor: "rgba(255,255,255,.52)" }} />
+                    <Chip key={label} size="small" label={label} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(255,159,28,.14)", color: "secondary.dark", border: "1px solid rgba(255,159,28,.22)" }} />
                   ))}
-                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", bgcolor: "rgba(255,75,69,.08)", color: "primary.dark" }} />}
+                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(46,173,103,.13)", color: "success.dark", border: "1px solid rgba(46,173,103,.2)", "& .MuiChip-icon": { color: "success.main" } }} />}
+                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(255,75,69,.11)", color: "primary.dark", border: "1px solid rgba(255,75,69,.18)", "& .MuiChip-icon": { color: "primary.main" } }} />}
                 </Stack>
               )}
 
@@ -106,6 +123,20 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
       <ScheduleDialog open={scheduleOpen} onClose={() => setScheduleOpen(false)} data={business} />
     </>
   );
+};
+
+CardPlace.propTypes = {
+  data: PropTypes.object.isRequired,
+  userLocation: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.number),
+    PropTypes.shape({
+      latitude: PropTypes.number,
+      longitude: PropTypes.number,
+      lat: PropTypes.number,
+      lng: PropTypes.number,
+    }),
+  ]),
+  loadBusinessMenu: PropTypes.func.isRequired,
 };
 
 export default CardPlace;

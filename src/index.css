@@ -4,9 +4,12 @@
 
 :root {
   --red: #ff4b45;
-  --accent: #ffd447;
-  --dark: #222;
-  --muted: #f6f6f6;
+  --orange: #ff9f1c;
+  --green: #2ead67;
+  --accent: #ff9f1c;
+  --dark: #292522;
+  --muted: #fff3e8;
+  --cream: #fff9f4;
   --card-bg: #ffffff;
 }
 
