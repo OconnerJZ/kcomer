@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Alert, Box, Button, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextField, Typography } from "@mui/material";
 import { AddShoppingCart, Cancel, ContentCopy, ExitToApp, Refresh, Send } from "@mui/icons-material";
 import { QRCode } from "antd";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { useCart } from "@Features/cart/context/CartContext";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
+import { api } from "@Shared/api/rtk/api";
+import OrderProductList from "@Features/orders/components/items/OrderProductList";
 import { useAddSharedOrderItemsMutation, useCancelSharedOrderMutation, useDeleteSharedOrderItemMutation, useGetSharedOrderQuery, useJoinSharedOrderByTokenMutation, useLeaveSharedOrderMutation, useRotateSharedOrderInviteMutation, useSubmitSharedOrderMutation, useUpdateSharedOrderItemMutation } from "../api/sharedOrders.api";
 import { createCheckoutDraft, flattenCartForSharedOrder, sharedOrderError } from "../model/sharedOrder";
 
@@ -26,6 +29,7 @@ SharedOrderShell.propTypes = {
 export default function SharedOrderPage({ embedded = false, sessionIdOverride = null }) {
   const { id, token } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const { cart, clearAll } = useCart();
   const [joinedSessionId, setJoinedSessionId] = useState(null);
@@ -37,6 +41,7 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
     try { return JSON.parse(window.sessionStorage.getItem(`shared-order-secrets:${id}`)); } catch { return null; }
   });
   const [checkout, setCheckout] = useState({});
+  const [itemToRemove, setItemToRemove] = useState(null);
   const [joinToken] = useJoinSharedOrderByTokenMutation();
   const { data: session, isLoading, refetch } = useGetSharedOrderQuery(sessionId, { skip: !sessionId });
   const [addItems, addState] = useAddSharedOrderItemsMutation();
@@ -51,7 +56,10 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
     if (!token || sessionId) return;
     joinToken(token).unwrap().then((joined) => { setJoinedSessionId(joined.id); navigate(`/orden-compartida/${joined.id}`, { replace: true }); }).catch((requestError) => setError(sharedOrderError(requestError, "El enlace ya no es válido")));
   }, [joinToken, navigate, sessionId, token]);
-  useSocketEvent("shared-order:updated", () => refetch(), { enabled: Boolean(sessionId), room: { type: "shared-order", id: sessionId } });
+  useSocketEvent("shared-order:updated", (payload) => {
+    refetch();
+    if (payload?.reason === "submitted") dispatch(api.util.invalidateTags([{ type: "Orders", id: "LIST" }]));
+  }, { enabled: Boolean(sessionId), room: { type: "shared-order", id: sessionId } });
 
   const cartItems = useMemo(() => flattenCartForSharedOrder(cart), [cart]);
   const defaultCheckout = createCheckoutDraft(session?.businesses || [], user);
@@ -66,7 +74,14 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
     clearAll(); setNotice("Tu carrito se agregó a la orden compartida"); refetch();
   };
   const changeQuantity = (item, delta) => act(() => updateItem({ id: session.id, itemId: item.id, quantity: item.quantity + delta, note: item.note || "", modifiers: item.modifiers || [], expectedVersion: session.version }).unwrap());
-  const remove = (item) => act(() => deleteItem({ id: session.id, itemId: item.id, expectedVersion: session.version }).unwrap());
+  const remove = async () => {
+    if (!itemToRemove) return;
+    const updated = await act(
+      () => deleteItem({ id: session.id, itemId: itemToRemove.id, expectedVersion: session.version }).unwrap(),
+      "Producto eliminado de tu selección.",
+    );
+    if (updated) setItemToRemove(null);
+  };
   const rotate = async () => {
     const result = await act(() => rotateInvite({ id: session.id, expectedVersion: session.version, codeLength: secrets?.code?.length === 4 ? 4 : 6 }).unwrap(), "Se generó una invitación nueva");
     if (result?.secrets) { setSecrets(result.secrets); window.sessionStorage.setItem(`shared-order-secrets:${session.id}`, JSON.stringify(result.secrets)); }
@@ -101,10 +116,25 @@ export default function SharedOrderPage({ embedded = false, sessionIdOverride = 
 
       {session.status === "open" && <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}><Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} gap={1}><Box><Typography variant="h6">Mi selección compartida</Typography><Typography color="text.secondary">{cartItems.length ? `${cartItems.length} producto(s) listos para sumar al grupo` : "Ve a Explorar, elige tus productos y vuelve aquí."}</Typography></Box><Button variant="contained" startIcon={<AddShoppingCart />} disabled={!cartItems.length || addState.isLoading} onClick={importCart}>Sumar a la orden</Button></Stack></Paper>}
 
-      <Paper sx={{ p: 2.5, borderRadius: 3 }}><Typography variant="h6">Productos del grupo</Typography>{!session.items.length ? <Typography color="text.secondary" sx={{ py: 3 }}>Todavía no hay productos.</Typography> : <Stack divider={<Divider flexItem />} sx={{ mt: 1 }}>{session.items.map((item) => <Stack key={item.id} direction="row" gap={2} alignItems="center" sx={{ py: 1.5 }}><Box sx={{ flex: 1 }}><Typography>{item.quantity} × {item.name}</Typography><Typography variant="caption" color="text.secondary">{item.businessName} · {item.participantLabel}</Typography>{item.note && <Typography variant="body2">{item.note}</Typography>}</Box><Typography sx={{ fontWeight: 700 }}>${item.subtotal.toFixed(2)}</Typography>{item.mine && session.status === "open" && <Stack direction="row"><Button size="small" disabled={item.quantity <= 1} onClick={() => changeQuantity(item, -1)}>−</Button><Button size="small" onClick={() => changeQuantity(item, 1)}>+</Button><Button size="small" color="error" onClick={() => remove(item)}>Quitar</Button></Stack>}</Stack>)}</Stack>}<Divider sx={{ my: 2 }} /><Stack direction="row" justifyContent="space-between"><Typography variant="h6">Total del grupo</Typography><Typography variant="h6" color="success.main">${session.grandTotal.toFixed(2)}</Typography></Stack></Paper>
+      <Paper sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: 3 }}>
+        <Box sx={{ mb: 1.5 }}><Typography variant="h6">Productos del grupo</Typography><Typography variant="body2" color="text.secondary">Cada selección conserva juntos los productos que deben entregarse.</Typography></Box>
+        <OrderProductList
+          items={session.items}
+          groupBySelection
+          total={session.grandTotal}
+          emptyMessage="Todavía no hay productos en esta orden compartida."
+          getMeta={(item) => item.businessName}
+          renderActions={(item) => item.mine && session.status === "open" ? <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="flex-end"><Button size="small" variant="outlined" disabled={item.quantity <= 1} onClick={() => changeQuantity(item, -1)}>−</Button><Button size="small" variant="outlined" onClick={() => changeQuantity(item, 1)}>+</Button><Button size="small" color="error" onClick={() => setItemToRemove(item)}>Quitar</Button></Stack> : null}
+        />
+      </Paper>
 
       {session.isHost && session.status === "open" && session.businesses.length > 0 && <Paper sx={{ p: 2.5, borderRadius: 3 }}><Typography variant="h6">Crear órdenes por negocio</Typography><Typography color="text.secondary" sx={{ mb: 2 }}>Cada negocio recibirá únicamente sus productos.</Typography><Stack gap={2}>{session.businesses.map((business) => { const config = checkoutFor(business.id); const methods = business.paymentMethods.filter((entry) => entry.active); return <Paper key={business.id} variant="outlined" sx={{ p: 2 }}><Typography sx={{ fontWeight: 700, mb: 1.5 }}>{business.name}</Typography><Stack direction={{ xs: "column", sm: "row" }} gap={2}><FormControl fullWidth><InputLabel>Entrega</InputLabel><Select label="Entrega" value={config.orderType || "pickup"} onChange={(event) => updateCheckout(business.id, "orderType", event.target.value)}><MenuItem value="pickup">Recoger en tienda</MenuItem><MenuItem value="delivery">Delivery</MenuItem></Select></FormControl><FormControl fullWidth><InputLabel>Pago</InputLabel><Select label="Pago" value={config.paymentMethod || ""} onChange={(event) => updateCheckout(business.id, "paymentMethod", event.target.value)}>{methods.map(({ method }) => <MenuItem key={method} value={method}>{methodLabel[method] || method}</MenuItem>)}</Select></FormControl></Stack>{config.orderType === "delivery" && <TextField fullWidth label="Dirección de entrega" value={config.deliveryAddress === "Recoger en tienda" ? "" : config.deliveryAddress || ""} onChange={(event) => updateCheckout(business.id, "deliveryAddress", event.target.value)} sx={{ mt: 2 }} />}</Paper>; })}<TextField label="Teléfono de contacto" value={checkoutFor(session.businesses[0].id).customerPhone || ""} onChange={(event) => setCheckout((current) => Object.fromEntries(session.businesses.map((business) => [business.id, { ...defaultCheckout[business.id], ...current[business.id], customerPhone: event.target.value }])))}/><Button size="large" variant="contained" startIcon={<Send />} disabled={submitState.isLoading} onClick={finish}>Confirmar y crear {session.businesses.length} orden(es)</Button></Stack></Paper>}
     </Stack></Box>
+    <Dialog open={Boolean(itemToRemove)} onClose={() => setItemToRemove(null)} fullWidth maxWidth="xs">
+      <DialogTitle>Quitar producto</DialogTitle>
+      <DialogContent><Typography>¿Quieres quitar <strong>{itemToRemove?.name}</strong> de {itemToRemove?.participantLabel || "tu selección"}? Los demás productos no cambiarán.</Typography></DialogContent>
+      <DialogActions><Button color="inherit" onClick={() => setItemToRemove(null)}>Conservar</Button><Button color="error" variant="contained" onClick={remove}>Sí, quitar</Button></DialogActions>
+    </Dialog>
   </SharedOrderShell>;
 }
 

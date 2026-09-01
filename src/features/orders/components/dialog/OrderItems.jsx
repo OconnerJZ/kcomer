@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { CheckCircleRounded, LocalDining, PlayArrowRounded, RestaurantRounded, StickyNote2 } from "@mui/icons-material";
-import { formatCurrency } from "@Features/orders/model/orderFormatters";
+import { CheckCircleRounded, PlayArrowRounded, RestaurantRounded } from "@mui/icons-material";
+import PropTypes from "prop-types";
+import OrderProductList from "@Features/orders/components/items/OrderProductList";
 
 const kitchenMeta = {
   pending: { label: "Pendiente", color: "default" },
@@ -34,25 +35,10 @@ const KitchenAction = ({ item, enabled, onUpdate }) => {
   );
 };
 
-const ModifierSummary = ({ modifiers = [] }) => {
-  if (!modifiers.length) return null;
-  const grouped = modifiers.reduce((acc, modifier) => {
-    const key = modifier.group || "Personalización";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(modifier);
-    return acc;
-  }, {});
-
-  return (
-    <Stack spacing={0.35} sx={{ mt: 0.7 }}>
-      {Object.entries(grouped).map(([group, choices]) => (
-        <Typography key={group} variant="caption" color="text.secondary" sx={{ lineHeight: 1.45 }}>
-          <Box component="span" sx={{ fontWeight: 800 }}>{group}: </Box>
-          {choices.map((choice) => choice.state === "removed" ? `sin ${choice.name}` : choice.name).join(" · ")}
-        </Typography>
-      ))}
-    </Stack>
-  );
+KitchenAction.propTypes = {
+  item: PropTypes.object.isRequired,
+  enabled: PropTypes.bool,
+  onUpdate: PropTypes.func,
 };
 
 const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus }) => {
@@ -66,6 +52,7 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".64rem" }}>PEDIDO</Typography>
           <Typography variant="subtitle1" fontWeight={800}>Productos</Typography>
+          {items.some((item) => item.participantLabel) && <Typography variant="caption" color="text.secondary">Separados por selección para facilitar el empaquetado.</Typography>}
         </Box>
         <Stack direction="row" spacing={0.8} alignItems="center">
           {kitchenEnabled && <Chip icon={<RestaurantRounded />} size="small" label={`${readyUnits}/${totalUnits} listos`} color={readyUnits === totalUnits && totalUnits > 0 ? "success" : "default"} sx={{ fontWeight: 800 }} />}
@@ -75,55 +62,20 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
 
       {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: 2, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
 
-      <Stack spacing={0}>
-        {items.map((item, index) => {
-          const subtotal = Number(item.subtotal ?? (Number(item.price || 0) * Number(item.quantity || 0)));
-          return (
-            <Box
-              key={item.detailId || item.id || `${item.name}-${index}`}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "auto minmax(0,1fr)", sm: "auto minmax(0,1fr) auto" },
-                gap: 1.5,
-                alignItems: "start",
-                py: 1.6,
-                borderTop: index === 0 ? "none" : "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Box sx={{ width: 38, height: 38, borderRadius: 2, display: "grid", placeItems: "center", bgcolor: item.kitchenStatus === "ready" ? "rgba(46,125,50,.1)" : "rgba(255,75,69,.08)", color: item.kitchenStatus === "ready" ? "success.main" : "primary.main", fontWeight: 800 }}>
-                {item.kitchenStatus === "ready" ? <CheckCircleRounded fontSize="small" /> : `${item.quantity}×`}
-              </Box>
-
-              <Box minWidth={0}>
-                <Stack direction="row" spacing={0.75} alignItems="center">
-                  <LocalDining sx={{ fontSize: 16, color: "text.disabled" }} />
-                  <Typography variant="body2" fontWeight={800}>{item.quantity}× {item.name}</Typography>
-                </Stack>
-                {item.price != null && <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>{formatCurrency(Number(item.price))} c/u</Typography>}
-                <ModifierSummary modifiers={item.modifiers} />
-                {item.note && (
-                  <Stack direction="row" spacing={0.6} alignItems="flex-start" sx={{ mt: 0.7 }}>
-                    <StickyNote2 sx={{ fontSize: 14, color: "text.disabled", mt: "2px" }} />
-                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic", lineHeight: 1.45 }}>{item.note}</Typography>
-                  </Stack>
-                )}
-
-                <Box sx={{ display: { xs: "block", sm: "none" }, mt: 1.1 }}>
-                  <KitchenAction item={item} enabled={kitchenEnabled} onUpdate={onUpdateKitchenStatus} />
-                </Box>
-              </Box>
-
-              <Stack alignItems="flex-end" spacing={0.8} sx={{ display: { xs: "none", sm: "flex" } }}>
-                <Typography variant="body2" fontWeight={850} sx={{ whiteSpace: "nowrap", pt: 0.2 }}>{formatCurrency(subtotal)}</Typography>
-                <KitchenAction item={item} enabled={kitchenEnabled} onUpdate={onUpdateKitchenStatus} />
-              </Stack>
-            </Box>
-          );
-        })}
-      </Stack>
+      <OrderProductList
+        items={items}
+        groupBySelection={items.some((item) => item.participantLabel)}
+        showTotal={false}
+        renderActions={(item) => <KitchenAction item={item} enabled={kitchenEnabled} onUpdate={onUpdateKitchenStatus} />}
+      />
     </Box>
   );
 };
 
 export default OrderItems;
+
+OrderItems.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.object),
+  kitchenEnabled: PropTypes.bool,
+  onUpdateKitchenStatus: PropTypes.func,
+};

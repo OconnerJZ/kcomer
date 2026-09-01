@@ -15,5 +15,7 @@ export const createCheckoutDraft = (businesses = [], user = {}) =>
     return [business.id, { businessId: business.id, orderType: "pickup", paymentMethod: activeMethods[0] || "cash", customerName: user.name || "", customerPhone: user.phone || "", deliveryAddress: "Recoger en tienda" }];
   }));
 
-export const sharedOrderError = (error, fallback = "No se pudo actualizar la orden compartida") =>
-  error?.data?.message || error?.data?.errors?.[0]?.msg || error?.message || fallback;
+export const sharedOrderError = (error, fallback = "No se pudo actualizar la orden compartida") => {
+  const message = error?.data?.message || error?.data?.error || error?.data?.errors?.[0]?.msg;
+  return typeof message === "string" && message.trim() ? message : fallback;
+};

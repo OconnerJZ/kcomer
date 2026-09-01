@@ -1,5 +1,6 @@
-import { Button, Card, CardContent, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { EditRounded, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { Button, Card, CardContent, Chip, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { EditRounded, ExpandLess, ExpandMore, GroupsRounded } from "@mui/icons-material";
+import PropTypes from "prop-types";
 import { ORDER_STATUS } from "@Features/orders/context/OrderContext";
 import OrderProgressTracker from "./OrderProgressTracker";
 import OrderItemsList from "./OrderItemsList";
@@ -18,6 +19,7 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <Stack spacing={.65} flex={1} minWidth={0}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.businessName}</Typography>
+                {order.sharedSessionId && <Chip size="small" icon={<GroupsRounded />} label="Compartida" variant="outlined" sx={{ height: 23, fontSize: ".68rem", fontWeight: 750 }} />}
                 {expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
               </Stack>
               {!isMobile && (
@@ -36,8 +38,8 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <OrderItemsList order={order} />
             <Divider sx={{ my: 1.25 }} />
             <OrderHistory order={order} expanded={historyExpanded} onToggle={onToggleHistory} />
-            <TransferPaymentPanel order={order} />
-            {order.status === ORDER_STATUS.PENDING && (
+            {order.viewerCanManage !== false && <TransferPaymentPanel order={order} />}
+            {order.status === ORDER_STATUS.PENDING && order.viewerCanManage !== false && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <Stack spacing={1}>
@@ -55,3 +57,13 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
     </Card>
   );
 }
+
+CustomerOrderCard.propTypes = {
+  order: PropTypes.object.isRequired,
+  expanded: PropTypes.bool.isRequired,
+  historyExpanded: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onToggleHistory: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+};

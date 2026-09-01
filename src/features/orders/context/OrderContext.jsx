@@ -131,14 +131,14 @@ export const OrdersProvider = ({ children }) => {
   );
 
   const selectors = useMemo(() => ({
-    getOrdersByUser: (userId) => orders.filter((order) => order.userId === userId),
+    getOrdersByUser: (userId) => String(userId) === String(user?.id) ? orders : orders.filter((order) => String(order.userId) === String(userId)),
     getOrdersByBusiness: (businessId) => orders.filter((order) => order.businessId === businessId),
     getOrdersByStatus: (status) => orders.filter((order) => order.status === status),
     getOrderById: (orderId) => orders.find((order) => order.id === orderId),
     getPendingOrders: () => orders.filter((order) => order.status === ORDER_STATUS.PENDING),
     getActiveOrders: () => orders.filter((order) => ![ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(order.status)),
     getCompletedOrders: () => orders.filter((order) => [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED].includes(order.status)),
-  }), [orders]);
+  }), [orders, user?.id]);
 
   const value = useMemo(() => ({
     orders,

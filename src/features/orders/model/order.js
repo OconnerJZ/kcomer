@@ -18,6 +18,7 @@ const normalizeOrderItem = (item = {}) => ({
   note: item.note ?? item.notes ?? "",
   image: item.image ?? item.image_url ?? "",
   kitchenStatus: item.kitchenStatus ?? item.kitchen_status ?? "pending",
+  participantLabel: item.participantLabel ?? item.participant_label ?? null,
   modifiers: Array.isArray(item.modifiers) ? item.modifiers.map(normalizeModifier) : [],
 });
 
@@ -33,6 +34,8 @@ export const normalizeOrder = (order = {}) => {
     id: order.id ?? null,
     version: Number(order.version ?? 1),
     businessId: order.businessId ?? order.business_id ?? null,
+    sharedSessionId: order.sharedSessionId ?? order.shared_session_id ?? null,
+    viewerCanManage: order.viewerCanManage ?? order.viewer_can_manage ?? true,
     userId: order.userId ?? order.user_id ?? null,
     businessName: order.businessName ?? order.business_name ?? "",
     customerName: order.customerName ?? order.customer_name ?? order.user_name ?? "",
