@@ -12,7 +12,8 @@
     "lint:registration-fields": "eslint src/features/owner/components/registration/FormField.jsx src/features/owner/components/registration/RegistrationAutocompleteField.jsx src/features/owner/components/registration/RegistrationChoiceField.jsx src/features/owner/components/registration/RegistrationImageField.jsx src/features/owner/components/registration/RegistrationTextField.jsx src/features/owner/hooks/useRegistrationImageField.js src/features/owner/model/registrationField.js --report-unused-disable-directives --max-warnings 0",
     "lint:explore-card": "eslint src/features/explore/components/CardPlaceBack.jsx src/features/explore/components/CardPlaceRedes.jsx --report-unused-disable-directives --max-warnings 0",
     "lint:shared-map": "eslint src/shared/components/maps/GoogleMapField.jsx src/shared/hooks/useGoogleMapField.js src/shared/model/mapLocation.js --report-unused-disable-directives --max-warnings 0",
-    "quality": "npm run lint:critical && npm run lint:owner-menu && npm run lint:registration-fields && npm run lint:explore-card && npm run lint:shared-map && npm run test:unit && npm run build",
+    "lint:owner-schedule": "eslint src/features/owner/components/registration/ScheduleField.jsx src/features/owner/components/registration/ScheduleDayRow.jsx src/features/owner/hooks/useWeeklySchedule.js src/features/owner/model/weeklySchedule.js --report-unused-disable-directives --max-warnings 0",
+    "quality": "npm run lint:critical && npm run lint:owner-menu && npm run lint:registration-fields && npm run lint:explore-card && npm run lint:shared-map && npm run lint:owner-schedule && npm run test:unit && npm run build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
