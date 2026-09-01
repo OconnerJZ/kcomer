@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test:unit": "node --test src/features/auth/model/*.test.mjs src/features/catalogs/model/*.test.mjs src/features/explore/model/*.test.mjs src/features/menu/model/*.test.mjs src/features/shared-orders/model/*.test.mjs src/features/stats/model/*.test.mjs src/features/plans/model/*.test.mjs",
+    "test:unit": "node --test src/features/auth/model/*.test.mjs src/features/catalogs/model/*.test.mjs src/features/explore/model/*.test.mjs src/features/menu/model/*.test.mjs src/features/orders/model/*.test.mjs src/features/shared-orders/model/*.test.mjs src/features/stats/model/*.test.mjs src/features/plans/model/*.test.mjs",
+    "lint:critical": "eslint src/features/orders/context/OrderContext.jsx src/features/orders/context/useOrders.js src/features/orders/hooks/useBusinessOrders.jsx src/features/orders/model/orderCache.js src/features/orders/model/orderStatus.js src/features/owner/hooks/useBusinessOwner.jsx src/features/owner/pages/OwnerDashboard.jsx src/features/owner/pages/OwnerOrders.jsx --report-unused-disable-directives --max-warnings 0",
+    "quality": "npm run lint:critical && npm run test:unit && npm run build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -26,6 +28,7 @@
     "dayjs": "^1.11.19",
     "iconify": "^1.4.0",
     "jwt-decode": "^4.0.0",
+    "prop-types": "^15.8.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-redux": "^9.2.0",

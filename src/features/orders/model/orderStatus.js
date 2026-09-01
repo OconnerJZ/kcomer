@@ -16,6 +16,22 @@ export const ORDER_STATUS = {
   cancelled: { label: "Cancelada", color: "error", icon: Cancel },
 };
 
+export const ORDER_STATUS_VALUES = Object.freeze({
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  PREPARING: "preparing",
+  READY: "ready",
+  IN_DELIVERY: "in_delivery",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+});
+
+export const STATUS_LABELS = Object.freeze(
+  Object.fromEntries(
+    Object.entries(ORDER_STATUS).map(([status, config]) => [status, config.label]),
+  ),
+);
+
 export const STATUS_COLORS = {
   pending: { bg: "#467A77", hover: "#dd6b20" },
   accepted: { bg: "#FF4B45", hover: "#C93430" },

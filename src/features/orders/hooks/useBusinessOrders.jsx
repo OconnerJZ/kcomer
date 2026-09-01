@@ -7,20 +7,13 @@ import {
 } from "@Features/orders/api/orders.api";
 import { api } from "@Shared/api/rtk/api";
 import { normalizeOrders } from "@Features/orders/model/order";
+import {
+  patchKitchenItem,
+  patchOrderStatus,
+  patchTransferPayment,
+  upsertOrder,
+} from "@Features/orders/model/orderCache";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
-
-const getDraftOrders = (draft) => {
-  if (Array.isArray(draft)) return draft;
-  if (Array.isArray(draft?.data)) return draft.data;
-  return null;
-};
-
-const recalcKitchenProgress = (order) => {
-  const items = order?.items || [];
-  const total = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const ready = items.reduce((sum, item) => sum + (item.kitchenStatus === "ready" ? Number(item.quantity || 0) : 0), 0);
-  order.kitchenProgress = { ready, total };
-};
 
 export const useBusinessOrders = (businessId) => {
   const dispatch = useDispatch();
@@ -35,7 +28,6 @@ export const useBusinessOrders = (businessId) => {
     refetch: refreshOrders,
   } = useGetOrdersByBusinessQuery(queryArg, {
     skip: !businessId,
-    pollingInterval: 30000,
   });
 
   const [updateStatusMutation, { isLoading: updating }] = useOrderUpdateStatusMutation();
@@ -49,15 +41,12 @@ export const useBusinessOrders = (businessId) => {
     setError(null);
     const timestamp = new Date().toISOString();
     const patch = dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
-      const items = getDraftOrders(draft);
-      if (!items) return;
-      const order = items.find((item) => String(item.id) === String(orderId));
-      if (!order) return;
-      order.status = newStatus;
-      order.updatedAt = timestamp;
-      if (Array.isArray(order.statusHistory)) {
-        order.statusHistory.push({ status: newStatus, timestamp, note: note || `Estado cambiado a ${newStatus}`, optimistic: true });
-      }
+      patchOrderStatus(draft, {
+        orderId,
+        status: newStatus,
+        timestamp,
+        note: note || `Estado cambiado a ${newStatus}`,
+      });
     }));
 
     try {
@@ -76,15 +65,12 @@ export const useBusinessOrders = (businessId) => {
     setError(null);
 
     const patch = dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
-      const items = getDraftOrders(draft);
-      if (!items) return;
-      const order = items.find((item) => String(item.id) === String(orderId));
-      if (!order) return;
-      const target = order.items?.find((item) => String(item.detailId) === String(detailId));
-      if (!target) return;
-      target.kitchenStatus = status;
-      if (status === "preparing" && order.status === "accepted") order.status = "preparing";
-      recalcKitchenProgress(order);
+      patchKitchenItem(draft, {
+        orderId,
+        detailId,
+        status,
+        promoteAcceptedToPreparing: true,
+      });
     }));
 
     try {
@@ -107,14 +93,18 @@ export const useBusinessOrders = (businessId) => {
     if (!newOrder?.id) return;
     const eventBusinessId = newOrder.businessId ?? newOrder.business_id;
     if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
-    refreshOrders();
+    dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
+      upsertOrder(draft, newOrder, { prepend: true });
+    }));
   }, roomOptions);
 
   useSocketEvent("order:updated", (updatedOrder) => {
     if (!updatedOrder?.id) return;
     const eventBusinessId = updatedOrder.businessId ?? updatedOrder.business_id;
     if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
-    refreshOrders();
+    dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
+      upsertOrder(draft, updatedOrder);
+    }));
   }, roomOptions);
 
   useSocketEvent("order:kitchen_item_update", (payload) => {
@@ -123,20 +113,15 @@ export const useBusinessOrders = (businessId) => {
     if (eventBusinessId != null && String(eventBusinessId) !== String(businessId)) return;
 
     dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
-      const items = getDraftOrders(draft);
-      if (!items) return;
-      const order = items.find((item) => String(item.id) === String(payload.orderId));
-      if (!order) return;
-      const target = order.items?.find((item) => String(item.detailId) === String(payload.detailId));
-      if (target) target.kitchenStatus = payload.status;
-      if (payload.orderStatus) order.status = payload.orderStatus;
-      if (payload.kitchenProgress) order.kitchenProgress = payload.kitchenProgress;
-      else recalcKitchenProgress(order);
+      patchKitchenItem(draft, payload);
     }));
   }, roomOptions);
 
   useSocketEvent("order:transfer_payment_updated", (payload) => {
-    if (payload?.orderId) refreshOrders();
+    if (!payload?.orderId) return;
+    dispatch(api.util.updateQueryData("getOrdersByBusiness", queryArg, (draft) => {
+      patchTransferPayment(draft, payload);
+    }));
   }, roomOptions);
 
   const selectors = useMemo(() => ({

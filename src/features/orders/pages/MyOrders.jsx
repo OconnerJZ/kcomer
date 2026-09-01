@@ -14,7 +14,7 @@ import {
 import { Restaurant } from "@mui/icons-material";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import { useAuth } from "@Features/auth/context/AuthContext";
-import { useOrders } from "@Features/orders/context/OrderContext";
+import { useOrders } from "@Features/orders/context/useOrders";
 import CustomerOrderCard from "@Features/orders/components/customer/CustomerOrderCard";
 import EditPendingOrderDialog from "@Features/orders/components/customer/EditPendingOrderDialog";
 
@@ -58,7 +58,6 @@ export default function MyOrders() {
     setCancelOrderId(null);
     if (result?.success) {
       showFeedback("Orden cancelada", "success");
-      await refreshOrders();
     } else {
       showFeedback(result?.error || "No fue posible cancelar la orden", "error");
     }

@@ -1,6 +1,6 @@
 import { Box, Button, Collapse, Stack, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore, HistoryRounded } from "@mui/icons-material";
-import { STATUS_LABELS } from "../../context/OrderContext";
+import { STATUS_LABELS } from "../../model/orderStatus";
 import { getStatusColor, getStatusIcon } from "../../model/orderPresentation";
 
 const formatMoment = (value) => {

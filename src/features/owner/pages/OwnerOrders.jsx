@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { ViewList, ViewKanban } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
-import useBusinessOrders from "@Features/orders/hooks/useBusinessOrders";
+import PropTypes from "prop-types";
 import { useOrderFilters } from "@Features/orders/hooks/useOrderFilters";
 import { useOrderDialog } from "@Features/orders/hooks/useOrderDialog";
 import OrderFilters from "@Features/orders/components/OrderFilters";
@@ -35,7 +35,7 @@ const matchesOperationalFilter = (order, filter, now) => {
 
 const PRODUCTION_STATUSES = ["accepted", "preparing", "ready"];
 
-const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permissions = [], isAdmin = false }) => {
+const OwnerOrders = ({ ordersState, focusedOrderId = null, onFocusHandled, permissions = [], isAdmin = false }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [highlightedOrderId, setHighlightedOrderId] = useState(null);
   const [operationalFilter, setOperationalFilter] = useState(null);
@@ -48,7 +48,7 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permis
   const { canAcceptOrders, canViewKitchen, canUpdateKitchen, canReviewPayments } = getOrderCapabilities(permissions, { isAdmin });
   const displayedViewMode = canViewKitchen ? viewMode : "list";
 
-  const { orders, loading, updateOrderStatus, updateKitchenItemStatus, refreshOrders } = useBusinessOrders(businessId);
+  const { orders, loading, updateOrderStatus, updateKitchenItemStatus, refreshOrders } = ordersState;
   const { filterStatus, setFilterStatus, filteredOrders: statusFilteredOrders } = useOrderFilters(orders);
 
   useEffect(() => {
@@ -79,14 +79,20 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permis
     if (focusedOrderId == null || loading || orders.length === 0) return;
     const targetOrder = orders.find((order) => String(order.id) === String(focusedOrderId));
     if (!targetOrder) return;
-    setViewMode("list");
-    setFilterStatus("all");
-    setOperationalFilter(null);
-    setHighlightedOrderId(targetOrder.id);
-    openDialog(targetOrder);
-    onFocusHandled?.();
-    const timeout = window.setTimeout(() => setHighlightedOrderId(null), 4500);
-    return () => window.clearTimeout(timeout);
+    let highlightTimeout;
+    const focusTimeout = window.setTimeout(() => {
+      setViewMode("list");
+      setFilterStatus("all");
+      setOperationalFilter(null);
+      setHighlightedOrderId(targetOrder.id);
+      openDialog(targetOrder);
+      onFocusHandled?.();
+      highlightTimeout = window.setTimeout(() => setHighlightedOrderId(null), 4500);
+    }, 0);
+    return () => {
+      window.clearTimeout(focusTimeout);
+      if (highlightTimeout) window.clearTimeout(highlightTimeout);
+    };
   }, [focusedOrderId, loading, orders, openDialog, onFocusHandled, setFilterStatus]);
 
   const handleOperationalFilter = (filter) => {
@@ -169,6 +175,20 @@ const OwnerOrders = ({ businessId, focusedOrderId = null, onFocusHandled, permis
       </Snackbar>
     </Box>
   );
+};
+
+OwnerOrders.propTypes = {
+  ordersState: PropTypes.shape({
+    orders: PropTypes.arrayOf(PropTypes.object).isRequired,
+    loading: PropTypes.bool.isRequired,
+    updateOrderStatus: PropTypes.func.isRequired,
+    updateKitchenItemStatus: PropTypes.func.isRequired,
+    refreshOrders: PropTypes.func.isRequired,
+  }).isRequired,
+  focusedOrderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onFocusHandled: PropTypes.func,
+  permissions: PropTypes.arrayOf(PropTypes.string),
+  isAdmin: PropTypes.bool,
 };
 
 export default OwnerOrders;

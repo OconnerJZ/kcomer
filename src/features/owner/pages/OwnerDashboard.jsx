@@ -1,4 +1,4 @@
-import { useState, forwardRef, useMemo, useEffect } from "react";
+import { useState, forwardRef, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -43,16 +43,14 @@ export default function OwnerDashboard() {
   const {
     businesses,
     selectedBusiness,
+    selectedBusinessId: resolvedBusinessId,
     loading: loadingBusinesses,
     error: businessError,
     refetchBusinesses,
     hasBusinesses,
   } = useBusinessOwner(selectedBusinessId);
 
-  const {
-    loading: loadingOrders,
-    getPendingOrders,
-  } = useBusinessOrders(selectedBusinessId);
+  const businessOrders = useBusinessOrders(resolvedBusinessId);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -68,22 +66,10 @@ export default function OwnerDashboard() {
     setActiveTab(0);
   };
 
-  useEffect(() => {
-    if (businesses.length === 0) {
-      if (selectedBusinessId !== null) setSelectedBusinessId(null);
-      return;
-    }
-
-    const selectionStillExists = businesses.some(
-      (business) => String(business.id) === String(selectedBusinessId),
-    );
-
-    if (!selectionStillExists) {
-      setSelectedBusinessId(businesses[0].id);
-    }
-  }, [businesses, selectedBusinessId]);
-
-  const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
+  const pendingOrdersCount = useMemo(
+    () => businessOrders.orders.filter((order) => order.status === "pending").length,
+    [businessOrders.orders],
+  );
   const allowedTabs = useMemo(() => {
     return getAllowedDashboardTabs(selectedBusiness, { isAdmin: user?.role === "admin" });
   }, [selectedBusiness, user?.role]);
@@ -148,7 +134,7 @@ export default function OwnerDashboard() {
         onTabChange={handleTabChange}
         onNotificationNavigate={handleNotificationNavigate}
         businessName={selectedBusiness.name}
-        selectedBusinessId={selectedBusinessId}
+        selectedBusinessId={resolvedBusinessId}
         pendingOrders={pendingOrdersCount}
         selectBusiness={selectBusiness}
         businesses={businesses}
@@ -174,16 +160,15 @@ export default function OwnerDashboard() {
           <Box>
             {displayedTab === 0 && allowedTabs.includes(0) && (
               <OrdersTab
-                businessId={selectedBusinessId}
-                loading={loadingOrders}
+                ordersState={businessOrders}
                 focusedOrderId={focusedOrderId}
                 onFocusHandled={() => setFocusedOrderId(null)}
                 permissions={selectedBusiness.permissions}
                 isAdmin={user?.role === "admin"}
               />
             )}
-            {displayedTab === 1 && allowedTabs.includes(1) && <MenuTab businessId={selectedBusinessId} />}
-            {displayedTab === 2 && allowedTabs.includes(2) && <ReportsTab businessId={selectedBusinessId} />}
+            {displayedTab === 1 && allowedTabs.includes(1) && <MenuTab businessId={resolvedBusinessId} />}
+            {displayedTab === 2 && allowedTabs.includes(2) && <ReportsTab businessId={resolvedBusinessId} />}
             {displayedTab === 3 && allowedTabs.includes(3) && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
           </Box>
         </Fade>

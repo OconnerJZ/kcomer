@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { EditRounded, ExpandLess, ExpandMore, GroupsRounded } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { ORDER_STATUS } from "@Features/orders/context/OrderContext";
+import { ORDER_STATUS_VALUES as ORDER_STATUS } from "@Features/orders/model/orderStatus";
 import OrderProgressTracker from "./OrderProgressTracker";
 import OrderItemsList from "./OrderItemsList";
 import OrderHistory from "./OrderHistory";
