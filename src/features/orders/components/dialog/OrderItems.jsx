@@ -60,7 +60,7 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
         </Stack>
       </Stack>
 
-      {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: 2, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
+      {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: 2, bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
 
       <OrderProductList
         items={items}

@@ -1,4 +1,4 @@
-import { Chip, Paper, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Chip, Stack, Tab, Tabs, Typography } from "@mui/material";
 
 export default function CartBusinessTabs({
   businesses,
@@ -9,7 +9,7 @@ export default function CartBusinessTabs({
   if (!businesses.length) return null;
 
   return (
-    <Paper sx={{ mb: 2, borderRadius: 0 }} elevation={0}>
+    <Stack sx={{ mb: 2 }}>
       <Tabs
         value={activeTab}
         onChange={(_, newValue) => onChange(newValue)}
@@ -33,6 +33,6 @@ export default function CartBusinessTabs({
           />
         ))}
       </Tabs>
-    </Paper>
+    </Stack>
   );
 }

@@ -118,7 +118,7 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
           startIcon={<ContentCopy />}
           onClick={copyReferenceDay}
           disabled={!controlledSchedule.some((day) => !day.isClosed && day.opened && day.closed)}
-          sx={{ textTransform: "none", borderRadius: 2, alignSelf: { xs: "flex-start", sm: "center" } }}
+          sx={{ alignSelf: { xs: "stretch", sm: "center" } }}
         >
           Copiar horario al resto
         </Button>
@@ -131,12 +131,12 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
             <Box
               key={day.day}
               sx={{
-                px: { xs: 1.5, sm: 2 },
+                px: { xs: .5, sm: 1 },
                 py: 1.35,
-                border: "1px solid",
-                borderColor: isToday ? "rgba(255,75,69,.28)" : "divider",
+                borderBottom: "1px solid",
+                borderLeft: isToday ? "3px solid" : "3px solid transparent",
+                borderColor: isToday ? "primary.main" : "divider",
                 bgcolor: isToday ? "rgba(255,75,69,.035)" : "background.paper",
-                borderRadius: 2.25,
               }}
             >
               <Stack

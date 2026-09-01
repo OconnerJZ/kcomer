@@ -57,17 +57,15 @@ export default function CheckoutPage() {
 
   return (
     <GeneralContent title="Pedidos">
-      <Box sx={{ textAlign: "center", mt: 2 }}>
-        <Segmented
-          value={view}
-          onChange={setView}
-          options={VIEW_OPTIONS}
-        />
+      <Box sx={{ py: { xs: 2, sm: 3 } }}>
+        <Box sx={{ display: "flex", justifyContent: "center", px: 1.5 }}>
+          <Segmented value={view} onChange={setView} options={VIEW_OPTIONS} />
+        </Box>
 
         {view === "pedidos" && loadingSharedOrder && <Box sx={{ py: 7 }}><CircularProgress /></Box>}
 
         {view === "pedidos" && !loadingSharedOrder && sharedMode && (
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ maxWidth: 900, mx: "auto", mt: 2, px: { xs: 1.5, sm: 2 } }}>
             <Segmented value={orderMode} onChange={setOrderTarget} options={ORDER_MODE_OPTIONS} block />
           </Box>
         )}
@@ -87,7 +85,7 @@ export default function CheckoutPage() {
         )}
 
         {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.currentBusiness && (
-          <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
+          <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2 } }}>
             <CartBusinessTabs
               businesses={checkout.businesses}
               cart={checkout.cart}
@@ -95,14 +93,15 @@ export default function CheckoutPage() {
               onChange={checkout.changeTab}
             />
 
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
+            <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
-                alignItems="center"
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                gap={1}
                 sx={{ mb: 2 }}
               >
-                <Typography variant="h6">
+                <Typography variant="h6" sx={{ textAlign: "left", overflowWrap: "anywhere" }}>
                   {checkout.currentBusiness.businessName}
                 </Typography>
 

@@ -101,8 +101,8 @@ export default function MyOrders() {
 
   return (
     <GeneralContent title="Mis Órdenes">
-      <Box sx={{ maxWidth: 1200, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
-        <Grid container spacing={1} justifyContent="center">
+      <Box sx={{ maxWidth: 1200, mx: "auto", py: { xs: 2, sm: 4 }, px: { xs: 1.5, sm: 2.5 } }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2 }} justifyContent="center" alignItems="flex-start">
           {userOrders.map((order) => (
             <Grid item xs={12} sm={6} md={4} key={order.id}>
               <CustomerOrderCard

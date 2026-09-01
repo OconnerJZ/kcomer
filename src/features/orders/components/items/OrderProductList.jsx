@@ -1,4 +1,4 @@
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import { StickyNote2 } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { formatCurrency } from "@Features/orders/model/orderFormatters";
@@ -39,7 +39,7 @@ export default function OrderProductList({
   const groups = groupOrderItemsBySelection(items, groupBySelection, getGroupLabel);
   if (!items.length) return <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>{emptyMessage}</Typography>;
 
-  return <Paper elevation={0} sx={{ border: "1px solid", borderColor: "divider", overflow: "hidden", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.78)" }}>
+  return <Box sx={{ overflow: "hidden", borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
     {groups.map((group, groupIndex) => <Box key={group.label || "products"}>
       {group.label && <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1.5, py: 1, bgcolor: "rgba(255,75,69,.045)", borderTop: groupIndex ? "1px solid" : "none", borderColor: "divider" }}><Typography variant="caption" fontWeight={900} color="primary.dark">{group.label}</Typography><Typography variant="caption" color="text.secondary">{group.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)} piezas</Typography></Stack>}
       {group.items.map((item, index) => {
@@ -47,7 +47,7 @@ export default function OrderProductList({
         const meta = getMeta?.(item);
         const status = renderStatus?.(item);
         const actions = renderActions?.(item);
-        return <Box key={item.detailId || item.id || `${item.name}-${index}`} sx={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto", columnGap: 1.2, rowGap: .75, alignItems: "start", p: 1.35, borderTop: index || group.label ? "1px solid" : "none", borderColor: "divider" }}>
+        return <Box key={item.detailId || item.id || `${item.name}-${index}`} sx={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto", columnGap: { xs: .9, sm: 1.2 }, rowGap: .75, alignItems: "start", px: { xs: .5, sm: .75 }, py: 1.35, borderTop: index || group.label ? "1px solid" : "none", borderColor: "divider" }}>
           <Chip label={`${Number(item.quantity || 0)}×`} size="small" sx={{ fontWeight: 850, minWidth: 38, height: 24, bgcolor: "rgba(255,75,69,.08)", color: "primary.main" }} />
           <Box minWidth={0}>
             <Typography variant="body2" fontWeight={800} sx={{ lineHeight: 1.35 }}>{item.name}</Typography>
@@ -61,7 +61,7 @@ export default function OrderProductList({
       })}
     </Box>)}
     {showTotal && total != null && <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1.6, py: 1.35, bgcolor: "rgba(248,248,248,.8)", borderTop: "1px solid", borderColor: "divider" }}><Typography variant="body2" fontWeight={750}>Total del pedido</Typography><Typography variant="subtitle1" fontWeight={900}>{formatCurrency(total)}</Typography></Stack>}
-  </Paper>;
+  </Box>;
 }
 
 const itemShape = PropTypes.shape({

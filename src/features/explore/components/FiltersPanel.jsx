@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Search } from "@mui/icons-material";
-import { Autocomplete, Box, Grid, IconButton, Paper, TextField } from "@mui/material";
-import { Card, Drawer } from "antd";
+import { Autocomplete, Box, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Drawer } from "antd";
 import { Icon } from "@iconify/react";
 import { useFilterMenu } from "@Features/explore/context/FilterMenuContext";
 import useGeolocation from "@Features/explore/hooks/useGeolocation";
@@ -26,9 +26,12 @@ export default function FiltersPanel() {
           position: "fixed",
           top: { xs: "0px", sm: "56px", md: "64px" },
           width: "100%",
-          padding: "3px",
-          backgroundImage: "radial-gradient(circle at 56.6% 38.56%, #fffbae 5%, #ffe9a6 15%, #d8b46c 50%, #c99f54 75%, #bd8c40 100%)",
-          color: "#000",
+          minHeight: 40,
+          px: 1.5,
+          py: .4,
+          backgroundColor: "rgba(255,243,232,.94)",
+          borderBottom: "1px solid rgba(255,159,28,.22)",
+          color: "text.primary",
           backdropFilter: "blur(5px)",
           display: "flex",
           justifyContent: "center",
@@ -38,35 +41,29 @@ export default function FiltersPanel() {
           letterSpacing: "0.5px",
         }}
       >
-        <article>{address}</article>
-        <IconButton onClick={() => setOpen(true)}>
+        <Typography component="span" variant="caption" fontWeight={750} noWrap sx={{ maxWidth: "calc(100vw - 64px)" }}>{address}</Typography>
+        <IconButton size="small" onClick={() => setOpen(true)}>
           <Search />
         </IconButton>
       </Box>
 
       <Drawer title="" placement="top" onClose={() => setOpen(false)} open={open} className="panelFilter">
-        <Grid container spacing={5} justifyContent="center" alignItems="center" mt={2}>
+        <Grid container spacing={{ xs: 2, md: 3 }} justifyContent="center" alignItems="stretch" mt={2}>
           {[
-            ["ion:location", "#D02828", "Ubicación"],
-            ["ion:fast-food", "#E3A024", "Comida"],
-            ["fluent:person-feedback-48-filled", "#003085", "Feedback"],
+            ["ion:location", "#2EAD67", "Ubicación"],
+            ["ion:fast-food", "#FF9F1C", "Comida"],
+            ["fluent:person-feedback-48-filled", "#FF4B45", "Feedback"],
           ].map(([icon, color, label]) => (
-            <Grid item key={label}>
-              <Paper elevation={3}>
-                <Card
-                  className="filterPanel"
-                  title={<Icon style={{ fontSize: "40px", color }} icon={icon} />}
-                  bordered={false}
-                  style={{ width: 300 }}
-                >
+            <Grid item xs={12} sm={6} md={4} key={label}>
+              <Stack spacing={1.5} sx={{ height: "100%", p: { xs: 1.5, sm: 2 }, border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "rgba(255,255,255,.9)" }}>
+                  <Stack direction="row" spacing={1} alignItems="center"><Icon style={{ fontSize: "28px", color }} icon={icon} /><Typography fontWeight={800}>{label}</Typography></Stack>
                   <Autocomplete
                     value={value}
                     onChange={(_, newValue) => setValue(newValue)}
                     options={options}
                     renderInput={(params) => <TextField {...params} label={label} />}
                   />
-                </Card>
-              </Paper>
+              </Stack>
             </Grid>
           ))}
         </Grid>

@@ -35,10 +35,10 @@ export default function SharedOrderLauncher() {
 
   return (
     <>
-      <Paper variant="outlined" sx={{ maxWidth: 900, mx: "auto", mt: 2, p: 2.5, borderRadius: 3, textAlign: "left" }}>
+      <Paper elevation={0} sx={{ maxWidth: 900, mx: "auto", mt: 2, p: { xs: 1.5, sm: 2.5 }, border: "1px solid", borderColor: "divider", borderRadius: 3, textAlign: "left" }}>
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} gap={2}>
           <div><Typography variant="h6">Orden compartida</Typography><Typography color="text.secondary">Junten productos de uno o varios negocios y mantengan separado lo de cada persona.</Typography></div>
-          <Stack direction="row" gap={1}><Button startIcon={<GroupAdd />} variant="contained" onClick={() => setMode("create")}>Crear</Button><Button startIcon={<Login />} variant="outlined" onClick={() => setMode("join")}>Unirme</Button></Stack>
+          <Stack direction={{ xs: "column", sm: "row" }} gap={1}><Button startIcon={<GroupAdd />} variant="contained" onClick={() => setMode("create")}>Crear</Button><Button startIcon={<Login />} variant="outlined" onClick={() => setMode("join")}>Unirme</Button></Stack>
         </Stack>
       </Paper>
       <Dialog open={Boolean(mode)} onClose={() => setMode(null)} fullWidth maxWidth="xs">

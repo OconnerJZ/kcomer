@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Box, CircularProgress, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Paper, Snackbar, Stack, Typography } from "@mui/material";
 import useBusinessTeam from "@Features/owner/hooks/useBusinessTeam";
 import { getTeamErrorMessage } from "@Features/owner/model/teamAccess";
 import InvitationSecretAlert from "./team/InvitationSecretAlert";
@@ -38,7 +38,7 @@ export default function TeamAccessTab({ businessId }) {
     if (invitation) { setLatestInvite(invitation); setTransferEmail(""); }
   };
 
-  return <Stack spacing={3}>
+  return <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3, border: "1px solid", borderColor: "divider", bgcolor: "rgba(255,255,255,.88)" }}><Stack spacing={{ xs: 2, sm: 3 }}>
     <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em" }}>EQUIPO Y ACCESO</Typography><Typography variant="h5" fontWeight={850}>Personas que operan este local</Typography><Typography variant="body2" color="text.secondary">Cada permiso está limitado a este negocio. Un colaborador no obtiene acceso a tus otros locales.</Typography></Box>
     {teamAccess.error && <Alert severity="error">{getTeamErrorMessage(teamAccess.error)}</Alert>}
     <InvitationSecretAlert invitation={latestInvite} onCopy={copy} />
@@ -47,6 +47,5 @@ export default function TeamAccessTab({ businessId }) {
     <PendingInvitationList invitations={teamAccess.team.invitations} onCancel={(invitation) => run(() => teamAccess.cancelInvitation(invitation.id), "Invitación cancelada")} />
     <OwnershipTransferPanel email={transferEmail} retainPrevious={retainPrevious} loading={teamAccess.isTransferring} onEmailChange={setTransferEmail} onRetainChange={setRetainPrevious} onTransfer={handleTransfer} />
     <Snackbar open={notice.open} autoHideDuration={4500} onClose={() => setNotice((current) => ({ ...current, open: false }))}><Alert severity={notice.severity}>{notice.message}</Alert></Snackbar>
-  </Stack>;
+  </Stack></Paper>;
 }
-

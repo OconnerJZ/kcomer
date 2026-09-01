@@ -24,10 +24,10 @@ const PreparationProgress = ({ order }) => {
   const complete = total > 0 && ready >= total;
 
   return (
-    <Box sx={{ p: 1.15, borderRadius: 2, bgcolor: complete ? "rgba(46,125,50,.08)" : "rgba(255,75,69,.045)", border: "1px solid", borderColor: complete ? "rgba(46,125,50,.18)" : "rgba(255,75,69,.10)" }}>
+    <Box sx={{ p: 1.15, borderRadius: 2, bgcolor: complete ? "rgba(46,173,103,.08)" : "rgba(255,159,28,.07)", border: "1px solid", borderColor: complete ? "rgba(46,173,103,.18)" : "rgba(255,159,28,.18)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: .7 }}>
         <Stack direction="row" spacing={.7} alignItems="center">
-          {complete ? <CheckCircleRounded sx={{ fontSize: 16, color: "success.main" }} /> : <RestaurantRounded sx={{ fontSize: 16, color: "primary.main" }} />}
+          {complete ? <CheckCircleRounded sx={{ fontSize: 16, color: "success.main" }} /> : <RestaurantRounded sx={{ fontSize: 16, color: "secondary.dark" }} />}
           <Typography variant="caption" fontWeight={800}>{complete ? "Todos listos" : "Preparación"}</Typography>
         </Stack>
         <Typography variant="caption" fontWeight={900} color={complete ? "success.main" : "text.secondary"}>{ready}/{total}</Typography>
@@ -80,8 +80,8 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
 
 export default function KitchenBoard({ orders = [], now, onViewOrder, onUpdateStatus }) {
   return (
-    <Box sx={{ overflowX: { xs: "auto", lg: "visible" }, pb: 1 }}>
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(3, minmax(280px, 1fr))", lg: "repeat(3, minmax(0, 1fr))" }, gap: 2, minWidth: { xs: 880, lg: 0 } }}>
+    <Box sx={{ pb: 1 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: { xs: 2.5, md: 2 } }}>
         {COLUMNS.map((column) => {
           const columnOrders = orders.filter((order) => order.status === column.key);
           return (

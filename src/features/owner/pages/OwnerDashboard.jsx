@@ -169,7 +169,7 @@ export default function OwnerDashboard() {
 
       <Box sx={{ height: { xs: 56, sm: 64 } }} />
 
-      <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
+      <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1.5, sm: 2.5, md: 3 } }}>
         <Fade in timeout={500}>
           <Box>
             {displayedTab === 0 && allowedTabs.includes(0) && (

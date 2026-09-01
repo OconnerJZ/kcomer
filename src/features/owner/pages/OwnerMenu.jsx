@@ -254,16 +254,12 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
 
   return (
     <Box>
-      <Paper
-        elevation={0}
+      <Box
         sx={{
-          p: { xs: 2, sm: 2.5 },
+          pb: { xs: 2, sm: 2.5 },
           mb: 2.5,
-          border: "1px solid",
+          borderBottom: "1px solid",
           borderColor: "divider",
-          borderRadius: 2,
-          bgcolor: "rgba(255,255,255,.72)",
-          backdropFilter: "blur(10px)",
         }}
       >
         <Stack
@@ -300,7 +296,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
             Agregar platillo
           </Button>
         </Stack>
-      </Paper>
+      </Box>
 
       {hasItems() && (
         <MenuToolbar
@@ -328,7 +324,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
             textAlign: "center",
             border: "1px dashed",
             borderColor: "divider",
-            borderRadius: 2,
+            borderRadius: 3,
           }}
         >
           <Restaurant sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
@@ -358,7 +354,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
             textAlign: "center",
             border: "1px solid",
             borderColor: "divider",
-            borderRadius: 2,
+            borderRadius: 3,
           }}
         >
           <Typography variant="body1" fontWeight={700}>
@@ -374,7 +370,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
         <TableContainer
           component={Paper}
           elevation={0}
-          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}
+          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden" }}
         >
           <Table>
             <TableHead>
@@ -469,7 +465,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                   sx={{
                     border: "1px solid",
                     borderColor: "divider",
-                    borderRadius: 2,
+                    borderRadius: 3,
                     height: "100%",
                     bgcolor: "rgba(255,255,255,.82)",
                     overflow: "hidden",
@@ -516,7 +512,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                         </Typography>
                       )}
 
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Switch
                             checked={item.available}
@@ -530,7 +526,7 @@ const OwnerMenu = ({ businessId, onRefresh }) => {
                             {item.available ? "Disponible" : "Pausado"}
                           </Typography>
                         </Stack>
-                        <ActionButtons item={item} />
+                        <Box sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}><ActionButtons item={item} /></Box>
                       </Stack>
                     </Stack>
                   </CardContent>

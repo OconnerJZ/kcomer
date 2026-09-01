@@ -21,7 +21,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
       elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
-        borderRadius: 4,
+        borderRadius: 3,
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "rgba(255,255,255,.9)",
@@ -49,12 +49,12 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
           onChange={handleMapChange}
           label="Marca el punto exacto"
           apiKey={API_KEY_MAPS}
-          height={420}
+          height={{ xs: 300, sm: 360, lg: 420 }}
           compact
         />
 
         <Stack spacing={2}>
-          <Box sx={{ p: 2, borderRadius: 3, bgcolor: "rgba(247,245,243,.82)", border: "1px solid rgba(35,29,26,.06)" }}>
+          <Box sx={{ pb: 2, borderBottom: "1px solid", borderColor: "divider" }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
               <LocationOnRounded color="primary" fontSize="small" />
               <Typography variant="body2" fontWeight={850}>Dirección visible</Typography>
@@ -91,7 +91,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
             </Stack>
           </Box>
 
-          <Box sx={{ px: 2, py: 1.6, borderRadius: 3, border: "1px dashed", borderColor: "divider" }}>
+          <Box sx={{ px: 1.5, py: 1.35, borderRadius: 2, bgcolor: "rgba(46,173,103,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
             <Typography variant="caption" color="text.secondary">Coordenadas</Typography>
             <Typography variant="body2" fontWeight={750} sx={{ mt: .35 }}>
               {locationInfo.latitude && locationInfo.longitude

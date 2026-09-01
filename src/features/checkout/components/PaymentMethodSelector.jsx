@@ -2,10 +2,10 @@ import { Box, Card, CardContent, Typography } from "@mui/material";
 import TransferPaymentInfo from "./TransferPaymentInfo";
 
 const METHOD_META = {
-  cash: { icon: "💵", label: "Efectivo", color: "#4caf50", bg: "#f1f8f4" },
-  transfer: { icon: "🏦", label: "Transferencia", color: "#2196f3", bg: "#e3f2fd" },
-  card: { icon: "💳", label: "Tarjeta", color: "#7e57c2", bg: "#f3e5f5" },
-  wallet: { icon: "📱", label: "Billetera digital", color: "#ff9800", bg: "#fff3e0" },
+  cash: { icon: "💵", label: "Efectivo", color: "#2EAD67", bg: "rgba(46,173,103,.08)" },
+  transfer: { icon: "🏦", label: "Transferencia", color: "#FF9F1C", bg: "rgba(255,159,28,.08)" },
+  card: { icon: "💳", label: "Tarjeta", color: "#FF4B45", bg: "rgba(255,75,69,.07)" },
+  wallet: { icon: "📱", label: "Billetera digital", color: "#FF9F1C", bg: "rgba(255,159,28,.08)" },
 };
 
 export default function PaymentMethodSelector({ paymentMethod, methods = [], onChange }) {
@@ -26,8 +26,8 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
           const meta = METHOD_META[value] || {
             icon: "💰",
             label: method.label || value,
-            color: "#607d8b",
-            bg: "#eceff1",
+            color: "#FF4B45",
+            bg: "rgba(255,75,69,.07)",
           };
           const selected = paymentMethod === value;
 
@@ -38,10 +38,11 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
               sx={{
                 flex: "1 1 180px",
                 cursor: "pointer",
-                border: selected ? `1px solid ${meta.color}` : "1px solid #e0e0e0",
+                border: "1px solid",
+                borderColor: selected ? meta.color : "divider",
                 bgcolor: selected ? meta.bg : "white",
                 transition: "all 0.2s",
-                "&:hover": { borderColor: meta.color, transform: "translateY(-2px)", boxShadow: 2 },
+                "&:hover": { borderColor: meta.color },
               }}
             >
               <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>

@@ -3,7 +3,6 @@ import { Box, Toolbar } from "@mui/material";
 import Navbar from "@App/navigation/Navbar";
 import FiltersPanel from "@Features/explore/components/FiltersPanel";
 import Bg from "@Assets/images/qscome-bg-6.png";
-import { isMobile } from "@Shared/utils/commons";
 import Content from "@Shared/components/layout/Content";
 
 const { Header: AntdHeader, Content: AntdContent, Footer: AntdFooter } = AntdLayout;
@@ -19,16 +18,16 @@ export default function AppLayout() {
         </AntdHeader>
       </Box>
       <Toolbar sx={{ backgroundImage: `url(${Bg})`, display: { xs: "none", sm: "block" } }} />
-      <AntdContent style={{ position: "relative", overflow: "hidden", padding: "0 0px", backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`, backgroundSize: "contain", backgroundPosition: "center" }}>
+      <AntdContent className="app-content" style={{ position: "relative", overflow: "hidden", padding: "0", backgroundImage: `linear-gradient(rgba(255, 249, 244, 0.84), rgba(255, 249, 244, 0.84)), url(${Bg})`, backgroundSize: "contain", backgroundPosition: "center" }}>
         <Content />
       </AntdContent>
-      {!isMobile() && (
-        <AntdFooter style={{ backgroundColor: "#3a3b3d", color: "#f5f5f5", textAlign: "center", letterSpacing: "3.2px" }}>
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
+        <AntdFooter style={{ backgroundColor: "#292522", color: "#fff9f4", textAlign: "center", letterSpacing: "3.2px" }}>
           <Box component="span" className="footer">
             COPYRIGHT © {new Date().getFullYear()} {APP_NAME} - TODOS LOS DERECHOS RESERVADOS
           </Box>
         </AntdFooter>
-      )}
+      </Box>
     </AntdLayout>
   );
 }

@@ -5,9 +5,9 @@ export default function ProfileActions({ user, onNavigate, onLogoutRequest }) {
   const hasBusinessAccess = user?.role === "owner" || user?.role === "admin" || Boolean(user?.businesses?.length);
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }} elevation={2}>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Acciones Rápidas</Typography>
-      <Stack spacing={2}>
+      <Stack spacing={1.25}>
         <Button variant="outlined" startIcon={<ShoppingBag />} fullWidth onClick={() => onNavigate("/mis-ordenes")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Mis Órdenes</Button>
 
         {hasBusinessAccess ? (

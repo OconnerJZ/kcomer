@@ -18,19 +18,19 @@ export const ORDER_STATUS = {
 
 export const STATUS_COLORS = {
   pending: { bg: "#467A77", hover: "#dd6b20" },
-  accepted: { bg: "#1976D2", hover: "#2c5282" },
-  preparing: { bg: "#ED6C02", hover: "#6b46c1" },
-  ready: { bg: "#2E7D32", hover: "#2f855a" },
-  in_delivery: { bg: "#6A1B9A", hover: "#2f855a" },
+  accepted: { bg: "#FF4B45", hover: "#C93430" },
+  preparing: { bg: "#FF9F1C", hover: "#A95B00" },
+  ready: { bg: "#2EAD67", hover: "#187A42" },
+  in_delivery: { bg: "#A95B00", hover: "#7A4100" },
   completed: { bg: "#616161", hover: "#4a5568" },
 };
 
 export const COLOR_MAP = {
   pending: "#467A77",
-  accepted: "#1976D2",
-  preparing: "#ED6C02",
-  ready: "#2E7D32",
-  in_delivery: "#6A1B9A",
+  accepted: "#FF4B45",
+  preparing: "#FF9F1C",
+  ready: "#2EAD67",
+  in_delivery: "#A95B00",
   completed: "#616161",
   error: "#e53e3e",
   default: "#e0e0e0",

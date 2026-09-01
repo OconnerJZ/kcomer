@@ -9,7 +9,6 @@ import {
   IconButton,
   InputAdornment,
   MenuItem,
-  Paper,
   Stack,
   TextField,
   Typography,
@@ -290,24 +289,22 @@ export default function MenuModifierManager({ menuId }) {
           <CircularProgress size={28} />
         </Box>
       ) : groups.length === 0 ? (
-        <Paper
-          variant="outlined"
+        <Box
           sx={{ p: 2.5, borderStyle: "dashed", borderRadius: 3, textAlign: "center" }}
         >
           <Typography variant="body2" fontWeight={700}>Este platillo todavía no tiene opciones.</Typography>
           <Typography variant="caption" color="text.secondary">
             Usa una plantilla o crea un grupo desde cero.
           </Typography>
-        </Paper>
+        </Box>
       ) : (
         <Stack spacing={1.5}>
           {groups.map((group, groupIndex) => {
             const single = Number(group.maxSelect || 0) === 1;
             return (
-              <Paper
+              <Box
                 key={group.id || `new-${groupIndex}`}
-                variant="outlined"
-                sx={{ p: 2, borderRadius: 3, bgcolor: "rgba(255,255,255,.78)" }}
+                sx={{ py: 2, borderTop: groupIndex ? "1px solid" : "none", borderBottom: "1px solid", borderColor: "divider" }}
               >
                 <Stack direction="row" spacing={1} alignItems="flex-start">
                   <TextField
@@ -441,7 +438,7 @@ export default function MenuModifierManager({ menuId }) {
                     Agregar opción
                   </Button>
                 </Stack>
-              </Paper>
+              </Box>
             );
           })}
         </Stack>

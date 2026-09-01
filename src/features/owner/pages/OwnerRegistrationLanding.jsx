@@ -1,7 +1,6 @@
 import { Box, Typography, Button, Paper } from "@mui/material";
 import HeaderImg from "@Assets/images/qscome-header-1.png";
 import { Navigate, useNavigate } from "react-router-dom";
-import { isMobile } from "@Shared/utils/commons";
 import { useAuth } from "@Features/auth/context/AuthContext";
 import { isOwner } from "@Features/auth/model/roles";
 import RegisterBusiness from "./RegisterBusiness";
@@ -15,32 +14,23 @@ export default function OwnerRegistrationLanding() {
   if (isAuthenticated) return <RegisterBusiness />;
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <img
-        src={HeaderImg}
-        style={{ position: "absolute", top: 0, width: "auto" }}
-        alt=""
-      />
+    <Box sx={{ minHeight: "calc(100svh - 64px)", display: "grid", placeItems: "center", px: { xs: 1.5, sm: 3 }, py: { xs: 4, sm: 7 }, backgroundImage: `linear-gradient(rgba(255,249,244,.78), rgba(255,249,244,.94)), url(${HeaderImg})`, backgroundSize: "cover", backgroundPosition: "center top" }}>
       <Box
         sx={{
-          mt: isMobile() ? 23 : 30,
-          position: "relative",
-          maxWidth: 700,
-          borderRadius: 3,
-          overflow: "hidden",
-          boxShadow: 0,
+          width: "100%",
+          maxWidth: 620,
           textAlign: "center",
         }}
       >
         <Paper
           sx={{
-            bgcolor: "rgba(255, 255, 255, 0.70)",
-            color: "primary",
-            m: 2,
-            p: 4,
-            borderRadius: 4,
+            bgcolor: "rgba(255,255,255,.9)",
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: "divider",
           }}
-          elevation={5}
+          elevation={0}
         >
           <Typography variant="h5" component="h2" gutterBottom>
             ¡Haz que todos encuentren tu negocio!
@@ -54,7 +44,7 @@ export default function OwnerRegistrationLanding() {
           <Button
             variant="contained"
             color="primary"
-            sx={{ mt: 2, transform: "scale(1)", transition: "transform 0.3s", "&:hover": { transform: "scale(1.1)" } }}
+            sx={{ mt: 2, width: { xs: "100%", sm: "auto" } }}
             onClick={() => navigate("/login/registro")}
           >
             Registrar mi local

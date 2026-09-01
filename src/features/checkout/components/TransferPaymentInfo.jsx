@@ -9,8 +9,8 @@ export default function TransferPaymentInfo({ config = {}, compact = false }) {
 
   return (
     <Box mt={compact ? 0 : 2}>
-      <Box sx={{ background: "linear-gradient(135deg, #b96b22 0%, #ff4b45 100%)", borderRadius: 3, p: compact ? 2 : 3, color: "white", boxShadow: "0 8px 20px rgba(255,75,69,.2)" }}>
-        <Stack direction="row" justifyContent="space-between" mb={2} gap={2}>
+      <Box sx={{ background: "linear-gradient(135deg, #A95B00 0%, #FF4B45 100%)", borderRadius: 3, p: compact ? 2 : 3, color: "white" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" mb={2} gap={1}>
           <Box><Typography variant="caption" sx={{ opacity: .72 }}>BANCO</Typography><Typography fontWeight={800}>{config.bankName}</Typography></Box>
           <Box textAlign="right"><Typography variant="caption" sx={{ opacity: .72 }}>TITULAR</Typography><Typography variant="body2" fontWeight={750}>{config.accountHolder}</Typography></Box>
         </Stack>
@@ -18,7 +18,7 @@ export default function TransferPaymentInfo({ config = {}, compact = false }) {
         {config.clabe && <Box><Typography variant="caption" sx={{ opacity: .72 }}>CLABE INTERBANCARIA</Typography><Typography fontFamily="monospace" fontWeight={800}>{spaced(config.clabe, 3)}</Typography></Box>}
         {config.referenceInstructions && <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: .88 }}>{config.referenceInstructions}</Typography>}
       </Box>
-      <Stack direction="row" spacing={1} mt={1.5}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} mt={1.5}>
         {config.accountNumber && <Button size="small" variant="outlined" fullWidth onClick={() => copy(config.accountNumber)} sx={{ textTransform: "none" }}>Copiar cuenta</Button>}
         {config.clabe && <Button size="small" variant="outlined" fullWidth onClick={() => copy(config.clabe)} sx={{ textTransform: "none" }}>Copiar CLABE</Button>}
       </Stack>

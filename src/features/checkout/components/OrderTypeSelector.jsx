@@ -9,7 +9,7 @@ export default function OrderTypeSelector({ orderType, onChange }) {
         </Typography>
       </Box>
 
-      <Box display="flex" gap={2}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: { xs: 1, sm: 2 } }}>
         {[{ value: "pickup", icon: "🏪", label: "Recoger en tienda", hint: "Gratis" }, { value: "delivery", icon: "🚚", label: "Entrega a domicilio", hint: "Según distancia" }].map((option) => {
           const selected = orderType === option.value;
           return (
@@ -17,16 +17,16 @@ export default function OrderTypeSelector({ orderType, onChange }) {
               key={option.value}
               onClick={() => onChange(option.value)}
               sx={{
-                flex: 1,
                 cursor: "pointer",
-                border: selected ? "1.5px solid #1976d2" : "1px solid transparent",
-                bgcolor: selected ? "#e3f2fd" : "white",
+                border: "1px solid",
+                borderColor: selected ? "primary.main" : "divider",
+                bgcolor: selected ? "rgba(255,75,69,.07)" : "background.paper",
                 transition: "all 0.2s",
-                "&:hover": { borderColor: "#1976d2", transform: "translateY(-2px)", boxShadow: 2 },
+                "&:hover": { borderColor: "primary.main", bgcolor: "rgba(255,75,69,.045)" },
               }}
             >
-              <CardContent sx={{ textAlign: "center", py: 2 }}>
-                <Box sx={{ fontSize: 32, mb: 0.5 }}>{option.icon}</Box>
+              <CardContent sx={{ textAlign: "center", p: { xs: 1.25, sm: 2 }, "&:last-child": { pb: { xs: 1.25, sm: 2 } } }}>
+                <Box sx={{ fontSize: { xs: 26, sm: 32 }, mb: 0.5 }}>{option.icon}</Box>
                 <Typography variant="body2" fontWeight={600}>{option.label}</Typography>
                 {selected ? (
                   <Chip label="Seleccionado" size="small" color="primary" sx={{ mt: 1 }} />

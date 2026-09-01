@@ -48,7 +48,7 @@ export default function TransferPaymentReviewPanel({ order }) {
         </Stack>
         {feedback && <Alert severity={feedback.severity}>{feedback.text}</Alert>}
       </Stack>}
-      <Dialog open={Boolean(viewer)} onClose={() => setViewer("")} maxWidth="md"><DialogContent sx={{ p: 1, position: "relative", bgcolor: "#111" }}><IconButton onClick={() => setViewer("")} sx={{ position: "absolute", right: 8, top: 8, bgcolor: "rgba(255,255,255,.9)" }}><Close /></IconButton>{viewer && <Box component="img" src={viewer} alt="Comprobante ampliado" sx={{ display: "block", maxWidth: "100%", maxHeight: "82vh", mx: "auto" }} />}</DialogContent></Dialog>
+      <Dialog open={Boolean(viewer)} onClose={() => setViewer("")} maxWidth="md" fullWidth><DialogContent sx={{ p: 1, position: "relative", bgcolor: "#111" }}><IconButton onClick={() => setViewer("")} sx={{ position: "absolute", right: 8, top: 8, bgcolor: "rgba(255,255,255,.9)" }}><Close /></IconButton>{viewer && <Box component="img" src={viewer} alt="Comprobante ampliado" sx={{ display: "block", maxWidth: "100%", maxHeight: "calc(100dvh - 56px)", mx: "auto" }} />}</DialogContent></Dialog>
     </Box>
   );
 }

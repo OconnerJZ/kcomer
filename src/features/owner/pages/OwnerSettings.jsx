@@ -183,7 +183,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
         <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
           CONFIGURACIÓN
         </Typography>
@@ -193,7 +193,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: 3, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
+      <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1, mb: { xs: 2, sm: 3 }, scrollSnapType: "x proximity", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
         {navItems.map((item, index) => {
           const Icon = item.icon;
           const selected = activeTab === index;
@@ -204,7 +204,8 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
               startIcon={<Icon fontSize="small" />}
               sx={{
                 flex: "0 0 auto",
-                minWidth: 145,
+                minWidth: { xs: 132, sm: 145 },
+                scrollSnapAlign: "start",
                 justifyContent: "flex-start",
                 textTransform: "none",
                 borderRadius: 2,

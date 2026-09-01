@@ -106,10 +106,10 @@ export default function ExplorePage() {
 
   return (
     <GeneralContent title="Explorar">
-      <Parallax bg={Bg5} stx={{ minHeight: { xs: 520, md: 620 } }}>
+      <Parallax bg={Bg5} stx={{ minHeight: { xs: "calc(100svh - 56px)", sm: 520, md: 620 } }}>
         <Box
           sx={{
-            minHeight: { xs: 520, md: 620 },
+            minHeight: { xs: "calc(100svh - 56px)", sm: 520, md: 620 },
             display: "flex",
             alignItems: "center",
             px: { xs: 2.5, sm: 5, md: 8 },
@@ -130,7 +130,7 @@ export default function ExplorePage() {
                   fontWeight: 900,
                   lineHeight: .98,
                   letterSpacing: "-.045em",
-                  fontSize: { xs: "3rem", sm: "4rem", md: "5.25rem" },
+                  fontSize: { xs: "clamp(2.55rem, 13vw, 3.4rem)", sm: "4rem", md: "5.25rem" },
                   maxWidth: 760,
                 }}
               >
@@ -219,7 +219,7 @@ export default function ExplorePage() {
           {!helperBusinesses.isLoading && !geolocation.error && businesses.length > 0 && (
             <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center" alignItems="flex-start">
               {businesses.map((data) => (
-                <Grid key={data.id} item xs={12} sm={6} md={4} lg={3} sx={{ display: "flex", justifyContent: "center" }}>
+                <Grid key={data.id} item xs={12} sm={6} lg={4} sx={{ display: "flex", justifyContent: "center" }}>
                   <CardPlace data={data} userLocation={geolocation.location} loadBusinessMenu={loadBusinessMenu} />
                 </Grid>
               ))}

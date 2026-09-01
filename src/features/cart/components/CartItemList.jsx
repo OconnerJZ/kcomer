@@ -16,15 +16,15 @@ export default function CartItemList({
   onQuantityChange,
 }) {
   return (
-    <List>
+    <List disablePadding>
       {Object.entries(items).map(([itemId, item]) => (
         <ListItem
           key={itemId}
           sx={{
-            border: "1px solid",
+            borderTop: "1px solid",
             borderColor: "divider",
-            borderRadius: 2,
-            mb: 1,
+            px: { xs: 0, sm: .5 },
+            py: 1.5,
             flexDirection: "column",
             alignItems: "stretch",
           }}
@@ -35,9 +35,10 @@ export default function CartItemList({
               display: "flex",
               justifyContent: "space-between",
               mb: 1,
+              gap: 1,
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
                 {item.name}
               </Typography>
@@ -70,12 +71,12 @@ export default function CartItemList({
           </Box>
 
           <Stack
-            direction="row"
+            direction={{ xs: "column", sm: "row" }}
             spacing={2}
-            alignItems="center"
             justifyContent="space-between"
+            alignItems={{ xs: "stretch", sm: "center" }}
           >
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent={{ xs: "space-between", sm: "flex-start" }}>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 ${item.price.toFixed(2)}
               </Typography>
@@ -122,6 +123,7 @@ export default function CartItemList({
               size="small"
               color="success"
               variant="outlined"
+              sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
             />
           </Stack>
         </ListItem>

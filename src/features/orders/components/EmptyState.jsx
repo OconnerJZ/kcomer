@@ -1,24 +1,24 @@
-import { Paper, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { Restaurant } from "@mui/icons-material";
 
 const EmptyState = () => (
-  <Paper
-    elevation={0}
+  <Box
     sx={{
-      p: 5,
+      p: { xs: 3, sm: 5 },
       textAlign: "center",
-      border: "1px solid #e0e0e0",
-      borderRadius: 0,
+      border: "1px dashed",
+      borderColor: "divider",
+      borderRadius: 3,
     }}
   >
-    <Restaurant sx={{ fontSize: 48, color: "#e0e0e0", mb: 2 }} />
-    <Typography sx={{ color: "#666", mb: 1 }}>
+    <Restaurant sx={{ fontSize: 48, color: "secondary.main", opacity: .55, mb: 2 }} />
+    <Typography color="text.secondary" sx={{ mb: 1 }}>
       No tienes ordenes en tu negocio
     </Typography>
-    <Typography variant="caption" sx={{ color: "#999" }}>
+    <Typography variant="caption" color="text.secondary">
       Comparte <strong>qscome.com.mx</strong> con tus clientes
     </Typography>
-  </Paper>
+  </Box>
 );
 
 export default EmptyState;

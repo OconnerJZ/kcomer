@@ -53,7 +53,8 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
       <StyledCard
         elevation={0}
         sx={{
-          width: { xs: "min(92vw,370px)", sm: 370 },
+          width: "100%",
+          maxWidth: 370,
           borderRadius: 5,
           overflow: "hidden",
           position: "relative",
@@ -90,7 +91,7 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                   </Box>
                 </Stack>
                 <Stack direction="row" spacing={.65} alignItems="center">
-                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, fontWeight: 800, fontSize: ".66rem", bgcolor: business.open ? "rgba(46,125,50,.10)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
+                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, fontWeight: 800, fontSize: ".66rem", bgcolor: business.open ? "rgba(46,173,103,.11)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
                   <IconButton size="small" onClick={(event) => { event.stopPropagation(); setScheduleOpen(true); }} sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,.7)", border: "1px solid rgba(0,0,0,.05)" }}><AccessTimeRounded sx={{ fontSize: 16 }} /></IconButton>
                 </Stack>
               </Stack>

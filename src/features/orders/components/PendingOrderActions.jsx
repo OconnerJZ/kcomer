@@ -40,10 +40,10 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
             sx={{
               width: 34,
               height: 34,
-              bgcolor: "rgba(46,125,50,.09)",
+              bgcolor: "rgba(46,173,103,.09)",
               color: "success.main",
-              border: "1px solid rgba(46,125,50,.18)",
-              "&:hover": { bgcolor: "rgba(46,125,50,.16)" },
+              border: "1px solid rgba(46,173,103,.18)",
+              "&:hover": { bgcolor: "rgba(46,173,103,.16)" },
             }}
           >
             <CheckRounded fontSize="small" />

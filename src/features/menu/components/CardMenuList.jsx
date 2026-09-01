@@ -85,12 +85,12 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
   return (
     <>
       <Card elevation={0} sx={{ width: "100%", mb: 1, overflow: "hidden", border: "1px solid", borderColor: "divider", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.82)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 10px 28px rgba(0,0,0,.06)", borderColor: "rgba(255, 75, 69, .28)" } }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: "104px minmax(0, 1fr)" }}>
-          <Box sx={{ minHeight: 112, bgcolor: "grey.100", backgroundImage: menuItem.image ? `url(${menuItem.image})` : "none", backgroundSize: "cover", backgroundPosition: "center", display: "grid", placeItems: "center" }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "88px minmax(0, 1fr)", sm: "104px minmax(0, 1fr)" } }}>
+          <Box sx={{ minHeight: { xs: 104, sm: 112 }, bgcolor: "rgba(255,159,28,.08)", backgroundImage: menuItem.image ? `url(${menuItem.image})` : "none", backgroundSize: "cover", backgroundPosition: "center", display: "grid", placeItems: "center" }}>
             {!menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 34 }} />}
           </Box>
 
-          <CardContent sx={{ p: 1.75, "&:last-child": { pb: 1.75 } }}>
+          <CardContent sx={{ p: { xs: 1.25, sm: 1.75 }, "&:last-child": { pb: { xs: 1.25, sm: 1.75 } } }}>
             <Stack spacing={1.15}>
               <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
@@ -116,9 +116,9 @@ const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onA
                 </Stack>
               )}
 
-              <Stack direction="row" justifyContent="space-between" alignItems="center" gap={1}>
+              <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1}>
                 {quantity > 0 ? (
-                  <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Stack direction="row" spacing={0.5} alignItems="center" justifyContent={{ xs: "flex-end", sm: "flex-start" }}>
                     <IconButton size="small" disabled={busy} onClick={handleDecrement} sx={{ border: "1px solid", borderColor: "divider" }}><Remove fontSize="small" /></IconButton>
                     <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 800 }}>{quantity}</Typography>
                     <IconButton size="small" disabled={busy} onClick={handleIncrement} color="primary" sx={{ border: "1px solid", borderColor: "primary.main" }}><Add fontSize="small" /></IconButton>

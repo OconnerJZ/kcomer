@@ -21,7 +21,7 @@ const ProductionReminder = ({ order }) => {
   const ready = Number(order.kitchenProgress?.ready || 0);
   const total = Number(order.kitchenProgress?.total || 0);
   if (!total || ready >= total) return null;
-  return <Box sx={{ px: 1.2, py: .8, borderRadius: 1.5, bgcolor: "rgba(237,108,2,.07)", border: "1px solid rgba(237,108,2,.16)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
+  return <Box sx={{ px: 1.2, py: .8, borderRadius: 1.5, bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
 };
 
 const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = false, now = Date.now() }) => {

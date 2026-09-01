@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Paper, Typography, Alert, Divider, Box, Button } from "@mui/material";
+import { Typography, Alert, Divider, Box, Button } from "@mui/material";
 import GoogleSignInButton from "./GoogleSignInButton";
 import AuthFormFields from "./AuthFormFields";
 
@@ -38,7 +38,7 @@ const LoginForm = ({
     : "¿No tienes cuenta? Regístrate";
 
   return (
-    <Paper sx={{ maxWidth: 450, width: "100%", p: 4, borderRadius: 3 }} elevation={6}>
+    <Box sx={{ width: "100%" }}>
       <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, textAlign: "center" }}>
         {headerTitle}
       </Typography>
@@ -66,7 +66,7 @@ const LoginForm = ({
           variant="contained"
           fullWidth
           disabled={loading}
-          sx={{ py: 1.5, mt: 2, bgcolor: "#ff4b45", "&:hover": { bgcolor: "#e63946" } }}
+          sx={{ py: 1.25, mt: 2 }}
         >
           {loading ? "Cargando..." : submitButtonText}
         </Button>
@@ -76,7 +76,7 @@ const LoginForm = ({
           {toggleText}
         </Button>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

@@ -17,23 +17,22 @@ const AboutPage = () => {
       <Box
         component="main"
         sx={{
-          height: "auto",
           display: "flex",
           flexDirection: "column",
           backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
           backgroundSize: "contain",
           backgroundPosition: "center",
+          px: { xs: 1.5, sm: 3 },
+          py: { xs: 3, sm: 5 },
         }}
-        mt={1}
-        mb={1}
       >
         <Box mb={2}>
           <Grid
             container
             spacing={{ xs: 2, md: 3 }}
-            sx={{ justifyContent: "center", alignItems: "center" }}
+            sx={{ justifyContent: "center", alignItems: "stretch" }}
           >
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={4} sx={{ display: "flex" }}>
               <div className="pkg">
                 <div className="box-art sticker-7" aria-hidden />
                 <h3>Explora negocios</h3>
@@ -42,7 +41,7 @@ const AboutPage = () => {
               </div>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={4} sx={{ display: "flex" }}>
               <div className="pkg">
                 <div className="box-art sticker-8" aria-hidden />
                 <h3>Explora menús</h3>
@@ -51,7 +50,7 @@ const AboutPage = () => {
               </div>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={4} sx={{ display: "flex" }}>
               <div className="pkg">
                 <div className="box-art sticker-3" aria-hidden />
                 <h3>Todo desde tu cel o compu</h3>
@@ -63,7 +62,7 @@ const AboutPage = () => {
               </div>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={4} sx={{ display: "flex" }}>
               <div className="pkg">
                 <div className="box-art sticker-4" aria-hidden />
                 <h3>Reseñas reales</h3>

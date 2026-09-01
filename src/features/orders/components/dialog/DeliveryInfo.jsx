@@ -16,8 +16,7 @@ const DeliveryInfo = ({ order }) => {
   const mapUrl = useMemo(() => buildMapUrl(order.deliveryLocation, deliveryAddress), [order.deliveryLocation, deliveryAddress]);
 
   return (
-    <Stack spacing={1.5} sx={{ height: "100%" }}>
-      <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden", bgcolor: "background.paper" }}>
+      <Box sx={{ height: "100%", border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden", bgcolor: "rgba(255,255,255,.72)" }}>
         <Box sx={{ px: 2, pt: 2 }}>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".64rem" }}>ENTREGA</Typography>
           <Typography variant="subtitle1" fontWeight={850}>{isDelivery ? "Dirección del cliente" : "Recoger en tienda"}</Typography>
@@ -49,10 +48,8 @@ const DeliveryInfo = ({ order }) => {
             </Box>
           ) : <Typography variant="body2" color="text.secondary">No hay coordenadas disponibles para esta orden.</Typography>}
         </Box>
+        {order.notes && <Box sx={{ borderTop: "1px solid", borderColor: "divider", p: 2, bgcolor: "rgba(255,159,28,.06)" }}><Stack direction="row" spacing={1}><StickyNote2 sx={{ fontSize: 18, color: "secondary.dark" }} /><Box><Typography variant="caption" color="text.secondary" fontWeight={800}>NOTAS DEL CLIENTE</Typography><Typography variant="body2" sx={{ mt: .35 }}>{order.notes}</Typography></Box></Stack></Box>}
       </Box>
-
-      {order.notes && <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: 2, bgcolor: "rgba(248,248,248,.72)" }}><Stack direction="row" spacing={1}><StickyNote2 sx={{ fontSize: 18, color: "text.secondary" }} /><Box><Typography variant="caption" color="text.secondary" fontWeight={800}>NOTAS DEL CLIENTE</Typography><Typography variant="body2" sx={{ mt: .35 }}>{order.notes}</Typography></Box></Stack></Box>}
-    </Stack>
   );
 };
 

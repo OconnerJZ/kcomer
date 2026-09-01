@@ -5,11 +5,11 @@ import { formatOrderDate } from "@Features/orders/model/orderFormatters";
 const InfoField = ({ icon: Icon, label, value, isLink = false, href = "" }) => (
   <Box>
     <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-      <Icon sx={{ fontSize: 16, color: "#666" }} />
+      <Icon sx={{ fontSize: 16, color: "secondary.dark" }} />
       <Typography
         variant="caption"
         sx={{
-          color: "#999",
+          color: "text.secondary",
           textTransform: "uppercase",
           fontSize: "0.688rem",
           letterSpacing: "0.1em",
@@ -23,9 +23,9 @@ const InfoField = ({ icon: Icon, label, value, isLink = false, href = "" }) => (
         <a
           href={href}
           style={{
-            color: "#1a1a1a",
+            color: "inherit",
             textDecoration: "none",
-            borderBottom: "1px solid #e0e0e0",
+            borderBottom: "1px solid currentColor",
           }}
         >
           {value}
@@ -38,11 +38,11 @@ const InfoField = ({ icon: Icon, label, value, isLink = false, href = "" }) => (
 );
 
 const CustomerInfo = ({ order }) => (
-  <Box sx={{ border: "1px solid #e0e0e0", p: 2.5, height: "100%" }}>
+  <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, height: "100%", bgcolor: "rgba(255,255,255,.72)" }}>
     <Typography
       variant="overline"
       sx={{
-        color: "#666",
+        color: "text.secondary",
         letterSpacing: "0.15em",
         fontSize: "0.688rem",
         fontWeight: 600,

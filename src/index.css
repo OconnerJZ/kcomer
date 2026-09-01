@@ -15,6 +15,39 @@
 
 * {
   font-family: "Quicksand", sans-serif !important;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--cream);
+}
+
+.ant-segmented {
+  padding: 4px;
+  border: 1px solid rgba(72, 55, 45, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 243, 232, 0.82);
+}
+
+.ant-segmented .ant-segmented-item {
+  min-height: 36px;
+  border-radius: 9px;
+  color: var(--dark);
+  font-weight: 700;
+}
+
+.ant-segmented .ant-segmented-item-selected {
+  color: #c93430;
+  box-shadow: 0 2px 8px rgba(72, 55, 45, 0.1);
 }
 
 .title {
@@ -153,6 +186,12 @@
 .ant-notification {
   z-index: 9999;
 }
+
+@media (max-width: 599.95px) {
+  .app-content {
+    padding-bottom: 64px !important;
+  }
+}
 .sticky-button-container {
   position: -webkit-sticky;
   position: sticky;
@@ -252,7 +291,9 @@
   transition: transform 0.28s ease, box-shadow 0.28s ease;
   padding: 26px 20px 24px;
   min-height: auto;
-  max-width: 300px;
+  width: 100%;
+  max-width: none;
+  height: 100%;
 }
 .pkg:hover {
   transform: translateY(-8px);
@@ -350,10 +391,6 @@
 }
 
 @media (min-width: 375px) {
-  .pkg {
-    width: 335px !important;
-    max-width: 375px;
-  }
   .footer{
     font-size: 11px;
   }
@@ -375,7 +412,6 @@
 
   .pkg {
     padding: 30px 24px 26px;
-    max-width: 350px;
   }
 
   .pkg h3 {
@@ -402,7 +438,6 @@
   }
 
   .pkg {
-    max-width: 350px;
     min-height: 220px;
   }
 
