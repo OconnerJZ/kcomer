@@ -5,7 +5,7 @@ import {
   useUpdateBusinessMutation,
   useDeleteBusinessMutation,
 } from "@Features/business/api/business.api";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { normalizeBusiness } from "@Features/business/model/business";
 import { normalizeMenuItems } from "@Features/menu/model/menuItem";
 

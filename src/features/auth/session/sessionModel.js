@@ -1,4 +1,4 @@
-import { normalizeSessionUser, normalizeUser } from "@Features/users/model/user";
+import { normalizeSessionUser, normalizeUser } from "../../users/model/user.js";
 
 export const createSessionUser = (authResponse) => {
   if (!authResponse?.user || !authResponse?.token) {

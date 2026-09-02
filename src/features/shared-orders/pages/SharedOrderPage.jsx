@@ -5,7 +5,7 @@ import { AddRounded, Cancel, DeleteOutlineRounded, ExitToApp, RemoveRounded, Sen
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 import { api } from "@Shared/api/rtk/api";
 import OrderProductList from "@Features/orders/components/items/OrderProductList";

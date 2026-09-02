@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useCreateBusinessMutation } from "@Features/business/api/business.api";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { isOwner } from "@Features/auth/model/roles";
 import { useUploadImageMutation, uploadHelpers } from "@Shared/api/uploads/upload.api";
 import { useFeedback } from "@Shared/feedback/FeedbackProvider";

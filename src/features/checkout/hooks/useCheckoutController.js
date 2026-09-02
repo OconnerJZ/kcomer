@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { useCart } from "@Features/cart/context/CartContext";
 import { useOrders } from "@Features/orders/context/useOrders";
 import useCheckoutForm from "./useCheckoutForm";

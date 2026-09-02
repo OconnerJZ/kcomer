@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { useUpdateUsersMutation } from "@Features/users/api/users.api";
 import { toUserUpdatePayload } from "@Features/users/model/user";
 

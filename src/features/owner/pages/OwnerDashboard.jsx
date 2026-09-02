@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Box, Container, Fab } from "@mui/material";
 import { AddBusiness } from "@mui/icons-material";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { canAccessBusinessDashboard } from "@Features/auth/model/roles";
 import { getAllowedDashboardTabs } from "@Features/auth/model/businessPermissions";
 import useBusinessOrders from "@Features/orders/hooks/useBusinessOrders";

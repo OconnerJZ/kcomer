@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import CancelOrderDialog from "@Features/orders/components/customer/CancelOrderDialog";
 import CustomerOrdersFeedback from "@Features/orders/components/customer/CustomerOrdersFeedback";
 import CustomerOrdersGrid from "@Features/orders/components/customer/CustomerOrdersGrid";

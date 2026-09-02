@@ -18,7 +18,7 @@ import {
   patchTransferPayment,
   upsertOrder,
 } from "@Features/orders/model/orderCache";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { useSocketEvent } from "@Shared/hooks/useSocket";
 import { api } from "@Shared/api/rtk/api";
 import { ORDER_STATUS_VALUES, STATUS_LABELS } from "@Features/orders/model/orderStatus";

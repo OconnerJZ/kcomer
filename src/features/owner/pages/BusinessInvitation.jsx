@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, TextField, Typography } from "@mui/material";
 import { CheckCircle, Store } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { useAcceptBusinessInvitationCodeMutation, useAcceptBusinessInvitationMutation, useGetBusinessInvitationQuery } from "@Features/business/api/business.api";
 
 export default function BusinessInvitation() {

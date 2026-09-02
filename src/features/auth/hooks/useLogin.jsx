@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { GOOGLE_CLIENT_ID } from "@Shared/config/env";
 import { initializeGoogleSignIn } from "@Features/auth/utils/googleAuth";
 

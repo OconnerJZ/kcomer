@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Logout, Person, Store } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 
 const DashboardUserMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);

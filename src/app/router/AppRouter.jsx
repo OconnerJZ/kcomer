@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 

@@ -1,7 +1,7 @@
 import { Box, Typography, Button, Paper } from "@mui/material";
 import HeaderImg from "@Assets/images/qscome-header-1.png";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { isOwner } from "@Features/auth/model/roles";
 import RegisterBusiness from "./RegisterBusiness";
 

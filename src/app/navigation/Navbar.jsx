@@ -31,7 +31,7 @@ import {
 import LogoClassic from "/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@Features/cart/context/CartContext";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { isOwner } from "@Features/auth/model/roles";
 
 const BASE_NAV_ITEMS = [
