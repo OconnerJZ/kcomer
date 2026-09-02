@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import FilterMenuProvider from "@Features/explore/context/FilterMenuContext";
-import { CartProvider } from "@Features/cart/context/CartContext";
+import CartProvider from "@Features/cart/context/CartProvider";
 import AuthProvider from "@Features/auth/context/AuthProvider";
 import useAuth from "@Features/auth/context/useAuth";
 import { getUserBusinessIds } from "@Features/users/model/user";

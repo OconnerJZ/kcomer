@@ -30,7 +30,7 @@ import {
 } from "@mui/icons-material";
 import LogoClassic from "/pwa-512x512.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCart } from "@Features/cart/context/CartContext";
+import useCart from "@Features/cart/context/useCart";
 import useAuth from "@Features/auth/context/useAuth";
 import { isOwner } from "@Features/auth/model/roles";
 

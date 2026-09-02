@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import useCart from "@Features/cart/context/CartContext";
+import useCart from "@Features/cart/context/useCart";
 import {
   useAddSharedOrderItemMutation,
   useDeleteSharedOrderItemMutation,
