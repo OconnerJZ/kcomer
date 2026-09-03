@@ -6,7 +6,7 @@ const SettingsSection = ({ eyebrow, title, description, children }) => (
     elevation={0}
     sx={{
       p: { xs: 2, sm: 3 },
-      borderRadius: "10px",
+      borderRadius: "8px",
       border: "1px solid",
       borderColor: "divider",
       bgcolor: "rgba(255,255,255,.88)",
@@ -22,7 +22,7 @@ const SettingsSection = ({ eyebrow, title, description, children }) => (
           {eyebrow}
         </Typography>
       )}
-      <Typography variant="h6" fontWeight={800}>{title}</Typography>
+      <Typography variant="h6" fontWeight={600}>{title}</Typography>
       {description && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 680 }}>
           {description}

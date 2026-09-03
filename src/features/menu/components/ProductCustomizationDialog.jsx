@@ -19,10 +19,10 @@ const ProductCustomizationContent = ({ item, onClose, onConfirm }) => {
   return (
     <>
       <DialogTitle sx={{ pb: 1 }}>
-        <Typography variant="overline" color="primary" fontWeight={800}>
+        <Typography variant="overline" color="primary" fontWeight={600}>
           PERSONALIZA TU PEDIDO
         </Typography>
-        <Typography variant="h5" fontWeight={900}>{item.name}</Typography>
+        <Typography variant="h5" fontWeight={700}>{item.name}</Typography>
         <Typography variant="body2" color="text.secondary">
           Elige exactamente cómo lo quieres.
         </Typography>
@@ -40,7 +40,7 @@ const ProductCustomizationContent = ({ item, onClose, onConfirm }) => {
           ))}
 
           <Box>
-            <Typography fontWeight={800} sx={{ mb: 1 }}>Indicaciones especiales</Typography>
+            <Typography fontWeight={600} sx={{ mb: 1 }}>Indicaciones especiales</Typography>
             <TextField
               fullWidth
               multiline
@@ -67,7 +67,7 @@ const ProductCustomizationContent = ({ item, onClose, onConfirm }) => {
           variant="contained"
           disableElevation
           onClick={customization.confirm}
-          sx={{ textTransform: "none", borderRadius: 999, px: 2.5 }}
+          sx={{ textTransform: "none", borderRadius: "6px", px: 2.5 }}
         >
           {item.modifiers?.length ? "Actualizar" : "Agregar"} · ${customization.finalPrice.toFixed(2)}
         </Button>
@@ -95,7 +95,7 @@ const ProductCustomizationDialog = ({ open, item, onClose, onConfirm }) => (
     onClose={onClose}
     maxWidth="sm"
     fullWidth
-    PaperProps={{ sx: { borderRadius: "10px" } }}
+    PaperProps={{ sx: { borderRadius: "8px" } }}
   >
     <ProductCustomizationContent
       key={open ? `open-${item.id}` : "closed"}

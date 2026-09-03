@@ -39,13 +39,13 @@ export default function OrderProgressTracker({ status, orderType = "pickup", com
       <Box sx={{ position: "relative", width: size, height: size, display: "grid", placeItems: "center" }}>
           <CircularProgress variant="determinate" value={100} size={size} thickness={3.8} sx={{ position: "absolute", color: "action.hover" }} />
           <CircularProgress variant="determinate" value={progress} size={size} thickness={3.8} sx={{ position: "absolute", color: status === "completed" ? "success.main" : "primary.main", "& .MuiCircularProgress-circle": { strokeLinecap: "round" } }} />
-          {status === "completed" ? <CheckRounded color="success" /> : <Typography fontWeight={900}>{progress}%</Typography>}
+          {status === "completed" ? <CheckRounded color="success" /> : <Typography fontWeight={700}>{progress}%</Typography>}
       </Box>
 
       <Stack spacing={pickupReady ? 1 : .65} minWidth={0}>
         <Box>
-          <Typography variant={compact ? "body2" : "subtitle2"} fontWeight={900}>{currentLabel}</Typography>
-          {pickupReady && <Typography variant="caption" color="success.dark" fontWeight={750} sx={{ display: "block", mt: .25, lineHeight: 1.4 }}>Tu orden está lista. Ya puedes ir a recogerla.</Typography>}
+          <Typography variant={compact ? "body2" : "subtitle2"} fontWeight={700}>{currentLabel}</Typography>
+          {pickupReady && <Typography variant="caption" color="success.dark" fontWeight={600} sx={{ display: "block", mt: .25, lineHeight: 1.4 }}>Tu orden está lista. Ya puedes ir a recogerla.</Typography>}
         </Box>
 
         {!compact && <Stack direction="row" alignItems="flex-start" sx={{ width: "100%", minWidth: 0 }}>
@@ -60,7 +60,7 @@ export default function OrderProgressTracker({ status, orderType = "pickup", com
               <Box sx={{ position: "relative", zIndex: 1, mx: "auto", width: 18, height: 18, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: completed || active ? (status === "completed" ? "success.main" : "primary.main") : "background.paper", border: "2px solid", borderColor: completed || active ? (status === "completed" ? "success.main" : "primary.main") : "divider", color: "common.white" }}>
                 {completed && <CheckRounded sx={{ fontSize: 12 }} />}
               </Box>
-              <Typography variant="caption" sx={{ display: { xs: index === 0 || index === currentIndex || index === steps.length - 1 ? "block" : "none", sm: "block" }, mt: .7, fontSize: ".61rem", color: completed || active ? "text.primary" : "text.disabled", fontWeight: active ? 800 : 500 }}>
+              <Typography variant="caption" sx={{ display: { xs: index === 0 || index === currentIndex || index === steps.length - 1 ? "block" : "none", sm: "block" }, mt: .7, fontSize: ".61rem", color: completed || active ? "text.primary" : "text.disabled", fontWeight: active ? 600 : 500 }}>
                 {step.label}
               </Typography>
             </Box>

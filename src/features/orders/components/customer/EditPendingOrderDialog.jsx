@@ -30,15 +30,15 @@ const PendingOrderEditorDialog = ({ open, order, menu, loading, onClose, onSave,
         onClose={saving ? undefined : onClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: "10px" } }}
+        PaperProps={{ sx: { borderRadius: "8px" } }}
       >
         <DialogTitle sx={{ pb: 1 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-              <Typography variant="overline" color="primary.main" fontWeight={850}>
+              <Typography variant="overline" color="primary.main" fontWeight={600}>
                 EDITAR ORDEN #{order.id}
               </Typography>
-              <Typography variant="h5" fontWeight={900}>Aún puedes hacer cambios</Typography>
+              <Typography variant="h5" fontWeight={700}>Aún puedes hacer cambios</Typography>
               <Typography variant="body2" color="text.secondary">
                 Cuando el negocio acepte la orden, quedará bloqueada.
               </Typography>
@@ -68,7 +68,7 @@ const PendingOrderEditorDialog = ({ open, order, menu, loading, onClose, onSave,
         <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>
           <Box>
             <Typography variant="caption" color="text.secondary">Nuevo total</Typography>
-            <Typography variant="h6" fontWeight={900}>${editor.total.toFixed(2)}</Typography>
+            <Typography variant="h6" fontWeight={700}>${editor.total.toFixed(2)}</Typography>
           </Box>
           <Stack direction="row" spacing={1}>
             <Button onClick={onClose} disabled={saving} sx={{ textTransform: "none" }}>
@@ -79,7 +79,7 @@ const PendingOrderEditorDialog = ({ open, order, menu, loading, onClose, onSave,
               disableElevation
               disabled={saving || editor.items.length === 0}
               onClick={editor.save}
-              sx={{ textTransform: "none", borderRadius: 999, px: 2.5 }}
+              sx={{ textTransform: "none", borderRadius: "6px", px: 2.5 }}
             >
               {saving ? "Guardando…" : "Guardar cambios"}
             </Button>

@@ -14,19 +14,19 @@ export default function OwnerRegistrationLanding() {
   if (isAuthenticated) return <RegisterBusiness />;
 
   return (
-    <Box sx={{ minHeight: "calc(100svh - 64px)", display: "grid", placeItems: "center", px: { xs: 1.5, sm: 3 }, py: { xs: 4, sm: 7 }, backgroundImage: `linear-gradient(rgba(255,249,244,.78), rgba(255,249,244,.94)), url(${HeaderImg})`, backgroundSize: "cover", backgroundPosition: "center top" }}>
+    <Box sx={{ minHeight: "calc(100svh - 64px)", display: "grid", placeItems: "center", px: { xs: 1.5, sm: 3 }, py: { xs: 4, sm: 7 }, backgroundImage: `linear-gradient(rgba(245,242,236,.88), rgba(245,242,236,.88)), url(${HeaderImg})`, backgroundSize: "cover", backgroundPosition: "center top" }}>
       <Box
         sx={{
           width: "100%",
           maxWidth: 620,
-          textAlign: "center",
+          textAlign: "left",
         }}
       >
         <Paper
           sx={{
-            bgcolor: "rgba(255,255,255,.9)",
+            bgcolor: "background.paper",
             p: { xs: 2.5, sm: 4 },
-            borderRadius: "10px",
+            borderRadius: "8px",
             border: "1px solid",
             borderColor: "divider",
           }}

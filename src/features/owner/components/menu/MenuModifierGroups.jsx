@@ -8,7 +8,7 @@ const MenuModifierGroups = ({ groups, loading, ...actions }) => {
   }
   if (groups.length === 0) {
     return (
-      <Box sx={{ p: 2.5, borderStyle: "dashed", borderRadius: "10px", textAlign: "center" }}>
+      <Box sx={{ p: 2.5, borderStyle: "dashed", borderRadius: "8px", textAlign: "center" }}>
         <Typography variant="body2" fontWeight={700}>Este platillo todavía no tiene opciones.</Typography>
         <Typography variant="caption" color="text.secondary">Usa una plantilla o crea un grupo desde cero.</Typography>
       </Box>

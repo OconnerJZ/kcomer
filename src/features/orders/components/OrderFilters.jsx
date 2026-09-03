@@ -35,7 +35,7 @@ const OrderFilters = ({ filterStatus, onFilterChange, orderCount, onRefresh, loa
               <MenuItem value="completed">Completadas</MenuItem>
             </Select>
           </FormControl>
-          <Typography variant="caption" sx={{ color: "secondary.dark", fontWeight: 800 }}>
+          <Typography variant="caption" sx={{ color: "secondary.dark", fontWeight: 600 }}>
             {orderCount} {orderCount === 1 ? "orden" : "órdenes"}
           </Typography>
         </Stack>

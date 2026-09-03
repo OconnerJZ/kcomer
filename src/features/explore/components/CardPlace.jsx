@@ -55,28 +55,28 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
         sx={{
           width: "100%",
           maxWidth: 370,
-          borderRadius: "10px",
+          borderRadius: "8px",
           overflow: "hidden",
           position: "relative",
-          backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : "linear-gradient(135deg,#e8ded8,#cdbdb4)",
+          backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : "none",
+          backgroundColor: "#D9D2C8",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          border: "1px solid rgba(255,255,255,.45)",
-          boxShadow: "0 22px 58px rgba(35,29,26,.15)",
+          border: "1px solid rgba(56,50,44,.16)",
+          boxShadow: "0 3px 12px rgba(35,29,26,.08)",
           transition: "transform .22s ease,box-shadow .22s ease",
-          "&:hover": { transform: "translateY(-5px)", boxShadow: "0 32px 76px rgba(35,29,26,.2)" },
-          "&::before": { content: '""', position: "absolute", inset: 0, bgcolor: "rgba(26,21,19,.16)", backdropFilter: "blur(1.5px)" },
+          "&:hover": { transform: "translateY(-2px)", boxShadow: "0 6px 18px rgba(35,29,26,.11)" },
+          "&::before": { content: '""', position: "absolute", inset: 0, bgcolor: "rgba(35,31,28,.12)" },
         }}
       >
         <Box sx={{ position: "relative", zIndex: 1, p: 1.2 }}>
           <Box
             sx={{
-              borderRadius: "10px",
+              borderRadius: "8px",
               overflow: "hidden",
-              bgcolor: "rgba(255,255,255,.82)",
-              backdropFilter: "blur(18px) saturate(1.12)",
-              border: "1px solid rgba(255,255,255,.62)",
-              boxShadow: "0 12px 34px rgba(33,27,24,.10)",
+              bgcolor: "rgba(254,253,251,.94)",
+              border: "1px solid rgba(56,50,44,.12)",
+              boxShadow: "0 1px 4px rgba(33,27,24,.05)",
             }}
           >
             <Box onClick={expandCard} sx={{ cursor: "pointer", px: 2, pt: 1.8, pb: 1.45 }}>
@@ -84,14 +84,14 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                 <Stack direction="row" spacing={1.25} alignItems="center" minWidth={0}>
                   <Avatar src={logoUrl} sx={{ width: 52, height: 52, bgcolor: "background.paper", border: "1px solid rgba(0,0,0,.07)", boxShadow: "0 6px 16px rgba(0,0,0,.08)" }}>{business.name?.charAt(0)}</Avatar>
                   <Box minWidth={0}>
-                    <Typography noWrap sx={{ fontSize: "1.12rem", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-.025em" }}>{business.name || "Negocio"}</Typography>
+                    <Typography noWrap sx={{ fontSize: "1.12rem", fontWeight: 700, lineHeight: 1.08, letterSpacing: "-.025em" }}>{business.name || "Negocio"}</Typography>
                     <Stack direction="row" spacing={.7} alignItems="center" sx={{ mt: .55, color: "text.secondary" }}>
                       {business.location?.city && <><PlaceRounded sx={{ fontSize: 13 }} /><Typography variant="caption" fontWeight={650}>{business.location.city}</Typography></>}
                     </Stack>
                   </Box>
                 </Stack>
                 <Stack direction="row" spacing={.65} alignItems="center">
-                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, fontWeight: 800, fontSize: ".66rem", bgcolor: business.open ? "rgba(46,173,103,.11)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
+                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, fontWeight: 600, fontSize: ".66rem", bgcolor: business.open ? "rgba(95,120,100,.11)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
                   <IconButton size="small" onClick={(event) => { event.stopPropagation(); setScheduleOpen(true); }} sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,.7)", border: "1px solid rgba(0,0,0,.05)" }}><AccessTimeRounded sx={{ fontSize: 16 }} /></IconButton>
                 </Stack>
               </Stack>
@@ -99,16 +99,16 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
               {(foodTags.length > 0 || distance || hasServiceTag) && (
                 <Stack direction="row" spacing={.65} flexWrap="wrap" useFlexGap sx={{ mt: 1.35 }}>
                   {foodTags.map((label) => (
-                    <Chip key={label} size="small" label={label} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(255,159,28,.14)", color: "secondary.dark", border: "1px solid rgba(255,159,28,.22)" }} />
+                  <Chip key={label} size="small" label={label} sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.08)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)" }} />
                   ))}
-                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(46,173,103,.13)", color: "success.dark", border: "1px solid rgba(46,173,103,.2)", "& .MuiChip-icon": { color: "success.main" } }} />}
-                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(49,94,251,.11)", color: "primary.dark", border: "1px solid rgba(49,94,251,.18)", "& .MuiChip-icon": { color: "primary.main" } }} />}
+                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(102,115,106,.09)", color: "secondary.dark", border: "1px solid rgba(102,115,106,.18)", "& .MuiChip-icon": { color: "secondary.main" } }} />}
+                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.08)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)", "& .MuiChip-icon": { color: "primary.main" } }} />}
                 </Stack>
               )}
 
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.25 }}>
                 <Typography variant="caption" color="text.secondary">Todo lo esencial, sin salir de la tarjeta</Typography>
-                <Stack direction="row" alignItems="center"><Typography variant="caption" fontWeight={850}>{expanded ? "Ocultar" : "Explorar"}</Typography><KeyboardArrowDownRounded sx={{ fontSize: 19, transform: expanded ? "rotate(180deg)" : "none", transition: ".2s" }} /></Stack>
+                <Stack direction="row" alignItems="center"><Typography variant="caption" fontWeight={600}>{expanded ? "Ocultar" : "Explorar"}</Typography><KeyboardArrowDownRounded sx={{ fontSize: 19, transform: expanded ? "rotate(180deg)" : "none", transition: ".2s" }} /></Stack>
               </Stack>
             </Box>
 

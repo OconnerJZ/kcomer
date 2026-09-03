@@ -33,7 +33,7 @@ const GoogleMapField = ({
   return (
     <Box>
       {label && (
-        <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
           {label}
         </Typography>
       )}
@@ -68,7 +68,7 @@ const GoogleMapField = ({
         elevation={0}
         sx={{
           height,
-          borderRadius: "10px",
+          borderRadius: "8px",
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",

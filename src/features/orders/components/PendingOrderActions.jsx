@@ -40,10 +40,10 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
             sx={{
               width: 34,
               height: 34,
-              bgcolor: "rgba(46,173,103,.09)",
+              bgcolor: "rgba(95,120,100,.09)",
               color: "success.main",
-              border: "1px solid rgba(46,173,103,.18)",
-              "&:hover": { bgcolor: "rgba(46,173,103,.16)" },
+              border: "1px solid rgba(95,120,100,.18)",
+              "&:hover": { bgcolor: "rgba(95,120,100,.16)" },
             }}
           >
             <CheckRounded fontSize="small" />
@@ -69,8 +69,8 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
         </Tooltip>
       </Stack>
 
-      <Dialog open={rejectOpen} onClose={() => setRejectOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "10px" } }}>
-        <DialogTitle sx={{ fontWeight: 800 }}>Rechazar orden #{order.id}</DialogTitle>
+      <Dialog open={rejectOpen} onClose={() => setRejectOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "8px" } }}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Rechazar orden #{order.id}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
             La orden se cerrará como cancelada y quedará registrado que fue rechazada por el negocio.
@@ -87,7 +87,7 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5 }}>
           <Button onClick={() => setRejectOpen(false)} sx={{ textTransform: "none" }}>Cancelar</Button>
-          <Button color="error" variant="contained" disableElevation onClick={handleReject} sx={{ textTransform: "none", borderRadius: "10px" }}>
+          <Button color="error" variant="contained" disableElevation onClick={handleReject} sx={{ textTransform: "none", borderRadius: "8px" }}>
             Confirmar rechazo
           </Button>
         </DialogActions>

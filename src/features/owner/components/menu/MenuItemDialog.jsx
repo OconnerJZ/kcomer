@@ -44,9 +44,9 @@ const MenuItemPreview = ({ form, imagePreview }) => (
       overflow: "hidden",
       border: "1px solid",
       borderColor: "divider",
-      borderRadius: "10px",
+      borderRadius: "8px",
       bgcolor: "background.paper",
-      boxShadow: "0 18px 50px rgba(0,0,0,.07)",
+      boxShadow: "0 3px 12px rgba(0,0,0,.07)",
     }}
   >
     <Box
@@ -77,10 +77,10 @@ const MenuItemPreview = ({ form, imagePreview }) => (
         </Typography>
       )}
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
-        <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1.2 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
           {form.name || "Nombre del platillo"}
         </Typography>
-        <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+        <Typography variant="h6" fontWeight={600} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
           {formatPreviewPrice(form.price)}
         </Typography>
       </Stack>
@@ -125,7 +125,7 @@ const MenuItemDialog = ({
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
             Menú
           </Typography>
-          <Typography variant="h5" fontWeight={800}>
+          <Typography variant="h5" fontWeight={600}>
             {editing ? "Editar platillo" : "Nuevo platillo"}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
@@ -145,7 +145,7 @@ const MenuItemDialog = ({
                   variant="outlined"
                   component="span"
                   startIcon={<AddPhotoAlternate />}
-                  sx={{ textTransform: "none", borderRadius: "10px", px: 2 }}
+                  sx={{ textTransform: "none", borderRadius: "8px", px: 2 }}
                 >
                   {imagePreview ? "Cambiar fotografía" : "Agregar fotografía"}
                 </Button>
@@ -196,7 +196,7 @@ const MenuItemDialog = ({
               fullWidth
             />
 
-            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "background.paper" }}>
+            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "8px", bgcolor: "background.paper" }}>
               <FormControlLabel
                 sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
                 control={<Switch checked={form.available} onChange={(event) => onFormChange("available", event.target.checked)} />}
@@ -228,7 +228,7 @@ const MenuItemDialog = ({
             startIcon={<TuneRounded />}
             variant="outlined"
             disabled={loading}
-            sx={{ mr: "auto", textTransform: "none", borderRadius: "10px", fontWeight: 700 }}
+            sx={{ mr: "auto", textTransform: "none", borderRadius: "8px", fontWeight: 700 }}
           >
             Ingredientes y opciones
           </Button>
@@ -241,7 +241,7 @@ const MenuItemDialog = ({
           variant="contained"
           disableElevation
           disabled={loading || !canSave}
-          sx={{ textTransform: "none", borderRadius: "10px", minWidth: 120, fontWeight: 700 }}
+          sx={{ textTransform: "none", borderRadius: "8px", minWidth: 120, fontWeight: 700 }}
         >
           {loading ? <CircularProgress size={22} color="inherit" /> : editing ? "Guardar cambios" : "Crear platillo"}
         </Button>

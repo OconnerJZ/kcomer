@@ -46,9 +46,11 @@ const DashboardNavbar = ({
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+        backgroundColor: "background.paper",
+        color: "text.primary",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        boxShadow: "0 1px 0 rgba(0,0,0,.07)",
       }}
     >
       <Toolbar>
@@ -75,7 +77,7 @@ const DashboardNavbar = ({
               <Divider
                 orientation="vertical"
                 flexItem
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+                sx={{ bgcolor: "divider" }}
               />
               <Box>
                 <Typography

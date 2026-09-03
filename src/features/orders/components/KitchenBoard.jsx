@@ -24,15 +24,15 @@ const PreparationProgress = ({ order }) => {
   const complete = total > 0 && ready >= total;
 
   return (
-    <Box sx={{ p: 1.15, borderRadius: "10px", bgcolor: complete ? "rgba(46,173,103,.08)" : "rgba(255,159,28,.07)", border: "1px solid", borderColor: complete ? "rgba(46,173,103,.18)" : "rgba(255,159,28,.18)" }}>
+    <Box sx={{ p: 1.15, borderRadius: "8px", bgcolor: complete ? "rgba(95,120,100,.08)" : "rgba(168,117,60,.07)", border: "1px solid", borderColor: complete ? "rgba(95,120,100,.18)" : "rgba(168,117,60,.18)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: .7 }}>
         <Stack direction="row" spacing={.7} alignItems="center">
           {complete ? <CheckCircleRounded sx={{ fontSize: 16, color: "success.main" }} /> : <RestaurantRounded sx={{ fontSize: 16, color: "secondary.dark" }} />}
-          <Typography variant="caption" fontWeight={800}>{complete ? "Todos listos" : "Preparación"}</Typography>
+          <Typography variant="caption" fontWeight={600}>{complete ? "Todos listos" : "Preparación"}</Typography>
         </Stack>
-        <Typography variant="caption" fontWeight={900} color={complete ? "success.main" : "text.secondary"}>{ready}/{total}</Typography>
+        <Typography variant="caption" fontWeight={700} color={complete ? "success.main" : "text.secondary"}>{ready}/{total}</Typography>
       </Stack>
-      <LinearProgress variant="determinate" value={progress} color={complete ? "success" : "primary"} sx={{ height: 5, borderRadius: 999, bgcolor: "rgba(0,0,0,.055)" }} />
+      <LinearProgress variant="determinate" value={progress} color={complete ? "success" : "primary"} sx={{ height: 5, borderRadius: "6px", bgcolor: "rgba(0,0,0,.055)" }} />
     </Box>
   );
 };
@@ -44,17 +44,17 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
   const chip = urgencyProps[urgency.level] || urgencyProps.normal;
 
   return (
-    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: urgency.level === "overdue" ? "error.light" : "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.9)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" } }}>
+    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: urgency.level === "overdue" ? "error.light" : "divider", borderRadius: "8px", bgcolor: "background.paper", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 3px 10px rgba(0,0,0,.06)" } }}>
       <Stack spacing={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
-          <Box><Typography sx={{ fontFamily: "monospace", fontWeight: 800, fontSize: "1rem" }}>#{order.id}</Typography><Typography variant="caption" color="text.secondary">{order.customerName}</Typography></Box>
+          <Box><Typography sx={{ fontFamily: "monospace", fontWeight: 600, fontSize: "1rem" }}>#{order.id}</Typography><Typography variant="caption" color="text.secondary">{order.customerName}</Typography></Box>
           <Chip size="small" label={urgency.label} color={chip.color} variant={chip.variant} />
         </Stack>
 
         <Box>
           {order.items.slice(0, 3).map((item) => (
             <Stack key={item.detailId ?? item.id ?? `${item.name}-${item.quantity}`} direction="row" justifyContent="space-between" spacing={1} sx={{ py: .15 }}>
-              <Typography variant="body2" sx={{ lineHeight: 1.55 }}><Box component="span" sx={{ fontWeight: 800, mr: 0.75 }}>{item.quantity || 1}×</Box>{item.name}</Typography>
+              <Typography variant="body2" sx={{ lineHeight: 1.55 }}><Box component="span" sx={{ fontWeight: 600, mr: 0.75 }}>{item.quantity || 1}×</Box>{item.name}</Typography>
               <Box sx={{ width: 8, height: 8, mt: .8, flex: "0 0 auto", borderRadius: "50%", bgcolor: item.kitchenStatus === "ready" ? "success.main" : item.kitchenStatus === "preparing" ? "warning.main" : "grey.300" }} />
             </Stack>
           ))}
@@ -69,7 +69,7 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
         </Stack>
 
         {onUpdateStatus && nextStatus && actionLabel && (
-          <Button fullWidth variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => onUpdateStatus(order.id, nextStatus)} sx={{ textTransform: "none", borderRadius: "10px", fontWeight: 700, py: 0.9 }}>
+          <Button fullWidth variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => onUpdateStatus(order.id, nextStatus)} sx={{ textTransform: "none", borderRadius: "8px", fontWeight: 700, py: 0.9 }}>
             {actionLabel}
           </Button>
         )}
@@ -87,12 +87,12 @@ export default function KitchenBoard({ orders = [], now, onViewOrder, onUpdateSt
           return (
             <Box key={column.key}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 1.5, px: 0.5 }}>
-                <Box><Typography variant="subtitle1" fontWeight={800}>{column.title}</Typography><Typography variant="caption" color="text.secondary">{column.hint}</Typography></Box>
+                <Box><Typography variant="subtitle1" fontWeight={600}>{column.title}</Typography><Typography variant="caption" color="text.secondary">{column.hint}</Typography></Box>
                 <Typography variant="h5" fontWeight={300} color="text.secondary">{columnOrders.length}</Typography>
               </Stack>
               <Stack spacing={1.25}>
                 {columnOrders.length === 0 ? (
-                  <Box sx={{ py: 5, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "10px" }}><Typography variant="body2" color="text.secondary">Sin órdenes</Typography></Box>
+                  <Box sx={{ py: 5, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "8px" }}><Typography variant="body2" color="text.secondary">Sin órdenes</Typography></Box>
                 ) : columnOrders.map((order) => <ProductionCard key={order.id} order={order} now={now} onViewOrder={onViewOrder} onUpdateStatus={onUpdateStatus} />)}
               </Stack>
             </Box>

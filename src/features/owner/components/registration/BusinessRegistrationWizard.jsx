@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { StorefrontRounded } from "@mui/icons-material";
 import FormField from "./FormField";
-import Bg from "@Assets/images/qscome-bg-6.png";
 
 const BusinessRegistrationWizard = ({
   currentTab,
@@ -29,9 +28,7 @@ const BusinessRegistrationWizard = ({
       minHeight: "calc(100vh - 64px)",
       py: { xs: 3, md: 5 },
       px: 2,
-      backgroundImage: `linear-gradient(rgba(255,255,255,.78),rgba(255,255,255,.92)), url(${Bg})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
+      bgcolor: "background.default",
     }}
   >
     <Paper
@@ -41,19 +38,18 @@ const BusinessRegistrationWizard = ({
         width: "100%",
         maxWidth: 720,
         overflow: "hidden",
-        borderRadius: "10px",
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
-        boxShadow: "0 18px 50px rgba(32,28,26,.10)",
-        bgcolor: "rgba(255,255,255,.92)",
-        backdropFilter: "blur(18px)",
+        boxShadow: "0 3px 12px rgba(32,28,26,.07)",
+        bgcolor: "background.paper",
       }}
     >
       <Box
         sx={{
           p: { xs: 2.5, sm: 4 },
           pb: 2,
-          background: "linear-gradient(135deg,#201c1b 0%,#302724 100%)",
+          backgroundColor: "#34312D",
           color: "white",
         }}
       >
@@ -66,11 +62,11 @@ const BusinessRegistrationWizard = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: "10px",
+              borderRadius: "8px",
               display: "grid",
               placeItems: "center",
-              bgcolor: "rgba(255,159,28,.18)",
-              color: "secondary.light",
+              bgcolor: "rgba(198,90,80,.16)",
+              color: "#E6A39D",
             }}
           >
             <StorefrontRounded />
@@ -79,7 +75,7 @@ const BusinessRegistrationWizard = ({
             <Typography variant="overline" sx={{ opacity: 0.65, letterSpacing: ".14em" }}>
               CREAR NEGOCIO
             </Typography>
-            <Typography variant="h4" fontWeight={900}>Hazlo fácil de descubrir.</Typography>
+            <Typography variant="h4" fontWeight={600}>Hazlo fácil de descubrir.</Typography>
           </Box>
         </Stack>
       </Box>
@@ -90,10 +86,10 @@ const BusinessRegistrationWizard = ({
         sx={{ height: 4 }}
       />
       <Box sx={{ p: { xs: 2.5, sm: 4 } }}>
-        <Typography variant="caption" color="primary" fontWeight={800}>
+        <Typography variant="caption" color="primary" fontWeight={600}>
           PASO {currentTab + 1} / {steps.length}
         </Typography>
-        <Typography variant="h5" fontWeight={850}>{step.label}</Typography>
+        <Typography variant="h5" fontWeight={600}>{step.label}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           {step.subtitle}
         </Typography>

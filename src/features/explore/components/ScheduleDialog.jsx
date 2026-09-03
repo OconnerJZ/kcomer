@@ -15,16 +15,16 @@ const ScheduleDialog = ({ open, onClose, data }) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: "10px",
+          borderRadius: "8px",
           overflow: "hidden",
           bgcolor: "rgba(255,255,255,.96)",
-          boxShadow: "0 30px 85px rgba(0,0,0,.22)",
-          border: "1px solid rgba(255,255,255,.72)",
+          boxShadow: "0 8px 24px rgba(38,33,29,.14)",
+          border: "1px solid rgba(56,50,44,.16)",
         },
       }}
       slotProps={{
         backdrop: {
-          sx: { backdropFilter: "blur(7px)", bgcolor: "rgba(17,17,17,.42)" },
+          sx: { bgcolor: "rgba(24,22,20,.48)" },
         },
       }}
     >

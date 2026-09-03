@@ -26,18 +26,18 @@ export default function SharedOrderInvitePanel({ code, shareLink, onRotate, rota
 
   return <Box sx={{ overflow: "hidden", borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
     <Box sx={{ px: { xs: 1.75, sm: 2.5 }, pt: 2.25, textAlign: "center" }}>
-      <Typography variant="h6" fontWeight={850}>Invitar al grupo</Typography>
+      <Typography variant="h6" fontWeight={600}>Invitar al grupo</Typography>
       <Typography variant="body2" color="text.secondary">Comparte sólo la opción que resulte más cómoda.</Typography>
     </Box>
 
-    <Tabs value={tab} onChange={(_event, value) => setTab(value)} centered sx={{ mt: 1, minHeight: 42, "& .MuiTab-root": { minHeight: 42, textTransform: "none", fontWeight: 800 } }}>
+    <Tabs value={tab} onChange={(_event, value) => setTab(value)} centered sx={{ mt: 1, minHeight: 42, "& .MuiTab-root": { minHeight: 42, textTransform: "none", fontWeight: 600 } }}>
       <Tab value="code" icon={<TagRounded />} iconPosition="start" label="Código" />
       <Tab value="qr" icon={<QrCode2Rounded />} iconPosition="start" label="QR" />
     </Tabs>
 
-    <Box sx={{ minHeight: { xs: 164, sm: 190 }, display: "grid", placeItems: "center", px: 2, py: 2.25, bgcolor: "rgba(255,159,28,.07)", borderTop: "1px solid", borderColor: "divider" }}>
+    <Box sx={{ minHeight: { xs: 164, sm: 190 }, display: "grid", placeItems: "center", px: 2, py: 2.25, bgcolor: "rgba(168,117,60,.07)", borderTop: "1px solid", borderColor: "divider" }}>
       {tab === "code"
-        ? <Stack alignItems="center" spacing={0.5}><Typography variant="overline" color="text.secondary">CÓDIGO PARA UNIRSE</Typography><Typography variant="h3" fontWeight={900} sx={{ letterSpacing: { xs: 5, sm: 8 } }}>{code || "••••••"}</Typography>{!hasInvite && <Typography variant="caption" color="text.secondary" textAlign="center">Genera una nueva invitación para mostrar el código.</Typography>}</Stack>
+        ? <Stack alignItems="center" spacing={0.5}><Typography variant="overline" color="text.secondary">CÓDIGO PARA UNIRSE</Typography><Typography variant="h3" fontWeight={700} sx={{ letterSpacing: { xs: 5, sm: 8 } }}>{code || "••••••"}</Typography>{!hasInvite && <Typography variant="caption" color="text.secondary" textAlign="center">Genera una nueva invitación para mostrar el código.</Typography>}</Stack>
         : <Stack alignItems="center" spacing={1}><QRCode value={shareLink || "Invitación protegida"} size={148} /><Typography variant="caption" color="text.secondary">Escanea para entrar directamente</Typography></Stack>}
     </Box>
 

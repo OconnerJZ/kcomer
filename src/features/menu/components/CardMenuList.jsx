@@ -12,13 +12,13 @@ const CARD_STYLES = {
   overflow: "hidden",
   border: "1px solid",
   borderColor: "divider",
-  borderRadius: "10px",
-  bgcolor: "rgba(255,255,255,.82)",
+  borderRadius: "8px",
+  bgcolor: "background.paper",
   transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease",
   "&:hover": {
     transform: "translateY(-1px)",
-    boxShadow: "0 10px 28px rgba(0,0,0,.06)",
-    borderColor: "rgba(255, 75, 69, .28)",
+    boxShadow: "0 3px 10px rgba(0,0,0,.06)",
+    borderColor: "rgba(198,90,80,.28)",
   },
 };
 
@@ -50,7 +50,7 @@ const CardMenuList = ({
           <Box
             sx={{
               minHeight: { xs: 104, sm: 112 },
-              bgcolor: "rgba(255,159,28,.08)",
+              bgcolor: "rgba(168,117,60,.08)",
               backgroundImage: selection.menuItem.image ? `url(${selection.menuItem.image})` : "none",
               backgroundSize: "cover",
               backgroundPosition: "center",
@@ -66,19 +66,19 @@ const CardMenuList = ({
               <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
                   <Box minWidth={0}>
-                    <Typography variant="subtitle2" fontWeight={800} sx={{ lineHeight: 1.25 }}>
+                    <Typography variant="subtitle2" fontWeight={600} sx={{ lineHeight: 1.25 }}>
                       {selection.menuItem.name}
                     </Typography>
                     {selection.configurable && (
                       <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.35 }}>
                         <TuneRounded sx={{ fontSize: 14, color: "primary.main" }} />
-                        <Typography variant="caption" color="primary.main" fontWeight={750}>
+                        <Typography variant="caption" color="primary.main" fontWeight={600}>
                           Personalizable
                         </Typography>
                       </Stack>
                     )}
                   </Box>
-                  <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+                  <Typography variant="subtitle2" fontWeight={600} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
                     ${selection.displayPrice.toFixed(2)}
                   </Typography>
                 </Stack>

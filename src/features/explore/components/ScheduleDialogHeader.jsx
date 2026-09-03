@@ -19,8 +19,9 @@ const ScheduleDialogHeader = ({ presentation, onClose }) => (
       pb: 2.3,
       color: "common.white",
       backgroundImage: presentation.coverUrl
-        ? `linear-gradient(180deg, rgba(18,18,18,.20), rgba(18,18,18,.78)), url(${presentation.coverUrl})`
-        : "linear-gradient(135deg, #9f2623 0%, #c53d37 55%, #e05a4f 100%)",
+        ? `linear-gradient(rgba(32,29,26,.62), rgba(32,29,26,.62)), url(${presentation.coverUrl})`
+        : "none",
+      backgroundColor: "#8F3E38",
       backgroundSize: "cover",
       backgroundPosition: "center",
     }}
@@ -32,7 +33,7 @@ const ScheduleDialogHeader = ({ presentation, onClose }) => (
           color: "rgba(255,255,255,.78)",
           letterSpacing: ".16em",
           fontSize: ".62rem",
-          fontWeight: 800,
+          fontWeight: 600,
         }}
       >
         Horarios del negocio
@@ -61,13 +62,13 @@ const ScheduleDialogHeader = ({ presentation, onClose }) => (
           border: "2px solid rgba(255,255,255,.88)",
           bgcolor: "common.white",
           color: "text.primary",
-          boxShadow: "0 7px 20px rgba(0,0,0,.18)",
+          boxShadow: "0 2px 7px rgba(0,0,0,.14)",
         }}
       >
         {presentation.businessInitial}
       </Avatar>
       <Box minWidth={0}>
-        <Typography variant="h5" fontWeight={900} noWrap sx={{ letterSpacing: "-.02em" }}>
+        <Typography variant="h5" fontWeight={600} noWrap sx={{ letterSpacing: "-.01em" }}>
           {presentation.businessName}
         </Typography>
         <Stack
@@ -87,7 +88,7 @@ const ScheduleDialogHeader = ({ presentation, onClose }) => (
                 ? "rgba(229,255,235,.94)"
                 : "rgba(255,255,255,.16)",
               color: presentation.isOpenNow ? "success.dark" : "common.white",
-              fontWeight: 850,
+              fontWeight: 600,
               backdropFilter: "blur(8px)",
             }}
           />

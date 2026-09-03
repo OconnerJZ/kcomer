@@ -27,10 +27,10 @@ export default function ExplorePage() {
 
   return (
     <GeneralContent title="Explorar">
-      <Parallax bg={Bg5} stx={{ minHeight: { xs: "calc(100svh - 56px)", sm: 520, md: 620 } }}>
+      <Parallax bg={Bg5} stx={{ minHeight: { xs: 430, sm: 450, md: 480 } }}>
         <Box
           sx={{
-            minHeight: { xs: "calc(100svh - 56px)", sm: 520, md: 620 },
+            minHeight: { xs: 430, sm: 450, md: 480 },
             display: "flex",
             alignItems: "center",
             px: { xs: 2.5, sm: 5, md: 8 },
@@ -48,11 +48,12 @@ export default function ExplorePage() {
                 component="h1"
                 sx={{
                   color: "white",
-                  fontWeight: 900,
-                  lineHeight: 0.98,
-                  letterSpacing: "-.045em",
-                  fontSize: { xs: "clamp(2.55rem, 13vw, 3.4rem)", sm: "4rem", md: "5.25rem" },
-                  maxWidth: 760,
+                  fontFamily: '"Lora", Georgia, serif',
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  letterSpacing: "-.02em",
+                  fontSize: { xs: "2rem", sm: "2.35rem", md: "2.6rem" },
+                  maxWidth: 620,
                 }}
               >
                 Descubre qué comer hoy.
@@ -100,8 +101,8 @@ export default function ExplorePage() {
                         height: 48,
                         bgcolor: "common.white",
                         color: "#282828",
-                        boxShadow: "0 10px 28px rgba(0,0,0,.16)",
-                        "&:hover": { bgcolor: "common.white", transform: "scale(1.05)" },
+                        boxShadow: "0 2px 8px rgba(0,0,0,.14)",
+                        "&:hover": { bgcolor: "#F5F2EC", transform: "translateY(-1px)" },
                         transition: "transform .2s ease",
                       }}
                     >
@@ -113,7 +114,7 @@ export default function ExplorePage() {
                   <Box>
                     <Typography
                       variant="body2"
-                      sx={{ color: "common.white", fontWeight: 800, lineHeight: 1.1 }}
+                      sx={{ color: "common.white", fontWeight: 600, lineHeight: 1.1 }}
                     >
                       Ver lugares
                     </Typography>

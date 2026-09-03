@@ -4,17 +4,17 @@ import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 
 const PendingOrderItemList = ({ items, onChangeQuantity, onEdit, onRemove }) => (
   <Box>
-    <Typography fontWeight={850} sx={{ mb: 1.25 }}>Tu orden</Typography>
+    <Typography fontWeight={600} sx={{ mb: 1.25 }}>Tu orden</Typography>
     <Stack spacing={1}>
       {items.map((item) => (
         <Box
           key={item.id}
-          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}
+          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "8px" }}
         >
           <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
             <Box minWidth={0} flex={1}>
               <Stack direction="row" spacing={0.75} alignItems="center">
-                <Typography fontWeight={800} noWrap>{item.name}</Typography>
+                <Typography fontWeight={600} noWrap>{item.name}</Typography>
                 {item.modifierGroups?.length > 0 && (
                   <TuneRounded sx={{ fontSize: 15, color: "primary.main" }} />
                 )}
@@ -46,7 +46,7 @@ const PendingOrderItemList = ({ items, onChangeQuantity, onEdit, onRemove }) => 
               <IconButton size="small" onClick={() => onChangeQuantity(item.id, -1)}>
                 <Remove fontSize="small" />
               </IconButton>
-              <Typography fontWeight={850} sx={{ minWidth: 22, textAlign: "center" }}>
+              <Typography fontWeight={600} sx={{ minWidth: 22, textAlign: "center" }}>
                 {item.quantity}
               </Typography>
               <IconButton size="small" onClick={() => onChangeQuantity(item.id, 1)}>

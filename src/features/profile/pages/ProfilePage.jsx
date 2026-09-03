@@ -38,7 +38,7 @@ export default function ProfilePage() {
   return (
     <GeneralContent title="Mi Perfil">
       <Box sx={{ maxWidth: 800, mx: "auto", py: { xs: 2, sm: 4 }, px: { xs: 1.5, sm: 2.5 } }}>
-        <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 }, borderRadius: "10px", border: "1px solid", borderColor: "divider" }}>
+        <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1.5, sm: 3 }} alignItems="center" textAlign={{ xs: "center", sm: "left" }}>
             <Avatar
               src={user?.avatar}

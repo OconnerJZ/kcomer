@@ -23,7 +23,7 @@ export default function MenuModifierManager({ menuId }) {
         <Box>
           <Stack direction="row" spacing={1} alignItems="center">
             <TuneRounded color="primary" fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={850}>Personalización</Typography>
+            <Typography variant="subtitle1" fontWeight={600}>Personalización</Typography>
           </Stack>
           <Typography variant="caption" color="text.secondary">
             Ingredientes removibles, extras y selecciones obligatorias.
@@ -57,7 +57,7 @@ export default function MenuModifierManager({ menuId }) {
           variant="outlined"
           disabled={editor.loading || !editor.hasChanges || editor.saving}
           onClick={editor.save}
-          sx={{ textTransform: "none", borderRadius: "10px" }}
+          sx={{ textTransform: "none", borderRadius: "8px" }}
         >
           {editor.saving ? "Guardando…" : "Guardar personalización"}
         </Button>

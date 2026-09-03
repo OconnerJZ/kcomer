@@ -29,10 +29,9 @@ export default function FiltersPanel() {
           minHeight: 40,
           px: 1.5,
           py: .4,
-          backgroundColor: "rgba(255,243,232,.94)",
-          borderBottom: "1px solid rgba(255,159,28,.22)",
+          backgroundColor: "#F5F2EC",
+          borderBottom: "1px solid rgba(168,117,60,.22)",
           color: "text.primary",
-          backdropFilter: "blur(5px)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -41,7 +40,7 @@ export default function FiltersPanel() {
           letterSpacing: "0.5px",
         }}
       >
-        <Typography component="span" variant="caption" fontWeight={750} noWrap sx={{ maxWidth: "calc(100vw - 64px)" }}>{address}</Typography>
+        <Typography component="span" variant="caption" fontWeight={600} noWrap sx={{ maxWidth: "calc(100vw - 64px)" }}>{address}</Typography>
         <IconButton size="small" onClick={() => setOpen(true)}>
           <Search />
         </IconButton>
@@ -50,13 +49,13 @@ export default function FiltersPanel() {
       <Drawer title="" placement="top" onClose={() => setOpen(false)} open={open} className="panelFilter">
         <Grid container spacing={{ xs: 2, md: 3 }} justifyContent="center" alignItems="stretch" mt={2}>
           {[
-            ["ion:location", "#2EAD67", "Ubicación"],
-            ["ion:fast-food", "#FF9F1C", "Comida"],
-            ["fluent:person-feedback-48-filled", "#315EFB", "Feedback"],
+            ["ion:location", "#5F7864", "Ubicación"],
+            ["ion:fast-food", "#A8753C", "Comida"],
+            ["fluent:person-feedback-48-filled", "#C65A50", "Feedback"],
           ].map(([icon, color, label]) => (
             <Grid item xs={12} sm={6} md={4} key={label}>
-              <Stack spacing={1.5} sx={{ height: "100%", p: { xs: 1.5, sm: 2 }, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.9)" }}>
-                  <Stack direction="row" spacing={1} alignItems="center"><Icon style={{ fontSize: "28px", color }} icon={icon} /><Typography fontWeight={800}>{label}</Typography></Stack>
+              <Stack spacing={1.5} sx={{ height: "100%", p: { xs: 1.5, sm: 2 }, border: "1px solid", borderColor: "divider", borderRadius: "8px", bgcolor: "rgba(255,255,255,.9)" }}>
+                  <Stack direction="row" spacing={1} alignItems="center"><Icon style={{ fontSize: "28px", color }} icon={icon} /><Typography fontWeight={600}>{label}</Typography></Stack>
                   <Autocomplete
                     value={value}
                     onChange={(_, newValue) => setValue(newValue)}

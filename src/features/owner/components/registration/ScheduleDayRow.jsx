@@ -13,7 +13,7 @@ const ScheduleDayRow = ({ day, isToday, onOpenChange, onTimeChange }) => (
       borderBottom: "1px solid",
       borderLeft: isToday ? "3px solid" : "3px solid transparent",
       borderColor: isToday ? "primary.main" : "divider",
-      bgcolor: isToday ? "rgba(49,94,251,.035)" : "background.paper",
+      bgcolor: isToday ? "rgba(198,90,80,.035)" : "background.paper",
     }}
   >
     <Stack
@@ -29,12 +29,12 @@ const ScheduleDayRow = ({ day, isToday, onOpenChange, onTimeChange }) => (
         />
         <Box>
           <Stack direction="row" alignItems="center" gap={0.75}>
-            <Typography variant="body2" fontWeight={800}>{day.day}</Typography>
+            <Typography variant="body2" fontWeight={600}>{day.day}</Typography>
             {isToday && (
               <Chip
                 label="Hoy"
                 size="small"
-                sx={{ height: 20, fontSize: ".66rem", fontWeight: 800 }}
+                sx={{ height: 20, fontSize: ".66rem", fontWeight: 600 }}
               />
             )}
           </Stack>

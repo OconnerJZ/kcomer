@@ -22,7 +22,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
       elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
-        borderRadius: "10px",
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "rgba(255,255,255,.9)",
@@ -33,7 +33,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".62rem" }}>
             UBICACIÓN
           </Typography>
-          <Typography variant="h6" fontWeight={850}>Dónde encontrarte</Typography>
+          <Typography variant="h6" fontWeight={600}>Dónde encontrarte</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: .5, maxWidth: 700 }}>
             Coloca el marcador exactamente donde está tu negocio. Kcomer completará la dirección y podrás afinarla antes de guardar.
           </Typography>
@@ -58,7 +58,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
           <Box sx={{ pb: 2, borderBottom: "1px solid", borderColor: "divider" }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
               <LocationOnRounded color="primary" fontSize="small" />
-              <Typography variant="body2" fontWeight={850}>Dirección visible</Typography>
+              <Typography variant="body2" fontWeight={600}>Dirección visible</Typography>
             </Stack>
             <Stack spacing={1.5}>
               <TextField
@@ -92,9 +92,9 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
             </Stack>
           </Box>
 
-          <Box sx={{ px: 1.5, py: 1.35, borderRadius: "10px", bgcolor: "rgba(46,173,103,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
+          <Box sx={{ px: 1.5, py: 1.35, borderRadius: "8px", bgcolor: "rgba(95,120,100,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
             <Typography variant="caption" color="text.secondary">Coordenadas</Typography>
-            <Typography variant="body2" fontWeight={750} sx={{ mt: .35 }}>
+            <Typography variant="body2" fontWeight={600} sx={{ mt: .35 }}>
               {locationInfo.latitude && locationInfo.longitude
                 ? `${Number(locationInfo.latitude).toFixed(6)}, ${Number(locationInfo.longitude).toFixed(6)}`
                 : "Selecciona un punto en el mapa"}
@@ -106,7 +106,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
             disableElevation
             onClick={onSave}
             disabled={loading || !locationInfo.latitude || !locationInfo.longitude}
-            sx={{ borderRadius: 999, py: 1.1, textTransform: "none", fontWeight: 800 }}
+            sx={{ borderRadius: "6px", py: 1.1, textTransform: "none", fontWeight: 600 }}
           >
             {loading ? <CircularProgress size={22} color="inherit" /> : "Guardar ubicación"}
           </Button>

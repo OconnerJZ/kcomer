@@ -53,6 +53,7 @@ export default function CartItemList({
                     mt: 0.5,
                     color: "primary.main",
                     fontStyle: "italic",
+                    "&::first-letter": { fontSize: 0 },
                   }}
                 >
                   📝 {item.note}

@@ -20,8 +20,8 @@ const ScheduleRow = ({ row }) => (
       gap: 1.2,
       px: 1.4,
       py: 1.15,
-      borderRadius: "10px",
-      bgcolor: row.isToday ? "rgba(49,94,251,.055)" : "transparent",
+      borderRadius: "8px",
+      bgcolor: row.isToday ? "rgba(198,90,80,.055)" : "transparent",
     }}
   >
     <Box
@@ -30,19 +30,19 @@ const ScheduleRow = ({ row }) => (
         height: 8,
         borderRadius: "50%",
         bgcolor: row.isToday ? "primary.main" : row.closed ? "grey.300" : "grey.400",
-        boxShadow: row.isToday ? "0 0 0 5px rgba(49,94,251,.10)" : "none",
+        boxShadow: row.isToday ? "0 0 0 5px rgba(198,90,80,.10)" : "none",
         justifySelf: "center",
       }}
     />
     <Stack direction="row" spacing={0.8} alignItems="center" minWidth={0}>
-      <Typography variant="body2" fontWeight={row.isToday ? 850 : 650} noWrap>
+      <Typography variant="body2" fontWeight={row.isToday ? 600 : 500} noWrap>
         {row.day}
       </Typography>
       {row.isToday && (
         <Typography
           variant="caption"
           color="primary.main"
-          fontWeight={850}
+          fontWeight={600}
           sx={{ fontSize: ".62rem", letterSpacing: ".08em" }}
         >
           HOY
@@ -52,7 +52,7 @@ const ScheduleRow = ({ row }) => (
     <Typography
       variant="body2"
       sx={{
-        fontWeight: 750,
+        fontWeight: 600,
         color: row.closed ? "text.disabled" : "text.primary",
         gridColumn: { xs: "2", sm: "3" },
         whiteSpace: "nowrap",
@@ -83,7 +83,7 @@ const EmptySchedule = () => (
     >
       <AccessTime sx={{ color: "text.secondary" }} />
     </Box>
-    <Typography variant="body2" fontWeight={800}>Horario no disponible</Typography>
+    <Typography variant="body2" fontWeight={600}>Horario no disponible</Typography>
     <Typography variant="caption" color="text.secondary">
       Este negocio todavía no ha publicado sus horarios.
     </Typography>
@@ -100,7 +100,7 @@ const ScheduleList = ({ rows }) => {
         <Typography
           variant="caption"
           color="text.secondary"
-          fontWeight={800}
+          fontWeight={600}
           sx={{ letterSpacing: ".04em" }}
         >
           SEMANA HABITUAL

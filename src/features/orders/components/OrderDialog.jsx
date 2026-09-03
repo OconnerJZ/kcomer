@@ -30,12 +30,12 @@ import ActionButton from "./ActionButton";
 import TransferPaymentReviewPanel from "@Features/payments/components/TransferPaymentReviewPanel";
 
 const SummaryPill = ({ icon: Icon, label, value }) => (
-  <Box sx={{ px: 1.4, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.78)" }}>
+  <Box sx={{ px: 1.4, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "8px", bgcolor: "rgba(255,255,255,.78)" }}>
     <Stack direction="row" spacing={1} alignItems="center">
       <Icon sx={{ fontSize: 17, color: "text.secondary" }} />
       <Box minWidth={0}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.15 }}>{label}</Typography>
-        <Typography variant="body2" fontWeight={800} noWrap>{value}</Typography>
+        <Typography variant="body2" fontWeight={600} noWrap>{value}</Typography>
       </Box>
     </Stack>
   </Box>
@@ -52,7 +52,7 @@ const StatusHistory = ({ history = [] }) => {
               {index !== history.length - 1 && <Box sx={{ position: "absolute", top: 12, width: 1.5, height: 28, bgcolor: "divider" }} />}
             </Box>
             <Box>
-              <Typography variant="body2" fontWeight={750}>{ORDER_STATUS[entry.status]?.label || entry.status}</Typography>
+              <Typography variant="body2" fontWeight={600}>{ORDER_STATUS[entry.status]?.label || entry.status}</Typography>
               {(entry.note || entry.not) && <Typography variant="caption" color="text.secondary">{entry.note || entry.not}</Typography>}
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ gridColumn: { xs: "2", sm: "3" }, whiteSpace: "nowrap" }}>{entry.createdAt ? formatOrderDate(entry.createdAt, true) : ""}</Typography>
@@ -65,7 +65,7 @@ const StatusHistory = ({ history = [] }) => {
 const ActivityAccordion = ({ eyebrow, title, children }) => (
   <Accordion disableGutters elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px !important", bgcolor: "rgba(255,255,255,.82)", "&:before": { display: "none" } }}>
     <AccordionSummary expandIcon={<ExpandMoreRounded />} sx={{ minHeight: 66, px: 2, "& .MuiAccordionSummary-content": { my: 1.2 } }}>
-      <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".62rem", lineHeight: 1.1 }}>{eyebrow}</Typography><Typography variant="subtitle2" fontWeight={850}>{title}</Typography></Box>
+      <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".62rem", lineHeight: 1.1 }}>{eyebrow}</Typography><Typography variant="subtitle2" fontWeight={600}>{title}</Typography></Box>
     </AccordionSummary>
     <AccordionDetails sx={{ px: 2, pt: 0, pb: 2, maxHeight: 330, overflowY: "auto" }}>{children}</AccordionDetails>
   </Accordion>
@@ -78,23 +78,23 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isSmall} TransitionComponent={Fade}
-      PaperProps={{ elevation: 0, sx: { borderRadius: isSmall ? 0 : "10px", overflow: "hidden", border: "1px solid", borderColor: "divider", boxShadow: "0 28px 80px rgba(0,0,0,.18)", bgcolor: "rgba(250,250,250,.97)", backdropFilter: "blur(18px)" } }}>
+      PaperProps={{ elevation: 0, sx: { borderRadius: isSmall ? 0 : "8px", overflow: "hidden", border: "1px solid", borderColor: "divider", boxShadow: "0 8px 24px rgba(38,33,29,.14)", bgcolor: "background.default" } }}>
       <DialogContent sx={{ p: 0 }}>
-        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.6 }, pb: 2.2, background: "linear-gradient(135deg, rgba(49,94,251,.08), rgba(255,255,255,.96) 52%)" }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.6 }, pb: 2.2, bgcolor: "#F0ECE5", borderBottom: "1px solid", borderColor: "divider" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
             <Box minWidth={0}>
               <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".64rem" }}>DETALLE DE ORDEN</Typography>
               <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: .2 }}>
-                <Typography variant="h4" fontWeight={900}>#{order.id}</Typography>
-                <Chip size="small" label={ORDER_STATUS[order.status]?.label || order.status} sx={{ borderRadius: 999, fontWeight: 800, bgcolor: `${statusColor}14`, color: statusColor, border: `1px solid ${statusColor}45` }} />
-                {order.version && <Chip size="small" variant="outlined" label={`v${order.version}`} sx={{ borderRadius: 999, fontWeight: 700 }} />}
+                <Typography variant="h4" fontWeight={600}>#{order.id}</Typography>
+                <Chip size="small" label={ORDER_STATUS[order.status]?.label || order.status} sx={{ borderRadius: "6px", fontWeight: 600, bgcolor: `${statusColor}14`, color: statusColor, border: `1px solid ${statusColor}45` }} />
+                {order.version && <Chip size="small" variant="outlined" label={`v${order.version}`} sx={{ borderRadius: "6px", fontWeight: 700 }} />}
               </Stack>
               <Typography variant="body2" color="text.secondary" sx={{ mt: .55 }}>{formatOrderDate(order.createdAt, true)}</Typography>
             </Box>
             <IconButton onClick={onClose} size="small" aria-label="cerrar detalle de orden" sx={{ bgcolor: "rgba(255,255,255,.75)", border: "1px solid", borderColor: "divider" }}><Close fontSize="small" /></IconButton>
           </Stack>
 
-          <Typography variant="body2" fontWeight={800} sx={{ mt: .9 }}>{order.customerName || "Cliente"}</Typography>
+          <Typography variant="body2" fontWeight={600} sx={{ mt: .9 }}>{order.customerName || "Cliente"}</Typography>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2,minmax(0,220px))" }, gap: 1.1, mt: 1.6 }}>
             <SummaryPill icon={Payments} label="Pago" value={formatPaymentMethod(order.paymentMethod)} />
             <SummaryPill icon={PaidRounded} label="Total" value={formatCurrency(order.total)} />

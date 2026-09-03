@@ -38,8 +38,8 @@ export default function TeamAccessTab({ businessId }) {
     if (invitation) { setLatestInvite(invitation); setTransferEmail(""); }
   };
 
-  return <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "10px", border: "1px solid", borderColor: "divider", bgcolor: "rgba(255,255,255,.88)" }}><Stack spacing={{ xs: 2, sm: 3 }}>
-    <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em" }}>EQUIPO Y ACCESO</Typography><Typography variant="h5" fontWeight={850}>Personas que operan este local</Typography><Typography variant="body2" color="text.secondary">Cada permiso está limitado a este negocio. Un colaborador no obtiene acceso a tus otros locales.</Typography></Box>
+  return <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider", bgcolor: "rgba(255,255,255,.88)" }}><Stack spacing={{ xs: 2, sm: 3 }}>
+    <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em" }}>EQUIPO Y ACCESO</Typography><Typography variant="h5" fontWeight={600}>Personas que operan este local</Typography><Typography variant="body2" color="text.secondary">Cada permiso está limitado a este negocio. Un colaborador no obtiene acceso a tus otros locales.</Typography></Box>
     {teamAccess.error && <Alert severity="error">{getTeamErrorMessage(teamAccess.error)}</Alert>}
     <InvitationSecretAlert invitation={latestInvite} onCopy={copy} />
     <InviteMemberPanel email={email} role={role} loading={teamAccess.isInviting} onEmailChange={setEmail} onRoleChange={setRole} onInvite={handleInvite} />

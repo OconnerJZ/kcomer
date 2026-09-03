@@ -55,7 +55,7 @@ const DashboardUserMenu = () => {
         onClose={() => setAnchorEl(null)}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        PaperProps={{ sx: { minWidth: 220, mt: 1, borderRadius: "10px" } }}
+        PaperProps={{ sx: { minWidth: 220, mt: 1, borderRadius: "8px" } }}
       >
         <Box sx={{ px: 2, py: 1.5 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{user?.name}</Typography>

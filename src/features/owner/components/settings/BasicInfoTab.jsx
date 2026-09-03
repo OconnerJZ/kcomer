@@ -41,7 +41,7 @@ const BasicInfoTab = ({
           p: 2.5,
           border: "1px solid",
           borderColor: "divider",
-          borderRadius: "10px",
+          borderRadius: "8px",
           textAlign: "center",
           bgcolor: "rgba(248,248,248,.7)",
         }}
@@ -61,7 +61,7 @@ const BasicInfoTab = ({
         >
           <Business sx={{ fontSize: 42 }} />
         </Avatar>
-        <Typography variant="body2" fontWeight={800}>Logo del negocio</Typography>
+        <Typography variant="body2" fontWeight={600}>Logo del negocio</Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.4, mb: 1.75 }}>
           Ideal en formato cuadrado, hasta 5 MB.
         </Typography>
@@ -69,7 +69,7 @@ const BasicInfoTab = ({
           variant="outlined"
           component="label"
           startIcon={<Edit />}
-          sx={{ textTransform: "none", borderRadius: "10px" }}
+          sx={{ textTransform: "none", borderRadius: "8px" }}
         >
           {logoFile ? "Cambiar logo" : "Actualizar logo"}
           <input type="file" hidden accept="image/*" onChange={onLogoChange} />
@@ -140,7 +140,7 @@ const BasicInfoTab = ({
             />
           </Grid>
         </Grid>
-        <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}>
+        <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "8px" }}>
           <FormControlLabel
             sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
             control={(
@@ -151,7 +151,7 @@ const BasicInfoTab = ({
             )}
             label={(
               <Box>
-                <Typography variant="body2" fontWeight={800}>
+                <Typography variant="body2" fontWeight={600}>
                   {basicInfo.open ? "Negocio abierto" : "Negocio cerrado"}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">

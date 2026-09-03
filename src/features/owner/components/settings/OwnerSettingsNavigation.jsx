@@ -54,20 +54,20 @@ const OwnerSettingsNavigation = ({ sections, activeTab, onChange }) => (
             scrollSnapAlign: "start",
             justifyContent: "flex-start",
             textTransform: "none",
-            borderRadius: "10px",
+            borderRadius: "8px",
             px: 1.6,
             py: 1.1,
             color: selected ? "text.primary" : "text.secondary",
-            bgcolor: selected ? "rgba(49,94,251,.08)" : "transparent",
+            bgcolor: selected ? "rgba(198,90,80,.08)" : "transparent",
             border: "1px solid",
-            borderColor: selected ? "rgba(49,94,251,.22)" : "divider",
+            borderColor: selected ? "rgba(198,90,80,.22)" : "divider",
             "&:hover": {
-              bgcolor: selected ? "rgba(49,94,251,.11)" : "action.hover",
+              bgcolor: selected ? "rgba(198,90,80,.11)" : "action.hover",
             },
           }}
         >
           <Stack alignItems="flex-start" spacing={0}>
-            <Typography variant="body2" fontWeight={selected ? 800 : 600}>
+            <Typography variant="body2" fontWeight={selected ? 600 : 500}>
               {section.label}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>

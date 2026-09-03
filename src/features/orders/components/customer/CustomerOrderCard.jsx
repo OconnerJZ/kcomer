@@ -12,13 +12,13 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Card elevation={0} sx={{ position: "relative", display: "flex", flexDirection: "column", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.78)", backdropFilter: "blur(10px)", overflow: "hidden" }}>
+    <Card elevation={0} sx={{ position: "relative", display: "flex", flexDirection: "column", borderColor: "divider", borderRadius: "8px", bgcolor: "background.paper", overflow: "hidden" }}>
       <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: order.sharedSessionId ? { xs: 5, sm: 5 } : { xs: 2, sm: 2.5 } }, flex: 1 }}>
         <Stack spacing={isMobile ? 1.75 : 2.25} height="100%">
           <Stack direction="row" justifyContent="space-between" alignItems="center" onClick={onToggle} sx={{ cursor: "pointer" }}>
             <Stack spacing={.65} flex={1} minWidth={0}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.businessName}</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.businessName}</Typography>
                 {expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
               </Stack>
               {!isMobile && (
@@ -27,7 +27,7 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
                 </Stack>
               )}
             </Stack>
-            <Typography variant="subtitle2" sx={{ fontWeight: 900, ml: 1 }}>${Number(order.total || 0).toFixed(2)}</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, ml: 1 }}>${Number(order.total || 0).toFixed(2)}</Typography>
           </Stack>
 
           {order.status !== ORDER_STATUS.CANCELLED && <OrderProgressTracker status={order.status} orderType={order.orderType} compact={isMobile} />}
@@ -42,18 +42,18 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
               <>
                 <Divider sx={{ my: 2 }} />
                 <Stack spacing={1}>
-                  <Button variant="contained" disableElevation fullWidth startIcon={<EditRounded />} onClick={onEdit} sx={{ borderRadius: "10px", py: 1, textTransform: "none", fontWeight: 750 }}>
+                  <Button variant="contained" disableElevation fullWidth startIcon={<EditRounded />} onClick={onEdit} sx={{ borderRadius: "8px", py: 1, textTransform: "none", fontWeight: 600 }}>
                     Modificar orden
                   </Button>
                   <Typography variant="caption" color="text.secondary" textAlign="center">Puedes cambiar productos y cantidades hasta que el negocio acepte la orden.</Typography>
-                  <Button variant="outlined" color="error" fullWidth onClick={onCancel} sx={{ borderRadius: "10px", py: 1, textTransform: "none", fontWeight: 700 }}>Cancelar Orden</Button>
+                  <Button variant="outlined" color="error" fullWidth onClick={onCancel} sx={{ borderRadius: "8px", py: 1, textTransform: "none", fontWeight: 700 }}>Cancelar Orden</Button>
                 </Stack>
               </>
             )}
           </Collapse>
         </Stack>
       </CardContent>
-      {order.sharedSessionId && <Box sx={{ position: "absolute", right: 0, bottom: 0, display: "flex", alignItems: "center", gap: 0.55, px: 1.35, py: 0.7, borderRadius: "10px 0 0 0", bgcolor: "rgba(49,94,251,.10)", color: "primary.dark", borderTop: "1px solid rgba(49,94,251,.16)", borderLeft: "1px solid rgba(49,94,251,.16)" }}><GroupsRounded sx={{ fontSize: 15 }} /><Typography variant="caption" fontWeight={850}>Compartida</Typography></Box>}
+      {order.sharedSessionId && <Box sx={{ position: "absolute", right: 0, bottom: 0, display: "flex", alignItems: "center", gap: 0.55, px: 1.35, py: 0.7, borderRadius: "10px 0 0 0", bgcolor: "rgba(198,90,80,.10)", color: "primary.dark", borderTop: "1px solid rgba(198,90,80,.16)", borderLeft: "1px solid rgba(198,90,80,.16)" }}><GroupsRounded sx={{ fontSize: 15 }} /><Typography variant="caption" fontWeight={600}>Compartida</Typography></Box>}
     </Card>
   );
 }

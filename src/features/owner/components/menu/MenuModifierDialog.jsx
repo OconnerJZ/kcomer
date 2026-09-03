@@ -13,7 +13,7 @@ export default function MenuModifierDialog({ open, item, fullScreen, onClose }) 
               <TuneRounded color="primary" />
               <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em" }}>PERSONALIZACIÓN</Typography>
             </Stack>
-            <Typography variant="h5" fontWeight={900}>{item?.name || "Platillo"}</Typography>
+            <Typography variant="h5" fontWeight={700}>{item?.name || "Platillo"}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: .4, maxWidth: 620 }}>
               Define qué puede quitar, elegir o agregar el cliente. Los cambios futuros no alterarán las órdenes históricas.
             </Typography>

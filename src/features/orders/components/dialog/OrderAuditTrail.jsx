@@ -55,7 +55,7 @@ export default function OrderAuditTrail({ orderId, enabled = true, compact = fal
           <Box minWidth={0}>
             <Stack direction="row" spacing={.75} alignItems="center" justifyContent="space-between" flexWrap="wrap" useFlexGap>
               <Stack direction="row" spacing={.75} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Typography variant="body2" fontWeight={800}>{LABELS[event.action] || event.action}</Typography>
+                <Typography variant="body2" fontWeight={600}>{LABELS[event.action] || event.action}</Typography>
                 {event.orderVersion != null && <Chip size="small" label={`v${event.orderVersion}`} sx={{ height: 20, fontSize: ".62rem" }} />}
               </Stack>
               <Typography variant="caption" color="text.secondary">
@@ -87,11 +87,11 @@ export default function OrderAuditTrail({ orderId, enabled = true, compact = fal
   if (compact) return <Box sx={{ pt: .5 }}>{content}</Box>;
 
   return (
-    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
+    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: "8px", p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".64rem" }}>AUDITORÍA</Typography>
-          <Typography variant="subtitle1" fontWeight={800}>Bitácora de actividad</Typography>
+          <Typography variant="subtitle1" fontWeight={600}>Bitácora de actividad</Typography>
         </Box>
         <HistoryToggleOffRounded color="action" />
       </Stack>

@@ -33,23 +33,23 @@ export const STATUS_LABELS = Object.freeze(
 );
 
 export const STATUS_COLORS = {
-  pending: { bg: "#467A77", hover: "#dd6b20" },
-  accepted: { bg: "#315EFB", hover: "#1E40AF" },
-  preparing: { bg: "#FF9F1C", hover: "#A95B00" },
-  ready: { bg: "#2EAD67", hover: "#187A42" },
-  in_delivery: { bg: "#A95B00", hover: "#7A4100" },
-  completed: { bg: "#616161", hover: "#4a5568" },
+  pending: { bg: "#66736A", hover: "#465048" },
+  accepted: { bg: "#C65A50", hover: "#8F3E38" },
+  preparing: { bg: "#A8753C", hover: "#704A24" },
+  ready: { bg: "#5F7864", hover: "#405544" },
+  in_delivery: { bg: "#626B73", hover: "#414950" },
+  completed: { bg: "#6F6A63", hover: "#403C37" },
 };
 
 export const COLOR_MAP = {
-  pending: "#467A77",
-  accepted: "#315EFB",
-  preparing: "#FF9F1C",
-  ready: "#2EAD67",
-  in_delivery: "#A95B00",
-  completed: "#616161",
-  error: "#e53e3e",
-  default: "#e0e0e0",
+  pending: "#66736A",
+  accepted: "#C65A50",
+  preparing: "#A8753C",
+  ready: "#5F7864",
+  in_delivery: "#626B73",
+  completed: "#6F6A63",
+  error: "#B7473F",
+  default: "#D9D2C8",
 };
 
 export const getActionLabels = (orderType) => ({

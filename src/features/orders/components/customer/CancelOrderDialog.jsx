@@ -2,8 +2,8 @@ import PropTypes from "prop-types";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 const CancelOrderDialog = ({ open, onClose, onConfirm }) => (
-  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "10px" } }}>
-    <DialogTitle sx={{ fontWeight: 900 }}>Cancelar orden</DialogTitle>
+  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "8px" } }}>
+    <DialogTitle sx={{ fontWeight: 700 }}>Cancelar orden</DialogTitle>
     <DialogContent>
       <Typography color="text.secondary">
         ¿Seguro que quieres cancelar esta orden? Esta acción solo está disponible mientras siga pendiente.
@@ -16,7 +16,7 @@ const CancelOrderDialog = ({ open, onClose, onConfirm }) => (
         variant="contained"
         disableElevation
         onClick={onConfirm}
-        sx={{ textTransform: "none", borderRadius: 999, px: 2.25 }}
+        sx={{ textTransform: "none", borderRadius: "6px", px: 2.25 }}
       >
         Sí, cancelar
       </Button>

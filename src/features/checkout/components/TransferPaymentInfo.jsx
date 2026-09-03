@@ -9,13 +9,13 @@ export default function TransferPaymentInfo({ config = {}, compact = false }) {
 
   return (
     <Box mt={compact ? 0 : 2}>
-      <Box sx={{ background: "linear-gradient(135deg, #A95B00 0%, #315EFB 100%)", borderRadius: "10px", p: compact ? 2 : 3, color: "white" }}>
+      <Box sx={{ bgcolor: "#34312D", borderRadius: "8px", p: compact ? 2 : 3, color: "white" }}>
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" mb={2} gap={1}>
-          <Box><Typography variant="caption" sx={{ opacity: .72 }}>BANCO</Typography><Typography fontWeight={800}>{config.bankName}</Typography></Box>
-          <Box textAlign="right"><Typography variant="caption" sx={{ opacity: .72 }}>TITULAR</Typography><Typography variant="body2" fontWeight={750}>{config.accountHolder}</Typography></Box>
+          <Box><Typography variant="caption" sx={{ opacity: .72 }}>BANCO</Typography><Typography fontWeight={600}>{config.bankName}</Typography></Box>
+          <Box textAlign="right"><Typography variant="caption" sx={{ opacity: .72 }}>TITULAR</Typography><Typography variant="body2" fontWeight={600}>{config.accountHolder}</Typography></Box>
         </Stack>
-        {config.accountNumber && <Box mb={1.5}><Typography variant="caption" sx={{ opacity: .72 }}>NÚMERO DE CUENTA</Typography><Typography fontFamily="monospace" fontWeight={800}>{spaced(config.accountNumber)}</Typography></Box>}
-        {config.clabe && <Box><Typography variant="caption" sx={{ opacity: .72 }}>CLABE INTERBANCARIA</Typography><Typography fontFamily="monospace" fontWeight={800}>{spaced(config.clabe, 3)}</Typography></Box>}
+        {config.accountNumber && <Box mb={1.5}><Typography variant="caption" sx={{ opacity: .72 }}>NÚMERO DE CUENTA</Typography><Typography fontFamily="monospace" fontWeight={600}>{spaced(config.accountNumber)}</Typography></Box>}
+        {config.clabe && <Box><Typography variant="caption" sx={{ opacity: .72 }}>CLABE INTERBANCARIA</Typography><Typography fontFamily="monospace" fontWeight={600}>{spaced(config.clabe, 3)}</Typography></Box>}
         {config.referenceInstructions && <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: .88 }}>{config.referenceInstructions}</Typography>}
       </Box>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1} mt={1.5}>

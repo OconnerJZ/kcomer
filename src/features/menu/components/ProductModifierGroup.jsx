@@ -18,7 +18,7 @@ const ProductModifierGroup = ({ group, selected, onToggle }) => {
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
         <Box>
-          <Typography fontWeight={850}>{group.title}</Typography>
+          <Typography fontWeight={600}>{group.title}</Typography>
           <Typography variant="caption" color="text.secondary">
             {group.required ? "Selección requerida" : "Opcional"}
             {group.maxSelect > 1 ? ` · Hasta ${group.maxSelect}` : ""}
@@ -44,7 +44,7 @@ const ProductModifierGroup = ({ group, selected, onToggle }) => {
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Typography variant="body2">{choice.name}</Typography>
                   {Number(choice.priceExtra || 0) > 0 && (
-                    <Typography variant="caption" color="primary.main" fontWeight={800}>
+                    <Typography variant="caption" color="primary.main" fontWeight={600}>
                       +${Number(choice.priceExtra).toFixed(2)}
                     </Typography>
                   )}

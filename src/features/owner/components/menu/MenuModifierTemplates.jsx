@@ -19,11 +19,11 @@ const MenuModifierTemplates = ({ disabled, onSelect }) => (
           variant="outlined"
           disabled={disabled}
           onClick={() => onSelect(template.key)}
-          sx={{ minHeight: 62, justifyContent: "flex-start", textAlign: "left", borderRadius: "10px", textTransform: "none", px: 1.5 }}
+          sx={{ minHeight: 62, justifyContent: "flex-start", textAlign: "left", borderRadius: "8px", textTransform: "none", px: 1.5 }}
         >
           <Icon sx={{ mr: 1.2, fontSize: 20 }} />
           <Box>
-            <Typography variant="body2" fontWeight={800}>{template.label}</Typography>
+            <Typography variant="body2" fontWeight={600}>{template.label}</Typography>
             <Typography variant="caption" color="text.secondary">{template.helper}</Typography>
           </Box>
         </Button>

@@ -11,7 +11,7 @@ export default function ProfileInfoCard({
   loading,
 }) {
   return (
-    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 }, borderRadius: "10px", border: "1px solid", borderColor: "divider" }}>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1.25} sx={{ mb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Información Personal

@@ -30,7 +30,7 @@ const OwnerSettings = ({ businessData, onRefresh }) => {
         >
           CONFIGURACIÓN
         </Typography>
-        <Typography variant="h4" fontWeight={800} sx={{ mt: 0.2 }}>
+        <Typography variant="h4" fontWeight={600} sx={{ mt: 0.2 }}>
           Tu negocio
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>

@@ -82,7 +82,7 @@ const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading })
               />
             </Grid>
           </Grid>
-          <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}>
+          <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "8px" }}>
             <FormControlLabel
               sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
               control={(
@@ -93,7 +93,7 @@ const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading })
               )}
               label={(
                 <Box>
-                  <Typography variant="body2" fontWeight={800}>Repartidores propios</Typography>
+                  <Typography variant="body2" fontWeight={600}>Repartidores propios</Typography>
                   <Typography variant="caption" color="text.secondary">
                     Tu negocio gestiona directamente las entregas.
                   </Typography>
@@ -116,17 +116,17 @@ const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading })
         <Box
           sx={{
             p: 2.25,
-            borderRadius: "10px",
+            borderRadius: "8px",
             border: "1px solid",
             borderColor: "divider",
-            bgcolor: "rgba(255,159,28,.06)",
+            bgcolor: "rgba(168,117,60,.06)",
           }}
         >
           <Stack direction="row" spacing={1}>
             <LocalShipping sx={{ color: "secondary.dark" }} />
-            <Typography fontWeight={800}>Vista para el cliente</Typography>
+            <Typography fontWeight={600}>Vista para el cliente</Typography>
           </Stack>
-          <Typography variant="h6" fontWeight={800} sx={{ mt: 2 }}>{radius} km</Typography>
+          <Typography variant="h6" fontWeight={600} sx={{ mt: 2 }}>{radius} km</Typography>
           <Typography variant="body2">Envío: {fee ? `$${fee.toFixed(2)}` : "Sin costo"}</Typography>
           <Typography variant="body2">Tiempo: {eta} min</Typography>
           <Typography variant="body2">

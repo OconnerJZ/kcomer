@@ -57,7 +57,7 @@ const BusinessSelector = ({ businessName, businesses, selectedBusinessId, onSele
         onClose={() => setAnchorEl(null)}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        PaperProps={{ sx: { minWidth: 260, maxHeight: 320, mt: 1, borderRadius: "10px" } }}
+        PaperProps={{ sx: { minWidth: 260, maxHeight: 320, mt: 1, borderRadius: "8px" } }}
       >
         {businesses.map((business) => {
           const selected = String(business.id) === String(selectedBusinessId);

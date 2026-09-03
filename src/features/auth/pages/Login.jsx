@@ -28,7 +28,7 @@ const Login = () => {
         px: { xs: 2, sm: 3 },
         py: 3,
         overflow: "hidden",
-        backgroundImage: `linear-gradient(115deg, rgba(18,18,20,.82), rgba(18,18,20,.52) 48%, rgba(49,94,251,.18)), url(${Bg})`,
+        backgroundImage: `linear-gradient(rgba(34,31,28,.68), rgba(34,31,28,.68)), url(${Bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -44,16 +44,16 @@ const Login = () => {
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) 430px" },
           alignItems: "center",
-          gap: { xs: 2, md: 7 },
+            gap: { xs: 2, md: 5 },
         }}
       >
         {!isMobile && (
           <Stack spacing={2.25} sx={{ color: "common.white", maxWidth: 480 }}>
-            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 72, height: 72, borderRadius: "10px", boxShadow: "0 18px 45px rgba(0,0,0,.2)" }} />
-            <Typography variant="overline" sx={{ letterSpacing: ".18em", opacity: .72, fontWeight: 700 }}>
+            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 64, height: 64, borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,.14)" }} />
+            <Typography variant="overline" sx={{ color: "#E39A93", letterSpacing: ".14em", fontWeight: 600 }}>
               Kcomer
             </Typography>
-            <Typography variant="h2" sx={{ fontWeight: 900, lineHeight: 1.02, letterSpacing: "-.04em", maxWidth: 460 }}>
+            <Typography variant="h2" sx={{ fontWeight: 600, lineHeight: 1.25, letterSpacing: "-.015em", maxWidth: 420 }}>
               Tu próxima comida empieza aquí.
             </Typography>
             <Typography variant="body1" sx={{ opacity: .78, maxWidth: 430, lineHeight: 1.7 }}>
@@ -65,18 +65,17 @@ const Login = () => {
         <Box
           sx={{
             width: "100%",
-            border: "1px solid rgba(255,255,255,.58)",
-            borderRadius: "10px",
-            bgcolor: "rgba(255,255,255,.90)",
-            backdropFilter: "blur(22px)",
-            boxShadow: "0 28px 80px rgba(0,0,0,.24)",
+            border: "1px solid rgba(56,50,44,.16)",
+            borderRadius: "8px",
+            bgcolor: "#FEFDFB",
+            boxShadow: "0 6px 18px rgba(27,24,21,.14)",
             overflow: "hidden",
           }}
         >
           {isMobile && (
             <Stack alignItems="center" spacing={1} sx={{ pt: 3, px: 3 }}>
-              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: "10px" }} />
-              <Typography variant="subtitle1" fontWeight={900}>Kcomer</Typography>
+              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: "8px" }} />
+              <Typography variant="subtitle1" fontWeight={600} color="primary.dark">Kcomer</Typography>
             </Stack>
           )}
           <Box sx={{ p: { xs: 2.25, sm: 3.25 } }}>

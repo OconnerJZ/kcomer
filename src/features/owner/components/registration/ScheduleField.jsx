@@ -29,7 +29,7 @@ const ScheduleField = ({ formValues, setFormValues, schedules, onChange }) => {
         sx={{ mb: 2 }}
       >
         <Box>
-          <Typography variant="body2" fontWeight={800}>Semana habitual</Typography>
+          <Typography variant="body2" fontWeight={600}>Semana habitual</Typography>
           <Typography variant="caption" color="text.secondary">
             Activa únicamente los días que abres y define un horario simple por día.
           </Typography>

@@ -57,12 +57,12 @@ const CardPlaceMenu = ({
             mb: 1.25,
             px: 1.4,
             py: 1,
-            borderRadius: "10px",
-            bgcolor: "rgba(49,94,251,.07)",
-            border: "1px solid rgba(49,94,251,.15)",
+            borderRadius: "8px",
+            bgcolor: "rgba(198,90,80,.07)",
+            border: "1px solid rgba(198,90,80,.15)",
           }}
         >
-          <Typography variant="caption" color="primary.dark" fontWeight={800}>
+          <Typography variant="caption" color="primary.dark" fontWeight={600}>
             Los productos se agregarán directamente al pedido de {order.sharedTargetName}.
           </Typography>
         </Box>

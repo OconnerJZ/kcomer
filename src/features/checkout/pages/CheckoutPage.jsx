@@ -93,7 +93,7 @@ export default function CheckoutPage() {
               onChange={checkout.changeTab}
             />
 
-            <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: "10px", border: "1px solid", borderColor: "divider" }}>
+            <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
                   size="large"
                   fullWidth
                   onClick={checkout.openCheckout}
-                  sx={{ borderRadius: "10px", py: 1.5 }}
+                  sx={{ borderRadius: "8px", py: 1.5 }}
                 >
                   Realizar Pedido
                 </Button>

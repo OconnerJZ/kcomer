@@ -91,14 +91,14 @@ export default function Navbar() {
   return (
     <Box>
       <CssBaseline />
-      <AppBar component="nav" sx={{ backgroundColor: "rgba(255,255,255,.78)", backdropFilter: "blur(14px)", color: "#27272a", display: { xs: "none", sm: "block" }, boxShadow: "0 1px 0 rgba(0,0,0,.06)" }}>
+      <AppBar component="nav" sx={{ backgroundColor: "background.paper", color: "text.primary", display: { xs: "none", sm: "block" }, boxShadow: "0 1px 0 rgba(0,0,0,.08)" }}>
         <Toolbar>
           <img src={LogoClassic} alt="logo" width={50} style={{ marginRight: 20, cursor: "pointer" }} onClick={() => navigate("/explorar")} />
           <Typography variant="h6" sx={{ flexGrow: 1 }} />
           <Box sx={{ display: "flex", alignItems: "center", gap: .5 }}>
             {navItems.map((item) => (
               <Badge key={item.title} badgeContent={item.cartBadge ? cartCount : 0} color="error" sx={{ "& .MuiBadge-badge": { right: -3, top: 2 } }}>
-                <Button sx={{ color: "text.primary", textTransform: "none", borderRadius: "10px", fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>
+                <Button sx={{ color: "text.primary", textTransform: "none", borderRadius: "8px", fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>
                   {item.title}
                 </Button>
               </Badge>
@@ -109,7 +109,7 @@ export default function Navbar() {
                 <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
                   <Avatar src={user?.avatar} sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>{user?.name?.charAt(0)}</Avatar>
                 </IconButton>
-                <Menu anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 210, mt: 1, borderRadius: "10px" } }}>
+                <Menu anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 210, mt: 1, borderRadius: "8px" } }}>
                   <MenuItem disabled><ListItemText primary={user?.name} secondary={user?.email} primaryTypographyProps={{ fontWeight: 700, fontSize: ".9rem" }} secondaryTypographyProps={{ fontSize: ".75rem" }} /></MenuItem>
                   <Divider />
                   <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
@@ -121,13 +121,13 @@ export default function Navbar() {
                 </Menu>
               </>
             ) : (
-              <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")} sx={{ ml: 1, textTransform: "none", borderRadius: "10px" }}>Entrar</Button>
+              <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")} sx={{ ml: 1, textTransform: "none", borderRadius: "8px" }}>Entrar</Button>
             )}
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ width: "100%", position: "fixed", bottom: 0, left: 0, zIndex: 1000, display: { xs: "flex", sm: "none" }, borderTop: "1px solid", borderColor: "divider", backgroundColor: "rgba(255,255,255,.96)", backdropFilter: "blur(14px)" }}>
+      <Box sx={{ width: "100%", position: "fixed", bottom: 0, left: 0, zIndex: 1000, display: { xs: "flex", sm: "none" }, borderTop: "1px solid", borderColor: "divider", backgroundColor: "background.paper" }}>
         <BottomNavigation showLabels value={value} onChange={(_, newValue) => { const toGo = navItems[newValue]?.link; if (!toGo) return; setValue(newValue); navigate(`/${toGo}`); }} sx={{ width: "100%", overflowX: "auto", justifyContent: "flex-start", "& .MuiBottomNavigationAction-root": { minWidth: 72, px: .5 }, "& .MuiBottomNavigationAction-label": { fontSize: ".65rem" } }}>
           {navItems.map((item) => (
             <BottomNavigationAction key={item.title} label={item.title} icon={<Badge badgeContent={item.cartBadge ? cartCount : 0} color="error">{item.icon}</Badge>} />

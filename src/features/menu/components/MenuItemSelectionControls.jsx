@@ -33,7 +33,7 @@ const MenuItemSelectionControls = ({
           >
             <Remove fontSize="small" />
           </IconButton>
-          <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 800 }}>
+          <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 600 }}>
             {quantity}
           </Typography>
           <IconButton
@@ -54,7 +54,7 @@ const MenuItemSelectionControls = ({
           disabled={busy}
           startIcon={configurable ? <TuneRounded /> : <Add />}
           onClick={onIncrement}
-          sx={{ textTransform: "none", borderRadius: 999, fontWeight: 700, px: 1.5 }}
+          sx={{ textTransform: "none", borderRadius: "6px", fontWeight: 700, px: 1.5 }}
         >
           {configurable ? "Personalizar" : targetLabel ? "Agregar a mi selección" : "Agregar"}
         </Button>
@@ -73,7 +73,7 @@ const MenuItemSelectionControls = ({
       )}
     </Stack>
     {targetLabel && (
-      <Typography variant="caption" color="primary.main" fontWeight={750}>
+      <Typography variant="caption" color="primary.main" fontWeight={600}>
         Se agregará directamente a {targetLabel}
       </Typography>
     )}

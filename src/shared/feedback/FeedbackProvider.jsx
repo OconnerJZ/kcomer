@@ -76,16 +76,15 @@ export function FeedbackProvider({ children }) {
               width: { xs: "calc(100vw - 24px)", sm: "auto" },
               minWidth: { sm: 360 },
               maxWidth: 560,
-              borderRadius: "10px",
+              borderRadius: "8px",
               alignItems: "center",
-              boxShadow: "0 18px 55px rgba(25,20,18,.18)",
-              backdropFilter: "blur(14px)",
+              boxShadow: "0 6px 18px rgba(25,20,18,.16)",
               "& .MuiAlert-message": { width: "100%" },
             }}
           >
             <Stack spacing={0.15}>
               {active.title && (
-                <Typography variant="subtitle2" fontWeight={850} lineHeight={1.15}>
+                <Typography variant="subtitle2" fontWeight={600} lineHeight={1.15}>
                   {active.title}
                 </Typography>
               )}

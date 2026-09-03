@@ -20,13 +20,12 @@ const EmptyExploreState = ({ icon, title, description }) => (
       textAlign: "center",
       border: "1px solid",
       borderColor: "rgba(0,0,0,.07)",
-      borderRadius: "10px",
-      bgcolor: "rgba(255,255,255,.78)",
-      backdropFilter: "blur(14px)",
+      borderRadius: "8px",
+      bgcolor: "background.paper",
     }}
   >
     <Box sx={{ mb: 1.5, color: "text.secondary" }}>{icon}</Box>
-    <Typography variant="h6" fontWeight={800}>{title}</Typography>
+    <Typography variant="h6" fontWeight={600}>{title}</Typography>
     <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
       {description}
     </Typography>
@@ -72,7 +71,7 @@ export default function ExploreResults({
             >
               Cerca de ti
             </Typography>
-            <Typography variant="h4" fontWeight={900} sx={{ letterSpacing: "-.03em" }}>
+            <Typography variant="h4" fontWeight={700} sx={{ letterSpacing: "-.03em" }}>
               Lugares para descubrir
             </Typography>
           </Box>

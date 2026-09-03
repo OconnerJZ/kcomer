@@ -165,7 +165,7 @@ const GoogleMapField = ({ value, onChange, label = "Ubicación en mapa", apiKey 
         sx={{
           width: "100%",
           height: 400,
-          borderRadius: "10px",
+          borderRadius: "8px",
           overflow: "hidden",
           position: "relative",
           bgcolor: loading ? "grey.100" : "transparent",
@@ -182,7 +182,7 @@ const GoogleMapField = ({ value, onChange, label = "Ubicación en mapa", apiKey 
               textAlign: "center",
               bgcolor: "rgba(255,255,255,0.9)",
               p: 3,
-              borderRadius: "10px",
+              borderRadius: "8px",
             }}
           >
             <CircularProgress sx={{ mb: 2 }} />

@@ -5,7 +5,7 @@ export default function ProfileActions({ user, onNavigate, onLogoutRequest }) {
   const hasBusinessAccess = user?.role === "owner" || user?.role === "admin" || Boolean(user?.businesses?.length);
 
   return (
-    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "10px", border: "1px solid", borderColor: "divider" }}>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Acciones Rápidas</Typography>
       <Stack spacing={1.25}>
         <Button variant="outlined" startIcon={<ShoppingBag />} fullWidth onClick={() => onNavigate("/mis-ordenes")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Mis Órdenes</Button>
@@ -19,7 +19,7 @@ export default function ProfileActions({ user, onNavigate, onLogoutRequest }) {
             startIcon={<AddBusinessRounded />}
             fullWidth
             onClick={() => onNavigate("/crear-negocio")}
-            sx={{ justifyContent: "flex-start", py: 1.5, borderRadius: "10px" }}
+            sx={{ justifyContent: "flex-start", py: 1.5, borderRadius: "8px" }}
           >
             Registrar mi negocio
           </Button>

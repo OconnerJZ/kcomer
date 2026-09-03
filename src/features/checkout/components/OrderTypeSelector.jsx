@@ -20,13 +20,13 @@ export default function OrderTypeSelector({ orderType, onChange }) {
                 cursor: "pointer",
                 border: "1px solid",
                 borderColor: selected ? "primary.main" : "divider",
-                bgcolor: selected ? "rgba(49,94,251,.07)" : "background.paper",
+                bgcolor: selected ? "rgba(198,90,80,.07)" : "background.paper",
                 transition: "all 0.2s",
-                "&:hover": { borderColor: "primary.main", bgcolor: "rgba(49,94,251,.045)" },
+                "&:hover": { borderColor: "primary.main", bgcolor: "rgba(198,90,80,.045)" },
               }}
             >
-              <CardContent sx={{ textAlign: "center", p: { xs: 1.25, sm: 2 }, "&:last-child": { pb: { xs: 1.25, sm: 2 } } }}>
-                <Box sx={{ fontSize: { xs: 26, sm: 32 }, mb: 0.5 }}>{option.icon}</Box>
+              <CardContent sx={{ textAlign: "left", p: { xs: 1.25, sm: 2 }, "&:last-child": { pb: { xs: 1.25, sm: 2 } } }}>
+                <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: selected ? "primary.main" : "secondary.main", color: "transparent", fontSize: 0, mb: 1 }}>{option.icon}</Box>
                 <Typography variant="body2" fontWeight={600}>{option.label}</Typography>
                 {selected ? (
                   <Chip label="Seleccionado" size="small" color="primary" sx={{ mt: 1 }} />

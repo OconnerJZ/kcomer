@@ -39,10 +39,10 @@ const LoginForm = ({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, textAlign: "center" }}>
+      <Typography variant="h4" sx={{ mb: 1, fontWeight: 600, textAlign: "left" }}>
         {headerTitle}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "left" }}>
         {headerSubtitle}
       </Typography>
       {error && (
@@ -71,7 +71,7 @@ const LoginForm = ({
           {loading ? "Cargando..." : submitButtonText}
         </Button>
       </form>
-      <Box sx={{ mt: 3, textAlign: "center" }}>
+      <Box sx={{ mt: 3, textAlign: "left" }}>
         <Button variant="text" onClick={onToggleMode} disabled={loading} sx={{ textTransform: "none" }}>
           {toggleText}
         </Button>

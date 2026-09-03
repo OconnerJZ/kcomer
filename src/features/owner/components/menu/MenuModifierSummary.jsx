@@ -15,7 +15,7 @@ const MenuModifierSummary = ({ item, compact = false }) => {
       sx={{ mt: compact ? 0.45 : 0.35, color: "primary.main" }}
     >
       <TuneRounded sx={{ fontSize: compact ? 14 : 15 }} />
-      <Typography variant="caption" fontWeight={750}>
+      <Typography variant="caption" fontWeight={600}>
         {summary.groups} {summary.groups === 1 ? "grupo" : "grupos"} · {summary.options} {summary.options === 1 ? "opción" : "opciones"}
       </Typography>
     </Stack>

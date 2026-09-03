@@ -38,7 +38,7 @@ const FoodTypesTab = ({
             gap={1}
           >
             <Box>
-              <Typography variant="h5" fontWeight={800} component="span">
+              <Typography variant="h5" fontWeight={600} component="span">
                 {selectedCount}
               </Typography>
               <Typography variant="body2" color="text.secondary" component="span" sx={{ ml: 0.75 }}>
@@ -57,11 +57,11 @@ const FoodTypesTab = ({
                 textAlign: "center",
                 border: "1px dashed",
                 borderColor: "divider",
-                borderRadius: "10px",
+                borderRadius: "8px",
               }}
             >
               <RestaurantMenu sx={{ color: "text.disabled", fontSize: 38, mb: 1 }} />
-              <Typography variant="body2" fontWeight={800}>No hay categorías disponibles</Typography>
+              <Typography variant="body2" fontWeight={600}>No hay categorías disponibles</Typography>
             </Box>
           ) : (
             <Box
@@ -88,13 +88,13 @@ const FoodTypesTab = ({
                       minHeight: 64,
                       px: 1.5,
                       justifyContent: "space-between",
-                      borderRadius: "10px",
-                      borderColor: selected ? "rgba(255,159,28,.42)" : "divider",
-                      bgcolor: selected ? "rgba(255,159,28,.07)" : "background.paper",
+                      borderRadius: "8px",
+                      borderColor: selected ? "rgba(168,117,60,.42)" : "divider",
+                      bgcolor: selected ? "rgba(168,117,60,.07)" : "background.paper",
                       color: "text.primary",
                       "&:hover": {
                         borderColor: selected ? "secondary.main" : "text.disabled",
-                        bgcolor: selected ? "rgba(255,159,28,.10)" : "grey.50",
+                        bgcolor: selected ? "rgba(168,117,60,.10)" : "grey.50",
                       },
                     }}
                   >
@@ -103,10 +103,10 @@ const FoodTypesTab = ({
                         sx={{
                           width: 34,
                           height: 34,
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           display: "grid",
                           placeItems: "center",
-                          bgcolor: selected ? "rgba(255,159,28,.12)" : "grey.100",
+                          bgcolor: selected ? "rgba(168,117,60,.12)" : "grey.100",
                           color: selected ? "secondary.dark" : "text.secondary",
                         }}
                       >

@@ -41,7 +41,7 @@ const PaymentMethodsTab = ({ paymentMethods, onToggle, onConfigChange, onSave, l
     >
       <Stack spacing={2.5}>
         <Box>
-          <Typography variant="h5" fontWeight={800} component="span">{activeCount}</Typography>
+          <Typography variant="h5" fontWeight={600} component="span">{activeCount}</Typography>
           <Typography variant="body2" color="text.secondary" component="span" sx={{ ml: 0.75 }}>
             métodos activos
           </Typography>
@@ -65,17 +65,17 @@ const PaymentMethodsTab = ({ paymentMethods, onToggle, onConfigChange, onSave, l
                   sx={{
                     width: 36,
                     height: 36,
-                    borderRadius: "10px",
+                    borderRadius: "8px",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: method.active ? "rgba(255,159,28,.10)" : "grey.100",
+                    bgcolor: method.active ? "rgba(168,117,60,.10)" : "grey.100",
                     color: method.active ? "secondary.dark" : "text.secondary",
                   }}
                 >
                   {paymentIcon(method.method || method.label)}
                 </Box>
                 <Box>
-                  <Typography variant="body2" fontWeight={800}>{method.label}</Typography>
+                  <Typography variant="body2" fontWeight={600}>{method.label}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {method.active ? "Disponible al pagar" : "No se mostrará al cliente"}
                   </Typography>
@@ -89,7 +89,7 @@ const PaymentMethodsTab = ({ paymentMethods, onToggle, onConfigChange, onSave, l
         {transfer && (
           <Collapse in={Boolean(transfer.active)}>
             <Box sx={{ pt: 2.5, borderTop: "1px solid", borderColor: "divider" }}>
-              <Typography variant="subtitle2" fontWeight={850}>Datos para transferencias</Typography>
+              <Typography variant="subtitle2" fontWeight={600}>Datos para transferencias</Typography>
               <Typography variant="caption" color="text.secondary">
                 Se mostrarán al cliente únicamente cuando elija transferencia.
               </Typography>

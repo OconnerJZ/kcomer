@@ -3,12 +3,12 @@ import PublicRounded from "@mui/icons-material/PublicRounded";
 
 export default function SocialLinksTab({ socialInfo, setSocialInfo, onSave, loading }) {
   return (
-    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "10px", border: "1px solid", borderColor: "divider", bgcolor: "rgba(255,255,255,.88)" }}>
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider", bgcolor: "rgba(255,255,255,.88)" }}>
       <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mb: .75 }}>
-        <Box sx={{ width: 38, height: 38, borderRadius: "10px", display: "grid", placeItems: "center", bgcolor: "rgba(255,159,28,.12)", color: "secondary.dark" }}><PublicRounded fontSize="small" /></Box>
+        <Box sx={{ width: 38, height: 38, borderRadius: "8px", display: "grid", placeItems: "center", bgcolor: "rgba(168,117,60,.12)", color: "secondary.dark" }}><PublicRounded fontSize="small" /></Box>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".62rem" }}>PRESENCIA DIGITAL</Typography>
-          <Typography variant="h6" fontWeight={850}>Redes sociales</Typography>
+          <Typography variant="h6" fontWeight={600}>Redes sociales</Typography>
         </Box>
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, maxWidth: 680 }}>

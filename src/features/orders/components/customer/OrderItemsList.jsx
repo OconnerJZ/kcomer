@@ -26,16 +26,16 @@ export default function OrderItemsList({ order }) {
     <Box sx={{ mb: 0 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1.5}>
         <Stack direction="row" alignItems="center" gap={1.25}>
-          <Box sx={{ width: 30, height: 30, borderRadius: "10px", bgcolor: "rgba(49,94,251,.10)", display: "flex", alignItems: "center", justifyContent: "center", color: "primary.main" }}>
+          <Box sx={{ width: 30, height: 30, borderRadius: "8px", bgcolor: "rgba(198,90,80,.10)", display: "flex", alignItems: "center", justifyContent: "center", color: "primary.main" }}>
             <RestaurantRounded sx={{ fontSize: 18 }} />
           </Box>
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 800 }}>Artículos del pedido</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Artículos del pedido</Typography>
             <Typography variant="caption" color="text.secondary">Detalle de preparación</Typography>
           </Box>
         </Stack>
         {showKitchen && (
-          <Typography variant="caption" fontWeight={800} color={progress.ready === progress.total ? "success.main" : "text.secondary"}>
+          <Typography variant="caption" fontWeight={600} color={progress.ready === progress.total ? "success.main" : "text.secondary"}>
             {progress.ready}/{progress.total} listos
           </Typography>
         )}
@@ -47,7 +47,7 @@ export default function OrderItemsList({ order }) {
             variant="determinate"
             value={progressPercent}
             color={progress.ready === progress.total ? "success" : "primary"}
-            sx={{ height: 6, borderRadius: 999, bgcolor: "rgba(0,0,0,.055)" }}
+            sx={{ height: 6, borderRadius: "6px", bgcolor: "rgba(0,0,0,.055)" }}
           />
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.65 }}>
             {progress.ready === progress.total

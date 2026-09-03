@@ -6,7 +6,7 @@ const Parallax = ({ bg, children, stx }) => (
     sx={{
       position: "relative",
       overflow: "hidden",
-      backgroundImage: `linear-gradient(180deg, rgba(15,15,15,.18) 0%, rgba(15,15,15,.58) 100%), url(${bg})`,
+      backgroundImage: `linear-gradient(rgba(28,26,23,.56), rgba(28,26,23,.56)), url(${bg})`,
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundAttachment: { md: "fixed" },
