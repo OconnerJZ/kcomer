@@ -10,9 +10,9 @@ import { StyledFront } from "./CardPlaceStyled";
 
 const ACTIONS = [
   { key: "menu", label: "Menú", helper: "Qué pedir", icon: RestaurantMenuRounded, color: "#8F3E38", tint: "rgba(198,90,80,.09)" },
-  { key: "location", label: "Llegar", helper: "Ubicación", icon: NearMeRounded, color: "#465048", tint: "rgba(102,115,106,.09)" },
+  { key: "location", label: "Llegar", helper: "Ubicación", icon: NearMeRounded, color: "#0d70e8", tint: "rgba(102,115,106,.09)" },
   { key: "photo", label: "Fotos", helper: "Conócelo", icon: PhotoLibraryRounded, color: "#465048", tint: "rgba(102,115,106,.09)" },
-  { key: "review", label: "Reseñas", helper: "Opiniones", icon: ReviewsRounded, color: "#8F3E38", tint: "rgba(198,90,80,.09)" },
+  { key: "review", label: "Reseñas", helper: "Opiniones", icon: ReviewsRounded, color: "#6935a4", tint: "rgba(198,90,80,.09)" },
 ];
 
 const CardPlaceFront = ({ flipped, onMovement, data }) => (
@@ -42,7 +42,7 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
             },
           }}
         >
-          <Box sx={{ width: 34, height: 34, borderRadius: "8px", mr: 1.1, flexShrink: 0, display: "grid", placeItems: "center", bgcolor: tint, color }}>
+          <Box sx={{ width: 34, height: 34, borderRadius: "50%", mr: 1.1, flexShrink: 0, display: "grid", placeItems: "center", bgcolor: tint, color }}>
             <Icon sx={{ fontSize: 18 }} />
           </Box>
           <Box minWidth={0} flex={1}>

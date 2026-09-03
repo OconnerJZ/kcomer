@@ -36,7 +36,6 @@ body {
 }
 
 .ant-segmented .ant-segmented-item {
-  min-height: 36px;
   border-radius: 5px;
   color: var(--dark);
   font-weight: 600;

@@ -3,7 +3,7 @@ import GeneralContent from "@Shared/components/layout/GeneralContent";
 import Bg from "@Assets/images/qscome-bg-6.png";
 import Bg4 from "@Assets/images/qsome-bg-4.jpg";
 
-const NAME_PAGE = "qsCome";
+const NAME_PAGE = "QSCOME";
 const ABOUT_SPOT =
   "¡Bienvenido!, el lugar donde los antojos se encuentran con los mejores spots de comida. Aquí vienes a descubrir, disfrutar y compartir lo que más nos une: ¡comer rico!";
 
@@ -15,9 +15,9 @@ const AboutPage = () => {
         className="hero"
         sx={{
           textAlign: "center",
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,0)), url(${Bg4})`,
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.82), rgba(0,0,0,.82)), url(${Bg4})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "top",
           backgroundRepeat: "no-repeat",
           "& .logo": { margin: 0 },
         }}

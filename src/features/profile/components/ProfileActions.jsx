@@ -8,8 +8,6 @@ export default function ProfileActions({ user, onNavigate, onLogoutRequest }) {
     <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Acciones Rápidas</Typography>
       <Stack spacing={1.25}>
-        <Button variant="outlined" startIcon={<ShoppingBag />} fullWidth onClick={() => onNavigate("/mis-ordenes")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Mis Órdenes</Button>
-
         {hasBusinessAccess ? (
           <Button variant="outlined" startIcon={<Store />} fullWidth onClick={() => onNavigate("/owner")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Panel de Negocio</Button>
         ) : (
@@ -25,7 +23,7 @@ export default function ProfileActions({ user, onNavigate, onLogoutRequest }) {
           </Button>
         )}
 
-        <Button variant="outlined" startIcon={<GroupAdd />} fullWidth onClick={() => onNavigate("/business-invitations")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Unirme con un código</Button>
+        <Button variant="outlined" startIcon={<GroupAdd />} fullWidth onClick={() => onNavigate("/business-invitations")} sx={{ justifyContent: "flex-start", py: 1.5 }}>Unirme con un código (Socio)</Button>
 
         <Button variant="outlined" color="error" startIcon={<Logout />} fullWidth onClick={onLogoutRequest} sx={{ justifyContent: "flex-start", py: 1.5 }}>Cerrar Sesión</Button>
       </Stack>

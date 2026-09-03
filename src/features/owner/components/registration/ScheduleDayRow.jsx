@@ -10,10 +10,10 @@ const ScheduleDayRow = ({ day, isToday, onOpenChange, onTimeChange }) => (
     sx={{
       px: { xs: 0.5, sm: 1 },
       py: 1.35,
-      borderBottom: "1px solid",
+      borderBottom: "0px solid",
       borderLeft: isToday ? "3px solid" : "3px solid transparent",
-      borderColor: isToday ? "primary.main" : "divider",
-      bgcolor: isToday ? "rgba(198,90,80,.035)" : "background.paper",
+      borderColor: isToday ? "green" : "divider",
+      bgcolor: isToday ? "rgba(41, 249, 65, 0.03)" : "background.paper",
     }}
   >
     <Stack
@@ -69,11 +69,6 @@ const ScheduleDayRow = ({ day, isToday, onOpenChange, onTimeChange }) => (
         </Stack>
       )}
 
-      {!day.isClosed && (
-        <ScheduleIcon
-          sx={{ display: { xs: "none", md: "block" }, color: "text.disabled", fontSize: 20 }}
-        />
-      )}
     </Stack>
   </Box>
 );

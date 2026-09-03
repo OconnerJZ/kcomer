@@ -3,7 +3,7 @@ import { Button, IconButton, Stack, Tooltip } from "@mui/material";
 import { Delete, Edit, TuneRounded } from "@mui/icons-material";
 
 const MenuItemActions = ({ item, onCustomize, onEdit, onDelete }) => (
-  <Stack direction="row" spacing={0.5} justifyContent="flex-end" flexWrap="wrap" useFlexGap>
+  <Stack direction="row" spacing={0} justifyContent="flex-end" flexWrap="wrap" useFlexGap>
     <Tooltip title="Personalización">
       <Button
         size="small"
@@ -13,7 +13,6 @@ const MenuItemActions = ({ item, onCustomize, onEdit, onDelete }) => (
         onClick={() => onCustomize(item)}
         sx={{ textTransform: "none", borderRadius: "8px", whiteSpace: "nowrap" }}
       >
-        Ingredientes y opciones
       </Button>
     </Tooltip>
     <Tooltip title="Editar platillo">

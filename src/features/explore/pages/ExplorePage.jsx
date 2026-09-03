@@ -42,7 +42,7 @@ export default function ExplorePage() {
                 variant="overline"
                 sx={{ color: "rgba(255,255,255,.78)", letterSpacing: ".18em", fontWeight: 700 }}
               >
-                Kcomer · Explora cerca de ti
+                
               </Typography>
               <Typography
                 component="h1"
@@ -67,7 +67,7 @@ export default function ExplorePage() {
                   lineHeight: 1.55,
                 }}
               >
-                Negocios locales, menús reales y todo lo que necesitas para elegir sin complicarte.
+                Negocios locales y todo lo que necesitas para elegir sin complicarte.
               </Typography>
               <Box sx={{ pt: 1.5 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
@@ -99,6 +99,7 @@ export default function ExplorePage() {
                       sx={{
                         width: 48,
                         height: 48,
+                        borderRadius: "50% !important",
                         bgcolor: "common.white",
                         color: "#282828",
                         boxShadow: "0 2px 8px rgba(0,0,0,.14)",

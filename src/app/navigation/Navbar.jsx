@@ -57,7 +57,7 @@ export default function Navbar() {
 
     // Todo usuario autenticado puede comprar, sin importar si también es owner.
     items.push({ title: "Mi pedido", icon: <ReceiptLong />, link: "orden", cartBadge: true });
-    items.push({ title: "Órdenes", icon: <ShoppingBag />, link: "mis-ordenes" });
+   // items.push({ title: "Órdenes", icon: <ShoppingBag />, link: "mis-ordenes" });
 
     // Owner es una capacidad adicional, no un rol excluyente del flujo cliente.
     if (owner) {
@@ -114,7 +114,6 @@ export default function Navbar() {
                   <Divider />
                   <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
                   <MenuItem onClick={() => goFromMenu("/orden")}><ListItemIcon><ReceiptLong fontSize="small" /></ListItemIcon><ListItemText>Mi pedido</ListItemText></MenuItem>
-                  <MenuItem onClick={() => goFromMenu("/mis-ordenes")}><ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon><ListItemText>Mis Órdenes</ListItemText></MenuItem>
                   {owner && <MenuItem onClick={() => goFromMenu("/owner")}><ListItemIcon><Dashboard fontSize="small" /></ListItemIcon><ListItemText>Panel de Negocio</ListItemText></MenuItem>}
                   <Divider />
                   <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}><ListItemIcon><Logout fontSize="small" color="error" /></ListItemIcon><ListItemText>Cerrar Sesión</ListItemText></MenuItem>

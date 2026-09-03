@@ -21,7 +21,7 @@ const OwnerOrdersToolbar = ({
     sx={{ mb: 1 }}
   >
     <Box sx={{ flex: 1 }}>
-      {viewMode === "list" && (
+      {/* {viewMode === "list" && (
         <OrderFilters
           filterStatus={filterStatus}
           onFilterChange={onFilterChange}
@@ -29,7 +29,7 @@ const OwnerOrdersToolbar = ({
           onRefresh={onRefresh}
           loading={loading}
         />
-      )}
+      )} */}
     </Box>
     <ButtonGroup
       size="small"
@@ -52,7 +52,7 @@ const OwnerOrdersToolbar = ({
           onClick={() => onViewModeChange("production")}
           sx={{ textTransform: "none" }}
         >
-          Producción
+          Preparación
         </Button>
       )}
     </ButtonGroup>

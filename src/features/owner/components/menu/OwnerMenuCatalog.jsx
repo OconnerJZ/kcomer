@@ -83,7 +83,7 @@ const DesktopMenuTable = ({ items, onCustomize, onEdit, onDelete, onToggle }) =>
                 </Box>
               </Stack>
             </TableCell>
-            <TableCell>{item.category && <Chip label={item.category} size="small" variant="outlined" sx={{ borderRadius: "6px" }} />}</TableCell>
+            <TableCell>{item.category && <Chip label={item.category} size="small" variant="outlined" sx={{ borderRadius: "15px" }} />}</TableCell>
             <TableCell align="right"><Typography fontWeight={600}>${item.price.toFixed(2)}</Typography></TableCell>
             <TableCell align="center"><AvailabilityControl item={item} onToggle={onToggle} /></TableCell>
             <TableCell align="right"><MenuItemActions item={item} onCustomize={onCustomize} onEdit={onEdit} onDelete={onDelete} /></TableCell>

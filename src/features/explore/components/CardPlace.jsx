@@ -69,12 +69,12 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
           "&::before": { content: '""', position: "absolute", inset: 0, bgcolor: "rgba(35,31,28,.12)" },
         }}
       >
-        <Box sx={{ position: "relative", zIndex: 1, p: 1.2 }}>
+        <Box sx={{ position: "relative", zIndex: 1, p: .3 }}>
           <Box
             sx={{
               borderRadius: "8px",
               overflow: "hidden",
-              bgcolor: "rgba(254,253,251,.94)",
+              bgcolor: "rgba(254,253,251,.80)",
               border: "1px solid rgba(56,50,44,.12)",
               boxShadow: "0 1px 4px rgba(33,27,24,.05)",
             }}
@@ -82,7 +82,7 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
             <Box onClick={expandCard} sx={{ cursor: "pointer", px: 2, pt: 1.8, pb: 1.45 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.4}>
                 <Stack direction="row" spacing={1.25} alignItems="center" minWidth={0}>
-                  <Avatar src={logoUrl} sx={{ width: 52, height: 52, bgcolor: "background.paper", border: "1px solid rgba(0,0,0,.07)", boxShadow: "0 6px 16px rgba(0,0,0,.08)" }}>{business.name?.charAt(0)}</Avatar>
+                  <Avatar src={logoUrl} sx={{ width: 56, height: 56, bgcolor: "background.paper", border: "1px solid rgba(0,0,0,.07)", boxShadow: "0 6px 16px rgba(0,0,0,.08)" }}>{business.name?.charAt(0)}</Avatar>
                   <Box minWidth={0}>
                     <Typography noWrap sx={{ fontSize: "1.12rem", fontWeight: 700, lineHeight: 1.08, letterSpacing: "-.025em" }}>{business.name || "Negocio"}</Typography>
                     <Stack direction="row" spacing={.7} alignItems="center" sx={{ mt: .55, color: "text.secondary" }}>
@@ -91,24 +91,24 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                   </Box>
                 </Stack>
                 <Stack direction="row" spacing={.65} alignItems="center">
-                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, fontWeight: 600, fontSize: ".66rem", bgcolor: business.open ? "rgba(95,120,100,.11)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
-                  <IconButton size="small" onClick={(event) => { event.stopPropagation(); setScheduleOpen(true); }} sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,.7)", border: "1px solid rgba(0,0,0,.05)" }}><AccessTimeRounded sx={{ fontSize: 16 }} /></IconButton>
+                  <Chip size="small" label={business.open ? "Abierto" : "Cerrado"} sx={{ height: 26, borderRadius:"15px" , fontWeight: 600, fontSize: ".66rem", bgcolor: business.open ? "rgba(95,120,100,.11)" : "rgba(0,0,0,.07)", color: business.open ? "success.dark" : "text.secondary" }} />
+                  <IconButton size="small" onClick={(event) => { event.stopPropagation(); setScheduleOpen(true); }} sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,0)", border: "1px solid rgba(0,0,0,.05)" }}><AccessTimeRounded sx={{ fontSize: 16 }} /></IconButton>
                 </Stack>
               </Stack>
 
+             
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.25 }}>
+                
               {(foodTags.length > 0 || distance || hasServiceTag) && (
                 <Stack direction="row" spacing={.65} flexWrap="wrap" useFlexGap sx={{ mt: 1.35 }}>
                   {foodTags.map((label) => (
-                  <Chip key={label} size="small" label={label} sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.08)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)" }} />
+                  <Chip key={label} size="small" label={label} sx={{ height: 25, borderRadius:"15px", fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.22)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)" }} />
                   ))}
-                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(102,115,106,.09)", color: "secondary.dark", border: "1px solid rgba(102,115,106,.18)", "& .MuiChip-icon": { color: "secondary.main" } }} />}
-                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.08)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)", "& .MuiChip-icon": { color: "primary.main" } }} />}
+                  {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, borderRadius:"15px", fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(102,115,106,.22)", color: "secondary.dark", border: "1px solid rgba(102,115,106,.18)", "& .MuiChip-icon": { color: "secondary.main" } }} />}
+                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, borderRadius:"15px",  fontSize: ".67rem", fontWeight: 600, bgcolor: "rgba(198,90,80,.22)", color: "primary.dark", border: "1px solid rgba(198,90,80,.16)", "& .MuiChip-icon": { color: "primary.main" } }} />}
                 </Stack>
               )}
-
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.25 }}>
-                <Typography variant="caption" color="text.secondary">Todo lo esencial, sin salir de la tarjeta</Typography>
-                <Stack direction="row" alignItems="center"><Typography variant="caption" fontWeight={600}>{expanded ? "Ocultar" : "Explorar"}</Typography><KeyboardArrowDownRounded sx={{ fontSize: 19, transform: expanded ? "rotate(180deg)" : "none", transition: ".2s" }} /></Stack>
+                <Stack direction="row" alignItems="center"><Typography variant="caption" fontWeight={600}>{expanded ? "" : ""}</Typography><KeyboardArrowDownRounded sx={{ fontSize: 19, transform: expanded ? "rotate(180deg)" : "none", transition: ".2s" }} /></Stack>
               </Stack>
             </Box>
 

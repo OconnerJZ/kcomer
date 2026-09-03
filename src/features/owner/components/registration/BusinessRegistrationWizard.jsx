@@ -65,8 +65,8 @@ const BusinessRegistrationWizard = ({
               borderRadius: "8px",
               display: "grid",
               placeItems: "center",
-              bgcolor: "rgba(198,90,80,.16)",
-              color: "#E6A39D",
+              bgcolor: "rgba(240, 238, 238, 0.16)",
+           
             }}
           >
             <StorefrontRounded />

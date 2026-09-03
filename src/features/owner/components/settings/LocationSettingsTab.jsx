@@ -92,7 +92,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
             </Stack>
           </Box>
 
-          <Box sx={{ px: 1.5, py: 1.35, borderRadius: "8px", bgcolor: "rgba(95,120,100,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
+          <Box sx={{ px: 1.5, py: 1.35, borderRadius: "0px", bgcolor: "rgba(95,120,100,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
             <Typography variant="caption" color="text.secondary">Coordenadas</Typography>
             <Typography variant="body2" fontWeight={600} sx={{ mt: .35 }}>
               {locationInfo.latitude && locationInfo.longitude

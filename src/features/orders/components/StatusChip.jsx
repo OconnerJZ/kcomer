@@ -15,7 +15,7 @@ const StatusChip = ({ status }) => {
         px: 1,
         py: 0.25,
         border: `1px solid ${color}`,
-        borderRadius: "8px",
+        borderRadius: "15px",
         color,
         fontSize: "0.75rem",
         fontWeight: 500,
