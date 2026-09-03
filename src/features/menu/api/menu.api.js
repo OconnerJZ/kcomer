@@ -19,6 +19,23 @@ const dynamicEndpoint = (builder, key, method) =>
 const customsEndpoints = (builder) => ({
   getMenuByBusiness: dynamicEndpoint(builder, "business", "getAll"),
   getManagedMenuByBusiness: dynamicEndpoint(builder, "managedBusiness", "getAll"),
+  getMenuModifiers: builder.query({
+    query: (menuId) => `/menus/${menuId}/modifiers`,
+    providesTags: (_result, _error, menuId) => [{ type: "Menu", id: `modifiers-${menuId}` }],
+  }),
+  updateMenuModifiers: builder.mutation({
+    query: ({ menuId, groups }) => ({
+      url: `/menus/${menuId}/modifiers`,
+      method: "PUT",
+      data: { groups },
+      headers: { "Content-Type": "application/json" },
+    }),
+    invalidatesTags: (_result, _error, { menuId }) => [
+      { type: "Menu", id: `modifiers-${menuId}` },
+      { type: "Menu", id: menuId },
+      { type: "Menu", id: "LIST" },
+    ],
+  }),
 });
 
 const menuEndpoints = (builder) => ({
@@ -39,4 +56,6 @@ export const {
   useDeleteMenuMutation,
   useGetMenuByBusinessQuery,
   useGetManagedMenuByBusinessQuery,
+  useGetMenuModifiersQuery,
+  useUpdateMenuModifiersMutation,
 } = apiMenu;

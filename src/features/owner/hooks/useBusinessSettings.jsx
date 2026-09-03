@@ -70,7 +70,7 @@ export const useBusinessSettings = (businessData) => {
     setSchedules(business.schedules);
     setDeliverySettings(business.deliverySettings);
     setPaymentMethods(business.paymentMethods);
-    setSelectedFoodTypes((business.foodTypeIds || []).map(Number).filter((id) => Number.isInteger(id) && id > 0));
+    setSelectedFoodTypes(business.foodTypeIds);
     setSocialInfo({ facebook: business.social?.facebook || "", instagram: business.social?.instagram || "" });
     setPhotos(business.photos);
     setCoverImage(business.bannerUrl || "");

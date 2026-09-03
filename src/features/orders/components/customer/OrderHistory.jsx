@@ -1,6 +1,6 @@
 import { Box, Button, Collapse, Stack, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore, HistoryRounded } from "@mui/icons-material";
-import { STATUS_LABELS } from "../../context/OrderContext";
+import { STATUS_LABELS } from "../../model/orderStatus";
 import { getStatusColor, getStatusIcon } from "../../model/orderPresentation";
 
 const formatMoment = (value) => {
@@ -33,11 +33,11 @@ export default function OrderHistory({ order, expanded, onToggle }) {
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1.1}>
-          <Box sx={{ width: 32, height: 32, borderRadius: 2, display: "grid", placeItems: "center", bgcolor: "rgba(255,75,69,.08)", color: "primary.main" }}>
+          <Box sx={{ width: 32, height: 32, borderRadius: "8px", display: "grid", placeItems: "center", bgcolor: "rgba(198,90,80,.08)", color: "primary.main" }}>
             <HistoryRounded sx={{ fontSize: 18 }} />
           </Box>
           <Box sx={{ textAlign: "left" }}>
-            <Typography variant="body2" fontWeight={850}>Historial del pedido</Typography>
+            <Typography variant="body2" fontWeight={600}>Historial del pedido</Typography>
             <Typography variant="caption" color="text.secondary">{history.length} {history.length === 1 ? "movimiento" : "movimientos"}</Typography>
           </Box>
         </Stack>
@@ -60,7 +60,7 @@ export default function OrderHistory({ order, expanded, onToggle }) {
 
                 <Box sx={{ minWidth: 0, pt: .1 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="baseline" spacing={1}>
-                    <Typography variant="body2" fontWeight={latest ? 850 : 700}>{STATUS_LABELS[item.status] || item.status}</Typography>
+                    <Typography variant="body2" fontWeight={latest ? 600 : 500}>{STATUS_LABELS[item.status] || item.status}</Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontSize: ".68rem" }}>{formatMoment(item.timestamp || item.createdAt)}</Typography>
                   </Stack>
                   {item.note && (
@@ -69,7 +69,7 @@ export default function OrderHistory({ order, expanded, onToggle }) {
                     </Typography>
                   )}
                   {latest && (
-                    <Typography variant="caption" sx={{ display: "inline-block", mt: .65, px: .8, py: .2, borderRadius: 999, bgcolor: `${color}.main`, color: "common.white", fontWeight: 750, fontSize: ".62rem" }}>
+                    <Typography variant="caption" sx={{ display: "inline-block", mt: .65, px: .8, py: .2, borderRadius: "6px", bgcolor: `${color}.main`, color: "common.white", fontWeight: 600, fontSize: ".62rem" }}>
                       Estado actual
                     </Typography>
                   )}

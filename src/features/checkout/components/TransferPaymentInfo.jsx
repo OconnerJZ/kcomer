@@ -1,65 +1,27 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 
-const ACCOUNT_NUMBER = "4152313876210043";
-const CLABE = "012345678901234567";
+const spaced = (value = "", size = 4) => String(value).replace(/\s/g, "").replace(new RegExp(`(.{${size}})`, "g"), "$1 ").trim();
 
-export default function TransferPaymentInfo() {
-  const copy = async (value, message) => {
-    await navigator.clipboard.writeText(value);
-    alert(message);
-  };
+export default function TransferPaymentInfo({ config = {}, compact = false }) {
+  const copy = async (value) => value && navigator.clipboard?.writeText(String(value));
+  const hasDetails = config.accountHolder && config.bankName && (config.clabe || config.accountNumber);
+  if (!hasDetails) return <Alert severity="warning">El negocio aún no ha completado sus datos bancarios.</Alert>;
 
   return (
-    <Box mt={2}>
-      <Typography variant="body2" fontWeight={600} mb={2} color="text.secondary">
-        Realiza tu transferencia a:
-      </Typography>
-
-      <Box
-        sx={{
-          background: "linear-gradient(135deg, #db9238ff 0%, #ff4b45 100%)",
-          borderRadius: 3,
-          p: 3,
-          position: "relative",
-          overflow: "hidden",
-          boxShadow: "0 8px 16px rgba(102, 126, 234, 0.4)",
-        }}
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
-          <Box sx={{ width: 50, height: 40, background: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", borderRadius: 1.5 }} />
-          <Typography variant="h6" sx={{ color: "white", fontWeight: 700 }}>qsCome</Typography>
-        </Box>
-
-        <Box mb={3}>
-          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)", display: "block" }}>Número de Cuenta</Typography>
-          <Typography variant="h6" sx={{ color: "white", fontWeight: 600, letterSpacing: 2, fontFamily: "monospace" }}>4152 3138 7621 0043</Typography>
-        </Box>
-
-        <Box mb={3}>
-          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)", display: "block" }}>CLABE Interbancaria</Typography>
-          <Typography variant="body2" sx={{ color: "white", fontWeight: 600, letterSpacing: 1, fontFamily: "monospace" }}>012 345 678 901 234 567</Typography>
-        </Box>
-
-        <Box display="flex" justifyContent="space-between">
-          <Box>
-            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)", display: "block" }}>TITULAR</Typography>
-            <Typography variant="body2" sx={{ color: "white", fontWeight: 600 }}>Bryant Samuel Jaramillo Zarate</Typography>
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)", display: "block" }}>BANCO</Typography>
-            <Typography variant="body2" sx={{ color: "white", fontWeight: 600 }}>BBVA México</Typography>
-          </Box>
-        </Box>
+    <Box mt={compact ? 0 : 2}>
+      <Box sx={{ bgcolor: "#34312D", borderRadius: "8px", p: compact ? 2 : 3, color: "white" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" mb={2} gap={1}>
+          <Box><Typography variant="caption" sx={{ opacity: .72 }}>BANCO</Typography><Typography fontWeight={600}>{config.bankName}</Typography></Box>
+          <Box textAlign="right"><Typography variant="caption" sx={{ opacity: .72 }}>TITULAR</Typography><Typography variant="body2" fontWeight={600}>{config.accountHolder}</Typography></Box>
+        </Stack>
+        {config.accountNumber && <Box mb={1.5}><Typography variant="caption" sx={{ opacity: .72 }}>NÚMERO DE CUENTA</Typography><Typography fontFamily="monospace" fontWeight={600}>{spaced(config.accountNumber)}</Typography></Box>}
+        {config.clabe && <Box><Typography variant="caption" sx={{ opacity: .72 }}>CLABE INTERBANCARIA</Typography><Typography fontFamily="monospace" fontWeight={600}>{spaced(config.clabe, 3)}</Typography></Box>}
+        {config.referenceInstructions && <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: .88 }}>{config.referenceInstructions}</Typography>}
       </Box>
-
-      <Box mt={2} display="flex" gap={1}>
-        <Button size="small" variant="outlined" onClick={() => copy(ACCOUNT_NUMBER, "Número de cuenta copiado ✓")} sx={{ flex: 1, textTransform: "none" }}>
-          Copiar Cuenta
-        </Button>
-        <Button size="small" variant="outlined" onClick={() => copy(CLABE, "CLABE copiada ✓")} sx={{ flex: 1, textTransform: "none" }}>
-          Copiar CLABE
-        </Button>
-      </Box>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} mt={1.5}>
+        {config.accountNumber && <Button size="small" variant="outlined" fullWidth onClick={() => copy(config.accountNumber)} sx={{ textTransform: "none" }}>Copiar cuenta</Button>}
+        {config.clabe && <Button size="small" variant="outlined" fullWidth onClick={() => copy(config.clabe)} sx={{ textTransform: "none" }}>Copiar CLABE</Button>}
+      </Stack>
     </Box>
   );
 }

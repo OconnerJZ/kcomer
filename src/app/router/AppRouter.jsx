@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
-import { OWNER_ROLES } from "@Features/auth/model/roles";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import useAuth from "@Features/auth/context/useAuth";
 import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
@@ -14,12 +13,14 @@ const Perfil = lazy(() => import("@Features/profile/pages/ProfilePage"));
 const LandingRegister = lazy(() => import("@Features/owner/pages/OwnerRegistrationLanding"));
 const RegisterBusiness = lazy(() => import("@Features/owner/pages/RegisterBusiness"));
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
+const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvitation"));
+const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
 
-const ProtectedRoute = ({ children, roles }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div>Cargando...</div>;
-  if (!isAuthenticated) return <Navigate to="/login/orden" replace />;
-  if (roles && !roles.includes(user?.role)) return <Navigate to="/explorar" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   return children;
 };
 
@@ -31,7 +32,11 @@ const routes = [
   { path: "perfil", element: <Perfil />, isProtected: true },
   { path: "orden", element: <Pedidos />, isProtected: true },
   { path: "mis-ordenes", element: <MisOrdenes />, isProtected: true },
-  { path: "owner", element: <OwnerDashboard />, isProtected: true, roles: OWNER_ROLES },
+  { path: "owner", element: <OwnerDashboard />, isProtected: true },
+  { path: "business-invitations", element: <BusinessInvitation />, isProtected: true },
+  { path: "business-invitations/:token", element: <BusinessInvitation />, isProtected: true },
+  { path: "orden-compartida/:id", element: <SharedOrder />, isProtected: true },
+  { path: "orden-compartida/unirse/:token", element: <SharedOrder />, isProtected: true },
 ];
 
 export default function AppRouter() {
@@ -43,7 +48,7 @@ export default function AppRouter() {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Navigate to="explorar" replace />} />
             {routes.map((route) => (
-              <Route key={route.path} path={route.path} element={route.isProtected ? <ProtectedRoute roles={route.roles}>{route.element}</ProtectedRoute> : route.element} />
+              <Route key={route.path} path={route.path} element={route.isProtected ? <ProtectedRoute>{route.element}</ProtectedRoute> : route.element} />
             ))}
           </Route>
           <Route path="/login/:from?" element={<Login />} />

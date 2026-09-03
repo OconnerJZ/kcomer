@@ -73,8 +73,6 @@ class SocketService {
       ...SOCKET_CONFIG,
       auth: {
         token: user.token,
-        userId: user.id,
-        role: user.role,
       },
     });
 
@@ -153,15 +151,9 @@ class SocketService {
   autoJoinRooms() {
     if (!this.currentUser) return;
 
-    const { role, id } = this.currentUser;
-
-    if (role === "owner" || role === "admin") {
-      const businessIdToJoin = localStorage.getItem("owner_business_id");
-      if (businessIdToJoin) {
-        this.joinBusiness(businessIdToJoin);
-      }
-    } else if (role === "customer" || role === "user") {
-      this.joinUser(id);
+    const businessIdToJoin = localStorage.getItem("owner_business_id");
+    if (businessIdToJoin) {
+      this.joinBusiness(businessIdToJoin);
     }
   }
 
@@ -211,33 +203,22 @@ class SocketService {
     });
   }
 
-  joinUser(userId) {
-    if (!this.socket?.connected) {
-      warn("⚠️ Socket no conectado, no se puede unir a sala");
-      return;
+  leaveBusiness(businessId) {
+    if (this.socket?.connected) {
+      this.socket.emit("leave:business", businessId);
+      log("👋 Saliendo de sala business:", businessId);
     }
+  }
 
-    if (!userId) {
-      logError("❌ userId requerido para unirse a sala");
-      return;
-    }
-
-    log("📤 Emitiendo join:user con ID:", userId);
-
-    this.socket.emit("join:user", userId, (response) => {
-      if (response?.success) {
-        log("✅ Unido a sala user:", userId);
-      } else {
-        logError("❌ Error al unirse a sala user:", response?.error);
-      }
+  joinSharedOrder(sessionId) {
+    if (!this.socket?.connected || !sessionId) return;
+    this.socket.emit("join:shared-order", sessionId, (response) => {
+      if (!response?.success) logError("No se pudo entrar al realtime compartido:", response?.error);
     });
   }
 
-  leaveRoom(room) {
-    if (this.socket?.connected) {
-      this.socket.emit("leave:room", room);
-      log("👋 Saliendo de sala:", room);
-    }
+  leaveSharedOrder(sessionId) {
+    if (this.socket?.connected && sessionId) this.socket.emit("leave:shared-order", sessionId);
   }
 
   setActiveBusiness(businessId) {
@@ -255,7 +236,7 @@ class SocketService {
 
     if (this.socket?.connected) {
       if (previousBusinessId && previousBusinessId !== nextBusinessId) {
-        this.leaveRoom(`business:${previousBusinessId}`);
+        this.leaveBusiness(previousBusinessId);
       }
       if (previousBusinessId !== nextBusinessId) {
         this.joinBusiness(nextBusinessId);
@@ -267,7 +248,7 @@ class SocketService {
     try {
       const activeBusinessId = localStorage.getItem("owner_business_id");
       if (activeBusinessId && this.socket?.connected) {
-        this.leaveRoom(`business:${activeBusinessId}`);
+        this.leaveBusiness(activeBusinessId);
       }
       localStorage.removeItem("owner_business_id");
     } catch {

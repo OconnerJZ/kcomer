@@ -19,17 +19,41 @@ const normalizeFoodType = (item) => {
   return { ...item, id: Number.isFinite(id) ? id : null, label };
 };
 
+const normalizeFoodType = (item = {}) => {
+  if (typeof item !== "object") return { id: item, name: String(item), label: String(item) };
+  const id = item.id ?? item.foodTypeId ?? item.food_type_id ?? null;
+  const name = item.name || item.label || item.typeName || item.type_name || item.value || "";
+  return { ...item, id, name, label: name };
+};
+
 export const normalizeBusiness = (business = {}) => {
   const location = business.location || business.locations?.[0] || {};
   const delivery = business.deliverySettings || business.delivery_settings || {};
   const methods = business.paymentMethods || business.payment_methods || [];
-  const rawFoodTypes = business.foodTypes || business.food_types || business.tags || [];
-  const foodTypes = (Array.isArray(rawFoodTypes) ? rawFoodTypes : []).map(normalizeFoodType).filter(Boolean);
+  const rawFoodTypes = business.foodTypes || business.food_types || [];
+  const foodTypes = (Array.isArray(rawFoodTypes) ? rawFoodTypes : []).map(normalizeFoodType);
+  const rawTags = business.tags || foodTypes;
   const phone = business.phone || business.phones?.[0] || "";
   const email = business.email || business.emails?.[0] || "";
   const photos = business.photos || business.businessPhotos || business.business_photos || [];
-  const logo = business.logo || business.logoUrl || business.logo_url || business.urlImage || business.image || "";
-  const coverImage = business.coverImage || business.cover_image || business.bannerUrl || business.banner_url || business.coverUrl || business.cover_url || business.heroImage || business.hero_image || getPhotoValue(photos[0]) || logo;
+  const logo =
+    business.logo ||
+    business.logoUrl ||
+    business.logo_url ||
+    business.urlImage ||
+    business.image ||
+    "";
+  const coverImage =
+    business.coverImage ||
+    business.cover_image ||
+    business.bannerUrl ||
+    business.banner_url ||
+    business.coverUrl ||
+    business.cover_url ||
+    business.heroImage ||
+    business.hero_image ||
+    getPhotoValue(photos[0]) ||
+    logo;
   const social = business.social || {};
 
   return {
@@ -59,7 +83,7 @@ export const normalizeBusiness = (business = {}) => {
     schedules: business.schedules || business.schedule || business.businessSchedules || [],
     schedule: business.schedule || business.schedules || business.businessSchedules || [],
     menu: business.menu || [],
-    tags: foodTypes.filter((item) => item.label),
+    tags: (Array.isArray(rawTags) ? rawTags : []).map(normalizeFoodType),
     foodTypes,
     social: {
       facebook: social.facebook || business.facebookUrl || business.facebook_url || "",
@@ -75,10 +99,16 @@ export const normalizeBusiness = (business = {}) => {
     },
     paymentMethods: DEFAULT_PAYMENT_METHODS.map((method) => {
       const current = methods.find((item) => item.method === method.method);
-      return { ...method, active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active };
+      return {
+        ...method,
+        active: current ? Boolean(current.active ?? current.isActive ?? current.is_active) : method.active,
+        config: current?.config && typeof current.config === "object" ? current.config : {},
+      };
     }),
-    foodTypeIds: foodTypes.map((item) => Number(item.id)).filter((id) => Number.isInteger(id) && id > 0),
+    foodTypeIds: foodTypes.map((item) => item.id).filter((id) => id !== null && id !== undefined),
     photos,
+    membershipRole: business.membershipRole || business.roleInBusiness || business.role_in_business || "",
+    permissions: Array.isArray(business.permissions) ? business.permissions : [],
   };
 };
 
@@ -116,4 +146,16 @@ export const toDeliveryPayload = (delivery) => ({
   use_own_delivery: Boolean(delivery.useOwnDelivery),
 });
 
-export const toPaymentMethodsPayload = (methods = []) => methods.map((method) => ({ method: method.method, is_active: Boolean(method.active), label: method.label }));
+export const toPaymentMethodsPayload = (methods = []) =>
+  methods.map((method) => ({
+    method: method.method,
+    is_active: Boolean(method.active),
+    label: method.label,
+    config: method.method === "transfer" ? {
+      accountHolder: method.config?.accountHolder || "",
+      bankName: method.config?.bankName || "",
+      clabe: method.config?.clabe || "",
+      accountNumber: method.config?.accountNumber || "",
+      referenceInstructions: method.config?.referenceInstructions || "",
+    } : undefined,
+  }));

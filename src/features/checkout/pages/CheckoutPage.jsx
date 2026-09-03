@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -17,15 +18,29 @@ import EmptyCartState from "@Features/cart/components/EmptyCartState";
 import MyOrders from "@Features/orders/pages/MyOrders";
 import CheckoutDialog from "../components/CheckoutDialog";
 import useCheckoutController from "../hooks/useCheckoutController";
+import SharedOrderLauncher from "@Features/shared-orders/components/SharedOrderLauncher";
+import SharedOrderPage from "@Features/shared-orders/pages/SharedOrderPage";
+import { useGetActiveSharedOrderQuery } from "@Features/shared-orders/api/sharedOrders.api";
+import useOrderTarget from "@Features/shared-orders/hooks/useOrderTarget";
 
 const VIEW_OPTIONS = [
   { label: "Pedidos", value: "pedidos" },
   { label: "Ordenes", value: "ordenes" },
 ];
 
+const ORDER_MODE_OPTIONS = [
+  { label: "Orden compartida", value: "shared" },
+  { label: "Pedido individual", value: "individual" },
+];
+
 export default function CheckoutPage() {
   const [view, setView] = useState("pedidos");
+  const [orderTarget, setOrderTarget] = useOrderTarget();
   const checkout = useCheckoutController();
+  const { data: activeSharedOrder, isLoading: loadingSharedOrder } = useGetActiveSharedOrderQuery();
+  const sharedMode = Boolean(activeSharedOrder?.id);
+  const orderMode = sharedMode ? orderTarget : "individual";
+  const showIndividualOrder = !sharedMode || orderMode === "individual";
 
   const handleConfirm = async () => {
     const result = await checkout.confirmCheckout();
@@ -42,21 +57,35 @@ export default function CheckoutPage() {
 
   return (
     <GeneralContent title="Pedidos">
-      <Box sx={{ textAlign: "center", mt: 2 }}>
-        <Segmented
-          value={view}
-          onChange={setView}
-          options={VIEW_OPTIONS}
-        />
+      <Box sx={{ py: { xs: 2, sm: 3 } }}>
+        <Box sx={{ display: "flex", justifyContent: "center", px: 1.5 }}>
+          <Segmented value={view} onChange={setView} options={VIEW_OPTIONS} />
+        </Box>
+
+        {view === "pedidos" && loadingSharedOrder && <Box sx={{ py: 7 }}><CircularProgress /></Box>}
+
+        {view === "pedidos" && !loadingSharedOrder && sharedMode && (
+          <Box sx={{ maxWidth: 900, mx: "auto", mt: 2, px: { xs: 1.5, sm: 2 } }}>
+            <Segmented value={orderMode} onChange={setOrderTarget} options={ORDER_MODE_OPTIONS} block />
+          </Box>
+        )}
+
+        {view === "pedidos" && !loadingSharedOrder && sharedMode && orderMode === "shared" && (
+          <Box sx={{ mt: 2, textAlign: "left" }}>
+            <SharedOrderPage embedded sessionIdOverride={activeSharedOrder.id} />
+          </Box>
+        )}
+
+        {view === "pedidos" && !loadingSharedOrder && !sharedMode && <SharedOrderLauncher />}
 
         {view === "ordenes" && <MyOrders />}
 
-        {view === "pedidos" && checkout.businesses.length === 0 && (
+        {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.businesses.length === 0 && (
           <EmptyCartState />
         )}
 
-        {view === "pedidos" && checkout.currentBusiness && (
-          <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
+        {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.currentBusiness && (
+          <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2 } }}>
             <CartBusinessTabs
               businesses={checkout.businesses}
               cart={checkout.cart}
@@ -64,14 +93,15 @@ export default function CheckoutPage() {
               onChange={checkout.changeTab}
             />
 
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
+            <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
-                alignItems="center"
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                gap={1}
                 sx={{ mb: 2 }}
               >
-                <Typography variant="h6">
+                <Typography variant="h6" sx={{ textAlign: "left", overflowWrap: "anywhere" }}>
                   {checkout.currentBusiness.businessName}
                 </Typography>
 
@@ -108,7 +138,7 @@ export default function CheckoutPage() {
                   size="large"
                   fullWidth
                   onClick={checkout.openCheckout}
-                  sx={{ borderRadius: 2, py: 1.5 }}
+                  sx={{ borderRadius: "8px", py: 1.5 }}
                 >
                   Realizar Pedido
                 </Button>

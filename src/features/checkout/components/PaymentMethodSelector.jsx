@@ -2,10 +2,10 @@ import { Box, Card, CardContent, Typography } from "@mui/material";
 import TransferPaymentInfo from "./TransferPaymentInfo";
 
 const METHOD_META = {
-  cash: { icon: "💵", label: "Efectivo", color: "#4caf50", bg: "#f1f8f4" },
-  transfer: { icon: "🏦", label: "Transferencia", color: "#2196f3", bg: "#e3f2fd" },
-  card: { icon: "💳", label: "Tarjeta", color: "#7e57c2", bg: "#f3e5f5" },
-  wallet: { icon: "📱", label: "Billetera digital", color: "#ff9800", bg: "#fff3e0" },
+  cash: { icon: "💵", label: "Efectivo", color: "#5F7864", bg: "rgba(95,120,100,.08)" },
+  transfer: { icon: "🏦", label: "Transferencia", color: "#A8753C", bg: "rgba(168,117,60,.08)" },
+  card: { icon: "💳", label: "Tarjeta", color: "#C65A50", bg: "rgba(198,90,80,.07)" },
+  wallet: { icon: "📱", label: "Billetera digital", color: "#A8753C", bg: "rgba(168,117,60,.08)" },
 };
 
 export default function PaymentMethodSelector({ paymentMethod, methods = [], onChange }) {
@@ -26,8 +26,8 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
           const meta = METHOD_META[value] || {
             icon: "💰",
             label: method.label || value,
-            color: "#607d8b",
-            bg: "#eceff1",
+            color: "#C65A50",
+            bg: "rgba(198,90,80,.07)",
           };
           const selected = paymentMethod === value;
 
@@ -38,16 +38,17 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
               sx={{
                 flex: "1 1 180px",
                 cursor: "pointer",
-                border: selected ? `1px solid ${meta.color}` : "1px solid #e0e0e0",
+                border: "1px solid",
+                borderColor: selected ? meta.color : "divider",
                 bgcolor: selected ? meta.bg : "white",
                 transition: "all 0.2s",
-                "&:hover": { borderColor: meta.color, transform: "translateY(-2px)", boxShadow: 2 },
+                "&:hover": { borderColor: meta.color },
               }}
             >
               <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Box sx={{ fontSize: 24 }}>{meta.icon}</Box>
+                    <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: meta.color, color: "transparent", fontSize: 0, flexShrink: 0 }}>{meta.icon}</Box>
                     <Typography variant="body2" fontWeight={600}>{method.label || meta.label}</Typography>
                   </Box>
                   {selected && (
@@ -60,7 +61,7 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
         })}
       </Box>
 
-      {paymentMethod === "transfer" && <TransferPaymentInfo />}
+      {paymentMethod === "transfer" && <TransferPaymentInfo config={availableMethods.find((method) => method.method === "transfer")?.config} />}
     </Box>
   );
 }

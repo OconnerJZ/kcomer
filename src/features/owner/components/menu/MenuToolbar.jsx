@@ -1,5 +1,6 @@
 import { Box, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import PropTypes from "prop-types";
 
 export default function MenuToolbar({
   search,
@@ -18,7 +19,7 @@ export default function MenuToolbar({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Buscar platillo"
           size="small"
-          sx={{ width: { xs: "100%", md: 320 }, "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "background.paper" } }}
+          sx={{ width: { xs: "100%", md: 320 }, "& .MuiOutlinedInput-root": { borderRadius: "8px", bgcolor: "background.paper" } }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -31,11 +32,11 @@ export default function MenuToolbar({
         <Stack direction="row" spacing={2} alignItems="center" sx={{ px: { xs: 0.5, md: 0 } }}>
           <Box>
             <Typography variant="caption" color="text.secondary">Disponibles</Typography>
-            <Typography variant="subtitle1" fontWeight={800}>{available}</Typography>
+            <Typography variant="subtitle1" fontWeight={600}>{available}</Typography>
           </Box>
           <Box>
             <Typography variant="caption" color="text.secondary">Total</Typography>
-            <Typography variant="subtitle1" fontWeight={800}>{total}</Typography>
+            <Typography variant="subtitle1" fontWeight={600}>{total}</Typography>
           </Box>
         </Stack>
       </Stack>
@@ -49,7 +50,7 @@ export default function MenuToolbar({
               onClick={() => onCategoryChange("all")}
               color={selectedCategory === "all" ? "primary" : "default"}
               variant={selectedCategory === "all" ? "filled" : "outlined"}
-              sx={{ borderRadius: 999 }}
+              sx={{ borderRadius: "6px" }}
             />
             {categories.map((category) => (
               <Chip
@@ -59,7 +60,7 @@ export default function MenuToolbar({
                 onClick={() => onCategoryChange(category)}
                 color={selectedCategory === category ? "primary" : "default"}
                 variant={selectedCategory === category ? "filled" : "outlined"}
-                sx={{ borderRadius: 999 }}
+                sx={{ borderRadius: "6px" }}
               />
             ))}
           </Stack>
@@ -68,3 +69,13 @@ export default function MenuToolbar({
     </Stack>
   );
 }
+
+MenuToolbar.propTypes = {
+  search: PropTypes.string.isRequired,
+  onSearchChange: PropTypes.func.isRequired,
+  categories: PropTypes.arrayOf(PropTypes.string),
+  selectedCategory: PropTypes.string,
+  onCategoryChange: PropTypes.func.isRequired,
+  total: PropTypes.number,
+  available: PropTypes.number,
+};

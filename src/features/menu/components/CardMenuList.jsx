@@ -1,113 +1,146 @@
-import { useMemo, useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Add, EditNote, Image as ImageIcon, Remove } from "@mui/icons-material";
-import { normalizeCartItem } from "@Features/cart/model/cartItem";
+import PropTypes from "prop-types";
+import { Image as ImageIcon, TuneRounded } from "@mui/icons-material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import useMenuItemSelection from "../hooks/useMenuItemSelection";
+import MenuItemModifierSummary from "./MenuItemModifierSummary";
+import MenuItemSelectionControls from "./MenuItemSelectionControls";
+import ProductCustomizationDialog from "./ProductCustomizationDialog";
 
-const CardMenuList = ({ item, businessId, businessName, paymentMethods = [], onAddToCart }) => {
-  const menuItem = useMemo(() => normalizeCartItem(item), [item]);
-  const [quantity, setQuantity] = useState(0);
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [note, setNote] = useState("");
-  const [hasNote, setHasNote] = useState(false);
+const CARD_STYLES = {
+  width: "100%",
+  mb: 1,
+  overflow: "hidden",
+  border: "1px solid",
+  borderColor: "divider",
+  borderRadius: "8px",
+  bgcolor: "background.paper",
+  transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease",
+  "&:hover": {
+    transform: "translateY(-1px)",
+    boxShadow: "0 3px 10px rgba(0,0,0,.06)",
+    borderColor: "rgba(198,90,80,.28)",
+  },
+};
 
-  const updateCart = (qty, itemNote) => {
-    onAddToCart({
-      itemId: menuItem.id,
-      businessId,
-      businessName,
-      paymentMethods,
-      item: { ...menuItem, quantity: qty, note: itemNote || "" },
-    });
-  };
-
-  const handleIncrement = () => {
-    const newQty = quantity + 1;
-    setQuantity(newQty);
-    updateCart(newQty, note);
-  };
-
-  const handleDecrement = () => {
-    if (quantity <= 0) return;
-    const newQty = quantity - 1;
-    setQuantity(newQty);
-    if (newQty === 0) {
-      setNote("");
-      setHasNote(false);
-    }
-    updateCart(newQty, newQty === 0 ? "" : note);
-  };
-
-  const handleSaveNote = () => {
-    setHasNote(note.trim() !== "");
-    updateCart(quantity, note);
-    setNoteDialogOpen(false);
-  };
+const CardMenuList = ({
+  item,
+  businessId,
+  businessName,
+  paymentMethods = [],
+  onAddToCart,
+  initialQuantity = 0,
+  initialConfiguration = null,
+  busy = false,
+  targetLabel = "",
+}) => {
+  const selection = useMenuItemSelection({
+    item,
+    businessId,
+    businessName,
+    paymentMethods,
+    onAddToCart,
+    initialQuantity,
+    initialConfiguration,
+  });
 
   return (
     <>
-      <Card elevation={0} sx={{ width: "100%", mb: .75, overflow: "hidden", border: "1px solid", borderColor: "divider", borderRadius: 2.25, bgcolor: "rgba(255,255,255,.84)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 8px 22px rgba(0,0,0,.055)", borderColor: "rgba(255,75,69,.24)" } }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: "84px minmax(0,1fr)" }}>
-          <Box sx={{ minHeight: 94, bgcolor: "grey.100", backgroundImage: menuItem.image ? `url(${menuItem.image})` : "none", backgroundSize: "cover", backgroundPosition: "center", display: "grid", placeItems: "center" }}>
-            {!menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 28 }} />}
+      <Card elevation={0} sx={CARD_STYLES}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "88px minmax(0, 1fr)", sm: "104px minmax(0, 1fr)" } }}>
+          <Box
+            sx={{
+              minHeight: { xs: 104, sm: 112 },
+              bgcolor: "rgba(168,117,60,.08)",
+              backgroundImage: selection.menuItem.image ? `url(${selection.menuItem.image})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            {!selection.menuItem.image && <ImageIcon sx={{ color: "grey.300", fontSize: 34 }} />}
           </Box>
 
-          <CardContent sx={{ p: 1.15, "&:last-child": { pb: 1.15 } }}>
-            <Stack spacing={.7}>
+          <CardContent sx={{ p: { xs: 1.25, sm: 1.75 }, "&:last-child": { pb: { xs: 1.25, sm: 1.75 } } }}>
+            <Stack spacing={1.15}>
               <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
-                  <Typography variant="body2" fontWeight={850} sx={{ lineHeight: 1.2, fontSize: ".82rem" }}>{menuItem.name}</Typography>
-                  <Typography variant="body2" fontWeight={850} color="primary.main" sx={{ whiteSpace: "nowrap", fontSize: ".8rem" }}>${menuItem.price.toFixed(2)}</Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
+                  <Box minWidth={0}>
+                    <Typography variant="subtitle2" fontWeight={600} sx={{ lineHeight: 1.25 }}>
+                      {selection.menuItem.name}
+                    </Typography>
+                    {selection.configurable && (
+                      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.35 }}>
+                        <TuneRounded sx={{ fontSize: 14, color: "primary.main" }} />
+                        <Typography variant="caption" color="primary.main" fontWeight={600}>
+                          Personalizable
+                        </Typography>
+                      </Stack>
+                    )}
+                  </Box>
+                  <Typography variant="subtitle2" fontWeight={600} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+                    ${selection.displayPrice.toFixed(2)}
+                  </Typography>
                 </Stack>
-                {menuItem.description && <Typography variant="caption" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden", mt: .25, lineHeight: 1.35, fontSize: ".68rem" }}>{menuItem.description}</Typography>}
+                {selection.menuItem.description && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: 0.4, lineHeight: 1.45 }}
+                  >
+                    {selection.menuItem.description}
+                  </Typography>
+                )}
+                {selection.includedIngredients.length > 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.45, lineHeight: 1.35 }}>
+                    Incluye: {selection.includedIngredients.slice(0, 4).map((choice) => choice.name).join(" · ")}
+                    {selection.includedIngredients.length > 4 ? "…" : ""}
+                  </Typography>
+                )}
               </Box>
 
-              {hasNote && note && <Chip size="small" label={note.length > 22 ? `${note.slice(0, 22)}…` : note} icon={<EditNote sx={{ fontSize: "14px !important" }} />} sx={{ alignSelf: "flex-start", maxWidth: "100%", borderRadius: 999, height: 22, fontSize: ".64rem" }} />}
+              {selection.quantity > 0
+                && (selection.removed.length > 0 || selection.selectedExtras.length > 0) && (
+                  <MenuItemModifierSummary
+                    removed={selection.removed}
+                    selectedExtras={selection.selectedExtras}
+                  />
+              )}
 
-              <Stack direction="row" justifyContent="space-between" alignItems="center" gap={.75}>
-                {quantity > 0 ? (
-                  <Stack direction="row" spacing={.25} alignItems="center">
-                    <IconButton size="small" onClick={handleDecrement} sx={{ width: 27, height: 27, border: "1px solid", borderColor: "divider" }}><Remove sx={{ fontSize: 16 }} /></IconButton>
-                    <Typography sx={{ minWidth: 20, textAlign: "center", fontWeight: 850, fontSize: ".8rem" }}>{quantity}</Typography>
-                    <IconButton size="small" onClick={handleIncrement} color="primary" sx={{ width: 27, height: 27, border: "1px solid", borderColor: "primary.main" }}><Add sx={{ fontSize: 16 }} /></IconButton>
-                  </Stack>
-                ) : (
-                  <Button size="small" variant="contained" disableElevation startIcon={<Add sx={{ fontSize: "15px !important" }} />} onClick={handleIncrement} sx={{ textTransform: "none", borderRadius: 999, fontWeight: 750, px: 1.15, minHeight: 28, fontSize: ".7rem" }}>Agregar</Button>
-                )}
-
-                {quantity > 0 && <Button size="small" startIcon={<EditNote sx={{ fontSize: "15px !important" }} />} onClick={() => setNoteDialogOpen(true)} sx={{ textTransform: "none", color: "text.secondary", minWidth: 0, px: .45, fontSize: ".68rem" }}>Nota</Button>}
-              </Stack>
+              <MenuItemSelectionControls
+                quantity={selection.quantity}
+                configurable={selection.configurable}
+                busy={busy}
+                targetLabel={targetLabel}
+                onIncrement={selection.increment}
+                onDecrement={selection.decrement}
+                onEdit={selection.openCustomizer}
+              />
             </Stack>
           </CardContent>
         </Box>
       </Card>
 
-      <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Nota para cocina</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{menuItem.name}</Typography>
-          <TextField autoFocus fullWidth multiline rows={3} placeholder="Ej. Sin cebolla, extra salsa…" value={note} onChange={(event) => setNote(event.target.value)} inputProps={{ maxLength: 100 }} helperText={`${note.length}/100 caracteres`} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNoteDialogOpen(false)} sx={{ textTransform: "none" }}>Cancelar</Button>
-          <Button variant="contained" disableElevation onClick={handleSaveNote} sx={{ textTransform: "none" }}>Guardar nota</Button>
-        </DialogActions>
-      </Dialog>
+      <ProductCustomizationDialog
+        open={selection.customizerOpen}
+        item={selection.customizationItem}
+        onClose={selection.closeCustomizer}
+        onConfirm={selection.confirmConfiguration}
+      />
     </>
   );
+};
+
+CardMenuList.propTypes = {
+  item: PropTypes.object.isRequired,
+  businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  businessName: PropTypes.string,
+  paymentMethods: PropTypes.array,
+  onAddToCart: PropTypes.func.isRequired,
+  initialQuantity: PropTypes.number,
+  initialConfiguration: PropTypes.object,
+  busy: PropTypes.bool,
+  targetLabel: PropTypes.string,
 };
 
 export default CardMenuList;

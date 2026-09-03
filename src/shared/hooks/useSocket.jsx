@@ -11,7 +11,10 @@ export const useSocketConnected = () =>
 export const useSocketEvent = (event, handler, { enabled = true, room } = {}) => {
   const connected = useSocketConnected();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   const roomType = room?.type;
   const roomId = room?.id;
@@ -23,11 +26,16 @@ export const useSocketEvent = (event, handler, { enabled = true, room } = {}) =>
     if (!socket) return;
 
     if (roomType === "business" && roomId) socketService.setActiveBusiness(roomId);
-    if (roomType === "user" && roomId) socketService.joinUser(roomId);
+    if (roomType === "shared-order" && roomId) socketService.joinSharedOrder(roomId);
+    // La sala personal se asigna en el servidor desde el JWT; el cliente nunca
+    // elige un userId para evitar suscripciones a notificaciones ajenas.
 
     const listener = (data) => handlerRef.current?.(data);
     socket.on(event, listener);
 
-    return () => socket.off(event, listener);
+    return () => {
+      socket.off(event, listener);
+      if (roomType === "shared-order" && roomId) socketService.leaveSharedOrder(roomId);
+    };
   }, [enabled, connected, event, roomType, roomId]);
 };

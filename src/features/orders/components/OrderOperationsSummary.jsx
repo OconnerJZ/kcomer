@@ -35,9 +35,8 @@ export default function OrderOperationsSummary({ counts, activeKey, onSelect }) 
             sx={{
               border: active ? "1px solid" : "1px solid #e7e7e7",
               borderColor: active ? "primary.main" : "#e7e7e7",
-              bgcolor: active ? "rgba(255,75,69,0.06)" : "rgba(255,255,255,0.72)",
-              backdropFilter: "blur(4px)",
-              borderRadius: 2,
+              bgcolor: active ? "rgba(198,90,80,0.06)" : "background.paper",
+              borderRadius: "8px",
               p: { xs: 1.25, sm: 1.5 },
               textAlign: "left",
               cursor: "pointer",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Paper, Typography, Alert, Divider, Box, Button } from "@mui/material";
+import { Typography, Alert, Divider, Box, Button } from "@mui/material";
 import GoogleSignInButton from "./GoogleSignInButton";
 import AuthFormFields from "./AuthFormFields";
 
@@ -38,11 +38,11 @@ const LoginForm = ({
     : "¿No tienes cuenta? Regístrate";
 
   return (
-    <Paper sx={{ maxWidth: 450, width: "100%", p: 4, borderRadius: 3 }} elevation={6}>
-      <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, textAlign: "center" }}>
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h4" sx={{ mb: 1, fontWeight: 600, textAlign: "left" }}>
         {headerTitle}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "left" }}>
         {headerSubtitle}
       </Typography>
       {error && (
@@ -66,17 +66,17 @@ const LoginForm = ({
           variant="contained"
           fullWidth
           disabled={loading}
-          sx={{ py: 1.5, mt: 2, bgcolor: "#ff4b45", "&:hover": { bgcolor: "#e63946" } }}
+          sx={{ py: 1.25, mt: 2 }}
         >
           {loading ? "Cargando..." : submitButtonText}
         </Button>
       </form>
-      <Box sx={{ mt: 3, textAlign: "center" }}>
+      <Box sx={{ mt: 3, textAlign: "left" }}>
         <Button variant="text" onClick={onToggleMode} disabled={loading} sx={{ textTransform: "none" }}>
           {toggleText}
         </Button>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

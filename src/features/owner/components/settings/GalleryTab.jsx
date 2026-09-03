@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -32,7 +33,7 @@ export default function GalleryTab({
       elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
-        borderRadius: 3,
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "rgba(255,255,255,.88)",
@@ -43,7 +44,7 @@ export default function GalleryTab({
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".62rem" }}>
             IMAGEN
           </Typography>
-          <Typography variant="h6" fontWeight={800}>Galería y portada</Typography>
+          <Typography variant="h6" fontWeight={600}>Galería y portada</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 680 }}>
             Elige qué fotografía representa tu negocio en Explore y mantén una galería breve y atractiva.
           </Typography>
@@ -51,7 +52,7 @@ export default function GalleryTab({
 
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1.5}>
           <Box>
-            <Typography variant="h5" fontWeight={800} component="span">{photos.length}</Typography>
+            <Typography variant="h5" fontWeight={600} component="span">{photos.length}</Typography>
             <Typography variant="body2" color="text.secondary" component="span" sx={{ ml: .75 }}>
               {photos.length === 1 ? "fotografía" : "fotografías"}
             </Typography>
@@ -64,7 +65,7 @@ export default function GalleryTab({
             component="label"
             startIcon={<Add />}
             disabled={loading}
-            sx={{ textTransform: "none", borderRadius: 2, alignSelf: { xs: "flex-start", sm: "center" } }}
+            sx={{ textTransform: "none", borderRadius: "8px", alignSelf: { xs: "flex-start", sm: "center" } }}
           >
             Agregar foto
             <input type="file" hidden accept="image/*" onChange={onUpload} />
@@ -72,9 +73,9 @@ export default function GalleryTab({
         </Stack>
 
         {photos.length === 0 ? (
-          <Box sx={{ py: 6, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: 3 }}>
+          <Box sx={{ py: 6, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "8px" }}>
             <PhotoLibrary sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
-            <Typography variant="body2" fontWeight={800}>Tu galería todavía está vacía</Typography>
+            <Typography variant="body2" fontWeight={600}>Tu galería todavía está vacía</Typography>
             <Typography variant="caption" color="text.secondary">
               Agrega una fotografía para construir la presencia visual del negocio.
             </Typography>
@@ -92,12 +93,12 @@ export default function GalleryTab({
                   elevation={0}
                   sx={{
                     overflow: "hidden",
-                    borderRadius: 3,
+                    borderRadius: "8px",
                     border: "1px solid",
-                    borderColor: isCover ? "rgba(255,75,69,.4)" : "divider",
+                    borderColor: isCover ? "rgba(198,90,80,.4)" : "divider",
                     bgcolor: "background.paper",
                     transition: "transform .16s ease, box-shadow .16s ease",
-                    "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 28px rgba(0,0,0,.07)" },
+                    "&:hover": { transform: "translateY(-1px)", boxShadow: "0 3px 10px rgba(0,0,0,.07)" },
                   }}
                 >
                   <Box sx={{ position: "relative", aspectRatio: "16 / 10", overflow: "hidden", bgcolor: "grey.100" }}>
@@ -107,7 +108,7 @@ export default function GalleryTab({
                         icon={<Check sx={{ fontSize: "15px !important" }} />}
                         label="Portada"
                         size="small"
-                        sx={{ position: "absolute", top: 10, left: 10, bgcolor: "rgba(255,255,255,.94)", fontWeight: 800, backdropFilter: "blur(8px)" }}
+                        sx={{ position: "absolute", top: 10, left: 10, bgcolor: "background.paper", fontWeight: 600 }}
                       />
                     )}
                   </Box>
@@ -130,7 +131,7 @@ export default function GalleryTab({
                           size="small"
                           onClick={() => onSetCover?.(url)}
                           disabled={loading || !url}
-                          sx={{ textTransform: "none", borderRadius: 2, whiteSpace: "nowrap" }}
+                          sx={{ textTransform: "none", borderRadius: "8px", whiteSpace: "nowrap" }}
                         >
                           Usar como portada
                         </Button>
@@ -155,3 +156,12 @@ export default function GalleryTab({
     </Paper>
   );
 }
+
+GalleryTab.propTypes = {
+  photos: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.object])),
+  coverImage: PropTypes.string,
+  onSetCover: PropTypes.func,
+  onUpload: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};

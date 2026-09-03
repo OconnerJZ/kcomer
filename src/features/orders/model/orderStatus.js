@@ -16,24 +16,40 @@ export const ORDER_STATUS = {
   cancelled: { label: "Cancelada", color: "error", icon: Cancel },
 };
 
+export const ORDER_STATUS_VALUES = Object.freeze({
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  PREPARING: "preparing",
+  READY: "ready",
+  IN_DELIVERY: "in_delivery",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+});
+
+export const STATUS_LABELS = Object.freeze(
+  Object.fromEntries(
+    Object.entries(ORDER_STATUS).map(([status, config]) => [status, config.label]),
+  ),
+);
+
 export const STATUS_COLORS = {
-  pending: { bg: "#467A77", hover: "#dd6b20" },
-  accepted: { bg: "#1976D2", hover: "#2c5282" },
-  preparing: { bg: "#ED6C02", hover: "#6b46c1" },
-  ready: { bg: "#2E7D32", hover: "#2f855a" },
-  in_delivery: { bg: "#6A1B9A", hover: "#2f855a" },
-  completed: { bg: "#616161", hover: "#4a5568" },
+  pending: { bg: "#66736A", hover: "#465048" },
+  accepted: { bg: "#C65A50", hover: "#8F3E38" },
+  preparing: { bg: "#A8753C", hover: "#704A24" },
+  ready: { bg: "#5F7864", hover: "#405544" },
+  in_delivery: { bg: "#626B73", hover: "#414950" },
+  completed: { bg: "#6F6A63", hover: "#403C37" },
 };
 
 export const COLOR_MAP = {
-  pending: "#467A77",
-  accepted: "#1976D2",
-  preparing: "#ED6C02",
-  ready: "#2E7D32",
-  in_delivery: "#6A1B9A",
-  completed: "#616161",
-  error: "#e53e3e",
-  default: "#e0e0e0",
+  pending: "#66736A",
+  accepted: "#C65A50",
+  preparing: "#A8753C",
+  ready: "#5F7864",
+  in_delivery: "#626B73",
+  completed: "#6F6A63",
+  error: "#B7473F",
+  default: "#D9D2C8",
 };
 
 export const getActionLabels = (orderType) => ({

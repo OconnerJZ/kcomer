@@ -1,186 +1,132 @@
-import { useState, forwardRef, useMemo, useEffect } from "react";
-import {
-  Box,
-  CircularProgress,
-  Alert,
-  Container,
-  Fade,
-  Fab,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Dialog,
-  Slide,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { useMemo } from "react";
+import { Box, Container, Fab } from "@mui/material";
 import { AddBusiness } from "@mui/icons-material";
-import { useAuth } from "@Features/auth/context/AuthContext";
-import { isOwner } from "@Features/auth/model/roles";
-import DashboardNavbar from "@Features/owner/components/navigation/DashboardNavbar";
-import DashboardMobileNav from "@Features/owner/components/navigation/DashboardMobileNav";
-import OrdersTab from "@Features/owner/pages/OwnerOrders";
-import MenuTab from "@Features/owner/pages/OwnerMenu";
-import ReportsTab from "@Features/owner/pages/OwnerReports";
-import SettingsTab from "@Features/owner/pages/OwnerSettings";
-import RegisterBusiness from "@Features/owner/pages/RegisterBusiness";
-import useBusinessOwner from "@Features/owner/hooks/useBusinessOwner";
+import useAuth from "@Features/auth/context/useAuth";
+import { canAccessBusinessDashboard } from "@Features/auth/model/roles";
+import { getAllowedDashboardTabs } from "@Features/auth/model/businessPermissions";
 import useBusinessOrders from "@Features/orders/hooks/useBusinessOrders";
+import BusinessRegistrationDialog from "../components/dashboard/BusinessRegistrationDialog";
+import OwnerDashboardContent from "../components/dashboard/OwnerDashboardContent";
+import OwnerDashboardState from "../components/dashboard/OwnerDashboardState";
+import DashboardMobileNav from "../components/navigation/DashboardMobileNav";
+import DashboardNavbar from "../components/navigation/DashboardNavbar";
+import useBusinessOwner from "../hooks/useBusinessOwner";
+import { useBusinessRegistrationDialog } from "../hooks/useBusinessRegistrationDialog";
+import { useOwnerDashboardNavigation } from "../hooks/useOwnerDashboardNavigation";
+import {
+  DASHBOARD_STATE,
+  getDisplayedDashboardTab,
+  getOwnerDashboardState,
+  getPendingOrdersCount,
+} from "../model/ownerDashboard";
 import Bg from "@Assets/images/qscome-bg-6.png";
-
-const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 export default function OwnerDashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState(0);
-  const [open, setOpen] = useState(false);
-  const [selectedBusinessId, setSelectedBusinessId] = useState(null);
-  const [focusedOrderId, setFocusedOrderId] = useState(null);
-
+  const navigation = useOwnerDashboardNavigation();
   const {
     businesses,
     selectedBusiness,
+    selectedBusinessId,
     loading: loadingBusinesses,
     error: businessError,
     refetchBusinesses,
     hasBusinesses,
-  } = useBusinessOwner(selectedBusinessId);
+  } = useBusinessOwner(navigation.selectedBusinessId);
+  const businessOrders = useBusinessOrders(selectedBusinessId);
+  const registration = useBusinessRegistrationDialog({
+    refetchBusinesses,
+    selectBusiness: navigation.selectBusiness,
+  });
+  const isAdmin = user?.role === "admin";
+  const allowedTabs = useMemo(
+    () => getAllowedDashboardTabs(selectedBusiness, { isAdmin }),
+    [isAdmin, selectedBusiness],
+  );
+  const displayedTab = getDisplayedDashboardTab(navigation.activeTab, allowedTabs);
+  const pendingOrdersCount = useMemo(
+    () => getPendingOrdersCount(businessOrders.orders),
+    [businessOrders.orders],
+  );
+  const dashboardState = getOwnerDashboardState({
+    canAccess: canAccessBusinessDashboard(user),
+    loadingBusinesses,
+    hasBusinesses: hasBusinesses(),
+    businessError,
+    selectedBusiness,
+  });
 
-  const {
-    loading: loadingOrders,
-    getPendingOrders,
-  } = useBusinessOrders(selectedBusinessId);
-
-  const handleClickOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleTabChange = (newTab) => setActiveTab(newTab);
-  const selectBusiness = (businessId) => {
-    setSelectedBusinessId(businessId);
-    setFocusedOrderId(null);
-  };
-
-  const handleNotificationNavigate = ({ businessId, orderId }) => {
-    if (businessId != null) setSelectedBusinessId(businessId);
-    setFocusedOrderId(orderId ?? null);
-    setActiveTab(0);
-  };
-
-  useEffect(() => {
-    if (businesses.length === 0) {
-      if (selectedBusinessId !== null) setSelectedBusinessId(null);
-      return;
-    }
-
-    const selectionStillExists = businesses.some(
-      (business) => String(business.id) === String(selectedBusinessId),
-    );
-
-    if (!selectionStillExists) {
-      setSelectedBusinessId(businesses[0].id);
-    }
-  }, [businesses, selectedBusinessId]);
-
-  const pendingOrdersCount = useMemo(() => getPendingOrders().length, [getPendingOrders]);
-
-  const handleBusinessCreated = async () => {
-    handleClose();
-    const result = await refetchBusinesses();
-    const refreshed = result?.data?.data || result?.data || [];
-    const list = Array.isArray(refreshed) ? refreshed : [];
-    if (list.length > 0) {
-      const newest = list[list.length - 1];
-      if (newest?.id != null) setSelectedBusinessId(newest.id);
-    }
-  };
-
-  if (!isOwner(user)) {
+  if (dashboardState !== DASHBOARD_STATE.READY) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2, mt: -6 }}>
-        <RegisterBusiness />
-      </Box>
-    );
-  }
-
-  if (loadingBusinesses && !hasBusinesses()) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "background.default" }}>
-        <CircularProgress size={60} />
-      </Box>
-    );
-  }
-
-  if (businessError) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2 }}>
-        <Alert severity="error" sx={{ maxWidth: 600 }}>{businessError}</Alert>
-      </Box>
-    );
-  }
-
-  if (!hasBusinesses()) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", px: 2 }}>
-        <RegisterBusiness onSuccess={refetchBusinesses} />
-      </Box>
-    );
-  }
-
-  if (!selectedBusiness) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <CircularProgress />
-      </Box>
+      <OwnerDashboardState
+        state={dashboardState}
+        error={businessError}
+        onBusinessCreated={refetchBusinesses}
+      />
     );
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`, backgroundSize: "contain", backgroundPosition: "center", pb: { xs: 10, md: 0 } }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        pb: { xs: 10, md: 0 },
+      }}
+    >
       <DashboardNavbar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onNotificationNavigate={handleNotificationNavigate}
+        activeTab={displayedTab}
+        onTabChange={navigation.setActiveTab}
+        onNotificationNavigate={navigation.navigateFromNotification}
         businessName={selectedBusiness.name}
         selectedBusinessId={selectedBusinessId}
         pendingOrders={pendingOrdersCount}
-        selectBusiness={selectBusiness}
+        selectBusiness={navigation.selectBusiness}
         businesses={businesses}
+        allowedTabs={allowedTabs}
       />
 
-      <Fab sx={{ position: "fixed", bottom: 100, right: 16 }} color="primary" size="small" onClick={handleClickOpen}><AddBusiness /></Fab>
-
-      <Dialog fullScreen open={open} onClose={handleClose} slots={{ transition: Transition }}>
-        <AppBar sx={{ position: "relative" }}>
-          <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close"><CloseIcon /></IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">Registrar negocio</Typography>
-          </Toolbar>
-        </AppBar>
-        <RegisterBusiness onSuccess={handleBusinessCreated} />
-      </Dialog>
+      <Fab
+        sx={{ position: "fixed", bottom: 100, right: 16 }}
+        color="primary"
+        size="small"
+        aria-label="Registrar negocio"
+        onClick={registration.openDialog}
+      >
+        <AddBusiness />
+      </Fab>
+      <BusinessRegistrationDialog
+        open={registration.open}
+        onClose={registration.closeDialog}
+        onCreated={registration.handleBusinessCreated}
+      />
 
       <Box sx={{ height: { xs: 56, sm: 64 } }} />
-
-      <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
-        <Fade in timeout={500}>
-          <Box>
-            {activeTab === 0 && (
-              <OrdersTab
-                businessId={selectedBusinessId}
-                loading={loadingOrders}
-                focusedOrderId={focusedOrderId}
-                onFocusHandled={() => setFocusedOrderId(null)}
-              />
-            )}
-            {activeTab === 1 && <MenuTab businessId={selectedBusinessId} />}
-            {activeTab === 2 && <ReportsTab businessId={selectedBusinessId} />}
-            {activeTab === 3 && <SettingsTab businessData={selectedBusiness} onRefresh={refetchBusinesses} />}
-          </Box>
-        </Fade>
+      <Container
+        maxWidth="xl"
+        sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1.5, sm: 2.5, md: 3 } }}
+      >
+        <OwnerDashboardContent
+          displayedTab={displayedTab}
+          allowedTabs={allowedTabs}
+          businessId={selectedBusinessId}
+          selectedBusiness={selectedBusiness}
+          businessOrders={businessOrders}
+          focusedOrderId={navigation.focusedOrderId}
+          onFocusHandled={navigation.clearFocusedOrder}
+          onRefreshBusinesses={refetchBusinesses}
+          isAdmin={isAdmin}
+        />
       </Container>
 
-      <DashboardMobileNav activeTab={activeTab} onTabChange={handleTabChange} pendingOrders={pendingOrdersCount} />
+      <DashboardMobileNav
+        activeTab={displayedTab}
+        onTabChange={navigation.setActiveTab}
+        pendingOrders={pendingOrdersCount}
+        allowedTabs={allowedTabs}
+      />
     </Box>
   );
 }

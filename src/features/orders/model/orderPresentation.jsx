@@ -5,7 +5,7 @@ import {
   HourglassEmpty,
   Restaurant,
 } from "@mui/icons-material";
-import { ORDER_STATUS } from "../context/OrderContext";
+import { ORDER_STATUS_VALUES as ORDER_STATUS } from "./orderStatus";
 
 export const getStatusColor = (status) => ({
   [ORDER_STATUS.PENDING]: "warning",

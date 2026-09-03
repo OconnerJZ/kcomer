@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@Features/auth/context/AuthContext";
-import { useCart } from "@Features/cart/context/CartContext";
-import { useOrders } from "@Features/orders/context/OrderContext";
+import useAuth from "@Features/auth/context/useAuth";
+import useCart from "@Features/cart/context/useCart";
+import { useOrders } from "@Features/orders/context/useOrders";
 import useCheckoutForm from "./useCheckoutForm";
 import {
   buildOrderPayload,

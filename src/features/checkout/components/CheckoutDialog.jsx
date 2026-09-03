@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import ContactSection from "./ContactSection";
 import DeliveryAddressSection from "./DeliveryAddressSection";
 import OrderTypeSelector from "./OrderTypeSelector";
@@ -20,6 +20,8 @@ export default function CheckoutDialog({
   handleChange,
   handleNewAddressChange,
 }) {
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const paymentMethods = currentBusiness?.paymentMethods || [];
   const activePaymentMethods = paymentMethods.filter((method) => method.active !== false);
   const validPaymentMethod = activePaymentMethods.some(
@@ -45,7 +47,7 @@ export default function CheckoutDialog({
   if (!currentBusiness) return null;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isSmall} PaperProps={{ sx: { borderRadius: isSmall ? 0 : "10px" } }}>
       <DialogTitle sx={{ pb: 1 }}>
         <Typography variant="h5" fontWeight={400}>Confirmar pedido</Typography>
       </DialogTitle>
@@ -71,7 +73,7 @@ export default function CheckoutDialog({
             />
           )}
           <Divider />
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} gap={.5}>
             <Typography variant="h6">Total a pagar:</Typography>
             <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
               ${currentBusiness.total.toFixed(2)}
@@ -80,9 +82,9 @@ export default function CheckoutDialog({
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>Cancelar</Button>
-        <Button onClick={onConfirm} variant="contained" sx={{ textTransform: "none", px: 3 }}>Confirmar Pedido</Button>
+      <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 }, flexDirection: { xs: "column-reverse", sm: "row" } }}>
+        <Button onClick={onClose} fullWidth={isSmall} sx={{ textTransform: "none" }}>Cancelar</Button>
+        <Button onClick={onConfirm} variant="contained" fullWidth={isSmall} sx={{ textTransform: "none", px: 3 }}>Confirmar Pedido</Button>
       </DialogActions>
     </Dialog>
   );

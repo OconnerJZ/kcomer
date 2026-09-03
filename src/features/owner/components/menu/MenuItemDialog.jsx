@@ -18,7 +18,18 @@ import {
   AddPhotoAlternate,
   Close,
   Image as ImageIcon,
+  TuneRounded,
 } from "@mui/icons-material";
+import PropTypes from "prop-types";
+
+const menuFormShape = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  category: PropTypes.string.isRequired,
+  image: PropTypes.string.isRequired,
+  available: PropTypes.bool.isRequired,
+});
 
 const formatPreviewPrice = (value) => {
   const number = Number(value);
@@ -33,9 +44,9 @@ const MenuItemPreview = ({ form, imagePreview }) => (
       overflow: "hidden",
       border: "1px solid",
       borderColor: "divider",
-      borderRadius: 3,
+      borderRadius: "8px",
       bgcolor: "background.paper",
-      boxShadow: "0 18px 50px rgba(0,0,0,.07)",
+      boxShadow: "0 3px 12px rgba(0,0,0,.07)",
     }}
   >
     <Box
@@ -66,10 +77,10 @@ const MenuItemPreview = ({ form, imagePreview }) => (
         </Typography>
       )}
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
-        <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1.2 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
           {form.name || "Nombre del platillo"}
         </Typography>
-        <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
+        <Typography variant="h6" fontWeight={600} color="primary.main" sx={{ whiteSpace: "nowrap" }}>
           {formatPreviewPrice(form.price)}
         </Typography>
       </Stack>
@@ -79,6 +90,11 @@ const MenuItemPreview = ({ form, imagePreview }) => (
     </Box>
   </Box>
 );
+
+MenuItemPreview.propTypes = {
+  form: menuFormShape.isRequired,
+  imagePreview: PropTypes.string,
+};
 
 const MenuItemDialog = ({
   open,
@@ -91,6 +107,7 @@ const MenuItemDialog = ({
   onSave,
   onImageChange,
   onFormChange,
+  onCustomize,
 }) => {
   const canSave = Boolean(form.name?.trim()) && Number(form.price) > 0;
 
@@ -101,14 +118,14 @@ const MenuItemDialog = ({
       maxWidth="md"
       fullWidth
       fullScreen={fullScreen}
-      PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: "hidden" } }}
+      PaperProps={{ sx: { borderRadius: fullScreen ? 0 : "10px", overflow: "hidden" } }}
     >
       <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.5 }, pb: 1.5, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".65rem" }}>
             Menú
           </Typography>
-          <Typography variant="h5" fontWeight={800}>
+          <Typography variant="h5" fontWeight={600}>
             {editing ? "Editar platillo" : "Nuevo platillo"}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
@@ -128,7 +145,7 @@ const MenuItemDialog = ({
                   variant="outlined"
                   component="span"
                   startIcon={<AddPhotoAlternate />}
-                  sx={{ textTransform: "none", borderRadius: 2, px: 2 }}
+                  sx={{ textTransform: "none", borderRadius: "8px", px: 2 }}
                 >
                   {imagePreview ? "Cambiar fotografía" : "Agregar fotografía"}
                 </Button>
@@ -179,7 +196,7 @@ const MenuItemDialog = ({
               fullWidth
             />
 
-            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: 2, bgcolor: "background.paper" }}>
+            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "8px", bgcolor: "background.paper" }}>
               <FormControlLabel
                 sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
                 control={<Switch checked={form.available} onChange={(event) => onFormChange("available", event.target.checked)} />}
@@ -205,6 +222,17 @@ const MenuItemDialog = ({
       </DialogContent>
 
       <DialogActions sx={{ px: { xs: 2, sm: 3 }, py: 2, gap: 1 }}>
+        {editing && (
+          <Button
+            onClick={onCustomize}
+            startIcon={<TuneRounded />}
+            variant="outlined"
+            disabled={loading}
+            sx={{ mr: "auto", textTransform: "none", borderRadius: "8px", fontWeight: 700 }}
+          >
+            Ingredientes y opciones
+          </Button>
+        )}
         <Button onClick={onClose} disabled={loading} sx={{ textTransform: "none", color: "text.secondary" }}>
           Cancelar
         </Button>
@@ -213,13 +241,27 @@ const MenuItemDialog = ({
           variant="contained"
           disableElevation
           disabled={loading || !canSave}
-          sx={{ textTransform: "none", borderRadius: 2, minWidth: 120, fontWeight: 700 }}
+          sx={{ textTransform: "none", borderRadius: "8px", minWidth: 120, fontWeight: 700 }}
         >
           {loading ? <CircularProgress size={22} color="inherit" /> : editing ? "Guardar cambios" : "Crear platillo"}
         </Button>
       </DialogActions>
     </Dialog>
   );
+};
+
+MenuItemDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
+  fullScreen: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
+  form: menuFormShape.isRequired,
+  imagePreview: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onImageChange: PropTypes.func.isRequired,
+  onFormChange: PropTypes.func.isRequired,
+  onCustomize: PropTypes.func.isRequired,
 };
 
 export default MenuItemDialog;

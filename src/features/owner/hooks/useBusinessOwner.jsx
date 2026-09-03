@@ -5,7 +5,7 @@ import {
   useUpdateBusinessMutation,
   useDeleteBusinessMutation,
 } from "@Features/business/api/business.api";
-import { useAuth } from "@Features/auth/context/AuthContext";
+import useAuth from "@Features/auth/context/useAuth";
 import { normalizeBusiness } from "@Features/business/model/business";
 import { normalizeMenuItems } from "@Features/menu/model/menuItem";
 
@@ -27,28 +27,35 @@ export const useBusinessOwner = (selectedBusinessId = null) => {
     },
   );
 
-  const {
-    data: menuResponse,
-    isLoading: loadingMenu,
-    error: menuError,
-    refetch: refetchMenu,
-  } = useGetMenuQuery(
-    { businessId: selectedBusinessId },
-    {
-      skip: !selectedBusinessId,
-      pollingInterval: 30000,
-    },
-  );
-
-  const [updateBusiness, { isLoading: updating }] = useUpdateBusinessMutation();
-  const [deleteBusiness, { isLoading: deleting }] = useDeleteBusinessMutation();
-
   const myBusinesses = useMemo(() => {
     const raw = Array.isArray(businessesResponse)
       ? businessesResponse
       : businessesResponse?.data || businessesResponse || [];
     return Array.isArray(raw) ? raw.map(normalizeBusiness) : [];
   }, [businessesResponse]);
+
+  const resolvedBusinessId = useMemo(() => {
+    const selectedExists = myBusinesses.some(
+      (business) => String(business.id) === String(selectedBusinessId),
+    );
+    return selectedExists ? selectedBusinessId : myBusinesses[0]?.id ?? null;
+  }, [myBusinesses, selectedBusinessId]);
+
+  const {
+    data: menuResponse,
+    isLoading: loadingMenu,
+    error: menuError,
+    refetch: refetchMenu,
+  } = useGetMenuQuery(
+    { businessId: resolvedBusinessId },
+    {
+      skip: !resolvedBusinessId,
+      pollingInterval: 30000,
+    },
+  );
+
+  const [updateBusiness, { isLoading: updating }] = useUpdateBusinessMutation();
+  const [deleteBusiness, { isLoading: deleting }] = useDeleteBusinessMutation();
 
   const menu = useMemo(() => {
     const raw = Array.isArray(menuResponse)
@@ -58,16 +65,16 @@ export const useBusinessOwner = (selectedBusinessId = null) => {
   }, [menuResponse]);
 
   const selectedBusiness = useMemo(() => {
-    if (!selectedBusinessId) return null;
+    if (!resolvedBusinessId) return null;
     const business = myBusinesses.find(
-      (item) => String(item.id) === String(selectedBusinessId),
+      (item) => String(item.id) === String(resolvedBusinessId),
     );
     if (!business) return null;
     return {
       ...business,
       menu: menu.length > 0 ? menu : business.menu || [],
     };
-  }, [myBusinesses, selectedBusinessId, menu]);
+  }, [myBusinesses, resolvedBusinessId, menu]);
 
   const updateBusinessData = useCallback(
     async (businessId, data) => {
@@ -113,6 +120,7 @@ export const useBusinessOwner = (selectedBusinessId = null) => {
 
   return {
     businesses: myBusinesses,
+    selectedBusinessId: resolvedBusinessId,
     selectedBusiness,
     menu,
     loading: loadingBusinesses || loadingMenu || updating || deleting,

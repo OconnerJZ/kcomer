@@ -1,5 +1,5 @@
 import {
-  Paper,
+  Box,
   Stack,
   Typography,
   FormControl,
@@ -11,24 +11,21 @@ import { Refresh } from "@mui/icons-material";
 
 const OrderFilters = ({ filterStatus, onFilterChange, orderCount, onRefresh, loading }) => {
   return (
-    <Paper elevation={0} sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0", borderRadius: 0 }}>
-      <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" flexWrap="wrap">
-        <Stack direction="row" spacing={2} alignItems="center">
+    <Box sx={{ pb: 1.5, mb: 2, borderBottom: "1px solid", borderColor: "divider" }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between">
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} alignItems={{ xs: "stretch", sm: "center" }}>
           <Typography
             variant="overline"
-            sx={{ color: "#666", fontWeight: 600, letterSpacing: "0.1em", fontSize: "0.688rem" }}
+            sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.1em", fontSize: "0.688rem" }}
           >
             Filtrar
           </Typography>
-          <FormControl size="small" sx={{ minWidth: 180 }}>
+          <FormControl size="small" sx={{ minWidth: { sm: 180 } }}>
             <Select
               value={filterStatus}
               onChange={(e) => onFilterChange(e.target.value)}
               sx={{
-                borderRadius: 0,
                 fontSize: "0.875rem",
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#e0e0e0" },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#1a1a1a" },
               }}
             >
               <MenuItem value="all">Todas</MenuItem>
@@ -38,16 +35,16 @@ const OrderFilters = ({ filterStatus, onFilterChange, orderCount, onRefresh, loa
               <MenuItem value="completed">Completadas</MenuItem>
             </Select>
           </FormControl>
-          <Typography variant="caption" sx={{ color: "#1a1a1a", fontWeight: 500, px: 1.5, py: 0.5 }}>
-            {orderCount}
+          <Typography variant="caption" sx={{ color: "secondary.dark", fontWeight: 600 }}>
+            {orderCount} {orderCount === 1 ? "orden" : "órdenes"}
           </Typography>
         </Stack>
 
-        <IconButton onClick={onRefresh} disabled={loading} size="small" sx={{ "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}>
+        <IconButton onClick={onRefresh} disabled={loading} size="small" sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}>
           <Refresh fontSize="small" />
         </IconButton>
       </Stack>
-    </Paper>
+    </Box>
   );
 };
 

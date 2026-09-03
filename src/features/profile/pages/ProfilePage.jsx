@@ -37,14 +37,14 @@ export default function ProfilePage() {
 
   return (
     <GeneralContent title="Mi Perfil">
-      <Box sx={{ maxWidth: 800, mx: "auto", mt: { xs: 2, sm: 4 }, px: 2 }}>
-        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }} elevation={3}>
-          <Stack direction="row" spacing={3} alignItems="center">
+      <Box sx={{ maxWidth: 800, mx: "auto", py: { xs: 2, sm: 4 }, px: { xs: 1.5, sm: 2.5 } }}>
+        <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, sm: 3 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1.5, sm: 3 }} alignItems="center" textAlign={{ xs: "center", sm: "left" }}>
             <Avatar
               src={user?.avatar}
               sx={{
-                width: 100,
-                height: 100,
+                width: { xs: 76, sm: 100 },
+                height: { xs: 76, sm: 100 },
                 bgcolor: "primary.main",
                 fontSize: "2.5rem",
               }}
@@ -52,11 +52,11 @@ export default function ProfilePage() {
               {user?.name?.charAt(0) || "U"}
             </Avatar>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                 {user?.name || "Usuario"}
               </Typography>
-              <Typography color="text.secondary">{user?.email}</Typography>
+              <Typography color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{user?.email}</Typography>
             </Box>
           </Stack>
         </Paper>

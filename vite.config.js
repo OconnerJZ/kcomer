@@ -14,14 +14,15 @@ export default defineConfig({
     viteBasicSslPlugin(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["logo.png"],
+      includeAssets: ["pwa-192x192.png", "pwa-512x512.png"],
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
         name: "qsCome",
         short_name: "qsCome",
-        description: "Mi app para encontra mi comida de hoy",
+        description: "Explora negocios y encuentra tu comida de hoy",
+        lang: "es-MX",
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",

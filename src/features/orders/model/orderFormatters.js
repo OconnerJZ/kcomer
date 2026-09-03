@@ -21,3 +21,13 @@ export const formatOrderDate = (date, useFullDate = false) => {
 };
 
 export const formatCurrency = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+
+const PAYMENT_METHOD_LABELS = {
+  cash: "Efectivo",
+  transfer: "Transferencia",
+  card: "Tarjeta",
+  wallet: "Billetera digital",
+};
+
+export const formatPaymentMethod = (method) =>
+  PAYMENT_METHOD_LABELS[String(method || "cash").toLowerCase()] || method || "Efectivo";

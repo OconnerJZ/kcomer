@@ -1,75 +1,52 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+/* eslint-disable react-refresh/only-export-components -- El provider y su hook forman una API cohesiva. */
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useReducer,
+} from "react";
+import PropTypes from "prop-types";
+import {
+  createOrderNotification,
+  notificationReducer,
+  selectUnreadByBusiness,
+  selectUnreadNotifications,
+} from "@Features/notifications/model/notifications";
 
 const NotificationContext = createContext(null);
 
-const getBusinessId = (notification) =>
-  notification?.businessId ?? notification?.business_id ?? notification?.business?.id ?? null;
-
-const getOrderId = (notification) => notification?.orderId ?? notification?.id ?? null;
-
 export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, dispatch] = useReducer(notificationReducer, []);
 
   const addOrderNotification = useCallback((order) => {
-    const businessId = getBusinessId(order);
-    const orderId = getOrderId(order);
-    const businessName =
-      order?.businessName || order?.business_name || order?.business?.name || "Negocio";
-    const customerName = order?.customerName || order?.customer_name || "Un cliente";
-
-    const notification = {
-      id: `${businessId ?? "business"}:${orderId ?? Date.now()}:${Date.now()}`,
-      type: "order:new",
-      businessId,
-      orderId,
-      businessName,
-      title: `Nueva orden · ${businessName}`,
-      message: `${customerName} acaba de realizar un pedido.`,
-      createdAt: new Date().toISOString(),
-      read: false,
-    };
-
-    setNotifications((current) => [notification, ...current].slice(0, 100));
+    const notification = createOrderNotification(order);
+    dispatch({ type: "notification/added", payload: notification });
     return notification;
   }, []);
 
   const markAsRead = useCallback((notificationId) => {
-    setNotifications((current) =>
-      current.map((item) =>
-        item.id === notificationId ? { ...item, read: true } : item,
-      ),
-    );
+    dispatch({ type: "notification/read", payload: notificationId });
   }, []);
 
   const markBusinessAsRead = useCallback((businessId) => {
-    setNotifications((current) =>
-      current.map((item) =>
-        String(item.businessId) === String(businessId)
-          ? { ...item, read: true }
-          : item,
-      ),
-    );
+    dispatch({ type: "notification/business-read", payload: businessId });
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications((current) => current.map((item) => ({ ...item, read: true })));
+    dispatch({ type: "notification/all-read" });
   }, []);
 
-  const clearNotifications = useCallback(() => setNotifications([]), []);
+  const clearNotifications = useCallback(() => {
+    dispatch({ type: "notification/cleared" });
+  }, []);
 
   const unreadNotifications = useMemo(
-    () => notifications.filter((item) => !item.read),
+    () => selectUnreadNotifications(notifications),
     [notifications],
   );
-
   const unreadByBusiness = useMemo(
-    () =>
-      unreadNotifications.reduce((accumulator, item) => {
-        if (item.businessId == null) return accumulator;
-        const key = String(item.businessId);
-        accumulator[key] = (accumulator[key] || 0) + 1;
-        return accumulator;
-      }, {}),
+    () => selectUnreadByBusiness(unreadNotifications),
     [unreadNotifications],
   );
 
@@ -99,6 +76,10 @@ export function NotificationProvider({ children }) {
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }
+
+NotificationProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);

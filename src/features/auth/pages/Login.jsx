@@ -23,14 +23,12 @@ const Login = () => {
       sx={{
         minHeight: "100dvh",
         position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        px: { xs: 1.5, sm: 3, lg: 5 },
-        py: { xs: 1.5, sm: 3 },
-        overflowX: "hidden",
-        overflowY: "auto",
-        backgroundImage: `linear-gradient(115deg, rgba(18,18,20,.84), rgba(18,18,20,.54) 48%, rgba(255,75,69,.20)), url(${Bg})`,
+        display: "grid",
+        placeItems: "center",
+        px: { xs: 2, sm: 3 },
+        py: 3,
+        overflow: "hidden",
+        backgroundImage: `linear-gradient(rgba(34,31,28,.68), rgba(34,31,28,.68)), url(${Bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -46,25 +44,16 @@ const Login = () => {
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "minmax(0,1fr) minmax(360px,420px)" },
           alignItems: "center",
-          gap: { xs: 2, md: 4, lg: 7 },
-          my: "auto",
+            gap: { xs: 2, md: 5 },
         }}
       >
-        {isDesktop && (
-          <Stack spacing={{ md: 1.75, lg: 2.25 }} sx={{ color: "common.white", maxWidth: 500, minWidth: 0 }}>
-            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: { md: 60, lg: 72 }, height: { md: 60, lg: 72 }, borderRadius: 3, boxShadow: "0 18px 45px rgba(0,0,0,.2)" }} />
-            <Typography variant="overline" sx={{ letterSpacing: ".18em", opacity: .72, fontWeight: 700 }}>
+        {!isMobile && (
+          <Stack spacing={2.25} sx={{ color: "common.white", maxWidth: 480 }}>
+            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 64, height: 64, borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,.14)" }} />
+            <Typography variant="overline" sx={{ color: "#E39A93", letterSpacing: ".14em", fontWeight: 600 }}>
               Kcomer
             </Typography>
-            <Typography
-              sx={{
-                fontWeight: 900,
-                lineHeight: 1.02,
-                letterSpacing: "-.04em",
-                fontSize: { md: "clamp(2.35rem,4.5vw,3.65rem)", lg: "3.75rem" },
-                maxWidth: 500,
-              }}
-            >
+            <Typography variant="h2" sx={{ fontWeight: 600, lineHeight: 1.25, letterSpacing: "-.015em", maxWidth: 420 }}>
               Tu próxima comida empieza aquí.
             </Typography>
             <Typography variant="body1" sx={{ opacity: .78, maxWidth: 430, lineHeight: 1.65 }}>
@@ -76,21 +65,17 @@ const Login = () => {
         <Box
           sx={{
             width: "100%",
-            maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 48px)" },
-            overflowY: "auto",
-            overscrollBehavior: "contain",
-            border: "1px solid rgba(255,255,255,.58)",
-            borderRadius: { xs: 3, sm: 4 },
-            bgcolor: "rgba(255,255,255,.92)",
-            backdropFilter: "blur(22px)",
-            boxShadow: "0 28px 80px rgba(0,0,0,.24)",
-            scrollbarWidth: "thin",
+            border: "1px solid rgba(56,50,44,.16)",
+            borderRadius: "8px",
+            bgcolor: "#FEFDFB",
+            boxShadow: "0 6px 18px rgba(27,24,21,.14)",
+            overflow: "hidden",
           }}
         >
-          {!isDesktop && (
-            <Stack alignItems="center" spacing={0.6} sx={{ pt: { xs: 2, sm: 2.5 }, px: 3 }}>
-              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: { xs: 46, sm: 56 }, height: { xs: 46, sm: 56 }, borderRadius: 2.5 }} />
-              <Typography variant="subtitle1" fontWeight={900}>Kcomer</Typography>
+          {isMobile && (
+            <Stack alignItems="center" spacing={1} sx={{ pt: 3, px: 3 }}>
+              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: "8px" }} />
+              <Typography variant="subtitle1" fontWeight={600} color="primary.dark">Kcomer</Typography>
             </Stack>
           )}
           <Box sx={{ p: { xs: 2, sm: 3, md: 3.15 } }}>
