@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { Business, LocationOff, RestaurantMenu } from "@mui/icons-material";
 import CardPlace from "@Features/explore/components/CardPlace";
+import Bg from "@Assets/images/qscome-bg-6.png";
 
 const EmptyExploreState = ({ icon, title, description }) => (
   <Paper
@@ -52,7 +53,9 @@ export default function ExploreResults({
         position: "relative",
         px: { xs: 2, sm: 3, md: 5 },
         py: { xs: 5, md: 7 },
-        bgcolor: "transparent",
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)), url(${Bg})`,
+        backgroundSize: "contain",
+        backgroundPosition: "center",
       }}
     >
       <Box sx={{ maxWidth: 1280, mx: "auto" }}>

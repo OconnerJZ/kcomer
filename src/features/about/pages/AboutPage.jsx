@@ -1,6 +1,7 @@
 import { Box, Grid } from "@mui/material";
 import GeneralContent from "@Shared/components/layout/GeneralContent";
 import Bg from "@Assets/images/qscome-bg-6.png";
+import Bg4 from "@Assets/images/qsome-bg-4.jpg";
 
 const NAME_PAGE = "qsCome";
 const ABOUT_SPOT =
@@ -9,7 +10,18 @@ const ABOUT_SPOT =
 const AboutPage = () => {
   return (
     <GeneralContent>
-      <Box component="header" className="hero">
+      <Box
+        component="header"
+        className="hero"
+        sx={{
+          textAlign: "center",
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,0)), url(${Bg4})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          "& .logo": { margin: 0 },
+        }}
+      >
         <div className="logo">{NAME_PAGE}</div>
         <p className="hero-sub">{ABOUT_SPOT}</p>
       </Box>
