@@ -9,7 +9,7 @@ const BusinessRegistrationSuccess = ({ ownerReady, onContinue }) => (
       sx={{
         maxWidth: 520,
         p: 2,
-        borderRadius: 5,
+        borderRadius: "10px",
         border: "1px solid",
         borderColor: "divider",
       }}

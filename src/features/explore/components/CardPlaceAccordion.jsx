@@ -29,12 +29,12 @@ const CardPlaceAccordion = ({ data: datacard }) => {
                 minWidth: 0,
                 px: 1,
                 py: 0.9,
-                borderRadius: 2.4,
-                bgcolor: selected ? "rgba(255,75,69,.09)" : "rgba(255,255,255,.58)",
+                borderRadius: "10px",
+                bgcolor: selected ? "rgba(49,94,251,.09)" : "rgba(255,255,255,.58)",
                 border: "1px solid",
-                borderColor: selected ? "rgba(255,75,69,.18)" : "rgba(0,0,0,.05)",
+                borderColor: selected ? "rgba(49,94,251,.18)" : "rgba(0,0,0,.05)",
                 transition: "all .18s ease",
-                "&:hover": { bgcolor: selected ? "rgba(255,75,69,.12)" : "rgba(255,255,255,.9)" },
+                "&:hover": { bgcolor: selected ? "rgba(49,94,251,.12)" : "rgba(255,255,255,.9)" },
               }}
             >
               <Stack direction="row" spacing={0.65} alignItems="center" minWidth={0}>
@@ -49,7 +49,7 @@ const CardPlaceAccordion = ({ data: datacard }) => {
       </Stack>
 
       <Collapse in={Boolean(current)} unmountOnExit>
-        <Box sx={{ mt: 1, p: 1.2, borderRadius: 2.5, bgcolor: "rgba(255,255,255,.72)", border: "1px solid rgba(0,0,0,.05)" }}>
+        <Box sx={{ mt: 1, p: 1.2, borderRadius: "10px", bgcolor: "rgba(255,255,255,.72)", border: "1px solid rgba(0,0,0,.05)" }}>
           {current?.details}
         </Box>
       </Collapse>

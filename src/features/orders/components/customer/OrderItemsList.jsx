@@ -26,7 +26,7 @@ export default function OrderItemsList({ order }) {
     <Box sx={{ mb: 0 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1.5}>
         <Stack direction="row" alignItems="center" gap={1.25}>
-          <Box sx={{ width: 30, height: 30, borderRadius: 2, bgcolor: "rgba(255,75,69,.10)", display: "flex", alignItems: "center", justifyContent: "center", color: "primary.main" }}>
+          <Box sx={{ width: 30, height: 30, borderRadius: "10px", bgcolor: "rgba(49,94,251,.10)", display: "flex", alignItems: "center", justifyContent: "center", color: "primary.main" }}>
             <RestaurantRounded sx={{ fontSize: 18 }} />
           </Box>
           <Box>

@@ -13,7 +13,7 @@ const ScheduleDayRow = ({ day, isToday, onOpenChange, onTimeChange }) => (
       borderBottom: "1px solid",
       borderLeft: isToday ? "3px solid" : "3px solid transparent",
       borderColor: isToday ? "primary.main" : "divider",
-      bgcolor: isToday ? "rgba(255,75,69,.035)" : "background.paper",
+      bgcolor: isToday ? "rgba(49,94,251,.035)" : "background.paper",
     }}
   >
     <Stack

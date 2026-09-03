@@ -52,10 +52,10 @@ export default function FiltersPanel() {
           {[
             ["ion:location", "#2EAD67", "Ubicación"],
             ["ion:fast-food", "#FF9F1C", "Comida"],
-            ["fluent:person-feedback-48-filled", "#FF4B45", "Feedback"],
+            ["fluent:person-feedback-48-filled", "#315EFB", "Feedback"],
           ].map(([icon, color, label]) => (
             <Grid item xs={12} sm={6} md={4} key={label}>
-              <Stack spacing={1.5} sx={{ height: "100%", p: { xs: 1.5, sm: 2 }, border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "rgba(255,255,255,.9)" }}>
+              <Stack spacing={1.5} sx={{ height: "100%", p: { xs: 1.5, sm: 2 }, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.9)" }}>
                   <Stack direction="row" spacing={1} alignItems="center"><Icon style={{ fontSize: "28px", color }} icon={icon} /><Typography fontWeight={800}>{label}</Typography></Stack>
                   <Autocomplete
                     value={value}

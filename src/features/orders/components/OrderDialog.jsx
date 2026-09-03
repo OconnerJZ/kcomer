@@ -30,7 +30,7 @@ import ActionButton from "./ActionButton";
 import TransferPaymentReviewPanel from "@Features/payments/components/TransferPaymentReviewPanel";
 
 const SummaryPill = ({ icon: Icon, label, value }) => (
-  <Box sx={{ px: 1.4, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.78)" }}>
+  <Box sx={{ px: 1.4, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.78)" }}>
     <Stack direction="row" spacing={1} alignItems="center">
       <Icon sx={{ fontSize: 17, color: "text.secondary" }} />
       <Box minWidth={0}>
@@ -63,7 +63,7 @@ const StatusHistory = ({ history = [] }) => {
 };
 
 const ActivityAccordion = ({ eyebrow, title, children }) => (
-  <Accordion disableGutters elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", bgcolor: "rgba(255,255,255,.82)", "&:before": { display: "none" } }}>
+  <Accordion disableGutters elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px !important", bgcolor: "rgba(255,255,255,.82)", "&:before": { display: "none" } }}>
     <AccordionSummary expandIcon={<ExpandMoreRounded />} sx={{ minHeight: 66, px: 2, "& .MuiAccordionSummary-content": { my: 1.2 } }}>
       <Box><Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".62rem", lineHeight: 1.1 }}>{eyebrow}</Typography><Typography variant="subtitle2" fontWeight={850}>{title}</Typography></Box>
     </AccordionSummary>
@@ -78,9 +78,9 @@ const OrderDialog = ({ open, order, onClose, onUpdateStatus, onUpdateKitchenStat
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isSmall} TransitionComponent={Fade}
-      PaperProps={{ elevation: 0, sx: { borderRadius: isSmall ? 0 : 4, overflow: "hidden", border: "1px solid", borderColor: "divider", boxShadow: "0 28px 80px rgba(0,0,0,.18)", bgcolor: "rgba(250,250,250,.97)", backdropFilter: "blur(18px)" } }}>
+      PaperProps={{ elevation: 0, sx: { borderRadius: isSmall ? 0 : "10px", overflow: "hidden", border: "1px solid", borderColor: "divider", boxShadow: "0 28px 80px rgba(0,0,0,.18)", bgcolor: "rgba(250,250,250,.97)", backdropFilter: "blur(18px)" } }}>
       <DialogContent sx={{ p: 0 }}>
-        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.6 }, pb: 2.2, background: "linear-gradient(135deg, rgba(255,75,69,.08), rgba(255,255,255,.96) 52%)" }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.6 }, pb: 2.2, background: "linear-gradient(135deg, rgba(49,94,251,.08), rgba(255,255,255,.96) 52%)" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
             <Box minWidth={0}>
               <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".14em", fontSize: ".64rem" }}>DETALLE DE ORDEN</Typography>

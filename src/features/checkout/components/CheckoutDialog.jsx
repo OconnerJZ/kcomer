@@ -47,7 +47,7 @@ export default function CheckoutDialog({
   if (!currentBusiness) return null;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isSmall} PaperProps={{ sx: { borderRadius: isSmall ? 0 : 3 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isSmall} PaperProps={{ sx: { borderRadius: isSmall ? 0 : "10px" } }}>
       <DialogTitle sx={{ pb: 1 }}>
         <Typography variant="h5" fontWeight={400}>Confirmar pedido</Typography>
       </DialogTitle>

@@ -41,5 +41,18 @@ export const prepareRegisterPayload = (userData) => {
   };
 };
 
-export const getAuthErrorMessage = (error) =>
-  error?.data?.message || error?.message || "Error desconocido";
+export const getAuthErrorMessage = (error) => {
+  const response = error?.data;
+  const validationMessage = Array.isArray(response?.errors)
+    ? response.errors.find((entry) => entry?.msg || entry?.message)
+    : null;
+
+  return response?.message
+    || response?.data?.message
+    || validationMessage?.msg
+    || validationMessage?.message
+    || (typeof response?.error === "string" ? response.error : null)
+    || (typeof response === "string" ? response : null)
+    || error?.message
+    || "No fue posible completar la autenticación";
+};

@@ -20,8 +20,8 @@ const ScheduleRow = ({ row }) => (
       gap: 1.2,
       px: 1.4,
       py: 1.15,
-      borderRadius: 2.4,
-      bgcolor: row.isToday ? "rgba(255,75,69,.055)" : "transparent",
+      borderRadius: "10px",
+      bgcolor: row.isToday ? "rgba(49,94,251,.055)" : "transparent",
     }}
   >
     <Box
@@ -30,7 +30,7 @@ const ScheduleRow = ({ row }) => (
         height: 8,
         borderRadius: "50%",
         bgcolor: row.isToday ? "primary.main" : row.closed ? "grey.300" : "grey.400",
-        boxShadow: row.isToday ? "0 0 0 5px rgba(255,75,69,.10)" : "none",
+        boxShadow: row.isToday ? "0 0 0 5px rgba(49,94,251,.10)" : "none",
         justifySelf: "center",
       }}
     />

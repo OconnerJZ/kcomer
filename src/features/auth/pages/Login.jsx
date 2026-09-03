@@ -28,7 +28,7 @@ const Login = () => {
         px: { xs: 2, sm: 3 },
         py: 3,
         overflow: "hidden",
-        backgroundImage: `linear-gradient(115deg, rgba(18,18,20,.82), rgba(18,18,20,.52) 48%, rgba(255,75,69,.18)), url(${Bg})`,
+        backgroundImage: `linear-gradient(115deg, rgba(18,18,20,.82), rgba(18,18,20,.52) 48%, rgba(49,94,251,.18)), url(${Bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -49,7 +49,7 @@ const Login = () => {
       >
         {!isMobile && (
           <Stack spacing={2.25} sx={{ color: "common.white", maxWidth: 480 }}>
-            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 72, height: 72, borderRadius: 3, boxShadow: "0 18px 45px rgba(0,0,0,.2)" }} />
+            <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 72, height: 72, borderRadius: "10px", boxShadow: "0 18px 45px rgba(0,0,0,.2)" }} />
             <Typography variant="overline" sx={{ letterSpacing: ".18em", opacity: .72, fontWeight: 700 }}>
               Kcomer
             </Typography>
@@ -66,7 +66,7 @@ const Login = () => {
           sx={{
             width: "100%",
             border: "1px solid rgba(255,255,255,.58)",
-            borderRadius: { xs: 3, sm: 4 },
+            borderRadius: "10px",
             bgcolor: "rgba(255,255,255,.90)",
             backdropFilter: "blur(22px)",
             boxShadow: "0 28px 80px rgba(0,0,0,.24)",
@@ -75,7 +75,7 @@ const Login = () => {
         >
           {isMobile && (
             <Stack alignItems="center" spacing={1} sx={{ pt: 3, px: 3 }}>
-              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: 2.5 }} />
+              <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: "10px" }} />
               <Typography variant="subtitle1" fontWeight={900}>Kcomer</Typography>
             </Stack>
           )}

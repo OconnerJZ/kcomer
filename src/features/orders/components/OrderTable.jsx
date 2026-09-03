@@ -48,7 +48,7 @@ const KitchenProgress = ({ order }) => {
 };
 
 const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedOrderId, now = Date.now() }) => (
-  <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflowX: "auto", bgcolor: "rgba(255,255,255,.88)" }}>
+  <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", overflowX: "auto", bgcolor: "rgba(255,255,255,.88)" }}>
     <Table sx={{ minWidth: 1080, tableLayout: "fixed" }}>
       <TableHead>
         <TableRow sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
@@ -65,7 +65,7 @@ const OrderTable = ({ orders, onViewOrder, onUpdateStatus, isSmall, highlightedO
           const terminal = terminalStatuses.has(order.status);
 
           return (
-            <TableRow key={order.id} sx={{ height: 66, bgcolor: highlighted ? "rgba(255,75,69,.055)" : "transparent", boxShadow: highlighted ? "inset 3px 0 0 rgba(255,75,69,.9)" : "none", "&:hover": { bgcolor: highlighted ? "rgba(255,75,69,.08)" : "rgba(0,0,0,.018)" }, transition: "background-color .18s ease, box-shadow .18s ease", "& td": { borderColor: "rgba(0,0,0,.055)", py: 1.2 } }}>
+            <TableRow key={order.id} sx={{ height: 66, bgcolor: highlighted ? "rgba(49,94,251,.055)" : "transparent", boxShadow: highlighted ? "inset 3px 0 0 rgba(49,94,251,.9)" : "none", "&:hover": { bgcolor: highlighted ? "rgba(49,94,251,.08)" : "rgba(0,0,0,.018)" }, transition: "background-color .18s ease, box-shadow .18s ease", "& td": { borderColor: "rgba(0,0,0,.055)", py: 1.2 } }}>
               <TableCell><Typography variant="body2" sx={{ fontWeight: 800, fontFamily: "monospace" }}>#{order.id}</Typography></TableCell>
               <TableCell><Typography variant="body2" fontWeight={650} noWrap>{order.customerName || "Cliente"}</Typography></TableCell>
               <TableCell><Typography variant="body2" color="text.secondary">{order.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) || 0}</Typography></TableCell>

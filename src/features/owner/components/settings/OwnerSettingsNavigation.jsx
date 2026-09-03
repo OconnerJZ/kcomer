@@ -54,15 +54,15 @@ const OwnerSettingsNavigation = ({ sections, activeTab, onChange }) => (
             scrollSnapAlign: "start",
             justifyContent: "flex-start",
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: "10px",
             px: 1.6,
             py: 1.1,
             color: selected ? "text.primary" : "text.secondary",
-            bgcolor: selected ? "rgba(255,75,69,.08)" : "transparent",
+            bgcolor: selected ? "rgba(49,94,251,.08)" : "transparent",
             border: "1px solid",
-            borderColor: selected ? "rgba(255,75,69,.22)" : "divider",
+            borderColor: selected ? "rgba(49,94,251,.22)" : "divider",
             "&:hover": {
-              bgcolor: selected ? "rgba(255,75,69,.11)" : "action.hover",
+              bgcolor: selected ? "rgba(49,94,251,.11)" : "action.hover",
             },
           }}
         >

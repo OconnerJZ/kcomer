@@ -95,7 +95,7 @@ const ProductCustomizationDialog = ({ open, item, onClose, onConfirm }) => (
     onClose={onClose}
     maxWidth="sm"
     fullWidth
-    PaperProps={{ sx: { borderRadius: 4 } }}
+    PaperProps={{ sx: { borderRadius: "10px" } }}
   >
     <ProductCustomizationContent
       key={open ? `open-${item.id}` : "closed"}

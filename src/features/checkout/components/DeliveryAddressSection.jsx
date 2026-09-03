@@ -25,8 +25,8 @@ export default function DeliveryAddressSection({ addressType, onAddressTypeChang
     <Typography variant="h6" fontWeight={850} sx={{ mb: .5 }}>¿Dónde entregamos?</Typography>
     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Marca el punto exacto. La dirección escrita seguirá disponible para referencias y número exterior.</Typography>
 
-    <Box sx={{ display: "flex", gap: 1, p: .5, bgcolor: "action.hover", borderRadius: 2.5, mb: 2 }}>
-      {options.map((option) => <Box key={option.value} onClick={() => onAddressTypeChange(option.value)} sx={{ flex: 1, py: .9, textAlign: "center", borderRadius: 2, cursor: "pointer", bgcolor: addressType === option.value ? "background.paper" : "transparent", boxShadow: addressType === option.value ? "0 4px 14px rgba(0,0,0,.06)" : 0 }}><Typography variant="body2" fontWeight={addressType === option.value ? 800 : 500}>{option.label}</Typography></Box>)}
+    <Box sx={{ display: "flex", gap: 1, p: .5, bgcolor: "action.hover", borderRadius: "10px", mb: 2 }}>
+      {options.map((option) => <Box key={option.value} onClick={() => onAddressTypeChange(option.value)} sx={{ flex: 1, py: .9, textAlign: "center", borderRadius: "10px", cursor: "pointer", bgcolor: addressType === option.value ? "background.paper" : "transparent", boxShadow: addressType === option.value ? "0 4px 14px rgba(0,0,0,.06)" : 0 }}><Typography variant="body2" fontWeight={addressType === option.value ? 800 : 500}>{option.label}</Typography></Box>)}
     </Box>
 
     {addressType === "saved" && hasSavedAddresses && <Stack spacing={1.5}>

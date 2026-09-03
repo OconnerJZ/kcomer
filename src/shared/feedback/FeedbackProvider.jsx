@@ -76,7 +76,7 @@ export function FeedbackProvider({ children }) {
               width: { xs: "calc(100vw - 24px)", sm: "auto" },
               minWidth: { sm: 360 },
               maxWidth: 560,
-              borderRadius: 3,
+              borderRadius: "10px",
               alignItems: "center",
               boxShadow: "0 18px 55px rgba(25,20,18,.18)",
               backdropFilter: "blur(14px)",

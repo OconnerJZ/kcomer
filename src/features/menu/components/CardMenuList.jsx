@@ -12,7 +12,7 @@ const CARD_STYLES = {
   overflow: "hidden",
   border: "1px solid",
   borderColor: "divider",
-  borderRadius: 2.5,
+  borderRadius: "10px",
   bgcolor: "rgba(255,255,255,.82)",
   transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease",
   "&:hover": {

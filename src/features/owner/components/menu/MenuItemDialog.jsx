@@ -44,7 +44,7 @@ const MenuItemPreview = ({ form, imagePreview }) => (
       overflow: "hidden",
       border: "1px solid",
       borderColor: "divider",
-      borderRadius: 3,
+      borderRadius: "10px",
       bgcolor: "background.paper",
       boxShadow: "0 18px 50px rgba(0,0,0,.07)",
     }}
@@ -118,7 +118,7 @@ const MenuItemDialog = ({
       maxWidth="md"
       fullWidth
       fullScreen={fullScreen}
-      PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: "hidden" } }}
+      PaperProps={{ sx: { borderRadius: fullScreen ? 0 : "10px", overflow: "hidden" } }}
     >
       <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 2.5 }, pb: 1.5, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
         <Box>
@@ -145,7 +145,7 @@ const MenuItemDialog = ({
                   variant="outlined"
                   component="span"
                   startIcon={<AddPhotoAlternate />}
-                  sx={{ textTransform: "none", borderRadius: 2, px: 2 }}
+                  sx={{ textTransform: "none", borderRadius: "10px", px: 2 }}
                 >
                   {imagePreview ? "Cambiar fotografía" : "Agregar fotografía"}
                 </Button>
@@ -196,7 +196,7 @@ const MenuItemDialog = ({
               fullWidth
             />
 
-            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: 2, bgcolor: "background.paper" }}>
+            <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "background.paper" }}>
               <FormControlLabel
                 sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
                 control={<Switch checked={form.available} onChange={(event) => onFormChange("available", event.target.checked)} />}
@@ -228,7 +228,7 @@ const MenuItemDialog = ({
             startIcon={<TuneRounded />}
             variant="outlined"
             disabled={loading}
-            sx={{ mr: "auto", textTransform: "none", borderRadius: 2, fontWeight: 700 }}
+            sx={{ mr: "auto", textTransform: "none", borderRadius: "10px", fontWeight: 700 }}
           >
             Ingredientes y opciones
           </Button>
@@ -241,7 +241,7 @@ const MenuItemDialog = ({
           variant="contained"
           disableElevation
           disabled={loading || !canSave}
-          sx={{ textTransform: "none", borderRadius: 2, minWidth: 120, fontWeight: 700 }}
+          sx={{ textTransform: "none", borderRadius: "10px", minWidth: 120, fontWeight: 700 }}
         >
           {loading ? <CircularProgress size={22} color="inherit" /> : editing ? "Guardar cambios" : "Crear platillo"}
         </Button>

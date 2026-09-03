@@ -87,7 +87,7 @@ export default function OrderAuditTrail({ orderId, enabled = true, compact = fal
   if (compact) return <Box sx={{ pt: .5 }}>{content}</Box>;
 
   return (
-    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
+    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.82)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".64rem" }}>AUDITORÍA</Typography>

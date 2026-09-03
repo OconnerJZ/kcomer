@@ -3,20 +3,22 @@ import PropTypes from "prop-types";
 import PhotoLibraryRounded from "@mui/icons-material/PhotoLibraryRounded";
 import RestaurantMenuRounded from "@mui/icons-material/RestaurantMenuRounded";
 import NearMeRounded from "@mui/icons-material/NearMeRounded";
+import ReviewsRounded from "@mui/icons-material/ReviewsRounded";
 import ArrowOutwardRounded from "@mui/icons-material/ArrowOutwardRounded";
 import CardPlaceAccordion from "./CardPlaceAccordion";
 import { StyledFront } from "./CardPlaceStyled";
 
 const ACTIONS = [
-  { key: "menu", label: "Menú", helper: "Qué pedir", icon: RestaurantMenuRounded },
-  { key: "location", label: "Llegar", helper: "Ubicación", icon: NearMeRounded },
-  { key: "photo", label: "Fotos", helper: "Conócelo", icon: PhotoLibraryRounded },
+  { key: "menu", label: "Menú", helper: "Qué pedir", icon: RestaurantMenuRounded, color: "#D97706", tint: "rgba(217,119,6,.10)" },
+  { key: "location", label: "Llegar", helper: "Ubicación", icon: NearMeRounded, color: "#2563EB", tint: "rgba(37,99,235,.09)" },
+  { key: "photo", label: "Fotos", helper: "Conócelo", icon: PhotoLibraryRounded, color: "#7C3AED", tint: "rgba(124,58,237,.09)" },
+  { key: "review", label: "Reseñas", helper: "Opiniones", icon: ReviewsRounded, color: "#0F766E", tint: "rgba(15,118,110,.09)" },
 ];
 
 const CardPlaceFront = ({ flipped, onMovement, data }) => (
   <StyledFront flipped={flipped} sx={{ p: "16px !important", alignItems: "stretch !important" }}>
-    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 1 }}>
-      {ACTIONS.map(({ key, label, helper, icon: Icon }) => (
+    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 1 }}>
+      {ACTIONS.map(({ key, label, helper, icon: Icon, color, tint }) => (
         <ButtonBase
           key={key}
           onClick={(event) => {
@@ -27,7 +29,7 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
             minHeight: 64,
             px: 1.35,
             py: 1.1,
-            borderRadius: 3,
+            borderRadius: "10px",
             justifyContent: "flex-start",
             textAlign: "left",
             bgcolor: "rgba(247,245,243,.94)",
@@ -40,7 +42,7 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
             },
           }}
         >
-          <Box sx={{ width: 34, height: 34, borderRadius: 2.2, mr: 1.1, flexShrink: 0, display: "grid", placeItems: "center", bgcolor: "#fff", boxShadow: "0 4px 12px rgba(30,25,23,.06)", color: "text.primary" }}>
+          <Box sx={{ width: 34, height: 34, borderRadius: "8px", mr: 1.1, flexShrink: 0, display: "grid", placeItems: "center", bgcolor: tint, color }}>
             <Icon sx={{ fontSize: 18 }} />
           </Box>
           <Box minWidth={0} flex={1}>

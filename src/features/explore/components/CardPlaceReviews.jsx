@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Avatar, List, Rate, Spin } from "antd";
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { useGetReviewsByBusinessQuery } from "@Features/reviews/api/reviews.api";
 import { normalizeReviews } from "@Features/reviews/model/review";
@@ -8,7 +8,7 @@ import { resolveExploreMediaUrl } from "../model/cardPlaceMovement";
 import CardPlaceBack from "./CardPlaceBack";
 
 const CardPlaceReviews = ({ flipped, onMovement, businessId }) => {
-  const { data: reviewsResponse, isLoading } = useGetReviewsByBusinessQuery(
+  const { data: reviewsResponse, isLoading, isError, error } = useGetReviewsByBusinessQuery(
     { businessId },
     { skip: !businessId },
   );
@@ -20,6 +20,10 @@ const CardPlaceReviews = ({ flipped, onMovement, businessId }) => {
         <Box sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Spin />
         </Box>
+      ) : isError ? (
+        <Alert severity="warning" sx={{ m: 2 }}>
+          {error?.data?.message || "No pudimos cargar las reseñas en este momento"}
+        </Alert>
       ) : reviews.length === 0 ? (
         <Box
           sx={{

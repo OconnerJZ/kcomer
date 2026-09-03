@@ -65,7 +65,7 @@ const PaymentMethodsTab = ({ paymentMethods, onToggle, onConfigChange, onSave, l
                   sx={{
                     width: 36,
                     height: 36,
-                    borderRadius: 2,
+                    borderRadius: "10px",
                     display: "grid",
                     placeItems: "center",
                     bgcolor: method.active ? "rgba(255,159,28,.10)" : "grey.100",

@@ -98,7 +98,7 @@ export default function Navbar() {
           <Box sx={{ display: "flex", alignItems: "center", gap: .5 }}>
             {navItems.map((item) => (
               <Badge key={item.title} badgeContent={item.cartBadge ? cartCount : 0} color="error" sx={{ "& .MuiBadge-badge": { right: -3, top: 2 } }}>
-                <Button sx={{ color: "text.primary", textTransform: "none", borderRadius: 2, fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>
+                <Button sx={{ color: "text.primary", textTransform: "none", borderRadius: "10px", fontWeight: location.pathname.startsWith(`/${item.link}`) ? 700 : 500 }} startIcon={item.icon} onClick={() => navigate(`/${item.link}`)}>
                   {item.title}
                 </Button>
               </Badge>
@@ -109,7 +109,7 @@ export default function Navbar() {
                 <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
                   <Avatar src={user?.avatar} sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>{user?.name?.charAt(0)}</Avatar>
                 </IconButton>
-                <Menu anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 210, mt: 1, borderRadius: 2.5 } }}>
+                <Menu anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)} transformOrigin={{ horizontal: "right", vertical: "top" }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }} PaperProps={{ sx: { minWidth: 210, mt: 1, borderRadius: "10px" } }}>
                   <MenuItem disabled><ListItemText primary={user?.name} secondary={user?.email} primaryTypographyProps={{ fontWeight: 700, fontSize: ".9rem" }} secondaryTypographyProps={{ fontSize: ".75rem" }} /></MenuItem>
                   <Divider />
                   <MenuItem onClick={() => goFromMenu("/perfil")}><ListItemIcon><Person fontSize="small" /></ListItemIcon><ListItemText>Mi Perfil</ListItemText></MenuItem>
@@ -121,7 +121,7 @@ export default function Navbar() {
                 </Menu>
               </>
             ) : (
-              <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")} sx={{ ml: 1, textTransform: "none", borderRadius: 2 }}>Entrar</Button>
+              <Button variant="outlined" startIcon={<LoginIcon />} onClick={() => navigate("/login")} sx={{ ml: 1, textTransform: "none", borderRadius: "10px" }}>Entrar</Button>
             )}
           </Box>
         </Toolbar>

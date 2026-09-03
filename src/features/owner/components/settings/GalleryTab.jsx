@@ -33,7 +33,7 @@ export default function GalleryTab({
       elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
-        borderRadius: 3,
+        borderRadius: "10px",
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "rgba(255,255,255,.88)",
@@ -65,7 +65,7 @@ export default function GalleryTab({
             component="label"
             startIcon={<Add />}
             disabled={loading}
-            sx={{ textTransform: "none", borderRadius: 2, alignSelf: { xs: "flex-start", sm: "center" } }}
+            sx={{ textTransform: "none", borderRadius: "10px", alignSelf: { xs: "flex-start", sm: "center" } }}
           >
             Agregar foto
             <input type="file" hidden accept="image/*" onChange={onUpload} />
@@ -73,7 +73,7 @@ export default function GalleryTab({
         </Stack>
 
         {photos.length === 0 ? (
-          <Box sx={{ py: 6, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: 3 }}>
+          <Box sx={{ py: 6, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "10px" }}>
             <PhotoLibrary sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
             <Typography variant="body2" fontWeight={800}>Tu galería todavía está vacía</Typography>
             <Typography variant="caption" color="text.secondary">
@@ -93,9 +93,9 @@ export default function GalleryTab({
                   elevation={0}
                   sx={{
                     overflow: "hidden",
-                    borderRadius: 3,
+                    borderRadius: "10px",
                     border: "1px solid",
-                    borderColor: isCover ? "rgba(255,75,69,.4)" : "divider",
+                    borderColor: isCover ? "rgba(49,94,251,.4)" : "divider",
                     bgcolor: "background.paper",
                     transition: "transform .16s ease, box-shadow .16s ease",
                     "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 28px rgba(0,0,0,.07)" },
@@ -131,7 +131,7 @@ export default function GalleryTab({
                           size="small"
                           onClick={() => onSetCover?.(url)}
                           disabled={loading || !url}
-                          sx={{ textTransform: "none", borderRadius: 2, whiteSpace: "nowrap" }}
+                          sx={{ textTransform: "none", borderRadius: "10px", whiteSpace: "nowrap" }}
                         >
                           Usar como portada
                         </Button>

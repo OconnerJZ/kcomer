@@ -30,7 +30,7 @@ const PendingOrderEditorDialog = ({ open, order, menu, loading, onClose, onSave,
         onClose={saving ? undefined : onClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 4 } }}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
       >
         <DialogTitle sx={{ pb: 1 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">

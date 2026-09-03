@@ -5,7 +5,7 @@ import MenuModifierManager from "./MenuModifierManager";
 
 export default function MenuModifierDialog({ open, item, fullScreen, onClose }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen} PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 4 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen} PaperProps={{ sx: { borderRadius: fullScreen ? 0 : "10px" } }}>
       <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2.5, pb: 1.5 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
           <Box>

@@ -82,7 +82,7 @@ const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading })
               />
             </Grid>
           </Grid>
-          <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Box sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}>
             <FormControlLabel
               sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
               control={(
@@ -116,7 +116,7 @@ const DeliveryTab = ({ deliverySettings, setDeliverySettings, onSave, loading })
         <Box
           sx={{
             p: 2.25,
-            borderRadius: 3,
+            borderRadius: "10px",
             border: "1px solid",
             borderColor: "divider",
             bgcolor: "rgba(255,159,28,.06)",

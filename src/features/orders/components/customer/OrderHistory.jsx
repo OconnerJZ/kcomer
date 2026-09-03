@@ -33,7 +33,7 @@ export default function OrderHistory({ order, expanded, onToggle }) {
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1.1}>
-          <Box sx={{ width: 32, height: 32, borderRadius: 2, display: "grid", placeItems: "center", bgcolor: "rgba(255,75,69,.08)", color: "primary.main" }}>
+          <Box sx={{ width: 32, height: 32, borderRadius: "10px", display: "grid", placeItems: "center", bgcolor: "rgba(49,94,251,.08)", color: "primary.main" }}>
             <HistoryRounded sx={{ fontSize: 18 }} />
           </Box>
           <Box sx={{ textAlign: "left" }}>

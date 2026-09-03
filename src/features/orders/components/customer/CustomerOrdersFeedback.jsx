@@ -12,7 +12,7 @@ const CustomerOrdersFeedback = ({ feedback, onClose }) => (
       severity={feedback.severity}
       variant="filled"
       onClose={onClose}
-      sx={{ borderRadius: 2.5, boxShadow: "0 12px 34px rgba(0,0,0,.16)" }}
+      sx={{ borderRadius: "10px", boxShadow: "0 12px 34px rgba(0,0,0,.16)" }}
     >
       {feedback.message}
     </Alert>

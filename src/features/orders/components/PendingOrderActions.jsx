@@ -69,7 +69,7 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
         </Tooltip>
       </Stack>
 
-      <Dialog open={rejectOpen} onClose={() => setRejectOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={rejectOpen} onClose={() => setRejectOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "10px" } }}>
         <DialogTitle sx={{ fontWeight: 800 }}>Rechazar orden #{order.id}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
@@ -87,7 +87,7 @@ export default function PendingOrderActions({ order, onUpdateStatus, fullWidth =
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5 }}>
           <Button onClick={() => setRejectOpen(false)} sx={{ textTransform: "none" }}>Cancelar</Button>
-          <Button color="error" variant="contained" disableElevation onClick={handleReject} sx={{ textTransform: "none", borderRadius: 2 }}>
+          <Button color="error" variant="contained" disableElevation onClick={handleReject} sx={{ textTransform: "none", borderRadius: "10px" }}>
             Confirmar rechazo
           </Button>
         </DialogActions>

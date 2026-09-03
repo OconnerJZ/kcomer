@@ -32,7 +32,7 @@ export default function TransferPaymentReviewPanel({ order }) {
 
   if (loadingReport) return <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}><CircularProgress size={24} /></Box>;
   return (
-    <Box sx={{ p: { xs: 2, sm: 2.5 }, border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "rgba(255,255,255,.82)" }}>
+    <Box sx={{ p: { xs: 2, sm: 2.5 }, border: "1px solid", borderColor: "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.82)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5} gap={1}>
         <Box><Typography variant="overline" color="text.secondary">TRANSFERENCIA</Typography><Typography variant="subtitle1" fontWeight={850}>Comprobante del cliente</Typography></Box>
         {payment && <Chip size="small" label={labels[payment.status] || payment.status} color={payment.status === "reviewed" ? "success" : payment.status === "requires_clarification" ? "warning" : "default"} />}

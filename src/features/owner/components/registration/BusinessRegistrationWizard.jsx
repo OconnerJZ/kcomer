@@ -41,7 +41,7 @@ const BusinessRegistrationWizard = ({
         width: "100%",
         maxWidth: 720,
         overflow: "hidden",
-        borderRadius: 3,
+        borderRadius: "10px",
         border: "1px solid",
         borderColor: "divider",
         boxShadow: "0 18px 50px rgba(32,28,26,.10)",
@@ -66,7 +66,7 @@ const BusinessRegistrationWizard = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 3,
+              borderRadius: "10px",
               display: "grid",
               placeItems: "center",
               bgcolor: "rgba(255,159,28,.18)",

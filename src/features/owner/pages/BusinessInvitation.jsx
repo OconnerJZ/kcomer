@@ -33,8 +33,8 @@ export default function BusinessInvitation() {
     } catch (err) { setAcceptError(err?.data?.message || err?.message || "El código no es válido o ya expiró"); }
   };
 
-  return <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 8 }, px: { xs: 1.5, sm: 3 } }}><Paper elevation={0} sx={{ p: { xs: 2.5, sm: 5 }, border: "1px solid", borderColor: "divider", borderRadius: 3 }}><Stack spacing={2.5} alignItems="center" textAlign="center">
-    <Box sx={{ width: 64, height: 64, borderRadius: 3, bgcolor: "rgba(255,75,69,.08)", color: "primary.main", display: "grid", placeItems: "center" }}>{result ? <CheckCircle fontSize="large" /> : <Store fontSize="large" />}</Box>
+  return <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 8 }, px: { xs: 1.5, sm: 3 } }}><Paper elevation={0} sx={{ p: { xs: 2.5, sm: 5 }, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}><Stack spacing={2.5} alignItems="center" textAlign="center">
+    <Box sx={{ width: 64, height: 64, borderRadius: "10px", bgcolor: "rgba(49,94,251,.08)", color: "primary.main", display: "grid", placeItems: "center" }}>{result ? <CheckCircle fontSize="large" /> : <Store fontSize="large" />}</Box>
     {token && isLoading && <CircularProgress />}
     {error && <Alert severity="error">{error?.data?.message || "La invitación no está disponible"}</Alert>}
     {data && !result && <><Typography variant="h4" fontWeight={850}>{data.type === "ownership_transfer" ? "Traspaso de local" : "Invitación al equipo"}</Typography><Typography color="text.secondary"><strong>{data.businessName}</strong> te invita como <strong>{data.role}</strong>. La invitación está dirigida a {data.email}; iniciaste sesión como {user?.email}.</Typography><Button size="large" variant="contained" onClick={accept} disabled={accepting || data.status !== "pending"} sx={{ width: { xs: "100%", sm: "auto" } }}>{accepting ? <CircularProgress size={24} /> : "Aceptar invitación"}</Button></>}

@@ -9,7 +9,7 @@ const PendingOrderItemList = ({ items, onChangeQuantity, onEdit, onRemove }) => 
       {items.map((item) => (
         <Box
           key={item.id}
-          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 2.5 }}
+          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}
         >
           <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
             <Box minWidth={0} flex={1}>

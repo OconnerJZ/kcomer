@@ -3,14 +3,14 @@ import { Alert, Snackbar } from "@mui/material";
 
 const OwnerSettingsFeedback = ({ error, snackbar, onClose }) => (
   <>
-    {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
+    {error && <Alert severity="error" sx={{ mb: 2, borderRadius: "10px" }}>{error}</Alert>}
     <Snackbar
       open={snackbar.open}
       autoHideDuration={4000}
       onClose={onClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
-      <Alert severity={snackbar.severity} onClose={onClose} sx={{ borderRadius: 2 }}>
+      <Alert severity={snackbar.severity} onClose={onClose} sx={{ borderRadius: "10px" }}>
         {snackbar.message}
       </Alert>
     </Snackbar>

@@ -16,16 +16,16 @@ const DeliveryInfo = ({ order }) => {
   const mapUrl = useMemo(() => buildMapUrl(order.deliveryLocation, deliveryAddress), [order.deliveryLocation, deliveryAddress]);
 
   return (
-      <Box sx={{ height: "100%", border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden", bgcolor: "rgba(255,255,255,.72)" }}>
+      <Box sx={{ height: "100%", border: "1px solid", borderColor: "divider", borderRadius: "10px", overflow: "hidden", bgcolor: "rgba(255,255,255,.72)" }}>
         <Box sx={{ px: 2, pt: 2 }}>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".13em", fontSize: ".64rem" }}>ENTREGA</Typography>
           <Typography variant="subtitle1" fontWeight={850}>{isDelivery ? "Dirección del cliente" : "Recoger en tienda"}</Typography>
         </Box>
 
         {isDelivery && (
-          <Box sx={{ display: "flex", gap: .5, mx: 2, mt: 1.5, p: .4, bgcolor: "action.hover", borderRadius: 2 }}>
+          <Box sx={{ display: "flex", gap: .5, mx: 2, mt: 1.5, p: .4, bgcolor: "action.hover", borderRadius: "10px" }}>
             {[{ key: "address", label: "Dirección", icon: LocationOn }, { key: "map", label: "Mapa", icon: MapRounded }].map(({ key, label, icon: Icon }) => (
-              <ButtonBase key={key} onClick={() => setView(key)} sx={{ flex: 1, py: .8, borderRadius: 1.7, bgcolor: view === key ? "background.paper" : "transparent", boxShadow: view === key ? "0 4px 12px rgba(0,0,0,.06)" : 0 }}>
+              <ButtonBase key={key} onClick={() => setView(key)} sx={{ flex: 1, py: .8, borderRadius: "10px", bgcolor: view === key ? "background.paper" : "transparent", boxShadow: view === key ? "0 4px 12px rgba(0,0,0,.06)" : 0 }}>
                 <Icon sx={{ fontSize: 16, mr: .6 }} />
                 <Typography variant="caption" fontWeight={800}>{label}</Typography>
               </ButtonBase>
@@ -43,7 +43,7 @@ const DeliveryInfo = ({ order }) => {
               </Box>
             </Stack>
           ) : mapUrl ? (
-            <Box sx={{ height: 230, borderRadius: 2.5, overflow: "hidden", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ height: 230, borderRadius: "10px", overflow: "hidden", border: "1px solid", borderColor: "divider" }}>
               <iframe src={mapUrl} title={`Ubicación de entrega de orden ${order.id}`} width="100%" height="100%" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </Box>
           ) : <Typography variant="body2" color="text.secondary">No hay coordenadas disponibles para esta orden.</Typography>}

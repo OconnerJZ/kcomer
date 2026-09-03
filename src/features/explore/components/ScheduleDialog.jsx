@@ -15,7 +15,7 @@ const ScheduleDialog = ({ open, onClose, data }) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4.5,
+          borderRadius: "10px",
           overflow: "hidden",
           bgcolor: "rgba(255,255,255,.96)",
           boxShadow: "0 30px 85px rgba(0,0,0,.22)",

@@ -2,7 +2,7 @@ import { Avatar, Box, Chip, Collapse, IconButton, Stack, Typography } from "@mui
 import { AccessTimeRounded, DeliveryDiningRounded, KeyboardArrowDownRounded, PlaceRounded } from "@mui/icons-material";
 import { StyledCard } from "./CardPlaceStyled";
 import useCardPlace from "@Features/explore/hooks/useCardPlace";
-import { CardPlaceLocation, CardPlaceMenu, CardPlacePhotos } from "./CardPlaceMovements";
+import { CardPlaceLocation, CardPlaceMenu, CardPlacePhotos, CardPlaceReviews } from "./CardPlaceMovements";
 import CardPlaceFront from "./CardPlaceFront";
 import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
@@ -17,6 +17,7 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => ({
   location: <CardPlaceLocation flipped={flipped} onMovement={onMovement} business={business} />,
   photo: <CardPlacePhotos flipped={flipped} onMovement={onMovement} business={business} />,
   menu: <CardPlaceMenu flipped={flipped} onMovement={onMovement} businessId={business.id} businessName={business.name} paymentMethods={business.paymentMethods} menu={business.menu} />,
+  review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} businessId={business.id} />,
 }[movement] || null);
 
 const businessPropType = PropTypes.shape({
@@ -54,7 +55,7 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
         sx={{
           width: "100%",
           maxWidth: 370,
-          borderRadius: 5,
+          borderRadius: "10px",
           overflow: "hidden",
           position: "relative",
           backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : "linear-gradient(135deg,#e8ded8,#cdbdb4)",
@@ -70,7 +71,7 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
         <Box sx={{ position: "relative", zIndex: 1, p: 1.2 }}>
           <Box
             sx={{
-              borderRadius: 4,
+              borderRadius: "10px",
               overflow: "hidden",
               bgcolor: "rgba(255,255,255,.82)",
               backdropFilter: "blur(18px) saturate(1.12)",
@@ -101,7 +102,7 @@ const CardPlace = ({ data, userLocation, loadBusinessMenu }) => {
                     <Chip key={label} size="small" label={label} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(255,159,28,.14)", color: "secondary.dark", border: "1px solid rgba(255,159,28,.22)" }} />
                   ))}
                   {distance && <Chip size="small" icon={<PlaceRounded />} label={distance} sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(46,173,103,.13)", color: "success.dark", border: "1px solid rgba(46,173,103,.2)", "& .MuiChip-icon": { color: "success.main" } }} />}
-                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(255,75,69,.11)", color: "primary.dark", border: "1px solid rgba(255,75,69,.18)", "& .MuiChip-icon": { color: "primary.main" } }} />}
+                  {hasServiceTag && <Chip size="small" icon={<DeliveryDiningRounded />} label="Delivery" sx={{ height: 25, fontSize: ".67rem", fontWeight: 750, bgcolor: "rgba(49,94,251,.11)", color: "primary.dark", border: "1px solid rgba(49,94,251,.18)", "& .MuiChip-icon": { color: "primary.main" } }} />}
                 </Stack>
               )}
 

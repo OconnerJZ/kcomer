@@ -19,7 +19,7 @@ export default function MenuToolbar({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Buscar platillo"
           size="small"
-          sx={{ width: { xs: "100%", md: 320 }, "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "background.paper" } }}
+          sx={{ width: { xs: "100%", md: 320 }, "& .MuiOutlinedInput-root": { borderRadius: "10px", bgcolor: "background.paper" } }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">

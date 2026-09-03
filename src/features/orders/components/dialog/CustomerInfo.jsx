@@ -38,7 +38,7 @@ const InfoField = ({ icon: Icon, label, value, isLink = false, href = "" }) => (
 );
 
 const CustomerInfo = ({ order }) => (
-  <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, height: "100%", bgcolor: "rgba(255,255,255,.72)" }}>
+  <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", p: { xs: 2, sm: 2.5 }, height: "100%", bgcolor: "rgba(255,255,255,.72)" }}>
     <Typography
       variant="overline"
       sx={{

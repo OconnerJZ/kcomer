@@ -41,14 +41,14 @@ export default function OrderProductList({
 
   return <Box sx={{ overflow: "hidden", borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
     {groups.map((group, groupIndex) => <Box key={group.label || "products"}>
-      {group.label && <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1.5, py: 1, bgcolor: "rgba(255,75,69,.045)", borderTop: groupIndex ? "1px solid" : "none", borderColor: "divider" }}><Typography variant="caption" fontWeight={900} color="primary.dark">{group.label}</Typography><Typography variant="caption" color="text.secondary">{group.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)} piezas</Typography></Stack>}
+      {group.label && <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1.5, py: 1, bgcolor: "rgba(49,94,251,.045)", borderTop: groupIndex ? "1px solid" : "none", borderColor: "divider" }}><Typography variant="caption" fontWeight={900} color="primary.dark">{group.label}</Typography><Typography variant="caption" color="text.secondary">{group.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)} piezas</Typography></Stack>}
       {group.items.map((item, index) => {
         const subtotal = Number(item.subtotal ?? (Number(item.price || item.unitPrice || 0) * Number(item.quantity || 0)));
         const meta = getMeta?.(item);
         const status = renderStatus?.(item);
         const actions = renderActions?.(item);
         return <Box key={item.detailId || item.id || `${item.name}-${index}`} sx={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto", columnGap: { xs: .9, sm: 1.2 }, rowGap: .75, alignItems: "start", px: { xs: .5, sm: .75 }, py: 1.35, borderTop: index || group.label ? "1px solid" : "none", borderColor: "divider" }}>
-          <Chip label={`${Number(item.quantity || 0)}×`} size="small" sx={{ fontWeight: 850, minWidth: 38, height: 24, bgcolor: "rgba(255,75,69,.08)", color: "primary.main" }} />
+          <Chip label={`${Number(item.quantity || 0)}×`} size="small" sx={{ fontWeight: 850, minWidth: 38, height: 24, bgcolor: "rgba(49,94,251,.08)", color: "primary.main" }} />
           <Box minWidth={0}>
             <Typography variant="body2" fontWeight={800} sx={{ lineHeight: 1.35 }}>{item.name}</Typography>
             {meta && <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: .2 }}>{meta}</Typography>}

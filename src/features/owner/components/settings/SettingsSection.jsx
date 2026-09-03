@@ -6,7 +6,7 @@ const SettingsSection = ({ eyebrow, title, description, children }) => (
     elevation={0}
     sx={{
       p: { xs: 2, sm: 3 },
-      borderRadius: 3,
+      borderRadius: "10px",
       border: "1px solid",
       borderColor: "divider",
       bgcolor: "rgba(255,255,255,.88)",

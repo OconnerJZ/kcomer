@@ -34,7 +34,7 @@ export const STATUS_LABELS = Object.freeze(
 
 export const STATUS_COLORS = {
   pending: { bg: "#467A77", hover: "#dd6b20" },
-  accepted: { bg: "#FF4B45", hover: "#C93430" },
+  accepted: { bg: "#315EFB", hover: "#1E40AF" },
   preparing: { bg: "#FF9F1C", hover: "#A95B00" },
   ready: { bg: "#2EAD67", hover: "#187A42" },
   in_delivery: { bg: "#A95B00", hover: "#7A4100" },
@@ -43,7 +43,7 @@ export const STATUS_COLORS = {
 
 export const COLOR_MAP = {
   pending: "#467A77",
-  accepted: "#FF4B45",
+  accepted: "#315EFB",
   preparing: "#FF9F1C",
   ready: "#2EAD67",
   in_delivery: "#A95B00",

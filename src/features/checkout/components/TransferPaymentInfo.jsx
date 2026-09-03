@@ -9,7 +9,7 @@ export default function TransferPaymentInfo({ config = {}, compact = false }) {
 
   return (
     <Box mt={compact ? 0 : 2}>
-      <Box sx={{ background: "linear-gradient(135deg, #A95B00 0%, #FF4B45 100%)", borderRadius: 3, p: compact ? 2 : 3, color: "white" }}>
+      <Box sx={{ background: "linear-gradient(135deg, #A95B00 0%, #315EFB 100%)", borderRadius: "10px", p: compact ? 2 : 3, color: "white" }}>
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" mb={2} gap={1}>
           <Box><Typography variant="caption" sx={{ opacity: .72 }}>BANCO</Typography><Typography fontWeight={800}>{config.bankName}</Typography></Box>
           <Box textAlign="right"><Typography variant="caption" sx={{ opacity: .72 }}>TITULAR</Typography><Typography variant="body2" fontWeight={750}>{config.accountHolder}</Typography></Box>

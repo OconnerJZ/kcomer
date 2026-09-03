@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 const CancelOrderDialog = ({ open, onClose, onConfirm }) => (
-  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 3.5 } }}>
+  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "10px" } }}>
     <DialogTitle sx={{ fontWeight: 900 }}>Cancelar orden</DialogTitle>
     <DialogContent>
       <Typography color="text.secondary">

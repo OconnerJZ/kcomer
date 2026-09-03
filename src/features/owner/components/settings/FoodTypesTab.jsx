@@ -57,7 +57,7 @@ const FoodTypesTab = ({
                 textAlign: "center",
                 border: "1px dashed",
                 borderColor: "divider",
-                borderRadius: 3,
+                borderRadius: "10px",
               }}
             >
               <RestaurantMenu sx={{ color: "text.disabled", fontSize: 38, mb: 1 }} />
@@ -88,7 +88,7 @@ const FoodTypesTab = ({
                       minHeight: 64,
                       px: 1.5,
                       justifyContent: "space-between",
-                      borderRadius: 2.5,
+                      borderRadius: "10px",
                       borderColor: selected ? "rgba(255,159,28,.42)" : "divider",
                       bgcolor: selected ? "rgba(255,159,28,.07)" : "background.paper",
                       color: "text.primary",
@@ -103,7 +103,7 @@ const FoodTypesTab = ({
                         sx={{
                           width: 34,
                           height: 34,
-                          borderRadius: 2,
+                          borderRadius: "10px",
                           display: "grid",
                           placeItems: "center",
                           bgcolor: selected ? "rgba(255,159,28,.12)" : "grey.100",

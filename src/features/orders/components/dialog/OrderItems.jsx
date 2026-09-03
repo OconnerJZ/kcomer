@@ -47,7 +47,7 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
   const hasPendingProduction = kitchenEnabled && totalUnits > 0 && readyUnits < totalUnits;
 
   return (
-    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.86)" }}>
+    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", p: { xs: 2, sm: 2.5 }, bgcolor: "rgba(255,255,255,.86)" }}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} gap={1.2} sx={{ mb: 2 }}>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: ".12em", fontSize: ".64rem" }}>PEDIDO</Typography>
@@ -60,7 +60,7 @@ const OrderItems = ({ items = [], kitchenEnabled = false, onUpdateKitchenStatus 
         </Stack>
       </Stack>
 
-      {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: 2, bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
+      {hasPendingProduction && <Box sx={{ mb: 1.2, px: 1.35, py: 1, borderRadius: "10px", bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>Avanza cada producto desde aquí para que ninguno se quede pendiente.</Typography></Box>}
 
       <OrderProductList
         items={items}

@@ -4,7 +4,7 @@ import TransferPaymentInfo from "./TransferPaymentInfo";
 const METHOD_META = {
   cash: { icon: "💵", label: "Efectivo", color: "#2EAD67", bg: "rgba(46,173,103,.08)" },
   transfer: { icon: "🏦", label: "Transferencia", color: "#FF9F1C", bg: "rgba(255,159,28,.08)" },
-  card: { icon: "💳", label: "Tarjeta", color: "#FF4B45", bg: "rgba(255,75,69,.07)" },
+  card: { icon: "💳", label: "Tarjeta", color: "#315EFB", bg: "rgba(49,94,251,.07)" },
   wallet: { icon: "📱", label: "Billetera digital", color: "#FF9F1C", bg: "rgba(255,159,28,.08)" },
 };
 
@@ -26,8 +26,8 @@ export default function PaymentMethodSelector({ paymentMethod, methods = [], onC
           const meta = METHOD_META[value] || {
             icon: "💰",
             label: method.label || value,
-            color: "#FF4B45",
-            bg: "rgba(255,75,69,.07)",
+            color: "#315EFB",
+            bg: "rgba(49,94,251,.07)",
           };
           const selected = paymentMethod === value;
 

@@ -57,9 +57,9 @@ const CardPlaceMenu = ({
             mb: 1.25,
             px: 1.4,
             py: 1,
-            borderRadius: 2,
-            bgcolor: "rgba(255,75,69,.07)",
-            border: "1px solid rgba(255,75,69,.15)",
+            borderRadius: "10px",
+            bgcolor: "rgba(49,94,251,.07)",
+            border: "1px solid rgba(49,94,251,.15)",
           }}
         >
           <Typography variant="caption" color="primary.dark" fontWeight={800}>

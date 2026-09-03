@@ -57,7 +57,7 @@ export default function MenuModifierManager({ menuId }) {
           variant="outlined"
           disabled={editor.loading || !editor.hasChanges || editor.saving}
           onClick={editor.save}
-          sx={{ textTransform: "none", borderRadius: 2 }}
+          sx={{ textTransform: "none", borderRadius: "10px" }}
         >
           {editor.saving ? "Guardando…" : "Guardar personalización"}
         </Button>

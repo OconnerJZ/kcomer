@@ -55,7 +55,7 @@ AvailabilityControl.propTypes = {
 };
 
 const DesktopMenuTable = ({ items, onCustomize, onEdit, onDelete, onToggle }) => (
-  <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden" }}>
+  <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", overflow: "hidden" }}>
     <Table>
       <TableHead>
         <TableRow sx={{ bgcolor: "rgba(0,0,0,.025)" }}>
@@ -71,7 +71,7 @@ const DesktopMenuTable = ({ items, onCustomize, onEdit, onDelete, onToggle }) =>
           <TableRow key={item.id} hover sx={{ "& td": { borderColor: "divider" } }}>
             <TableCell>
               <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar src={item.image} variant="rounded" sx={{ width: 54, height: 54, borderRadius: 2 }}><ImageIcon /></Avatar>
+                <Avatar src={item.image} variant="rounded" sx={{ width: 54, height: 54, borderRadius: "10px" }}><ImageIcon /></Avatar>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={800}>{item.name}</Typography>
                   {item.description && (
@@ -99,11 +99,11 @@ const MobileMenuGrid = ({ items, onCustomize, onEdit, onDelete, onToggle }) => (
     {items.map((item) => (
       <Grid item xs={12} sm={6} key={item.id}>
         <Fade in>
-          <Card elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3, height: "100%", bgcolor: "rgba(255,255,255,.82)", overflow: "hidden" }}>
+          <Card elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", height: "100%", bgcolor: "rgba(255,255,255,.82)", overflow: "hidden" }}>
             <CardContent sx={{ p: 2 }}>
               <Stack spacing={1.5}>
                 <Stack direction="row" spacing={1.5}>
-                  <Avatar src={item.image} variant="rounded" sx={{ width: 72, height: 72, borderRadius: 2 }}><ImageIcon /></Avatar>
+                  <Avatar src={item.image} variant="rounded" sx={{ width: 72, height: 72, borderRadius: "10px" }}><ImageIcon /></Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="subtitle1" fontWeight={800} noWrap>{item.name}</Typography>
                     <Typography variant="h6" sx={{ fontWeight: 800 }}>${item.price.toFixed(2)}</Typography>

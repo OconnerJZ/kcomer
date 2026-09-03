@@ -26,7 +26,7 @@ export default function OwnerRegistrationLanding() {
           sx={{
             bgcolor: "rgba(255,255,255,.9)",
             p: { xs: 2.5, sm: 4 },
-            borderRadius: 3,
+            borderRadius: "10px",
             border: "1px solid",
             borderColor: "divider",
           }}

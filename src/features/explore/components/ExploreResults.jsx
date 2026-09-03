@@ -20,7 +20,7 @@ const EmptyExploreState = ({ icon, title, description }) => (
       textAlign: "center",
       border: "1px solid",
       borderColor: "rgba(0,0,0,.07)",
-      borderRadius: 4,
+      borderRadius: "10px",
       bgcolor: "rgba(255,255,255,.78)",
       backdropFilter: "blur(14px)",
     }}

@@ -8,7 +8,7 @@ const EmptyState = () => (
       textAlign: "center",
       border: "1px dashed",
       borderColor: "divider",
-      borderRadius: 3,
+      borderRadius: "10px",
     }}
   >
     <Restaurant sx={{ fontSize: 48, color: "secondary.main", opacity: .55, mb: 2 }} />

@@ -11,7 +11,7 @@ const MenuItemActions = ({ item, onCustomize, onEdit, onDelete }) => (
         color="primary"
         startIcon={<TuneRounded />}
         onClick={() => onCustomize(item)}
-        sx={{ textTransform: "none", borderRadius: 2, whiteSpace: "nowrap" }}
+        sx={{ textTransform: "none", borderRadius: "10px", whiteSpace: "nowrap" }}
       >
         Ingredientes y opciones
       </Button>

@@ -52,3 +52,14 @@ test("prioriza el mensaje del backend al presentar errores", () => {
     "Credenciales incorrectas",
   );
 });
+
+test("presenta mensajes JSON anidados y errores de validación del backend", () => {
+  assert.equal(
+    getAuthErrorMessage({ data: { data: { message: "La cuenta está bloqueada" } } }),
+    "La cuenta está bloqueada",
+  );
+  assert.equal(
+    getAuthErrorMessage({ data: { errors: [{ msg: "El email no es válido" }] } }),
+    "El email no es válido",
+  );
+});

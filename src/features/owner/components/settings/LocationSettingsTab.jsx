@@ -22,7 +22,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
       elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
-        borderRadius: 3,
+        borderRadius: "10px",
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "rgba(255,255,255,.9)",
@@ -92,7 +92,7 @@ export default function LocationSettingsTab({ locationInfo, setLocationInfo, onS
             </Stack>
           </Box>
 
-          <Box sx={{ px: 1.5, py: 1.35, borderRadius: 2, bgcolor: "rgba(46,173,103,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
+          <Box sx={{ px: 1.5, py: 1.35, borderRadius: "10px", bgcolor: "rgba(46,173,103,.07)", borderLeft: "3px solid", borderColor: "success.main" }}>
             <Typography variant="caption" color="text.secondary">Coordenadas</Typography>
             <Typography variant="body2" fontWeight={750} sx={{ mt: .35 }}>
               {locationInfo.latitude && locationInfo.longitude

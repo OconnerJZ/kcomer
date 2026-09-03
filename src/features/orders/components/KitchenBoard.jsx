@@ -24,7 +24,7 @@ const PreparationProgress = ({ order }) => {
   const complete = total > 0 && ready >= total;
 
   return (
-    <Box sx={{ p: 1.15, borderRadius: 2, bgcolor: complete ? "rgba(46,173,103,.08)" : "rgba(255,159,28,.07)", border: "1px solid", borderColor: complete ? "rgba(46,173,103,.18)" : "rgba(255,159,28,.18)" }}>
+    <Box sx={{ p: 1.15, borderRadius: "10px", bgcolor: complete ? "rgba(46,173,103,.08)" : "rgba(255,159,28,.07)", border: "1px solid", borderColor: complete ? "rgba(46,173,103,.18)" : "rgba(255,159,28,.18)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: .7 }}>
         <Stack direction="row" spacing={.7} alignItems="center">
           {complete ? <CheckCircleRounded sx={{ fontSize: 16, color: "success.main" }} /> : <RestaurantRounded sx={{ fontSize: 16, color: "secondary.dark" }} />}
@@ -44,7 +44,7 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
   const chip = urgencyProps[urgency.level] || urgencyProps.normal;
 
   return (
-    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: urgency.level === "overdue" ? "error.light" : "divider", borderRadius: 2.5, bgcolor: "rgba(255,255,255,.9)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" } }}>
+    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: urgency.level === "overdue" ? "error.light" : "divider", borderRadius: "10px", bgcolor: "rgba(255,255,255,.9)", transition: "transform .16s ease, box-shadow .16s ease, border-color .16s ease", "&:hover": { transform: "translateY(-1px)", boxShadow: "0 8px 24px rgba(0,0,0,.06)" } }}>
       <Stack spacing={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
           <Box><Typography sx={{ fontFamily: "monospace", fontWeight: 800, fontSize: "1rem" }}>#{order.id}</Typography><Typography variant="caption" color="text.secondary">{order.customerName}</Typography></Box>
@@ -69,7 +69,7 @@ const ProductionCard = ({ order, now, onViewOrder, onUpdateStatus }) => {
         </Stack>
 
         {onUpdateStatus && nextStatus && actionLabel && (
-          <Button fullWidth variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => onUpdateStatus(order.id, nextStatus)} sx={{ textTransform: "none", borderRadius: 1.5, fontWeight: 700, py: 0.9 }}>
+          <Button fullWidth variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => onUpdateStatus(order.id, nextStatus)} sx={{ textTransform: "none", borderRadius: "10px", fontWeight: 700, py: 0.9 }}>
             {actionLabel}
           </Button>
         )}
@@ -92,7 +92,7 @@ export default function KitchenBoard({ orders = [], now, onViewOrder, onUpdateSt
               </Stack>
               <Stack spacing={1.25}>
                 {columnOrders.length === 0 ? (
-                  <Box sx={{ py: 5, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: 2 }}><Typography variant="body2" color="text.secondary">Sin órdenes</Typography></Box>
+                  <Box sx={{ py: 5, px: 2, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "10px" }}><Typography variant="body2" color="text.secondary">Sin órdenes</Typography></Box>
                 ) : columnOrders.map((order) => <ProductionCard key={order.id} order={order} now={now} onViewOrder={onViewOrder} onUpdateStatus={onUpdateStatus} />)}
               </Stack>
             </Box>

@@ -68,7 +68,7 @@ const GoogleMapField = ({
         elevation={0}
         sx={{
           height,
-          borderRadius: 3,
+          borderRadius: "10px",
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",

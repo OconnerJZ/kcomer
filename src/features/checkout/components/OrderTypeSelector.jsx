@@ -20,9 +20,9 @@ export default function OrderTypeSelector({ orderType, onChange }) {
                 cursor: "pointer",
                 border: "1px solid",
                 borderColor: selected ? "primary.main" : "divider",
-                bgcolor: selected ? "rgba(255,75,69,.07)" : "background.paper",
+                bgcolor: selected ? "rgba(49,94,251,.07)" : "background.paper",
                 transition: "all 0.2s",
-                "&:hover": { borderColor: "primary.main", bgcolor: "rgba(255,75,69,.045)" },
+                "&:hover": { borderColor: "primary.main", bgcolor: "rgba(49,94,251,.045)" },
               }}
             >
               <CardContent sx={{ textAlign: "center", p: { xs: 1.25, sm: 2 }, "&:last-child": { pb: { xs: 1.25, sm: 2 } } }}>

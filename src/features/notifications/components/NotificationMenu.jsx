@@ -34,7 +34,7 @@ export default function NotificationMenu({
       onClose={onClose}
       transformOrigin={{ horizontal: "right", vertical: "top" }}
       anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-      PaperProps={{ sx: { width: { xs: 320, sm: 380 }, maxWidth: "calc(100vw - 24px)", maxHeight: 460, mt: 1, borderRadius: 2 } }}
+      PaperProps={{ sx: { width: { xs: 320, sm: 380 }, maxWidth: "calc(100vw - 24px)", maxHeight: 460, mt: 1, borderRadius: "10px" } }}
     >
       <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
         <Box>

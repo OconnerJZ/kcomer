@@ -21,7 +21,7 @@ const ProductionReminder = ({ order }) => {
   const ready = Number(order.kitchenProgress?.ready || 0);
   const total = Number(order.kitchenProgress?.total || 0);
   if (!total || ready >= total) return null;
-  return <Box sx={{ px: 1.2, py: .8, borderRadius: 1.5, bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
+  return <Box sx={{ px: 1.2, py: .8, borderRadius: "10px", bgcolor: "rgba(255,159,28,.08)", border: "1px solid rgba(255,159,28,.18)" }}><Typography variant="caption" color="warning.dark" fontWeight={800}>{order.status === "accepted" ? "Inicia los productos de esta orden" : `Avanza productos · ${ready} de ${total} listos`}</Typography></Box>;
 };
 
 const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = false, now = Date.now() }) => {
@@ -33,14 +33,14 @@ const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = 
     <Card
       elevation={0}
       sx={{
-        backgroundColor: highlighted ? "rgba(255,75,69,.065)" : "rgba(255,255,255,.76)",
+        backgroundColor: highlighted ? "rgba(49,94,251,.065)" : "rgba(255,255,255,.76)",
         backdropFilter: "blur(8px)",
         border: "1px solid",
-        borderColor: highlighted ? "rgba(255,75,69,.48)" : "divider",
+        borderColor: highlighted ? "rgba(49,94,251,.48)" : "divider",
         borderLeft: highlighted ? "4px solid rgba(255, 75, 69, 0.9)" : undefined,
-        borderRadius: 3,
+        borderRadius: "10px",
         transition: "border-color .18s ease, transform .18s ease, box-shadow .18s ease",
-        "&:hover": { borderColor: highlighted ? "rgba(255,75,69,.8)" : "rgba(0,0,0,.2)", transform: "translateY(-1px)", boxShadow: "0 10px 28px rgba(0,0,0,.055)" },
+        "&:hover": { borderColor: highlighted ? "rgba(49,94,251,.8)" : "rgba(0,0,0,.2)", transform: "translateY(-1px)", boxShadow: "0 10px 28px rgba(0,0,0,.055)" },
       }}
     >
       <CardContent sx={{ p: 2.1, "&:last-child": { pb: 2.1 } }}>
@@ -57,7 +57,7 @@ const OrderCard = ({ order, onViewOrder, onUpdateStatus, isSmall, highlighted = 
 
           {urgency.level !== "normal" && <Typography variant="caption" color={urgencyColor} fontWeight={800}>{urgency.label}</Typography>}
 
-          <Button fullWidth onClick={() => onViewOrder(order)} startIcon={<RestaurantMenuRounded />} endIcon={<ArrowForwardRounded />} sx={{ justifyContent: "space-between", px: 1.4, py: 1.05, borderRadius: 2, textTransform: "none", color: "text.primary", bgcolor: "rgba(0,0,0,.032)", border: "1px solid", borderColor: "rgba(0,0,0,.055)", "&:hover": { bgcolor: "rgba(255,75,69,.055)", borderColor: "rgba(255,75,69,.18)" } }}>
+          <Button fullWidth onClick={() => onViewOrder(order)} startIcon={<RestaurantMenuRounded />} endIcon={<ArrowForwardRounded />} sx={{ justifyContent: "space-between", px: 1.4, py: 1.05, borderRadius: "10px", textTransform: "none", color: "text.primary", bgcolor: "rgba(0,0,0,.032)", border: "1px solid", borderColor: "rgba(0,0,0,.055)", "&:hover": { bgcolor: "rgba(49,94,251,.055)", borderColor: "rgba(49,94,251,.18)" } }}>
             <Box sx={{ textAlign: "left", flex: 1 }}><Typography variant="body2" fontWeight={850}>Ver productos y detalle</Typography><Typography variant="caption" color="text.secondary">{itemUnits} {itemUnits === 1 ? "producto" : "productos"}</Typography></Box>
           </Button>
 

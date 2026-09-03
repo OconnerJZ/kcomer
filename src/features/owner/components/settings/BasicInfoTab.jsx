@@ -41,7 +41,7 @@ const BasicInfoTab = ({
           p: 2.5,
           border: "1px solid",
           borderColor: "divider",
-          borderRadius: 3,
+          borderRadius: "10px",
           textAlign: "center",
           bgcolor: "rgba(248,248,248,.7)",
         }}
@@ -69,7 +69,7 @@ const BasicInfoTab = ({
           variant="outlined"
           component="label"
           startIcon={<Edit />}
-          sx={{ textTransform: "none", borderRadius: 2 }}
+          sx={{ textTransform: "none", borderRadius: "10px" }}
         >
           {logoFile ? "Cambiar logo" : "Actualizar logo"}
           <input type="file" hidden accept="image/*" onChange={onLogoChange} />
@@ -140,7 +140,7 @@ const BasicInfoTab = ({
             />
           </Grid>
         </Grid>
-        <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+        <Box sx={{ px: 1.5, py: 1.1, border: "1px solid", borderColor: "divider", borderRadius: "10px" }}>
           <FormControlLabel
             sx={{ m: 0, width: "100%", justifyContent: "space-between", flexDirection: "row-reverse" }}
             control={(
