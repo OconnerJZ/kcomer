@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Swiper } from "antd-mobile";
+import { Carousel } from "antd";
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import CardMenuList from "@Features/menu/components/CardMenuList";
 import {
@@ -68,9 +68,9 @@ const CardPlaceMenu = ({
         </Box>
       )}
 
-      <Swiper>
+      <Carousel adaptiveHeight draggable>
         {groups.map((items, groupIndex) => (
-          <Swiper.Item key={items[0]?.id ?? groupIndex}>
+          <Box key={items[0]?.id ?? groupIndex}>
             {items.map((item) => {
               const sharedItem = order.sharedTarget ? order.getOwnSharedItem(item.id) : null;
               return (
@@ -88,9 +88,9 @@ const CardPlaceMenu = ({
                 />
               );
             })}
-          </Swiper.Item>
+          </Box>
         ))}
-      </Swiper>
+      </Carousel>
 
       <Snackbar
         open={order.feedback.open}

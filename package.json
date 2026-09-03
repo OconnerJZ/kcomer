@@ -40,7 +40,6 @@
     "@react-oauth/google": "^0.12.2",
     "@reduxjs/toolkit": "^2.11.2",
     "antd": "^6.0.1",
-    "antd-mobile": "^5.41.1",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "iconify": "^1.4.0",

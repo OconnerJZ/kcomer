@@ -1,8 +1,8 @@
 import { Box, ButtonBase, Typography } from "@mui/material";
+import PropTypes from "prop-types";
 import PhotoLibraryRounded from "@mui/icons-material/PhotoLibraryRounded";
 import RestaurantMenuRounded from "@mui/icons-material/RestaurantMenuRounded";
 import NearMeRounded from "@mui/icons-material/NearMeRounded";
-import ReviewsRounded from "@mui/icons-material/ReviewsRounded";
 import ArrowOutwardRounded from "@mui/icons-material/ArrowOutwardRounded";
 import CardPlaceAccordion from "./CardPlaceAccordion";
 import { StyledFront } from "./CardPlaceStyled";
@@ -11,12 +11,11 @@ const ACTIONS = [
   { key: "menu", label: "Menú", helper: "Qué pedir", icon: RestaurantMenuRounded },
   { key: "location", label: "Llegar", helper: "Ubicación", icon: NearMeRounded },
   { key: "photo", label: "Fotos", helper: "Conócelo", icon: PhotoLibraryRounded },
-  { key: "review", label: "Reseñas", helper: "Opiniones", icon: ReviewsRounded },
 ];
 
 const CardPlaceFront = ({ flipped, onMovement, data }) => (
   <StyledFront flipped={flipped} sx={{ p: "16px !important", alignItems: "stretch !important" }}>
-    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 1 }}>
+    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 1 }}>
       {ACTIONS.map(({ key, label, helper, icon: Icon }) => (
         <ButtonBase
           key={key}
@@ -57,5 +56,11 @@ const CardPlaceFront = ({ flipped, onMovement, data }) => (
     </Box>
   </StyledFront>
 );
+
+CardPlaceFront.propTypes = {
+  flipped: PropTypes.bool,
+  onMovement: PropTypes.func.isRequired,
+  data: PropTypes.object.isRequired,
+};
 
 export default CardPlaceFront;

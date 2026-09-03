@@ -2,7 +2,7 @@ import { Avatar, Box, Chip, Collapse, IconButton, Stack, Typography } from "@mui
 import { AccessTimeRounded, DeliveryDiningRounded, KeyboardArrowDownRounded, PlaceRounded } from "@mui/icons-material";
 import { StyledCard } from "./CardPlaceStyled";
 import useCardPlace from "@Features/explore/hooks/useCardPlace";
-import { CardPlaceLocation, CardPlaceMenu, CardPlacePhotos, CardPlaceReviews } from "./CardPlaceMovements";
+import { CardPlaceLocation, CardPlaceMenu, CardPlacePhotos } from "./CardPlaceMovements";
 import CardPlaceFront from "./CardPlaceFront";
 import ScheduleDialog from "./ScheduleDialog";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
@@ -17,7 +17,6 @@ const MovementContent = ({ movement, flipped, onMovement, business }) => ({
   location: <CardPlaceLocation flipped={flipped} onMovement={onMovement} business={business} />,
   photo: <CardPlacePhotos flipped={flipped} onMovement={onMovement} business={business} />,
   menu: <CardPlaceMenu flipped={flipped} onMovement={onMovement} businessId={business.id} businessName={business.name} paymentMethods={business.paymentMethods} menu={business.menu} />,
-  review: <CardPlaceReviews flipped={flipped} onMovement={onMovement} businessId={business.id} />,
 }[movement] || null);
 
 const businessPropType = PropTypes.shape({
