@@ -8,16 +8,16 @@ const DEFAULT_PAYMENT_METHODS = [
 const compactValues = (values = []) => Array.from(new Set(values.filter((value) => value !== null && value !== undefined && value !== "")));
 const getPhotoValue = (photo) => typeof photo === "string" ? photo : photo?.url || photo?.photoUrl || photo?.photo_url || photo?.image || photo?.imageUrl || photo?.image_url || "";
 
-const normalizeFoodType = (item) => {
-  if (item == null) return null;
-  if (typeof item !== "object") {
-    const id = Number(item);
-    return Number.isFinite(id) ? { id, label: "" } : { id: null, label: String(item) };
-  }
-  const id = Number(item.id ?? item.foodTypeId ?? item.food_type_id ?? item.valueId);
-  const label = item.label || item.name || item.typeName || item.type_name || (typeof item.value === "string" ? item.value : "") || "";
-  return { ...item, id: Number.isFinite(id) ? id : null, label };
-};
+// const normalizeFoodType = (item) => {
+//   if (item == null) return null;
+//   if (typeof item !== "object") {
+//     const id = Number(item);
+//     return Number.isFinite(id) ? { id, label: "" } : { id: null, label: String(item) };
+//   }
+//   const id = Number(item.id ?? item.foodTypeId ?? item.food_type_id ?? item.valueId);
+//   const label = item.label || item.name || item.typeName || item.type_name || (typeof item.value === "string" ? item.value : "") || "";
+//   return { ...item, id: Number.isFinite(id) ? id : null, label };
+// };
 
 const normalizeFoodType = (item = {}) => {
   if (typeof item !== "object") return { id: item, name: String(item), label: String(item) };
