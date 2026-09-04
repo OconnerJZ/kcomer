@@ -47,7 +47,7 @@ const Login = () => {
             gap: { xs: 2, md: 5 },
         }}
       >
-        {!isMobile && (
+        {isDesktop && (
           <Stack spacing={2.25} sx={{ color: "common.white", maxWidth: 480 }}>
             <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 64, height: 64, borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,.14)" }} />
             <Typography variant="overline" sx={{ color: "#E39A93", letterSpacing: ".14em", fontWeight: 600 }}>
@@ -72,7 +72,7 @@ const Login = () => {
             overflow: "hidden",
           }}
         >
-          {isMobile && (
+          {!isDesktop && (
             <Stack alignItems="center" spacing={1} sx={{ pt: 3, px: 3 }}>
               <Box component="img" src={LogoClassic} alt="Kcomer" sx={{ width: 58, height: 58, borderRadius: "8px" }} />
               <Typography variant="subtitle1" fontWeight={600} color="primary.dark">Kcomer</Typography>
