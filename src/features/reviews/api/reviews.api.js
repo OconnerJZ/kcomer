@@ -11,7 +11,10 @@ const customEndpoints = (builder) => {
     }),
     getReviewSummary: builder.query({
       query: ({ businessId }) => `${ENDPOINTS.reviews.business}/${businessId}/summary`,
-      providesTags: (_result, _error, { businessId }) => [{ type: "Reviews", id: `summary-${businessId}` }],
+      providesTags: (_result, _error, { businessId }) => [
+        { type: "Reviews", id: "LIST" },
+        { type: "Reviews", id: `summary-${businessId}` },
+      ],
     }),
     getReviewByOrder: builder.query({
       query: ({ orderId }) => `${ENDPOINTS.reviews.base}/order/${orderId}`,
