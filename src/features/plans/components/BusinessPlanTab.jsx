@@ -2,7 +2,7 @@
 import { Alert, Box, Chip, CircularProgress, LinearProgress, Paper, Stack, Typography } from "@mui/material";
 import { CheckCircleRounded, CampaignRounded, LockRounded, WorkspacePremiumRounded } from "@mui/icons-material";
 import { useGetBusinessPlanQuery } from "@Features/business/api/business.api";
-import { availableFeatures, formatPlanLimit, limitProgress, upcomingFeatures } from "../model/businessPlan";
+import { availableFeatures, formatPlanLimit, limitUsageState, upcomingFeatures } from "../model/businessPlan";
 import PlanValueMatrix from "./PlanValueMatrix";
 
 const LIMIT_LABELS = {
@@ -49,7 +49,23 @@ export default function BusinessPlanTab({ businessId }) {
   return <Stack gap={2.5}>
     <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: "8px", color: "white", bgcolor: "#34312D" }}><Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2}><Box><Stack direction="row" gap={1} alignItems="center"><WorkspacePremiumRounded sx={{ color: "#D9877F" }} /><Typography variant="overline" sx={{ color: "rgba(255,255,255,.62)" }}>PLAN DEL NEGOCIO</Typography></Stack><Stack direction="row" alignItems="center" gap={1} flexWrap="wrap"><Typography variant="h4" fontWeight={600}>{current.name}</Typography>{trial?.active && <Chip label="Trial activo" size="small" sx={{ color: "white", bgcolor: "rgba(255,255,255,.14)" }} />}</Stack><Typography variant="body2" sx={{ color: "rgba(255,255,255,.67)", mt: .6 }}>{current.description}</Typography>{trial?.active && basePlan && <Typography variant="caption" sx={{ color: "rgba(255,255,255,.58)", display: "block", mt: 1 }}>Plan base: {basePlan.name}. Al terminar el trial se conserva este plan.</Typography>}</Box><Stack alignItems={{ sm: "flex-end" }} justifyContent="center"><Chip label={current.adsEnabled ? "Publicidad permitida por el plan" : "Sin publicidad por política del plan"} sx={{ color: "white", bgcolor: "rgba(255,255,255,.1)" }} /><Typography variant="caption" sx={{ color: "rgba(255,255,255,.5)", mt: 1 }}>Cobro automático no habilitado</Typography></Stack></Stack></Paper>
     <Alert severity="info" variant="outlined">{data.message} Nadie puede activar un nivel pagado desde esta pantalla.</Alert>
-    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "8px" }}><Typography variant="h6" fontWeight={600}>Uso y límites</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Los límites comerciales describen escala del negocio. Realtime, órdenes, Shared Orders y reseñas verificadas no se bloquean por nivel.</Typography><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2,minmax(0,1fr))", lg: "repeat(3,minmax(0,1fr))" }, gap: 2 }}>{Object.entries(data.limits || {}).map(([key, value]) => { const progress = limitProgress(value); return <Box key={key} sx={{ p: 1.7, bgcolor: "grey.50", borderRadius: "8px" }}><Typography variant="body2" fontWeight={600}>{LIMIT_LABELS[key] || key}</Typography><Typography variant="caption" color="text.secondary">{formatPlanLimit(value)}</Typography>{progress != null && <LinearProgress variant="determinate" value={progress} sx={{ mt: 1, height: 6, borderRadius: "8px" }} />}</Box>; })}</Box></Paper>
+    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "8px" }}>
+      <Typography variant="h6" fontWeight={600}>Uso y límites</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Los límites comerciales describen escala del negocio. Realtime, órdenes, Shared Orders y reseñas verificadas no se bloquean por nivel.</Typography>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2,minmax(0,1fr))", lg: "repeat(3,minmax(0,1fr))" }, gap: 2 }}>
+        {Object.entries(data.limits || {}).map(([key, value]) => {
+          const state = limitUsageState(value);
+          return (
+            <Box key={key} sx={{ p: 1.7, bgcolor: "grey.50", borderRadius: "8px" }}>
+              <Typography variant="body2" fontWeight={600}>{LIMIT_LABELS[key] || key}</Typography>
+              <Typography variant="caption" color="text.secondary">{formatPlanLimit(value)}</Typography>
+              {state.progress != null && <LinearProgress variant="determinate" value={state.progress} sx={{ mt: 1, height: 6, borderRadius: "8px" }} />}
+              {state.message && <Typography variant="caption" color={state.level === "blocked" ? "error.main" : "text.secondary"} sx={{ display: "block", mt: .8 }}>{state.message}</Typography>}
+            </Box>
+          );
+        })}
+      </Box>
+    </Paper>
     <Box><Typography variant="h6" fontWeight={600}>Comparar niveles</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>FREE mantiene el flujo completo para vender. Los niveles pagados se diferencian por escala, reputación, crecimiento e inteligencia, no por bloquear la experiencia del cliente.</Typography><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2,minmax(0,1fr))", xl: "repeat(4,minmax(0,1fr))" }, gap: 1.5 }}>{catalog.map((plan) => <PlanCard key={plan.code} plan={plan} current={plan.code === current.code} />)}</Box></Box>
     <PlanValueMatrix catalog={catalog} />
   </Stack>;
