@@ -24,6 +24,7 @@ import {
 import { ArrowBackRounded, SearchRounded, WorkspacePremiumRounded } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@Features/auth/context/useAuth";
+import PlanImpactPreview from "../components/PlanImpactPreview";
 import {
   useAssignAdminBusinessPlanMutation,
   useCancelAdminBusinessPlanTrialMutation,
@@ -221,6 +222,7 @@ export default function AdminPlansPage() {
                     <Button variant="contained" disabled={busy || !planCode || planCode === plan?.basePlan?.code} onClick={onAssignPlan}>Guardar plan base</Button>
                     <Typography variant="caption" color="text.secondary">Versión {plan?.subscription?.version || "—"}</Typography>
                   </Stack>
+                  <PlanImpactPreview businessId={businessId} planCode={planCode} currentBasePlanCode={plan?.basePlan?.code} />
                 </Paper>
 
                 <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
