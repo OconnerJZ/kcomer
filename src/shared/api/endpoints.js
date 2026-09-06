@@ -1,4 +1,5 @@
 const AUTH_NAME = "api/auth";
+const ADMIN_NAME = "api/admin";
 const BUSINESS_NAME = "api/business";
 const CATALOGS_NAME = "api/catalogs";
 const MENU_NAME = "api/menus";
@@ -15,6 +16,9 @@ export const ENDPOINTS = {
     register: `${AUTH_NAME}/register`,
     me: `${AUTH_NAME}/me`,
     google: `${AUTH_NAME}/google`,
+  },
+  admin: {
+    businesses: `${ADMIN_NAME}/businesses`,
   },
   businesses: {
     base: BUSINESS_NAME,
