@@ -108,7 +108,9 @@ export default function OwnerReviews({ businessId }) {
                 <Avatar src={review.avatar || undefined}>{review.userName?.charAt(0)}</Avatar>
                 <Box>
                   <Typography variant="subtitle2" fontWeight={700}>{review.userName}</Typography>
-                  <Typography variant="caption" color="text.secondary">{dateLabel(review.createdAt)}{review.verifiedOrder ? ` · Compra verificada · Orden #${review.orderId}` : ""}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {dateLabel(review.createdAt)}{review.verifiedOrder ? " · Compra verificada" : ""}
+                  </Typography>
                 </Box>
               </Stack>
               <Rating value={review.rating} readOnly size="small" />
