@@ -11,7 +11,15 @@ import OperationalInsights from "@Features/stats/components/OperationalInsights"
 import CustomerIntelligence from "@Features/stats/components/CustomerIntelligence";
 import { integer, money } from "@Features/stats/model/statsPresentation";
 
-const periods = [{ value: 7, label: "Últimos 7 días" }, { value: 15, label: "Últimos 15 días" }, { value: 30, label: "Últimos 30 días" }, { value: 90, label: "Últimos 90 días" }];
+const periods = [
+  { value: 7, label: "Últimos 7 días" },
+  { value: 15, label: "Últimos 15 días" },
+  { value: 30, label: "Últimos 30 días" },
+  { value: 90, label: "Últimos 90 días" },
+  { value: 180, label: "Últimos 180 días" },
+  { value: 365, label: "Últimos 365 días" },
+  { value: 730, label: "Últimos 730 días" },
+];
 
 export default function OwnerReports({ businessId }) {
   const [period, setPeriod] = useState(30);
