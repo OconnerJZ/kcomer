@@ -10,6 +10,7 @@ const CustomerOrdersGrid = ({
   onToggleHistory,
   onCancel,
   onEdit,
+  onReview,
 }) => (
   <Grid container spacing={{ xs: 1.5, sm: 2 }} justifyContent="center" alignItems="flex-start">
     {orders.map((order) => (
@@ -22,6 +23,7 @@ const CustomerOrdersGrid = ({
           onToggleHistory={() => onToggleHistory(order.id)}
           onCancel={() => onCancel(order.id)}
           onEdit={() => onEdit(order)}
+          onReview={onReview}
         />
       </Grid>
     ))}
@@ -36,6 +38,7 @@ CustomerOrdersGrid.propTypes = {
   onToggleHistory: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
+  onReview: PropTypes.func.isRequired,
 };
 
 export default CustomerOrdersGrid;
