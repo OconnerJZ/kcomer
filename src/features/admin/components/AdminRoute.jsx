@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import useAuth from "@Features/auth/context/useAuth";
 
 export default function AdminRoute({ children }) {
@@ -12,8 +12,7 @@ export default function AdminRoute({ children }) {
   }
 
   if (!isAuthenticated) {
-    navigate("/login", { replace: true, state: { from: "/admin" } });
-    return null;
+    return <Navigate to="/login" replace state={{ from: "/admin" }} />;
   }
 
   if (user?.role !== "admin") {
