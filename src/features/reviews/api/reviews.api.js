@@ -16,6 +16,12 @@ const customEndpoints = (builder) => {
         { type: "Reviews", id: `summary-${businessId}` },
       ],
     }),
+    getReputationInsights: builder.query({
+      query: ({ businessId, period = 90 }) => `${ENDPOINTS.reviews.business}/${businessId}/insights?period=${period}`,
+      providesTags: (_result, _error, { businessId }) => [
+        { type: "Reviews", id: `insights-${businessId}` },
+      ],
+    }),
     getReviewByOrder: builder.query({
       query: ({ orderId }) => `${ENDPOINTS.reviews.base}/order/${orderId}`,
       providesTags: (_result, _error, { orderId }) => [{ type: "Reviews", id: `order-${orderId}` }],
@@ -40,6 +46,7 @@ const customEndpoints = (builder) => {
       invalidatesTags: (_result, _error, { businessId }) => [
         { type: "Reviews", id: "LIST" },
         { type: "Reviews", id: `summary-${businessId}` },
+        { type: "Reviews", id: `insights-${businessId}` },
       ],
     }),
   };
@@ -67,6 +74,7 @@ export const {
   useDeleteReviewMutation,
   useGetReviewsByBusinessQuery,
   useGetReviewSummaryQuery,
+  useGetReputationInsightsQuery,
   useGetReviewByOrderQuery,
   useCreateVerifiedReviewMutation,
   useRespondToReviewMutation,
