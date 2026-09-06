@@ -9,6 +9,36 @@ const customEndpoints = (builder) => {
       dynamicPath: ({ businessId }) => `${ENDPOINTS.reviews.business}/${businessId}`,
       tagType: "Reviews",
     }),
+    getReviewSummary: builder.query({
+      query: ({ businessId }) => `${ENDPOINTS.reviews.business}/${businessId}/summary`,
+      providesTags: (_result, _error, { businessId }) => [{ type: "Reviews", id: `summary-${businessId}` }],
+    }),
+    getReviewByOrder: builder.query({
+      query: ({ orderId }) => `${ENDPOINTS.reviews.base}/order/${orderId}`,
+      providesTags: (_result, _error, { orderId }) => [{ type: "Reviews", id: `order-${orderId}` }],
+    }),
+    createVerifiedReview: builder.mutation({
+      query: (data) => ({
+        url: ENDPOINTS.reviews.base,
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { orderId }) => [
+        { type: "Reviews", id: "LIST" },
+        { type: "Reviews", id: `order-${orderId}` },
+      ],
+    }),
+    respondToReview: builder.mutation({
+      query: ({ businessId, reviewId, response }) => ({
+        url: `${ENDPOINTS.reviews.business}/${businessId}/${reviewId}/response`,
+        method: "POST",
+        data: { response },
+      }),
+      invalidatesTags: (_result, _error, { businessId }) => [
+        { type: "Reviews", id: "LIST" },
+        { type: "Reviews", id: `summary-${businessId}` },
+      ],
+    }),
   };
 };
 
@@ -33,4 +63,8 @@ export const {
   usePatchReviewMutation,
   useDeleteReviewMutation,
   useGetReviewsByBusinessQuery,
+  useGetReviewSummaryQuery,
+  useGetReviewByOrderQuery,
+  useCreateVerifiedReviewMutation,
+  useRespondToReviewMutation,
 } = apiReviews;
