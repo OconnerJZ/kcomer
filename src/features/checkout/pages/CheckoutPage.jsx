@@ -44,15 +44,11 @@ export default function CheckoutPage() {
 
   const handleConfirm = async () => {
     const result = await checkout.confirmCheckout();
-    if (!result?.success && result?.error) {
-      window.alert(result.error);
-    }
+    if (!result?.success && result?.error) window.alert(result.error);
   };
 
   const handleClearBusiness = () => {
-    if (window.confirm("¿Eliminar todos los items de este negocio?")) {
-      checkout.clearCurrentBusiness();
-    }
+    if (window.confirm("¿Eliminar todos los items de este negocio?")) checkout.clearCurrentBusiness();
   };
 
   return (
@@ -77,69 +73,34 @@ export default function CheckoutPage() {
         )}
 
         {view === "pedidos" && !loadingSharedOrder && !sharedMode && <SharedOrderLauncher />}
-
         {view === "ordenes" && <MyOrders />}
-
-        {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.businesses.length === 0 && (
-          <EmptyCartState />
-        )}
+        {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.businesses.length === 0 && <EmptyCartState />}
 
         {view === "pedidos" && !loadingSharedOrder && showIndividualOrder && checkout.currentBusiness && (
           <Box sx={{ maxWidth: 900, mx: "auto", mt: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2 } }}>
-            <CartBusinessTabs
-              businesses={checkout.businesses}
-              cart={checkout.cart}
-              activeTab={checkout.activeTab}
-              onChange={checkout.changeTab}
-            />
+            <CartBusinessTabs businesses={checkout.businesses} cart={checkout.cart} activeTab={checkout.activeTab} onChange={checkout.changeTab} />
 
             <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems={{ xs: "flex-start", sm: "center" }}
-                gap={1}
-                sx={{ mb: 2 }}
-              >
+              <Stack direction="row" justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} gap={1} sx={{ mb: 2 }}>
                 <Typography variant="h6" sx={{ textAlign: "left", overflowWrap: "anywhere" }}>
                   {checkout.currentBusiness.businessName}
                 </Typography>
-
-                <IconButton color="default" onClick={handleClearBusiness}>
-                  <DeleteSweep />
-                </IconButton>
+                <IconButton color="default" onClick={handleClearBusiness}><DeleteSweep /></IconButton>
               </Stack>
 
               <Divider sx={{ mb: 2 }} />
-
-              <CartItemList
-                businessId={checkout.currentBusinessId}
-                items={checkout.currentBusiness.items}
-                onRemove={checkout.removeFromCart}
-                onQuantityChange={checkout.changeQuantity}
-              />
-
+              <CartItemList businessId={checkout.currentBusinessId} items={checkout.currentBusiness.items} onRemove={checkout.removeFromCart} onQuantityChange={checkout.changeQuantity} />
               <Divider sx={{ my: 2 }} />
 
               <Stack spacing={2}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="h6">Total:</Typography>
-                  <Typography
-                    variant="h6"
-                    color="success.main"
-                    sx={{ fontWeight: 700 }}
-                  >
+                  <Typography variant="h6" color="success.main" sx={{ fontWeight: 700 }}>
                     ${checkout.currentBusiness.total.toFixed(2)}
                   </Typography>
                 </Stack>
 
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  onClick={checkout.openCheckout}
-                  sx={{ borderRadius: "8px", py: 1.5 }}
-                >
+                <Button variant="contained" size="large" fullWidth onClick={checkout.openCheckout} sx={{ borderRadius: "8px", py: 1.5 }}>
                   Realizar Pedido
                 </Button>
               </Stack>
@@ -162,6 +123,11 @@ export default function CheckoutPage() {
         addresses={checkout.addresses}
         handleChange={checkout.handleChange}
         handleNewAddressChange={checkout.handleNewAddressChange}
+        loyalty={checkout.loyalty}
+        loyaltyLoading={checkout.loyaltyLoading}
+        canRedeemLoyalty={checkout.canRedeemLoyalty}
+        useLoyaltyReward={checkout.useLoyaltyReward}
+        setUseLoyaltyReward={checkout.setUseLoyaltyReward}
       />
     </GeneralContent>
   );
