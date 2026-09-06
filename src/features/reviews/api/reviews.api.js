@@ -19,6 +19,7 @@ const customEndpoints = (builder) => {
     getReputationInsights: builder.query({
       query: ({ businessId, period = 90 }) => `${ENDPOINTS.reviews.business}/${businessId}/insights?period=${period}`,
       providesTags: (_result, _error, { businessId }) => [
+        { type: "Reviews", id: "LIST" },
         { type: "Reviews", id: `insights-${businessId}` },
       ],
     }),
