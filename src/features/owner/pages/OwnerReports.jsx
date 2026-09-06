@@ -8,6 +8,7 @@ import { KpiCard } from "@Features/stats/components/ReportPrimitives";
 import FinancialOverview from "@Features/stats/components/FinancialOverview";
 import ProductInsights from "@Features/stats/components/ProductInsights";
 import OperationalInsights from "@Features/stats/components/OperationalInsights";
+import CustomerIntelligence from "@Features/stats/components/CustomerIntelligence";
 import { integer, money } from "@Features/stats/model/statsPresentation";
 
 const periods = [{ value: 7, label: "Últimos 7 días" }, { value: 15, label: "Últimos 15 días" }, { value: 30, label: "Últimos 30 días" }, { value: 90, label: "Últimos 90 días" }];
@@ -18,6 +19,9 @@ export default function OwnerReports({ businessId }) {
   const { data: planResponse, isLoading: planLoading } = useGetBusinessPlanQuery({ businessId }, { skip: !businessId });
   const planData = planResponse?.data || planResponse;
   const analyticsLimit = Number(planData?.limits?.analyticsHistoryDays?.limit ?? planData?.plan?.limits?.analyticsHistoryDays ?? 30);
+  const planFeatures = planData?.features || planData?.plan?.features || [];
+  const customerIntelligenceFeature = planFeatures.find((feature) => feature.key === "customer.intelligence");
+  const customerIntelligenceEnabled = Boolean(customerIntelligenceFeature?.included && customerIntelligenceFeature?.status === "available");
   const allowedPeriods = useMemo(
     () => periods.filter((option) => !Number.isFinite(analyticsLimit) || option.value <= analyticsLimit),
     [analyticsLimit],
@@ -56,8 +60,9 @@ export default function OwnerReports({ businessId }) {
     </Box>
 
     <Alert severity="info" variant="outlined" sx={{ mt: 2, borderRadius: "8px" }}>Tu plan incluye hasta {analyticsLimit} días de historial analítico. {accountingNote}</Alert>
-    <Tabs value={section} onChange={(_event, value) => setSection(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2, minHeight: 42 }}><Tab value="finance" label="Finanzas y clientes"/><Tab value="products" label="Productos"/><Tab value="operations" label="Operación"/></Tabs>
+    <Tabs value={section} onChange={(_event, value) => setSection(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2, minHeight: 42 }}><Tab value="finance" label="Finanzas y clientes"/><Tab value="customers" label="Customer Intelligence"/><Tab value="products" label="Productos"/><Tab value="operations" label="Operación"/></Tabs>
     {section === "finance" && <FinancialOverview salesByDay={salesByDay} paymentMix={paymentMix} orderTypeMix={orderTypeMix} categoryPerformance={categoryPerformance}/>}
+    {section === "customers" && <CustomerIntelligence businessId={businessId} period={period} entitled={customerIntelligenceEnabled}/>} 
     {section === "products" && <ProductInsights products={productPerformance} slowMovers={slowMovers}/>}
     {section === "operations" && <OperationalInsights operations={operations} peakHours={peakHours} ordersByStatus={ordersByStatus} summary={summary}/>}
   </Box>;
