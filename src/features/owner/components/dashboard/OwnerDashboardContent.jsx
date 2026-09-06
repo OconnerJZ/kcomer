@@ -3,6 +3,7 @@ import { Box, Fade } from "@mui/material";
 import OwnerMenu from "../../pages/OwnerMenu";
 import OwnerOrders from "../../pages/OwnerOrders";
 import OwnerReports from "../../pages/OwnerReports";
+import OwnerReviews from "../../pages/OwnerReviews";
 import OwnerSettings from "../../pages/OwnerSettings";
 
 const OwnerDashboardContent = ({
@@ -32,6 +33,9 @@ const OwnerDashboardContent = ({
       )}
       {displayedTab === 2 && allowedTabs.includes(2) && (
         <OwnerReports businessId={businessId} />
+      )}
+      {displayedTab === 4 && allowedTabs.includes(4) && (
+        <OwnerReviews businessId={businessId} />
       )}
       {displayedTab === 3 && allowedTabs.includes(3) && (
         <OwnerSettings businessData={selectedBusiness} onRefresh={onRefreshBusinesses} />
