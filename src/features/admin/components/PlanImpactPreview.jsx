@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Alert, Box, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { useGetAdminBusinessPlanImpactQuery } from "../api/admin.api";
 
 const dataOf = (response) => response?.data ?? response;
@@ -8,6 +8,12 @@ const LIMIT_LABELS = {
   menuItems: "Productos",
   businessPhotos: "Fotos del negocio",
   analyticsHistoryDays: "Historial de analítica",
+};
+
+const DIRECTION_LABELS = {
+  upgrade: "Upgrade",
+  downgrade: "Downgrade",
+  same: "Sin cambio",
 };
 
 export default function PlanImpactPreview({ businessId, planCode, currentBasePlanCode }) {
@@ -28,25 +34,31 @@ export default function PlanImpactPreview({ businessId, planCode, currentBasePla
   const preview = dataOf(query.data);
   const overages = preview?.impact?.overages || [];
   const cancelsTrial = Boolean(preview?.impact?.cancelsActiveTrial);
-
-  if (!overages.length && !cancelsTrial) {
-    return <Alert severity="success" variant="outlined" sx={{ mt: 2 }}>Con la configuración comercial actual, este cambio no deja recursos existentes por encima de un límite.</Alert>;
-  }
+  const direction = preview?.direction || "same";
 
   return (
     <Alert severity={overages.length ? "warning" : "info"} variant="outlined" sx={{ mt: 2 }}>
-      <Stack spacing={0.5}>
-        {cancelsTrial && <Typography variant="body2">El cambio de plan base cancelará el trial activo.</Typography>}
+      <Stack spacing={0.75}>
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+          <Typography variant="body2" fontWeight={700}>Impacto del cambio</Typography>
+          <Chip size="small" label={DIRECTION_LABELS[direction] || direction} variant="outlined" />
+        </Stack>
+        {!overages.length && <Typography variant="body2">Con la configuración actual, ningún recurso existente queda por encima de un límite.</Typography>}
+        {cancelsTrial && <Typography variant="body2">Cambiar el plan base cancelará el trial activo para evitar estados ambiguos.</Typography>}
         {overages.length > 0 && (
           <>
-            <Typography variant="body2" fontWeight={700}>Uso que excedería el plan objetivo:</Typography>
+            <Typography variant="body2" fontWeight={700}>Uso que quedaría por encima del plan objetivo:</Typography>
             {overages.map((entry) => (
               <Typography key={entry.key} variant="caption">
                 {LIMIT_LABELS[entry.key] || entry.key}: {entry.used} usados / {entry.max} permitidos (+{entry.overBy})
               </Typography>
             ))}
-            <Typography variant="caption" color="text.secondary">Este preview no elimina productos, miembros ni fotos. La política de downgrade se definirá antes de activar límites comerciales.</Typography>
           </>
+        )}
+        {direction === "downgrade" && (
+          <Typography variant="caption" color="text.secondary">
+            Política B2: el downgrade nunca elimina productos, miembros ni fotos existentes. Cuando un límite esté aprobado y activamente aplicado, únicamente se bloquearán nuevas altas en el recurso excedido hasta volver a estar dentro del límite.
+          </Typography>
         )}
       </Stack>
     </Alert>
