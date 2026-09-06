@@ -6,9 +6,6 @@ const numberOrNull = (value) => {
 
 export const normalizeReview = (review = {}) => ({
   id: review.id ?? null,
-  userId: review.userId ?? review.user_id ?? null,
-  businessId: review.businessId ?? review.business_id ?? null,
-  orderId: review.orderId ?? review.order_id ?? null,
   userName:
     review.userName ||
     review.user_name ||
@@ -25,7 +22,7 @@ export const normalizeReview = (review = {}) => ({
     "",
   comment: review.comment || review.content || review.review || review.description || "",
   rating: Number(review.rating ?? review.score ?? 0),
-  verifiedOrder: Boolean(review.verifiedOrder ?? review.verified_order ?? review.orderId ?? review.order_id),
+  verifiedOrder: Boolean(review.verifiedOrder ?? review.verified_order),
   categoryRatings: {
     food: numberOrNull(review.categoryRatings?.food ?? review.foodRating ?? review.food_rating),
     time: numberOrNull(review.categoryRatings?.time ?? review.timeRating ?? review.time_rating),
