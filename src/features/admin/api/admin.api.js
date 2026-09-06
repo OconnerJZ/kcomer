@@ -13,6 +13,12 @@ const adminApi = api.injectEndpoints({
       query: ({ businessId }) => `${ENDPOINTS.admin.businesses}/${businessId}/plan`,
       providesTags: (_result, _error, { businessId }) => [{ type: "BusinessPlan", id: businessId }],
     }),
+    getAdminBusinessPlanImpact: builder.query({
+      query: ({ businessId, planCode }) => ({
+        url: `${ENDPOINTS.admin.businesses}/${businessId}/plan/impact`,
+        params: { planCode },
+      }),
+    }),
     getAdminBusinessPlanHistory: builder.query({
       query: ({ businessId }) => `${ENDPOINTS.admin.businesses}/${businessId}/plan/history`,
       providesTags: (_result, _error, { businessId }) => [{ type: "BusinessPlan", id: `history-${businessId}` }],
@@ -57,6 +63,7 @@ const adminApi = api.injectEndpoints({
 export const {
   useGetAdminBusinessesQuery,
   useGetAdminBusinessPlanQuery,
+  useGetAdminBusinessPlanImpactQuery,
   useGetAdminBusinessPlanHistoryQuery,
   useAssignAdminBusinessPlanMutation,
   useGrantAdminBusinessPlanTrialMutation,
