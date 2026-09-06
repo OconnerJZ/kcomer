@@ -3,77 +3,63 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "@Features/auth/context/useAuth";
 import useCart from "@Features/cart/context/useCart";
 import { useOrders } from "@Features/orders/context/useOrders";
+import { useGetMyLoyaltyProgressQuery } from "@Features/loyalty/api/loyalty.api";
 import useCheckoutForm from "./useCheckoutForm";
-import {
-  buildOrderPayload,
-  validateCheckout,
-} from "../model/checkout";
+import { buildOrderPayload, validateCheckout } from "../model/checkout";
 
 export const useCheckoutController = (providedAddresses) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const {
-    cart,
-    addToCart,
-    removeFromCart,
-    clearBusiness,
-  } = useCart();
+  const { cart, addToCart, removeFromCart, clearBusiness } = useCart();
   const { createOrder } = useOrders();
-
   const checkout = useCheckoutForm(user);
-  const {
-    form,
-    orderType,
-    addressType,
-    setAddressType,
-    setErrors,
-    resetCheckout,
-  } = checkout;
+  const { form, orderType, addressType, setAddressType, setErrors, resetCheckout } = checkout;
 
   const [activeTab, setActiveTab] = useState(0);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+  const [useLoyaltyReward, setUseLoyaltyReward] = useState(false);
 
-  const addresses = useMemo(
-    () => providedAddresses ?? user?.addresses ?? [],
-    [providedAddresses, user?.addresses],
-  );
-
-  useEffect(() => {
-    if (addresses.length === 0 && addressType === "saved") {
-      setAddressType("new");
-    }
-  }, [addressType, addresses.length, setAddressType]);
-
+  const addresses = useMemo(() => providedAddresses ?? user?.addresses ?? [], [providedAddresses, user?.addresses]);
   const businesses = useMemo(() => Object.keys(cart), [cart]);
   const currentBusinessId = businesses[activeTab] || null;
   const currentBusiness = currentBusinessId ? cart[currentBusinessId] : null;
 
-  const changeTab = useCallback((newTab) => {
-    setActiveTab(newTab);
-  }, []);
-
-  const changeQuantity = useCallback(
-    (businessId, item, delta) => {
-      const newQuantity = item.quantity + delta;
-
-      if (newQuantity === 0) {
-        removeFromCart(businessId, item.id);
-        return;
-      }
-
-      addToCart({
-        itemId: item.id,
-        businessId,
-        businessName: cart[businessId].businessName,
-        paymentMethods: cart[businessId].paymentMethods || [],
-        item: {
-          ...item,
-          quantity: newQuantity,
-        },
-      });
-    },
-    [addToCart, cart, removeFromCart],
+  const { data: loyaltyResponse, isFetching: loyaltyLoading } = useGetMyLoyaltyProgressQuery(
+    { businessId: Number(currentBusinessId) },
+    { skip: !isAuthenticated || !currentBusinessId },
   );
+  const loyalty = loyaltyResponse?.data || loyaltyResponse || null;
+  const availableRewards = Number(loyalty?.progress?.availableRewards || 0);
+  const canRedeemLoyalty = Boolean(loyalty?.active && availableRewards > 0);
+
+  useEffect(() => {
+    if (addresses.length === 0 && addressType === "saved") setAddressType("new");
+  }, [addressType, addresses.length, setAddressType]);
+
+  useEffect(() => {
+    setUseLoyaltyReward(false);
+  }, [currentBusinessId]);
+
+  useEffect(() => {
+    if (!canRedeemLoyalty && useLoyaltyReward) setUseLoyaltyReward(false);
+  }, [canRedeemLoyalty, useLoyaltyReward]);
+
+  const changeTab = useCallback((newTab) => setActiveTab(newTab), []);
+
+  const changeQuantity = useCallback((businessId, item, delta) => {
+    const newQuantity = item.quantity + delta;
+    if (newQuantity === 0) {
+      removeFromCart(businessId, item.id);
+      return;
+    }
+    addToCart({
+      itemId: item.id,
+      businessId,
+      businessName: cart[businessId].businessName,
+      paymentMethods: cart[businessId].paymentMethods || [],
+      item: { ...item, quantity: newQuantity },
+    });
+  }, [addToCart, cart, removeFromCart]);
 
   const clearCurrentBusiness = useCallback(() => {
     if (!currentBusinessId) return;
@@ -86,36 +72,18 @@ export const useCheckoutController = (providedAddresses) => {
       navigate("/login/orden");
       return { success: false, reason: "unauthenticated" };
     }
-
     setCheckoutDialogOpen(true);
     return { success: true };
   }, [isAuthenticated, navigate]);
 
-  const closeCheckout = useCallback(() => {
-    setCheckoutDialogOpen(false);
-  }, []);
+  const closeCheckout = useCallback(() => setCheckoutDialogOpen(false), []);
 
   const confirmCheckout = useCallback(async () => {
-    if (!currentBusinessId || !currentBusiness) {
-      return { success: false, error: "No hay un negocio seleccionado" };
-    }
+    if (!currentBusinessId || !currentBusiness) return { success: false, error: "No hay un negocio seleccionado" };
 
-    const validation = validateCheckout({
-      form,
-      orderType,
-      addressType,
-      currentBusiness,
-    });
-
+    const validation = validateCheckout({ form, orderType, addressType, currentBusiness });
     setErrors(validation.errors);
-
-    if (!validation.valid) {
-      return {
-        success: false,
-        error: "Por favor completa todos los campos requeridos",
-        errors: validation.errors,
-      };
-    }
+    if (!validation.valid) return { success: false, error: "Por favor completa todos los campos requeridos", errors: validation.errors };
 
     const payload = buildOrderPayload({
       businessId: currentBusinessId,
@@ -125,35 +93,19 @@ export const useCheckoutController = (providedAddresses) => {
       orderType,
       addressType,
       addresses,
+      useLoyaltyReward: useLoyaltyReward && canRedeemLoyalty,
     });
 
     const result = await createOrder(payload);
-
-    if (!result?.success) {
-      return result || { success: false, error: "Error al crear la orden" };
-    }
+    if (!result?.success) return result || { success: false, error: "Error al crear la orden" };
 
     clearBusiness(currentBusinessId);
     closeCheckout();
     resetCheckout();
+    setUseLoyaltyReward(false);
     navigate("/mis-ordenes");
-
     return result;
-  }, [
-    addressType,
-    addresses,
-    clearBusiness,
-    closeCheckout,
-    createOrder,
-    currentBusiness,
-    currentBusinessId,
-    form,
-    navigate,
-    orderType,
-    resetCheckout,
-    setErrors,
-    user,
-  ]);
+  }, [addressType, addresses, canRedeemLoyalty, clearBusiness, closeCheckout, createOrder, currentBusiness, currentBusinessId, form, navigate, orderType, resetCheckout, setErrors, useLoyaltyReward, user]);
 
   return {
     user,
@@ -165,6 +117,12 @@ export const useCheckoutController = (providedAddresses) => {
     activeTab,
     checkoutDialogOpen,
     addresses,
+    loyalty,
+    loyaltyLoading,
+    availableRewards,
+    canRedeemLoyalty,
+    useLoyaltyReward,
+    setUseLoyaltyReward,
     ...checkout,
     changeTab,
     changeQuantity,
