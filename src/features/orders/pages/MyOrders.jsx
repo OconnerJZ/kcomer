@@ -7,6 +7,7 @@ import CustomerOrdersFeedback from "@Features/orders/components/customer/Custome
 import CustomerOrdersGrid from "@Features/orders/components/customer/CustomerOrdersGrid";
 import EditPendingOrderDialog from "@Features/orders/components/customer/EditPendingOrderDialog";
 import EmptyCustomerOrders from "@Features/orders/components/customer/EmptyCustomerOrders";
+import CustomerLoyaltySummary from "@Features/loyalty/components/CustomerLoyaltySummary";
 import ReviewOrderDialog from "@Features/reviews/components/ReviewOrderDialog";
 import useCustomerOrdersView from "@Features/orders/hooks/useCustomerOrdersView";
 
@@ -26,6 +27,7 @@ const MyOrders = () => {
   return (
     <GeneralContent title="Mis Órdenes">
       <Box sx={{ maxWidth: 1200, mx: "auto", py: { xs: 2, sm: 4 }, px: { xs: 1.5, sm: 2.5 } }}>
+        <CustomerLoyaltySummary />
         <CustomerOrdersGrid
           orders={view.userOrders}
           expandedOrder={view.expandedOrder}
