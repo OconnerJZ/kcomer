@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Avatar, List, Rate, Spin } from "antd";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Box, Chip, Stack, Typography } from "@mui/material";
 import { API_URL_MEDIA_SERVER } from "@Shared/config/env";
 import { useGetReviewsByBusinessQuery } from "@Features/reviews/api/reviews.api";
 import { normalizeReviews } from "@Features/reviews/model/review";
@@ -57,12 +57,23 @@ const CardPlaceReviews = ({ flipped, onMovement, businessId }) => {
                     {item.userName?.charAt(0)}
                   </Avatar>
                 )}
-                title={item.userName}
+                title={(
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <span>{item.userName}</span>
+                    {item.verifiedOrder && <Chip label="Compra verificada" size="small" variant="outlined" sx={{ height: 20, fontSize: 10 }} />}
+                  </Stack>
+                )}
                 description={item.rating > 0
                   ? <Rate disabled allowHalf value={item.rating} style={{ fontSize: 13 }} />
                   : null}
               />
-              {item.comment || "Sin comentario"}
+              <Typography variant="body2">{item.comment || "Sin comentario"}</Typography>
+              {item.ownerResponse?.text && (
+                <Box sx={{ mt: 1.25, p: 1.25, bgcolor: "grey.50", borderLeft: "3px solid", borderColor: "divider" }}>
+                  <Typography variant="caption" fontWeight={700}>Respuesta del negocio</Typography>
+                  <Typography variant="caption" display="block" color="text.secondary">{item.ownerResponse.text}</Typography>
+                </Box>
+              )}
             </List.Item>
           )}
         />
