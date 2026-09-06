@@ -18,6 +18,7 @@ import {
   useRespondToReviewMutation,
 } from "@Features/reviews/api/reviews.api";
 import { normalizeReviews } from "@Features/reviews/model/review";
+import ReputationInsightsPanel from "@Features/reviews/components/ReputationInsightsPanel";
 
 const errorMessage = (error) => error?.data?.message || error?.message || "No fue posible completar la operación";
 const dateLabel = (value) => value ? new Date(value).toLocaleString("es-MX") : "—";
@@ -94,6 +95,8 @@ export default function OwnerReviews({ businessId }) {
           ))}
         </Box>
       </Paper>
+
+      <ReputationInsightsPanel businessId={businessId} />
 
       {!reviews.length ? (
         <Paper variant="outlined" sx={{ p: 4, borderRadius: 2, textAlign: "center" }}>
