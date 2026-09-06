@@ -9,6 +9,33 @@ export const limitProgress = ({ limit, used } = {}) => {
   return Math.min(100, Math.round((used / limit) * 100));
 };
 
+export const limitUsageState = (value = {}) => {
+  const progress = limitProgress(value);
+  if (progress == null) return { level: "normal", progress: null, message: null };
+  if (progress >= 100) {
+    return {
+      level: "blocked",
+      progress,
+      message: "Alcanzaste el límite. Puedes editar o eliminar recursos existentes, pero no agregar nuevos.",
+    };
+  }
+  if (progress >= 90) {
+    return {
+      level: "warning",
+      progress,
+      message: "Estás muy cerca del límite de tu plan.",
+    };
+  }
+  if (progress >= 80) {
+    return {
+      level: "notice",
+      progress,
+      message: "Te estás acercando al límite de tu plan.",
+    };
+  }
+  return { level: "normal", progress, message: null };
+};
+
 export const availableFeatures = (features = []) =>
   features.filter((feature) => feature.included && feature.status === "available");
 
