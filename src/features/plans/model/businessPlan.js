@@ -9,5 +9,33 @@ export const limitProgress = ({ limit, used } = {}) => {
   return Math.min(100, Math.round((used / limit) * 100));
 };
 
-export const availableFeatures = (features = []) => features.filter((feature) => feature.included && feature.status === "available");
-export const upcomingFeatures = (features = []) => features.filter((feature) => feature.status === "coming_soon");
+export const availableFeatures = (features = []) =>
+  features.filter((feature) => feature.included && feature.status === "available");
+
+export const upcomingFeatures = (features = []) =>
+  features.filter((feature) => feature.included && feature.status === "coming_soon");
+
+export const commercialFeatures = (features = []) =>
+  features.filter((feature) => feature.commercialModel && feature.commercialModel !== "core");
+
+export const buildPlanValueMatrix = (catalog = []) => {
+  const rows = new Map();
+
+  for (const plan of catalog) {
+    for (const feature of commercialFeatures(plan.features || [])) {
+      const current = rows.get(feature.key) || {
+        key: feature.key,
+        label: feature.label,
+        description: feature.description,
+        category: feature.category || "growth",
+        commercialModel: feature.commercialModel,
+        status: feature.status,
+        plans: {},
+      };
+      current.plans[plan.code] = Boolean(feature.included);
+      rows.set(feature.key, current);
+    }
+  }
+
+  return [...rows.values()];
+};
