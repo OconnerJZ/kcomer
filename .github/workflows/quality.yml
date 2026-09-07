@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feature/order-kitchen-workflow
+      - feature/admin-control-center
 
 jobs:
   frontend:
@@ -24,6 +25,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Admin control center lint
+        run: npx eslint src/features/admin --ext js,jsx --report-unused-disable-directives --max-warnings 0
+
+      - name: Admin navigation unit tests
+        run: node --test src/features/admin/model/*.test.mjs
 
       - name: Quality gate
         run: npm run quality
