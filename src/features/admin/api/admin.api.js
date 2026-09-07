@@ -7,6 +7,47 @@ const adminApi = api.injectEndpoints({
       query: () => ENDPOINTS.admin.dashboard,
       providesTags: [{ type: "Stats", id: "admin-dashboard" }],
     }),
+    getAdminUsers: builder.query({
+      query: ({ q = "", limit = 20 } = {}) => ({
+        url: ENDPOINTS.admin.users,
+        params: { q, limit },
+      }),
+      providesTags: (result) => {
+        const items = result?.data ?? result ?? [];
+        return [
+          { type: "Users", id: "ADMIN_LIST" },
+          ...items.map((user) => ({ type: "Users", id: `admin-${user.id}` })),
+        ];
+      },
+    }),
+    getAdminUser: builder.query({
+      query: ({ userId }) => `${ENDPOINTS.admin.users}/${userId}`,
+      providesTags: (_result, _error, { userId }) => [{ type: "Users", id: `admin-${userId}` }],
+    }),
+    updateAdminUserStatus: builder.mutation({
+      query: ({ userId, ...data }) => ({
+        url: `${ENDPOINTS.admin.users}/${userId}/status`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { userId }) => [
+        { type: "Users", id: `admin-${userId}` },
+        { type: "Users", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
+      ],
+    }),
+    updateAdminUserRole: builder.mutation({
+      query: ({ userId, ...data }) => ({
+        url: `${ENDPOINTS.admin.users}/${userId}/role`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { userId }) => [
+        { type: "Users", id: `admin-${userId}` },
+        { type: "Users", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
+      ],
+    }),
     getAdminBusinesses: builder.query({
       query: ({ q = "", limit = 20 } = {}) => ({
         url: ENDPOINTS.admin.businesses,
@@ -101,6 +142,10 @@ const adminApi = api.injectEndpoints({
 
 export const {
   useGetAdminDashboardQuery,
+  useGetAdminUsersQuery,
+  useGetAdminUserQuery,
+  useUpdateAdminUserStatusMutation,
+  useUpdateAdminUserRoleMutation,
   useGetAdminBusinessesQuery,
   useGetAdminBusinessQuery,
   useUpdateAdminBusinessStatusMutation,
