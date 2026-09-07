@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
-  AppBar,
   Box,
   Button,
   Chip,
   CircularProgress,
-  Container,
   Divider,
   FormControl,
   InputLabel,
@@ -18,12 +16,9 @@ import {
   Select,
   Stack,
   TextField,
-  Toolbar,
   Typography,
 } from "@mui/material";
-import { ArrowBackRounded, SearchRounded, WorkspacePremiumRounded } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import useAuth from "@Features/auth/context/useAuth";
+import { SearchRounded, WorkspacePremiumRounded } from "@mui/icons-material";
 import PlanImpactPreview from "../components/PlanImpactPreview";
 import {
   useAssignAdminBusinessPlanMutation,
@@ -39,8 +34,6 @@ const errorMessage = (error) => error?.data?.message || error?.message || "No fu
 const dateLabel = (value) => value ? new Date(value).toLocaleString("es-MX") : "—";
 
 export default function AdminPlansPage() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -130,143 +123,130 @@ export default function AdminPlansPage() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#F6F5F3" }}>
-      <AppBar position="static" elevation={0} sx={{ bgcolor: "#2F2D2A", color: "white" }}>
-        <Toolbar sx={{ gap: 2 }}>
-          <Button color="inherit" startIcon={<ArrowBackRounded />} onClick={() => navigate("/explorar")}>qsCome</Button>
-          <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255,255,255,.16)", my: 1.5 }} />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle1" fontWeight={700}>Admin · Plan Management</Typography>
-            <Typography variant="caption" sx={{ color: "rgba(255,255,255,.65)" }}>Sesión: {user?.email}</Typography>
+    <Stack spacing={3}>
+      <Box>
+        <Typography variant="overline" color="text.secondary">COMERCIAL</Typography>
+        <Typography variant="h4" fontWeight={700}>Control de planes</Typography>
+        <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: 820 }}>
+          Busca un negocio, revisa su plan efectivo y administra su plan base o trial sin intervenir en las funciones core.
+        </Typography>
+      </Box>
+
+      {feedback && <Alert severity={feedback.severity} onClose={() => setFeedback(null)}>{feedback.message}</Alert>}
+
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0,1fr)" }, gap: 3, alignItems: "start" }}>
+        <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+          <Box component="form" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search.trim()); }} sx={{ p: 2 }}>
+            <Stack direction="row" spacing={1}>
+              <TextField fullWidth size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre, email o ID" />
+              <Button type="submit" variant="contained" aria-label="Buscar"><SearchRounded /></Button>
+            </Stack>
           </Box>
-          <Chip label="ADMIN" size="small" sx={{ bgcolor: "rgba(255,255,255,.1)", color: "white", fontWeight: 700 }} />
-        </Toolbar>
-      </AppBar>
+          <Divider />
+          {businessesQuery.isLoading ? (
+            <Box sx={{ p: 4, display: "grid", placeItems: "center" }}><CircularProgress size={28} /></Box>
+          ) : businessesQuery.error ? (
+            <Alert severity="error" sx={{ m: 2 }}>{errorMessage(businessesQuery.error)}</Alert>
+          ) : (
+            <List disablePadding sx={{ maxHeight: 620, overflow: "auto" }}>
+              {businesses.map((business) => (
+                <ListItemButton key={business.id} selected={business.id === businessId} onClick={() => { setSelectedBusiness(business); setFeedback(null); }} divider>
+                  <ListItemText
+                    primary={business.name}
+                    secondary={`#${business.id} · ${business.owner?.email || business.email || "Sin email"}`}
+                    primaryTypographyProps={{ fontWeight: business.id === businessId ? 700 : 500 }}
+                  />
+                  <Chip size="small" label={(business.plan?.effectivePlanCode || "free").replace("level_", "L").toUpperCase()} variant="outlined" />
+                </ListItemButton>
+              ))}
+              {!businesses.length && <Box sx={{ p: 3 }}><Typography variant="body2" color="text.secondary">No se encontraron negocios.</Typography></Box>}
+            </List>
+          )}
+        </Paper>
 
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Stack spacing={3}>
-          <Box>
-            <Typography variant="h4" fontWeight={700}>Control de planes</Typography>
-            <Typography color="text.secondary">Busca un negocio, revisa su plan efectivo y administra su plan base o trial sin intervenir en las funciones core.</Typography>
-          </Box>
-
-          {feedback && <Alert severity={feedback.severity} onClose={() => setFeedback(null)}>{feedback.message}</Alert>}
-
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0,1fr)" }, gap: 3, alignItems: "start" }}>
-            <Paper variant="outlined" sx={{ overflow: "hidden", borderRadius: 2 }}>
-              <Box component="form" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search.trim()); }} sx={{ p: 2 }}>
-                <Stack direction="row" spacing={1}>
-                  <TextField fullWidth size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre, email o ID" />
-                  <Button type="submit" variant="contained" aria-label="Buscar"><SearchRounded /></Button>
+        {!selectedBusiness ? (
+          <Paper variant="outlined" sx={{ p: 5, textAlign: "center" }}>
+            <WorkspacePremiumRounded sx={{ fontSize: 46, color: "text.disabled" }} />
+            <Typography variant="h6" sx={{ mt: 1 }}>Selecciona un negocio</Typography>
+            <Typography variant="body2" color="text.secondary">Aquí podrás administrar únicamente su suscripción comercial.</Typography>
+          </Paper>
+        ) : planQuery.isLoading ? (
+          <Paper variant="outlined" sx={{ p: 6, display: "grid", placeItems: "center" }}><CircularProgress /></Paper>
+        ) : planQuery.error ? (
+          <Alert severity="error">{errorMessage(planQuery.error)}</Alert>
+        ) : (
+          <Stack spacing={2.5}>
+            <Paper variant="outlined" sx={{ p: 3 }}>
+              <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
+                <Box>
+                  <Typography variant="overline" color="text.secondary">NEGOCIO #{selectedBusiness.id}</Typography>
+                  <Typography variant="h5" fontWeight={700}>{selectedBusiness.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">Owner principal: {selectedBusiness.owner?.name || "—"} · {selectedBusiness.owner?.email || "Sin email"}</Typography>
+                </Box>
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                  <Chip label={`Efectivo: ${plan?.plan?.name || "Gratis"}`} color="primary" />
+                  <Chip label={`Base: ${plan?.basePlan?.name || "Gratis"}`} variant="outlined" />
+                  {activeTrial && <Chip label="Trial activo" color="warning" variant="outlined" />}
                 </Stack>
-              </Box>
-              <Divider />
-              {businessesQuery.isLoading ? (
-                <Box sx={{ p: 4, display: "grid", placeItems: "center" }}><CircularProgress size={28} /></Box>
-              ) : businessesQuery.error ? (
-                <Alert severity="error" sx={{ m: 2 }}>{errorMessage(businessesQuery.error)}</Alert>
+              </Stack>
+            </Paper>
+
+            <Paper variant="outlined" sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={700}>Plan base</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Cambiar el plan base cancela cualquier trial activo para evitar estados ambiguos.</Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
+                <FormControl size="small" sx={{ minWidth: 220 }}>
+                  <InputLabel>Plan</InputLabel>
+                  <Select label="Plan" value={planCode} onChange={(event) => setPlanCode(event.target.value)}>
+                    {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+                <Button variant="contained" disabled={busy || !planCode || planCode === plan?.basePlan?.code} onClick={onAssignPlan}>Guardar plan base</Button>
+                <Typography variant="caption" color="text.secondary">Versión {plan?.subscription?.version || "—"}</Typography>
+              </Stack>
+              <PlanImpactPreview businessId={businessId} planCode={planCode} currentBasePlanCode={plan?.basePlan?.code} />
+            </Paper>
+
+            <Paper variant="outlined" sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={700}>Trial</Typography>
+              {activeTrial ? (
+                <Stack spacing={1.5} sx={{ mt: 1.5 }}>
+                  <Alert severity="info">{activeTrial.name || activeTrial.planCode} activo hasta {dateLabel(activeTrial.endsAt)}. Después se recupera automáticamente {plan?.basePlan?.name}.</Alert>
+                  <Box><Button variant="outlined" color="warning" disabled={busy} onClick={onCancelTrial}>Cancelar trial</Button></Box>
+                </Stack>
               ) : (
-                <List disablePadding sx={{ maxHeight: 620, overflow: "auto" }}>
-                  {businesses.map((business) => (
-                    <ListItemButton key={business.id} selected={business.id === businessId} onClick={() => { setSelectedBusiness(business); setFeedback(null); }} divider>
-                      <ListItemText
-                        primary={business.name}
-                        secondary={`#${business.id} · ${business.owner?.email || business.email || "Sin email"}`}
-                        primaryTypographyProps={{ fontWeight: business.id === businessId ? 700 : 500 }}
-                      />
-                      <Chip size="small" label={(business.plan?.effectivePlanCode || "free").replace("level_", "L").toUpperCase()} variant="outlined" />
-                    </ListItemButton>
-                  ))}
-                  {!businesses.length && <Box sx={{ p: 3 }}><Typography variant="body2" color="text.secondary">No se encontraron negocios.</Typography></Box>}
-                </List>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mt: 2 }} alignItems={{ md: "center" }}>
+                  <FormControl size="small" sx={{ minWidth: 220 }}>
+                    <InputLabel>Plan del trial</InputLabel>
+                    <Select label="Plan del trial" value={trialPlanCode} onChange={(event) => setTrialPlanCode(event.target.value)}>
+                      {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                  <TextField size="small" label="Finaliza" type="datetime-local" value={trialEndsAt} onChange={(event) => setTrialEndsAt(event.target.value)} InputLabelProps={{ shrink: true }} />
+                  <Button variant="outlined" disabled={busy || !trialPlanCode || !trialEndsAt} onClick={onGrantTrial}>Activar trial</Button>
+                </Stack>
               )}
             </Paper>
 
-            {!selectedBusiness ? (
-              <Paper variant="outlined" sx={{ p: 5, borderRadius: 2, textAlign: "center" }}>
-                <WorkspacePremiumRounded sx={{ fontSize: 46, color: "text.disabled" }} />
-                <Typography variant="h6" sx={{ mt: 1 }}>Selecciona un negocio</Typography>
-                <Typography variant="body2" color="text.secondary">Aquí podrás administrar únicamente su suscripción comercial.</Typography>
-              </Paper>
-            ) : planQuery.isLoading ? (
-              <Paper variant="outlined" sx={{ p: 6, display: "grid", placeItems: "center", borderRadius: 2 }}><CircularProgress /></Paper>
-            ) : planQuery.error ? (
-              <Alert severity="error">{errorMessage(planQuery.error)}</Alert>
-            ) : (
-              <Stack spacing={2.5}>
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                  <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
+            <Paper variant="outlined" sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={700}>Historial comercial</Typography>
+              <Stack spacing={1.2} sx={{ mt: 2 }}>
+                {historyQuery.isLoading && <CircularProgress size={24} />}
+                {!historyQuery.isLoading && !history.length && <Typography variant="body2" color="text.secondary">Aún no hay eventos de plan registrados.</Typography>}
+                {history.map((event) => (
+                  <Box key={event.auditId} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: 1, py: 1.2, borderBottom: "1px solid", borderColor: "divider" }}>
+                    <Typography variant="caption" color="text.secondary">{dateLabel(event.createdAt)}</Typography>
                     <Box>
-                      <Typography variant="overline" color="text.secondary">NEGOCIO #{selectedBusiness.id}</Typography>
-                      <Typography variant="h5" fontWeight={700}>{selectedBusiness.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">Owner principal: {selectedBusiness.owner?.name || "—"} · {selectedBusiness.owner?.email || "Sin email"}</Typography>
+                      <Typography variant="body2" fontWeight={650}>{event.action}</Typography>
+                      <Typography variant="caption" color="text.secondary">{event.previousPlan || "—"} → {event.nextPlan || "—"} · actor #{event.actorUserId || "sistema"}</Typography>
                     </Box>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                      <Chip label={`Efectivo: ${plan?.plan?.name || "Gratis"}`} color="primary" />
-                      <Chip label={`Base: ${plan?.basePlan?.name || "Gratis"}`} variant="outlined" />
-                      {activeTrial && <Chip label="Trial activo" color="warning" variant="outlined" />}
-                    </Stack>
-                  </Stack>
-                </Paper>
-
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="h6" fontWeight={700}>Plan base</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Cambiar el plan base cancela cualquier trial activo para evitar estados ambiguos.</Typography>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
-                    <FormControl size="small" sx={{ minWidth: 220 }}>
-                      <InputLabel>Plan</InputLabel>
-                      <Select label="Plan" value={planCode} onChange={(event) => setPlanCode(event.target.value)}>
-                        {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
-                      </Select>
-                    </FormControl>
-                    <Button variant="contained" disabled={busy || !planCode || planCode === plan?.basePlan?.code} onClick={onAssignPlan}>Guardar plan base</Button>
-                    <Typography variant="caption" color="text.secondary">Versión {plan?.subscription?.version || "—"}</Typography>
-                  </Stack>
-                  <PlanImpactPreview businessId={businessId} planCode={planCode} currentBasePlanCode={plan?.basePlan?.code} />
-                </Paper>
-
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="h6" fontWeight={700}>Trial</Typography>
-                  {activeTrial ? (
-                    <Stack spacing={1.5} sx={{ mt: 1.5 }}>
-                      <Alert severity="info">{activeTrial.name || activeTrial.planCode} activo hasta {dateLabel(activeTrial.endsAt)}. Después se recupera automáticamente {plan?.basePlan?.name}.</Alert>
-                      <Box><Button variant="outlined" color="warning" disabled={busy} onClick={onCancelTrial}>Cancelar trial</Button></Box>
-                    </Stack>
-                  ) : (
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mt: 2 }} alignItems={{ md: "center" }}>
-                      <FormControl size="small" sx={{ minWidth: 220 }}>
-                        <InputLabel>Plan del trial</InputLabel>
-                        <Select label="Plan del trial" value={trialPlanCode} onChange={(event) => setTrialPlanCode(event.target.value)}>
-                          {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                      <TextField size="small" label="Finaliza" type="datetime-local" value={trialEndsAt} onChange={(event) => setTrialEndsAt(event.target.value)} InputLabelProps={{ shrink: true }} />
-                      <Button variant="outlined" disabled={busy || !trialPlanCode || !trialEndsAt} onClick={onGrantTrial}>Activar trial</Button>
-                    </Stack>
-                  )}
-                </Paper>
-
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="h6" fontWeight={700}>Historial comercial</Typography>
-                  <Stack spacing={1.2} sx={{ mt: 2 }}>
-                    {historyQuery.isLoading && <CircularProgress size={24} />}
-                    {!historyQuery.isLoading && !history.length && <Typography variant="body2" color="text.secondary">Aún no hay eventos de plan registrados.</Typography>}
-                    {history.map((event) => (
-                      <Box key={event.auditId} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: 1, py: 1.2, borderBottom: "1px solid", borderColor: "divider" }}>
-                        <Typography variant="caption" color="text.secondary">{dateLabel(event.createdAt)}</Typography>
-                        <Box>
-                          <Typography variant="body2" fontWeight={650}>{event.action}</Typography>
-                          <Typography variant="caption" color="text.secondary">{event.previousPlan || "—"} → {event.nextPlan || "—"} · actor #{event.actorUserId || "sistema"}</Typography>
-                        </Box>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Paper>
+                  </Box>
+                ))}
               </Stack>
-            )}
-          </Box>
-        </Stack>
-      </Container>
-    </Box>
+            </Paper>
+          </Stack>
+        )}
+      </Box>
+    </Stack>
   );
 }

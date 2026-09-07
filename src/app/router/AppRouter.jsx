@@ -16,6 +16,8 @@ const RegisterBusiness = lazy(() => import("@Features/owner/pages/RegisterBusine
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvitation"));
 const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
+const AdminShell = lazy(() => import("@Features/admin/components/AdminShell"));
+const AdminOverviewPage = lazy(() => import("@Features/admin/pages/AdminOverviewPage"));
 const AdminPlansPage = lazy(() => import("@Features/admin/pages/AdminPlansPage"));
 
 const ProtectedRoute = ({ children }) => {
@@ -53,7 +55,13 @@ export default function AppRouter() {
               <Route key={route.path} path={route.path} element={route.isProtected ? <ProtectedRoute>{route.element}</ProtectedRoute> : route.element} />
             ))}
           </Route>
-          <Route path="/admin" element={<AdminRoute><AdminPlansPage /></AdminRoute>} />
+
+          <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="plans" element={<AdminPlansPage />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Route>
+
           <Route path="/login/:from?" element={<Login />} />
           <Route path="*" element={<Navigate to="/explorar" replace />} />
         </Routes>
