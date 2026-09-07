@@ -60,8 +60,7 @@ export function FeedbackProvider({ children }) {
         {active ? (
           <Alert
             severity={active.severity}
-            variant="filled"
-            iconMapping={{}}
+            variant="standard"
             action={(
               <IconButton
                 size="small"
@@ -78,7 +77,7 @@ export function FeedbackProvider({ children }) {
               maxWidth: 560,
               borderRadius: "8px",
               alignItems: "center",
-              boxShadow: "0 6px 18px rgba(25,20,18,.16)",
+              boxShadow: "0 4px 14px rgba(25,20,18,.10)",
               "& .MuiAlert-message": { width: "100%" },
             }}
           >
@@ -88,7 +87,7 @@ export function FeedbackProvider({ children }) {
                   {active.title}
                 </Typography>
               )}
-              <Typography variant="body2" sx={{ opacity: 0.96 }}>
+              <Typography variant="body2">
                 {active.message}
               </Typography>
             </Stack>

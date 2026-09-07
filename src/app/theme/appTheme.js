@@ -1,5 +1,18 @@
 import { createTheme } from "@mui/material/styles";
 
+const alertTone = (backgroundColor, color, borderColor, iconColor) => ({
+  backgroundColor,
+  color,
+  borderColor,
+  "& .MuiAlert-icon": { color: iconColor, opacity: 1 },
+  "& .MuiAlert-action": { color },
+});
+
+const successAlert = alertTone("#E7EEE8", "#34463A", "#C8D7CB", "#5F7864");
+const infoAlert = alertTone("#ECEEEF", "#3F474D", "#D1D6D9", "#626B73");
+const warningAlert = alertTone("#F4ECE2", "#5B452D", "#E2CEB4", "#A8753C");
+const errorAlert = alertTone("#F3E6E4", "#60322E", "#DEC1BD", "#B7473F");
+
 export const appTheme = createTheme({
   palette: {
     primary: { main: "#C65A50", light: "#D9877F", dark: "#8F3E38", contrastText: "#FFFFFF" },
@@ -147,7 +160,28 @@ export const appTheme = createTheme({
       styleOverrides: { root: { minHeight: 42, textTransform: "none", fontWeight: 600 } },
     },
     MuiAlert: {
-      styleOverrides: { root: { borderRadius: 7 } },
+      defaultProps: { variant: "standard" },
+      styleOverrides: {
+        root: {
+          borderRadius: 7,
+          border: "1px solid",
+          boxShadow: "none",
+          alignItems: "center",
+          backgroundImage: "none",
+        },
+        standardSuccess: successAlert,
+        outlinedSuccess: successAlert,
+        filledSuccess: successAlert,
+        standardInfo: infoAlert,
+        outlinedInfo: infoAlert,
+        filledInfo: infoAlert,
+        standardWarning: warningAlert,
+        outlinedWarning: warningAlert,
+        filledWarning: warningAlert,
+        standardError: errorAlert,
+        outlinedError: errorAlert,
+        filledError: errorAlert,
+      },
     },
     MuiTextField: {
       defaultProps: { variant: "outlined" },
