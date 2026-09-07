@@ -15,7 +15,7 @@ export default function OwnerLoyalty({ businessId }) {
 
   const planData = planQuery.data?.data || planQuery.data || {};
   const entitlement = useMemo(
-    () => (planData.plan?.features || planData.current?.features || []).find((feature) => feature.key === "loyalty.management"),
+    () => (planData.features || planData.plan?.features || planData.current?.features || []).find((feature) => feature.key === "loyalty.management"),
     [planData],
   );
   const canManage = Boolean(entitlement?.included && entitlement?.status === "available");
@@ -59,7 +59,7 @@ export default function OwnerLoyalty({ businessId }) {
 
       {!canManage && (
         <Alert severity="info" variant="outlined">
-          Los clientes pueden participar gratuitamente en programas de lealtad. La configuración del programa está disponible desde Nivel 1.
+          Los clientes conservan su progreso y sus recompensas. La configuración y la acumulación de nuevos avances requieren Nivel 1 o superior.
         </Alert>
       )}
       {feedback && <Alert severity={feedback.severity} onClose={() => setFeedback(null)}>{feedback.message}</Alert>}
@@ -69,7 +69,7 @@ export default function OwnerLoyalty({ businessId }) {
           <Box>
             <Typography variant="h6" fontWeight={600}>Programa por órdenes completadas</Typography>
             <Typography variant="body2" color="text.secondary">
-              Cada orden completada que alcance el monto mínimo suma 1 avance. Al completar el ciclo se genera una recompensa de descuento.
+              Cada orden completada que alcance el monto mínimo suma 1 avance. Al completar el ciclo se genera una recompensa de descuento que el cliente puede aplicar en checkout.
             </Typography>
           </Box>
 
@@ -79,7 +79,7 @@ export default function OwnerLoyalty({ businessId }) {
             disabled={!canManage}
           />
 
-          <Box>
+          <Box sx={{ px: { xs: 0.5, sm: 1 } }}>
             <Typography variant="body2" fontWeight={600}>Órdenes requeridas: {form.ordersRequired}</Typography>
             <Slider
               value={form.ordersRequired}
@@ -92,7 +92,7 @@ export default function OwnerLoyalty({ businessId }) {
             />
           </Box>
 
-          <Box>
+          <Box sx={{ px: { xs: 0.5, sm: 1 } }}>
             <Typography variant="body2" fontWeight={600}>Descuento de recompensa: {form.rewardPercent}%</Typography>
             <Slider
               value={form.rewardPercent}
@@ -116,28 +116,20 @@ export default function OwnerLoyalty({ businessId }) {
             disabled={!canManage}
           />
 
-          <Paper elevation={0} sx={{ p: 2, bgcolor: "grey.50", borderRadius: "8px" }}>
+          <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
             <Typography variant="subtitle2" fontWeight={700}>Ejemplo</Typography>
             <Typography variant="body2" color="text.secondary">
-              Después de {form.ordersRequired} órdenes completadas elegibles, el cliente obtiene una recompensa de {form.rewardPercent}% de descuento para un canje futuro.
+              Después de {form.ordersRequired} órdenes completadas elegibles, el cliente obtiene una recompensa de {form.rewardPercent}% para aplicar a una orden futura. El descuento final siempre se valida y calcula en el servidor.
             </Typography>
-          </Paper>
+          </Box>
 
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="contained" disabled={!canManage || saveState.isLoading} onClick={submit}>
+          <Stack direction="row" justifyContent={{ xs: "stretch", sm: "flex-end" }}>
+            <Button fullWidth={false} variant="contained" disabled={!canManage || saveState.isLoading} onClick={submit} sx={{ width: { xs: "100%", sm: "auto" } }}>
               {saveState.isLoading ? "Guardando…" : "Guardar programa"}
             </Button>
           </Stack>
         </Stack>
       </Paper>
-
-      <Alert severity="warning" variant="outlined">
-        B4.1 acumula progreso y genera recompensas. El consumo del descuento en checkout se conectará en B4.2 con validación y snapshot del lado servidor; todavía no se descuenta dinero de una orden.
-      </Alert>
     </Stack>
   );
 }
-
-OwnerLoyalty.propTypes = {
-  businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-};
