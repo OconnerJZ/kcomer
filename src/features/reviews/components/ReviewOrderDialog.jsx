@@ -13,6 +13,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   useCreateVerifiedReviewMutation,
@@ -30,6 +32,8 @@ const errorMessage = (error) =>
   error?.data?.message || error?.message || "No fue posible publicar la reseña";
 
 export default function ReviewOrderDialog({ open, order, onClose }) {
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const orderId = order?.id;
   const reviewQuery = useGetReviewByOrderQuery({ orderId }, { skip: !open || !orderId });
   const [createReview, createState] = useCreateVerifiedReviewMutation();
@@ -75,9 +79,16 @@ export default function ReviewOrderDialog({ open, order, onClose }) {
   const categoryValue = (value) => (value == null ? 0 : Number(value));
 
   return (
-    <Dialog open={open} onClose={createState.isLoading ? undefined : onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Calificar experiencia · {order?.businessName || "Negocio"}</DialogTitle>
-      <DialogContent dividers>
+    <Dialog
+      open={open}
+      onClose={createState.isLoading ? undefined : onClose}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={isSmall}
+      PaperProps={{ sx: { borderRadius: isSmall ? 0 : "10px" } }}
+    >
+      <DialogTitle sx={{ pr: 2 }}>Calificar experiencia · {order?.businessName || "Negocio"}</DialogTitle>
+      <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
         <Stack spacing={2.5}>
           {reviewQuery.isError && <Alert severity="error">{errorMessage(reviewQuery.error)}</Alert>}
           {feedback && <Alert severity={feedback.severity}>{feedback.message}</Alert>}
@@ -97,7 +108,7 @@ export default function ReviewOrderDialog({ open, order, onClose }) {
                     const value = existing.categoryRatings[apiKey];
                     if (!value) return null;
                     return (
-                      <Stack key={key} direction="row" alignItems="center" justifyContent="space-between" gap={2}>
+                      <Stack key={key} direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} justifyContent="space-between" gap={0.5}>
                         <Typography variant="caption" color="text.secondary">{label}</Typography>
                         <Rating value={Number(value)} size="small" readOnly />
                       </Stack>
@@ -127,7 +138,7 @@ export default function ReviewOrderDialog({ open, order, onClose }) {
               </Box>
               <Stack spacing={1.25}>
                 {CATEGORY_FIELDS.map(([key, label]) => (
-                  <Stack key={key} direction="row" alignItems="center" justifyContent="space-between" gap={2}>
+                  <Stack key={key} direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} justifyContent="space-between" gap={0.5}>
                     <Typography variant="body2">{label}</Typography>
                     <Rating
                       value={categoryValue(categories[key])}
@@ -150,10 +161,10 @@ export default function ReviewOrderDialog({ open, order, onClose }) {
           )}
         </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={createState.isLoading}>Cerrar</Button>
+      <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 }, flexDirection: { xs: "column-reverse", sm: "row" } }}>
+        <Button onClick={onClose} disabled={createState.isLoading} fullWidth={isSmall}>Cerrar</Button>
         {!existing && eligibility?.eligible && (
-          <Button variant="contained" onClick={submit} disabled={createState.isLoading || !rating}>
+          <Button variant="contained" onClick={submit} disabled={createState.isLoading || !rating} fullWidth={isSmall}>
             {createState.isLoading ? "Publicando…" : "Publicar reseña"}
           </Button>
         )}
