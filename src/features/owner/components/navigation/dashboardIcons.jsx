@@ -1,4 +1,4 @@
-import { Assessment, Dashboard, LoyaltyRounded, RateReviewRounded, Restaurant, Settings } from "@mui/icons-material";
+import { Assessment, CampaignRounded, Dashboard, LoyaltyRounded, RateReviewRounded, Restaurant, Settings } from "@mui/icons-material";
 
 export const DASHBOARD_ICONS = Object.freeze({
   dashboard: <Dashboard />,
@@ -6,5 +6,6 @@ export const DASHBOARD_ICONS = Object.freeze({
   assessment: <Assessment />,
   reviews: <RateReviewRounded />,
   loyalty: <LoyaltyRounded />,
+  campaign: <CampaignRounded />,
   settings: <Settings />,
 });
