@@ -1,6 +1,12 @@
 import { api } from "@Shared/api/rtk/api";
 import { ENDPOINTS } from "@Shared/api/endpoints";
 
+const featureBusinessTag = (businessId) => ({ type: "FeatureControl", id: `business-${businessId}` });
+const featureBroadTags = [
+  { type: "FeatureControl", id: "CATALOG" },
+  { type: "FeatureControl", id: "BUSINESSES" },
+];
+
 const adminApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAdminDashboard: builder.query({
@@ -119,6 +125,7 @@ const adminApi = api.injectEndpoints({
         { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        featureBusinessTag(businessId),
       ],
     }),
     grantAdminBusinessPlanTrial: builder.mutation({
@@ -133,6 +140,7 @@ const adminApi = api.injectEndpoints({
         { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        featureBusinessTag(businessId),
       ],
     }),
     cancelAdminBusinessPlanTrial: builder.mutation({
@@ -147,7 +155,43 @@ const adminApi = api.injectEndpoints({
         { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        featureBusinessTag(businessId),
       ],
+    }),
+    getAdminFeatures: builder.query({
+      query: () => ENDPOINTS.admin.features,
+      providesTags: [{ type: "FeatureControl", id: "CATALOG" }],
+    }),
+    getAdminBusinessFeatures: builder.query({
+      query: ({ businessId }) => `${ENDPOINTS.admin.features}/businesses/${businessId}`,
+      providesTags: (_result, _error, { businessId }) => [
+        { type: "FeatureControl", id: "BUSINESSES" },
+        featureBusinessTag(businessId),
+      ],
+    }),
+    updateAdminGlobalFeature: builder.mutation({
+      query: ({ featureKey, ...data }) => ({
+        url: `${ENDPOINTS.admin.features}/${encodeURIComponent(featureKey)}/global`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: featureBroadTags,
+    }),
+    updateAdminPlanFeature: builder.mutation({
+      query: ({ featureKey, planCode, ...data }) => ({
+        url: `${ENDPOINTS.admin.features}/${encodeURIComponent(featureKey)}/plans/${planCode}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: featureBroadTags,
+    }),
+    updateAdminBusinessFeature: builder.mutation({
+      query: ({ featureKey, businessId, ...data }) => ({
+        url: `${ENDPOINTS.admin.features}/${encodeURIComponent(featureKey)}/businesses/${businessId}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { businessId }) => [featureBusinessTag(businessId)],
     }),
   }),
   overrideExisting: false,
@@ -170,4 +214,9 @@ export const {
   useAssignAdminBusinessPlanMutation,
   useGrantAdminBusinessPlanTrialMutation,
   useCancelAdminBusinessPlanTrialMutation,
+  useGetAdminFeaturesQuery,
+  useGetAdminBusinessFeaturesQuery,
+  useUpdateAdminGlobalFeatureMutation,
+  useUpdateAdminPlanFeatureMutation,
+  useUpdateAdminBusinessFeatureMutation,
 } = adminApi;

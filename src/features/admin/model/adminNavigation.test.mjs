@@ -15,6 +15,8 @@ test("resuelve el módulo activo para rutas admin anidadas", () => {
   assert.equal(getAdminModuleForPath("/admin/users/7").id, "users");
   assert.equal(getAdminModuleForPath("/admin/plans").id, "plans");
   assert.equal(getAdminModuleForPath("/admin/plans/history").id, "plans");
+  assert.equal(getAdminModuleForPath("/admin/features").id, "features");
+  assert.equal(getAdminModuleForPath("/admin/features/business/12").id, "features");
 });
 
 test("usa el overview como fallback sin habilitar rutas inexistentes", () => {
@@ -29,5 +31,6 @@ test("mantiene el catálogo agrupado y distingue módulos disponibles de planead
   assert.equal(ADMIN_MODULES.find(({ id }) => id === "plans")?.status, ADMIN_MODULE_STATUS.READY);
   assert.equal(ADMIN_MODULES.find(({ id }) => id === "businesses")?.status, ADMIN_MODULE_STATUS.READY);
   assert.equal(ADMIN_MODULES.find(({ id }) => id === "users")?.status, ADMIN_MODULE_STATUS.READY);
-  assert.equal(ADMIN_MODULES.find(({ id }) => id === "features")?.status, ADMIN_MODULE_STATUS.PLANNED);
+  assert.equal(ADMIN_MODULES.find(({ id }) => id === "features")?.status, ADMIN_MODULE_STATUS.READY);
+  assert.equal(ADMIN_MODULES.find(({ id }) => id === "marketing")?.status, ADMIN_MODULE_STATUS.PLANNED);
 });

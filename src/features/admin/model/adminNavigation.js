@@ -51,8 +51,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/features",
     icon: "features",
     section: "Comercial",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Controles globales, por plan y por negocio para funciones operativas.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Controles globales, por plan y por negocio para funciones comerciales.",
   },
   {
     id: "marketing",

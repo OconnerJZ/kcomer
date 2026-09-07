@@ -18,6 +18,7 @@ export const api = createApi({
     "BusinessTeam",
     "SharedOrder",
     "BusinessPlan",
+    "FeatureControl",
   ],
   endpoints: () => ({}),
 });
