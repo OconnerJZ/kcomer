@@ -5,7 +5,15 @@ import { getAllowedDashboardTabs, getOrderCapabilities, hasBusinessPermission } 
 test("primary owner conserva todos los permisos del negocio", () => {
   const business = { membershipRole: "primary_owner", permissions: [] };
   assert.equal(hasBusinessPermission(business, "ownership.transfer"), true);
-  assert.deepEqual(getAllowedDashboardTabs(business), [0, 1, 2, 3]);
+  assert.deepEqual(getAllowedDashboardTabs(business), [0, 1, 2, 4, 5, 6, 3]);
+});
+
+test("reviews, loyalty y marketing habilitan sólo sus superficies", () => {
+  const business = {
+    membershipRole: "manager",
+    permissions: ["orders.read", "reviews.manage", "loyalty.manage", "marketing.manage"],
+  };
+  assert.deepEqual(getAllowedDashboardTabs(business), [0, 4, 5, 6]);
 });
 
 test("cocina ve órdenes y producción, pero no acepta órdenes", () => {

@@ -3,6 +3,9 @@ import { Box, Fade } from "@mui/material";
 import OwnerMenu from "../../pages/OwnerMenu";
 import OwnerOrders from "../../pages/OwnerOrders";
 import OwnerReports from "../../pages/OwnerReports";
+import OwnerReviews from "../../pages/OwnerReviews";
+import OwnerLoyalty from "../../pages/OwnerLoyalty";
+import OwnerMarketing from "../../pages/OwnerMarketing";
 import OwnerSettings from "../../pages/OwnerSettings";
 
 const OwnerDashboardContent = ({
@@ -27,12 +30,11 @@ const OwnerDashboardContent = ({
           isAdmin={isAdmin}
         />
       )}
-      {displayedTab === 1 && allowedTabs.includes(1) && (
-        <OwnerMenu businessId={businessId} />
-      )}
-      {displayedTab === 2 && allowedTabs.includes(2) && (
-        <OwnerReports businessId={businessId} />
-      )}
+      {displayedTab === 1 && allowedTabs.includes(1) && <OwnerMenu businessId={businessId} />}
+      {displayedTab === 2 && allowedTabs.includes(2) && <OwnerReports businessId={businessId} />}
+      {displayedTab === 4 && allowedTabs.includes(4) && <OwnerReviews businessId={businessId} />}
+      {displayedTab === 5 && allowedTabs.includes(5) && <OwnerLoyalty businessId={businessId} />}
+      {displayedTab === 6 && allowedTabs.includes(6) && <OwnerMarketing businessId={businessId} />}
       {displayedTab === 3 && allowedTabs.includes(3) && (
         <OwnerSettings businessData={selectedBusiness} onRefresh={onRefreshBusinesses} />
       )}
@@ -44,9 +46,7 @@ OwnerDashboardContent.propTypes = {
   displayedTab: PropTypes.number.isRequired,
   allowedTabs: PropTypes.arrayOf(PropTypes.number).isRequired,
   businessId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  selectedBusiness: PropTypes.shape({
-    permissions: PropTypes.arrayOf(PropTypes.string),
-  }).isRequired,
+  selectedBusiness: PropTypes.shape({ permissions: PropTypes.arrayOf(PropTypes.string) }).isRequired,
   businessOrders: PropTypes.shape({
     orders: PropTypes.arrayOf(PropTypes.object).isRequired,
     loading: PropTypes.bool.isRequired,

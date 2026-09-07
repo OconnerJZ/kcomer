@@ -9,6 +9,9 @@ export const getAllowedDashboardTabs = (business, { isAdmin = false } = {}) => {
     hasBusinessPermission(business, "orders.read", { isAdmin }) && 0,
     hasBusinessPermission(business, "menu.manage", { isAdmin }) && 1,
     hasBusinessPermission(business, "reports.read", { isAdmin }) && 2,
+    hasBusinessPermission(business, "reviews.manage", { isAdmin }) && 4,
+    hasBusinessPermission(business, "loyalty.manage", { isAdmin }) && 5,
+    hasBusinessPermission(business, "marketing.manage", { isAdmin }) && 6,
     (hasBusinessPermission(business, "settings.update", { isAdmin }) || hasBusinessPermission(business, "team.manage", { isAdmin })) && 3,
   ].filter((value) => value !== false);
 };

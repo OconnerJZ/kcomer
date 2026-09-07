@@ -1,7 +1,11 @@
+const numberOrNull = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const normalizeReview = (review = {}) => ({
   id: review.id ?? null,
-  userId: review.userId ?? review.user_id ?? null,
-  businessId: review.businessId ?? review.business_id ?? null,
   userName:
     review.userName ||
     review.user_name ||
@@ -18,6 +22,14 @@ export const normalizeReview = (review = {}) => ({
     "",
   comment: review.comment || review.content || review.review || review.description || "",
   rating: Number(review.rating ?? review.score ?? 0),
+  verifiedOrder: Boolean(review.verifiedOrder ?? review.verified_order),
+  categoryRatings: {
+    food: numberOrNull(review.categoryRatings?.food ?? review.foodRating ?? review.food_rating),
+    time: numberOrNull(review.categoryRatings?.time ?? review.timeRating ?? review.time_rating),
+    presentation: numberOrNull(review.categoryRatings?.presentation ?? review.presentationRating ?? review.presentation_rating),
+    accuracy: numberOrNull(review.categoryRatings?.accuracy ?? review.accuracyRating ?? review.accuracy_rating),
+  },
+  ownerResponse: review.ownerResponse || review.owner_response || null,
   createdAt: review.createdAt || review.created_at || null,
 });
 

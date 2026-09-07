@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import useAuth from "@Features/auth/context/useAuth";
+import AdminRoute from "@Features/admin/components/AdminRoute";
 import AppLayout from "@App/layout/AppLayout";
 import ScrollToTop from "@Shared/components/navigation/ScrollToTop";
 
@@ -15,6 +16,7 @@ const RegisterBusiness = lazy(() => import("@Features/owner/pages/RegisterBusine
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvitation"));
 const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
+const AdminPlansPage = lazy(() => import("@Features/admin/pages/AdminPlansPage"));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -51,6 +53,7 @@ export default function AppRouter() {
               <Route key={route.path} path={route.path} element={route.isProtected ? <ProtectedRoute>{route.element}</ProtectedRoute> : route.element} />
             ))}
           </Route>
+          <Route path="/admin" element={<AdminRoute><AdminPlansPage /></AdminRoute>} />
           <Route path="/login/:from?" element={<Login />} />
           <Route path="*" element={<Navigate to="/explorar" replace />} />
         </Routes>

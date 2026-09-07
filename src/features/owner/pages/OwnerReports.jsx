@@ -1,21 +1,52 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Box, CircularProgress, FormControl, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { CancelPresentationRounded, GroupsRounded, Inventory2Rounded, PaymentsRounded, ReceiptLongRounded, RepeatRounded, ShoppingBagRounded, TrendingUpRounded } from "@mui/icons-material";
+import { useGetBusinessPlanQuery } from "@Features/business/api/business.api";
 import { useGetBusinessStatsQuery } from "@Features/stats/api/stats.api";
 import { KpiCard } from "@Features/stats/components/ReportPrimitives";
 import FinancialOverview from "@Features/stats/components/FinancialOverview";
 import ProductInsights from "@Features/stats/components/ProductInsights";
 import OperationalInsights from "@Features/stats/components/OperationalInsights";
+import CustomerIntelligence from "@Features/stats/components/CustomerIntelligence";
 import { integer, money } from "@Features/stats/model/statsPresentation";
 
-const periods = [{ value: 7, label: "Últimos 7 días" }, { value: 15, label: "Últimos 15 días" }, { value: 30, label: "Últimos 30 días" }, { value: 90, label: "Últimos 90 días" }];
+const periods = [
+  { value: 7, label: "Últimos 7 días" },
+  { value: 15, label: "Últimos 15 días" },
+  { value: 30, label: "Últimos 30 días" },
+  { value: 90, label: "Últimos 90 días" },
+  { value: 180, label: "Últimos 180 días" },
+  { value: 365, label: "Últimos 365 días" },
+  { value: 730, label: "Últimos 730 días" },
+];
 
 export default function OwnerReports({ businessId }) {
   const [period, setPeriod] = useState(30);
   const [section, setSection] = useState("finance");
-  const { data: response, isLoading, isFetching, error } = useGetBusinessStatsQuery({ businessId, period }, { skip: !businessId, pollingInterval: 60000 });
-  if (!businessId || isLoading) return <Box sx={{ display: "grid", placeItems: "center", minHeight: 340 }}><CircularProgress size={30}/></Box>;
+  const { data: planResponse, isLoading: planLoading } = useGetBusinessPlanQuery({ businessId }, { skip: !businessId });
+  const planData = planResponse?.data || planResponse;
+  const analyticsLimit = Number(planData?.limits?.analyticsHistoryDays?.limit ?? planData?.plan?.limits?.analyticsHistoryDays ?? 30);
+  const planFeatures = planData?.features || planData?.plan?.features || [];
+  const customerIntelligenceFeature = planFeatures.find((feature) => feature.key === "customer.intelligence");
+  const customerIntelligenceEnabled = Boolean(customerIntelligenceFeature?.included && customerIntelligenceFeature?.status === "available");
+  const allowedPeriods = useMemo(
+    () => periods.filter((option) => !Number.isFinite(analyticsLimit) || option.value <= analyticsLimit),
+    [analyticsLimit],
+  );
+
+  useEffect(() => {
+    if (!allowedPeriods.length) return;
+    if (!allowedPeriods.some((option) => option.value === period)) {
+      setPeriod(allowedPeriods[allowedPeriods.length - 1].value);
+    }
+  }, [allowedPeriods, period]);
+
+  const { data: response, isLoading, isFetching, error } = useGetBusinessStatsQuery(
+    { businessId, period },
+    { skip: !businessId || planLoading || !allowedPeriods.some((option) => option.value === period), pollingInterval: 60000 },
+  );
+  if (!businessId || planLoading || isLoading) return <Box sx={{ display: "grid", placeItems: "center", minHeight: 340 }}><CircularProgress size={30}/></Box>;
   if (error) return <Alert severity="error">{error?.data?.message || error?.message || "Error al cargar las métricas"}</Alert>;
   const stats = response?.data || response;
   if (!stats) return <Alert severity="info">Todavía no hay datos disponibles para este negocio.</Alert>;
@@ -23,7 +54,7 @@ export default function OwnerReports({ businessId }) {
 
   return <Box sx={{ pb: 3, opacity: isFetching ? .78 : 1, transition: "opacity .2s" }}>
     <Box sx={{ color: "white", bgcolor: "#34312D", borderRadius: "8px", p: { xs: 2.2, sm: 3 }, boxShadow: "0 3px 12px rgba(26,28,31,.10)" }}>
-      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} sx={{ mb: 3 }}><Box><Stack direction="row" alignItems="center" gap={.8}><TrendingUpRounded sx={{ color: "#D9877F", fontSize: 20 }}/><Typography variant="overline" sx={{ color: "rgba(255,255,255,.62)", letterSpacing: ".11em" }}>Inteligencia del negocio</Typography></Stack><Typography variant="h4" fontWeight={600} sx={{ letterSpacing: "-.01em" }}>Rendimiento</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,.67)", mt: .6 }}>Finanzas, clientes, productos y operación comparados con el periodo anterior.</Typography></Box><FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}><Select value={period} onChange={(event) => setPeriod(event.target.value)} sx={{ color: "white", bgcolor: "rgba(255,255,255,.06)", borderRadius: "7px", ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,.16)" }, ".MuiSvgIcon-root": { color: "white" } }}>{periods.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}</Select></FormControl></Stack>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} sx={{ mb: 3 }}><Box><Stack direction="row" alignItems="center" gap={.8}><TrendingUpRounded sx={{ color: "#D9877F", fontSize: 20 }}/><Typography variant="overline" sx={{ color: "rgba(255,255,255,.62)", letterSpacing: ".11em" }}>Inteligencia del negocio</Typography></Stack><Typography variant="h4" fontWeight={600} sx={{ letterSpacing: "-.01em" }}>Rendimiento</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,.67)", mt: .6 }}>Finanzas, clientes, productos y operación comparados con el periodo anterior.</Typography></Box><FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}><Select value={period} onChange={(event) => setPeriod(event.target.value)} sx={{ color: "white", bgcolor: "rgba(255,255,255,.06)", borderRadius: "7px", ".MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,.16)" }, ".MuiSvgIcon-root": { color: "white" } }}>{allowedPeriods.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}</Select></FormControl></Stack>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2,minmax(0,1fr))", md: "repeat(4,minmax(0,1fr))" }, gap: 1.2 }}>
         <KpiCard label="Ventas brutas" value={money(summary.totalRevenue)} delta={summary.revenueGrowth} icon={<PaymentsRounded fontSize="small"/>}/>
         <KpiCard label="Ticket promedio" value={money(summary.averageTicket)} delta={summary.averageTicketGrowth} icon={<ReceiptLongRounded fontSize="small"/>}/>
@@ -36,9 +67,10 @@ export default function OwnerReports({ businessId }) {
       </Box>
     </Box>
 
-    <Alert severity="info" variant="outlined" sx={{ mt: 2, borderRadius: "8px" }}>{accountingNote}</Alert>
-    <Tabs value={section} onChange={(_event, value) => setSection(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2, minHeight: 42 }}><Tab value="finance" label="Finanzas y clientes"/><Tab value="products" label="Productos"/><Tab value="operations" label="Operación"/></Tabs>
+    <Alert severity="info" variant="outlined" sx={{ mt: 2, borderRadius: "8px" }}>Tu plan incluye hasta {analyticsLimit} días de historial analítico. {accountingNote}</Alert>
+    <Tabs value={section} onChange={(_event, value) => setSection(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2, minHeight: 42 }}><Tab value="finance" label="Finanzas y clientes"/><Tab value="customers" label="Customer Intelligence"/><Tab value="products" label="Productos"/><Tab value="operations" label="Operación"/></Tabs>
     {section === "finance" && <FinancialOverview salesByDay={salesByDay} paymentMix={paymentMix} orderTypeMix={orderTypeMix} categoryPerformance={categoryPerformance}/>}
+    {section === "customers" && <CustomerIntelligence businessId={businessId} period={period} entitled={customerIntelligenceEnabled}/>} 
     {section === "products" && <ProductInsights products={productPerformance} slowMovers={slowMovers}/>}
     {section === "operations" && <OperationalInsights operations={operations} peakHours={peakHours} ordersByStatus={ordersByStatus} summary={summary}/>}
   </Box>;

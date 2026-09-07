@@ -59,7 +59,7 @@ export const buildDeliverySnapshot = ({ orderType, addressType, form, addresses 
   };
 };
 
-export const buildOrderPayload = ({ businessId, business, user, orderType, addressType, addresses = [], form }) => {
+export const buildOrderPayload = ({ businessId, business, user, orderType, addressType, addresses = [], form, useLoyaltyReward = false }) => {
   const delivery = buildDeliverySnapshot({ orderType, addressType, form, addresses });
   return {
     businessId,
@@ -74,7 +74,9 @@ export const buildOrderPayload = ({ businessId, business, user, orderType, addre
     deliveryAddressId: delivery.deliveryAddressId,
     deliveryLocation: delivery.deliveryLocation,
     phoneNumber: form.customerPhone,
+    customerPhone: form.customerPhone,
     paymentMethod: form.paymentMethod,
     notes: form.notes,
+    useLoyaltyReward: useLoyaltyReward === true,
   };
 };

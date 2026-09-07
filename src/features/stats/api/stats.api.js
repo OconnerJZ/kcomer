@@ -10,6 +10,13 @@ const statsEndpoints = (builder) => {
         `${ENDPOINTS.stats.business}/${businessId}?period=${period}`,
       tagType: "Stats",
     }),
+    getCustomerIntelligence: builder.query({
+      query: ({ businessId, period = 30 }) =>
+        `${ENDPOINTS.stats.business}/${businessId}/customers?period=${period}`,
+      providesTags: (_result, _error, { businessId, period }) => [
+        { type: "Stats", id: `customers-${businessId}-${period}` },
+      ],
+    }),
   };
 };
 
@@ -18,4 +25,4 @@ const apiStats = api.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetBusinessStatsQuery } = apiStats;
+export const { useGetBusinessStatsQuery, useGetCustomerIntelligenceQuery } = apiStats;

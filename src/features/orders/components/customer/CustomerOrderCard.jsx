@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardContent, Collapse, Divider, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { EditRounded, ExpandLess, ExpandMore, GroupsRounded } from "@mui/icons-material";
+import { EditRounded, ExpandLess, ExpandMore, GroupsRounded, StarRounded } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { ORDER_STATUS_VALUES as ORDER_STATUS } from "@Features/orders/model/orderStatus";
 import OrderProgressTracker from "./OrderProgressTracker";
@@ -7,7 +7,7 @@ import OrderItemsList from "./OrderItemsList";
 import OrderHistory from "./OrderHistory";
 import TransferPaymentPanel from "@Features/payments/components/TransferPaymentPanel";
 
-export default function CustomerOrderCard({ order, expanded, historyExpanded, onToggle, onToggleHistory, onCancel, onEdit }) {
+export default function CustomerOrderCard({ order, expanded, historyExpanded, onToggle, onToggleHistory, onCancel, onEdit, onReview }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -38,6 +38,20 @@ export default function CustomerOrderCard({ order, expanded, historyExpanded, on
             <Divider sx={{ my: 1.25 }} />
             <OrderHistory order={order} expanded={historyExpanded} onToggle={onToggleHistory} />
             {order.viewerCanManage !== false && <TransferPaymentPanel order={order} />}
+            {order.status === ORDER_STATUS.COMPLETED && order.viewerCanManage !== false && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<StarRounded />}
+                  onClick={() => onReview(order)}
+                  sx={{ borderRadius: "8px", py: 1, textTransform: "none", fontWeight: 650 }}
+                >
+                  Calificar experiencia
+                </Button>
+              </>
+            )}
             {order.status === ORDER_STATUS.PENDING && order.viewerCanManage !== false && (
               <>
                 <Divider sx={{ my: 2 }} />
@@ -66,4 +80,5 @@ CustomerOrderCard.propTypes = {
   onToggleHistory: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
+  onReview: PropTypes.func.isRequired,
 };
