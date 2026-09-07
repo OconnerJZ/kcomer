@@ -32,6 +32,11 @@ import {
 const dataOf = (response) => response?.data ?? response;
 const errorMessage = (error) => error?.data?.message || error?.message || "No fue posible completar la operación";
 const dateLabel = (value) => value ? new Date(value).toLocaleString("es-MX") : "—";
+const isFutureDate = (value) => {
+  if (!value) return false;
+  const timestamp = new Date(value).getTime();
+  return !Number.isNaN(timestamp) && timestamp > Date.now();
+};
 
 export default function AdminPlansPage() {
   const [search, setSearch] = useState("");
@@ -90,15 +95,14 @@ export default function AdminPlansPage() {
   const onGrantTrial = async () => {
     try {
       setFeedback(null);
-      const parsedEnd = new Date(trialEndsAt);
-      if (!trialEndsAt || Number.isNaN(parsedEnd.getTime()) || parsedEnd.getTime() <= Date.now()) {
+      if (!isFutureDate(trialEndsAt)) {
         setFeedback({ severity: "warning", message: "Selecciona una fecha futura para terminar el trial." });
         return;
       }
       await grantTrial({
         businessId,
         planCode: trialPlanCode,
-        endsAt: parsedEnd.toISOString(),
+        endsAt: new Date(trialEndsAt).toISOString(),
         expectedVersion: plan?.subscription?.version || undefined,
       }).unwrap();
       await refreshAfterMutation();
