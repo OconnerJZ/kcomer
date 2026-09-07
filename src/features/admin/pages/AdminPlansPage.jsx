@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Box,
@@ -37,8 +37,8 @@ export default function AdminPlansPage() {
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [planCode, setPlanCode] = useState("");
-  const [trialPlanCode, setTrialPlanCode] = useState("");
+  const [planCodeOverride, setPlanCodeOverride] = useState(null);
+  const [trialPlanCodeOverride, setTrialPlanCodeOverride] = useState(null);
   const [trialEndsAt, setTrialEndsAt] = useState("");
   const [feedback, setFeedback] = useState(null);
 
@@ -49,26 +49,26 @@ export default function AdminPlansPage() {
   const historyQuery = useGetAdminBusinessPlanHistoryQuery({ businessId }, { skip: !businessId });
   const plan = dataOf(planQuery.data);
   const history = dataOf(historyQuery.data) || [];
-  const catalog = plan?.catalog || [];
+  const catalog = plan?.catalog ?? [];
+  const planCode = planCodeOverride ?? plan?.basePlan?.code ?? plan?.plan?.code ?? "free";
+  const trialPlanCode = trialPlanCodeOverride ?? plan?.plan?.code ?? "level_1";
   const [assignPlan, assignState] = useAssignAdminBusinessPlanMutation();
   const [grantTrial, trialState] = useGrantAdminBusinessPlanTrialMutation();
   const [cancelTrial, cancelState] = useCancelAdminBusinessPlanTrialMutation();
   const busy = assignState.isLoading || trialState.isLoading || cancelState.isLoading;
-
-  useEffect(() => {
-    if (!plan) return;
-    setPlanCode(plan.basePlan?.code || plan.plan?.code || "free");
-    setTrialPlanCode(plan.plan?.code || "level_1");
-  }, [plan]);
-
   const activeTrial = plan?.trial?.active ? plan.trial : null;
-  const selectedPlanName = useMemo(
-    () => catalog.find((entry) => entry.code === planCode)?.name || planCode,
-    [catalog, planCode],
-  );
+  const selectedPlanName = catalog.find((entry) => entry.code === planCode)?.name || planCode;
 
   const refreshAfterMutation = async () => {
     await Promise.all([planQuery.refetch(), historyQuery.refetch(), businessesQuery.refetch()]);
+  };
+
+  const selectBusiness = (business) => {
+    setSelectedBusiness(business);
+    setPlanCodeOverride(null);
+    setTrialPlanCodeOverride(null);
+    setTrialEndsAt("");
+    setFeedback(null);
   };
 
   const onAssignPlan = async () => {
@@ -79,8 +79,9 @@ export default function AdminPlansPage() {
         planCode,
         expectedVersion: plan?.subscription?.version || undefined,
       }).unwrap();
-      setFeedback({ severity: "success", message: `Plan base actualizado a ${selectedPlanName}.` });
       await refreshAfterMutation();
+      setPlanCodeOverride(null);
+      setFeedback({ severity: "success", message: `Plan base actualizado a ${selectedPlanName}.` });
     } catch (error) {
       setFeedback({ severity: "error", message: errorMessage(error) });
     }
@@ -100,9 +101,10 @@ export default function AdminPlansPage() {
         endsAt: parsedEnd.toISOString(),
         expectedVersion: plan?.subscription?.version || undefined,
       }).unwrap();
-      setFeedback({ severity: "success", message: "Trial activado correctamente." });
-      setTrialEndsAt("");
       await refreshAfterMutation();
+      setTrialPlanCodeOverride(null);
+      setTrialEndsAt("");
+      setFeedback({ severity: "success", message: "Trial activado correctamente." });
     } catch (error) {
       setFeedback({ severity: "error", message: errorMessage(error) });
     }
@@ -115,8 +117,8 @@ export default function AdminPlansPage() {
         businessId,
         expectedVersion: plan?.subscription?.version || undefined,
       }).unwrap();
-      setFeedback({ severity: "success", message: "Trial cancelado; el negocio volvió a su plan base." });
       await refreshAfterMutation();
+      setFeedback({ severity: "success", message: "Trial cancelado; el negocio volvió a su plan base." });
     } catch (error) {
       setFeedback({ severity: "error", message: errorMessage(error) });
     }
@@ -150,7 +152,7 @@ export default function AdminPlansPage() {
           ) : (
             <List disablePadding sx={{ maxHeight: 620, overflow: "auto" }}>
               {businesses.map((business) => (
-                <ListItemButton key={business.id} selected={business.id === businessId} onClick={() => { setSelectedBusiness(business); setFeedback(null); }} divider>
+                <ListItemButton key={business.id} selected={business.id === businessId} onClick={() => selectBusiness(business)} divider>
                   <ListItemText
                     primary={business.name}
                     secondary={`#${business.id} · ${business.owner?.email || business.email || "Sin email"}`}
@@ -197,7 +199,7 @@ export default function AdminPlansPage() {
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
                 <FormControl size="small" sx={{ minWidth: 220 }}>
                   <InputLabel>Plan</InputLabel>
-                  <Select label="Plan" value={planCode} onChange={(event) => setPlanCode(event.target.value)}>
+                  <Select label="Plan" value={planCode} onChange={(event) => setPlanCodeOverride(event.target.value)}>
                     {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
                   </Select>
                 </FormControl>
@@ -218,7 +220,7 @@ export default function AdminPlansPage() {
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mt: 2 }} alignItems={{ md: "center" }}>
                   <FormControl size="small" sx={{ minWidth: 220 }}>
                     <InputLabel>Plan del trial</InputLabel>
-                    <Select label="Plan del trial" value={trialPlanCode} onChange={(event) => setTrialPlanCode(event.target.value)}>
+                    <Select label="Plan del trial" value={trialPlanCode} onChange={(event) => setTrialPlanCodeOverride(event.target.value)}>
                       {catalog.map((entry) => <MenuItem key={entry.code} value={entry.code}>{entry.name}</MenuItem>)}
                     </Select>
                   </FormControl>
