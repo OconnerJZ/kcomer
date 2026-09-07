@@ -5,6 +5,7 @@ import OwnerOrders from "../../pages/OwnerOrders";
 import OwnerReports from "../../pages/OwnerReports";
 import OwnerReviews from "../../pages/OwnerReviews";
 import OwnerLoyalty from "../../pages/OwnerLoyalty";
+import OwnerMarketing from "../../pages/OwnerMarketing";
 import OwnerSettings from "../../pages/OwnerSettings";
 
 const OwnerDashboardContent = ({
@@ -33,6 +34,7 @@ const OwnerDashboardContent = ({
       {displayedTab === 2 && allowedTabs.includes(2) && <OwnerReports businessId={businessId} />}
       {displayedTab === 4 && allowedTabs.includes(4) && <OwnerReviews businessId={businessId} />}
       {displayedTab === 5 && allowedTabs.includes(5) && <OwnerLoyalty businessId={businessId} />}
+      {displayedTab === 6 && allowedTabs.includes(6) && <OwnerMarketing businessId={businessId} />}
       {displayedTab === 3 && allowedTabs.includes(3) && (
         <OwnerSettings businessData={selectedBusiness} onRefresh={onRefreshBusinesses} />
       )}
