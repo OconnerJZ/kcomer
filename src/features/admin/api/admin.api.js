@@ -3,6 +3,9 @@ import { ENDPOINTS } from "@Shared/api/endpoints";
 
 const adminApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    getAdminDashboard: builder.query({
+      query: () => ENDPOINTS.admin.dashboard,
+    }),
     getAdminBusinesses: builder.query({
       query: ({ q = "", limit = 20 } = {}) => ({
         url: ENDPOINTS.admin.businesses,
@@ -61,6 +64,7 @@ const adminApi = api.injectEndpoints({
 });
 
 export const {
+  useGetAdminDashboardQuery,
   useGetAdminBusinessesQuery,
   useGetAdminBusinessPlanQuery,
   useGetAdminBusinessPlanImpactQuery,
