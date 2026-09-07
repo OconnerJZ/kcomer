@@ -89,6 +89,10 @@ const adminApi = api.injectEndpoints({
         { type: "Stats", id: "admin-dashboard" },
       ],
     }),
+    getAdminPlanSummary: builder.query({
+      query: () => ENDPOINTS.admin.planSummary,
+      providesTags: [{ type: "BusinessPlan", id: "ADMIN_SUMMARY" }],
+    }),
     getAdminBusinessPlan: builder.query({
       query: ({ businessId }) => `${ENDPOINTS.admin.businesses}/${businessId}/plan`,
       providesTags: (_result, _error, { businessId }) => [{ type: "BusinessPlan", id: businessId }],
@@ -112,6 +116,9 @@ const adminApi = api.injectEndpoints({
       invalidatesTags: (_result, _error, { businessId }) => [
         { type: "BusinessPlan", id: businessId },
         { type: "BusinessPlan", id: `history-${businessId}` },
+        { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
+        { type: "Business", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
       ],
     }),
     grantAdminBusinessPlanTrial: builder.mutation({
@@ -123,6 +130,9 @@ const adminApi = api.injectEndpoints({
       invalidatesTags: (_result, _error, { businessId }) => [
         { type: "BusinessPlan", id: businessId },
         { type: "BusinessPlan", id: `history-${businessId}` },
+        { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
+        { type: "Business", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
       ],
     }),
     cancelAdminBusinessPlanTrial: builder.mutation({
@@ -134,6 +144,9 @@ const adminApi = api.injectEndpoints({
       invalidatesTags: (_result, _error, { businessId }) => [
         { type: "BusinessPlan", id: businessId },
         { type: "BusinessPlan", id: `history-${businessId}` },
+        { type: "BusinessPlan", id: "ADMIN_SUMMARY" },
+        { type: "Business", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
       ],
     }),
   }),
@@ -150,6 +163,7 @@ export const {
   useGetAdminBusinessQuery,
   useUpdateAdminBusinessStatusMutation,
   useUpdateAdminBusinessVerificationMutation,
+  useGetAdminPlanSummaryQuery,
   useGetAdminBusinessPlanQuery,
   useGetAdminBusinessPlanImpactQuery,
   useGetAdminBusinessPlanHistoryQuery,
