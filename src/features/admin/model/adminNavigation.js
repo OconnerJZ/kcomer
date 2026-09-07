@@ -21,8 +21,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/businesses",
     icon: "businesses",
     section: "Plataforma",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Administración global de negocios, propietarios y estado operativo.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Administración global de negocios, propietarios y estado de plataforma.",
   },
   {
     id: "users",

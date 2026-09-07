@@ -5,12 +5,48 @@ const adminApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAdminDashboard: builder.query({
       query: () => ENDPOINTS.admin.dashboard,
+      providesTags: [{ type: "Stats", id: "admin-dashboard" }],
     }),
     getAdminBusinesses: builder.query({
       query: ({ q = "", limit = 20 } = {}) => ({
         url: ENDPOINTS.admin.businesses,
         params: { q, limit },
       }),
+      providesTags: (result) => {
+        const items = result?.data ?? result ?? [];
+        return [
+          { type: "Business", id: "ADMIN_LIST" },
+          ...items.map((business) => ({ type: "Business", id: `admin-${business.id}` })),
+        ];
+      },
+    }),
+    getAdminBusiness: builder.query({
+      query: ({ businessId }) => `${ENDPOINTS.admin.businesses}/${businessId}`,
+      providesTags: (_result, _error, { businessId }) => [{ type: "Business", id: `admin-${businessId}` }],
+    }),
+    updateAdminBusinessStatus: builder.mutation({
+      query: ({ businessId, ...data }) => ({
+        url: `${ENDPOINTS.admin.businesses}/${businessId}/status`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { businessId }) => [
+        { type: "Business", id: `admin-${businessId}` },
+        { type: "Business", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
+      ],
+    }),
+    updateAdminBusinessVerification: builder.mutation({
+      query: ({ businessId, ...data }) => ({
+        url: `${ENDPOINTS.admin.businesses}/${businessId}/verification`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (_result, _error, { businessId }) => [
+        { type: "Business", id: `admin-${businessId}` },
+        { type: "Business", id: "ADMIN_LIST" },
+        { type: "Stats", id: "admin-dashboard" },
+      ],
     }),
     getAdminBusinessPlan: builder.query({
       query: ({ businessId }) => `${ENDPOINTS.admin.businesses}/${businessId}/plan`,
@@ -66,6 +102,9 @@ const adminApi = api.injectEndpoints({
 export const {
   useGetAdminDashboardQuery,
   useGetAdminBusinessesQuery,
+  useGetAdminBusinessQuery,
+  useUpdateAdminBusinessStatusMutation,
+  useUpdateAdminBusinessVerificationMutation,
   useGetAdminBusinessPlanQuery,
   useGetAdminBusinessPlanImpactQuery,
   useGetAdminBusinessPlanHistoryQuery,

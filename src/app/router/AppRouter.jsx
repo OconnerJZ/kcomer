@@ -18,6 +18,7 @@ const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvi
 const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
 const AdminShell = lazy(() => import("@Features/admin/components/AdminShell"));
 const AdminOverviewPage = lazy(() => import("@Features/admin/pages/AdminOverviewPage"));
+const AdminBusinessesPage = lazy(() => import("@Features/admin/pages/AdminBusinessesPage"));
 const AdminPlansPage = lazy(() => import("@Features/admin/pages/AdminPlansPage"));
 
 const ProtectedRoute = ({ children }) => {
@@ -58,6 +59,7 @@ export default function AppRouter() {
 
           <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
             <Route index element={<AdminOverviewPage />} />
+            <Route path="businesses" element={<AdminBusinessesPage />} />
             <Route path="plans" element={<AdminPlansPage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
