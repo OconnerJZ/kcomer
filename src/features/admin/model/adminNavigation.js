@@ -31,8 +31,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/users",
     icon: "users",
     section: "Plataforma",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Gestión global de usuarios, roles y bloqueos.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Gestión global de usuarios, roles, membresías y bloqueos de cuenta.",
   },
   {
     id: "plans",
