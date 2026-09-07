@@ -23,6 +23,7 @@ import {
   useUpdateAdminBusinessStatusMutation,
   useUpdateAdminBusinessVerificationMutation,
 } from "../api/admin.api";
+import { adminBusinessPropType } from "../model/adminBusinessPropTypes";
 
 const errorMessage = (error) => error?.data?.message || error?.message || "No fue posible completar la operación";
 
@@ -193,3 +194,7 @@ export default function AdminBusinessStatusPanel({ business }) {
     </Paper>
   );
 }
+
+AdminBusinessStatusPanel.propTypes = {
+  business: adminBusinessPropType.isRequired,
+};

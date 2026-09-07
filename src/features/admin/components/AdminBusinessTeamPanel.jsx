@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { adminBusinessTeamPropType } from "../model/adminBusinessPropTypes";
 
 const ROLE_LABELS = Object.freeze({
   primary_owner: "Propietario principal",
@@ -63,3 +64,7 @@ export default function AdminBusinessTeamPanel({ team = [] }) {
     </Paper>
   );
 }
+
+AdminBusinessTeamPanel.propTypes = {
+  team: adminBusinessTeamPropType,
+};

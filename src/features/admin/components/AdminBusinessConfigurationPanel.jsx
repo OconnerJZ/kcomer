@@ -6,6 +6,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { adminBusinessConfigurationPropType } from "../model/adminBusinessPropTypes";
 
 const PAYMENT_LABELS = Object.freeze({
   cash: "Efectivo",
@@ -114,3 +115,7 @@ export default function AdminBusinessConfigurationPanel({ configuration }) {
     </Paper>
   );
 }
+
+AdminBusinessConfigurationPanel.propTypes = {
+  configuration: adminBusinessConfigurationPropType,
+};

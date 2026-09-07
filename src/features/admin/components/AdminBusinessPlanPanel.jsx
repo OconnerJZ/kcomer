@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -8,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ArrowForwardRounded } from "@mui/icons-material";
+import { adminBusinessPlanPropType } from "../model/adminBusinessPropTypes";
 
 const LIMIT_LABELS = Object.freeze({
   teamMembers: "Equipo",
@@ -79,3 +81,8 @@ export default function AdminBusinessPlanPanel({ plan, onManage }) {
     </Paper>
   );
 }
+
+AdminBusinessPlanPanel.propTypes = {
+  plan: adminBusinessPlanPropType,
+  onManage: PropTypes.func.isRequired,
+};
