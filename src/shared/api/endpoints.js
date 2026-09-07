@@ -25,6 +25,7 @@ export const ENDPOINTS = {
     users: `${ADMIN_NAME}/users`,
     planSummary: `${ADMIN_NAME}/plans/summary`,
     features: `${ADMIN_NAME}/features`,
+    marketing: `${ADMIN_NAME}/marketing`,
   },
   businesses: {
     base: BUSINESS_NAME,

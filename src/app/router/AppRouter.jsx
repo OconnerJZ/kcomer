@@ -22,6 +22,7 @@ const AdminBusinessesPage = lazy(() => import("@Features/admin/pages/AdminBusine
 const AdminUsersPage = lazy(() => import("@Features/admin/pages/AdminUsersPage"));
 const AdminPlansPage = lazy(() => import("@Features/admin/pages/AdminPlansPage"));
 const AdminFeaturesPage = lazy(() => import("@Features/admin/pages/AdminFeaturesPage"));
+const AdminMarketingPage = lazy(() => import("@Features/admin/pages/AdminMarketingPage"));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -65,6 +66,7 @@ export default function AppRouter() {
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="plans" element={<AdminPlansPage />} />
             <Route path="features" element={<AdminFeaturesPage />} />
+            <Route path="marketing" element={<AdminMarketingPage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 

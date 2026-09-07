@@ -61,8 +61,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/marketing",
     icon: "marketing",
     section: "Operación",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Moderación y operación administrativa de Marketing y qsCome Ads.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Supervisión de Marketing Center y moderación administrativa de qsCome Ads.",
   },
   {
     id: "payments",
