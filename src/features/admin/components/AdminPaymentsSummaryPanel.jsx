@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Alert, Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import { useGetAdminPaymentSummaryQuery } from "../api/adminPayments.api";
 
@@ -12,6 +13,12 @@ function Metric({ label, value, helper }) {
     </Box>
   );
 }
+
+Metric.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  helper: PropTypes.string,
+};
 
 export default function AdminPaymentsSummaryPanel() {
   const query = useGetAdminPaymentSummaryQuery();
