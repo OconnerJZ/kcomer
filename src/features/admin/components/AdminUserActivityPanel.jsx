@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import { adminUserActivityPropType } from "../model/adminUserPropTypes";
 
@@ -11,8 +12,8 @@ const Metric = ({ label, value }) => (
 );
 
 Metric.propTypes = {
-  label: Typography.propTypes?.children || (() => null),
-  value: Typography.propTypes?.children || (() => null),
+  label: PropTypes.string.isRequired,
+  value: PropTypes.number,
 };
 
 export default function AdminUserActivityPanel({ activity }) {
