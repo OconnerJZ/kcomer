@@ -4,10 +4,11 @@ export const DASHBOARD_TABS = Object.freeze([
   { id: 2, label: "Reportes", mobileLabel: "Reportes", icon: "assessment" },
   { id: 4, label: "Reseñas", mobileLabel: "Reseñas", icon: "reviews" },
   { id: 5, label: "Lealtad", mobileLabel: "Lealtad", icon: "loyalty" },
+  { id: 6, label: "Marketing", mobileLabel: "Marketing", icon: "campaign" },
   { id: 3, label: "Configuración", mobileLabel: "Config", icon: "settings" },
 ]);
 
-export const getVisibleDashboardTabs = (allowedTabs = [0, 1, 2, 4, 5, 3], pendingOrders = 0) =>
+export const getVisibleDashboardTabs = (allowedTabs = [0, 1, 2, 4, 5, 6, 3], pendingOrders = 0) =>
   DASHBOARD_TABS
     .filter((tab) => allowedTabs.includes(tab.id))
     .map((tab) => ({ ...tab, badge: tab.id === 0 ? pendingOrders : 0 }));
