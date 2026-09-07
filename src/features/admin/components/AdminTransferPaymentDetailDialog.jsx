@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Alert,
   Box,
@@ -211,3 +212,9 @@ export default function AdminTransferPaymentDetailDialog({ orderId, open, onClos
     </Dialog>
   );
 }
+
+AdminTransferPaymentDetailDialog.propTypes = {
+  orderId: PropTypes.number,
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
