@@ -8,6 +8,7 @@ const ORDERS_NAME = "api/orders";
 const PAYMENTS_NAME = "api/payments";
 const REVIEWS_NAME = "api/reviews";
 const LOYALTY_NAME = "api/loyalty";
+const MARKETING_NAME = "api/marketing";
 const STATS_NAME = "api/stats";
 const UPLOAD_NAME = "api/upload";
 
@@ -56,6 +57,11 @@ export const ENDPOINTS = {
     base: LOYALTY_NAME,
     business: `${LOYALTY_NAME}/business`,
     me: `${LOYALTY_NAME}/me`,
+  },
+  marketing: {
+    base: MARKETING_NAME,
+    business: `${MARKETING_NAME}/business`,
+    sponsored: `${MARKETING_NAME}/sponsored`,
   },
   stats: {
     business: `${STATS_NAME}/business`,
