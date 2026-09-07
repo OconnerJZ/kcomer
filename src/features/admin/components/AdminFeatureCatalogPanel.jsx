@@ -16,7 +16,8 @@ import {
   useUpdateAdminGlobalFeatureMutation,
   useUpdateAdminPlanFeatureMutation,
 } from "../api/admin.api";
-import FeatureModeSelect, { FEATURE_MODE_LABELS } from "./FeatureModeSelect";
+import { FEATURE_MODE_LABELS } from "../model/featureControl";
+import FeatureModeSelect from "./FeatureModeSelect";
 
 const dataOf = (response) => response?.data ?? response;
 const errorMessage = (error) => error?.data?.message || error?.message || "No fue posible aplicar el cambio";
@@ -106,7 +107,7 @@ export default function AdminFeatureCatalogPanel() {
           <Box sx={{ display: "grid", gridTemplateColumns: "minmax(250px,1.4fr) 155px repeat(4,155px)", gap: 1, px: 2, py: 1.5, borderBottom: "1px solid", borderColor: "divider", bgcolor: "action.hover" }}>
             <Typography variant="caption" fontWeight={700}>FEATURE</Typography>
             <Typography variant="caption" fontWeight={700}>GLOBAL</Typography>
-            {['Gratis', 'Nivel 1', 'Nivel 2', 'Nivel 3'].map((label) => <Typography key={label} variant="caption" fontWeight={700}>{label}</Typography>)}
+            {["Gratis", "Nivel 1", "Nivel 2", "Nivel 3"].map((label) => <Typography key={label} variant="caption" fontWeight={700}>{label}</Typography>)}
           </Box>
 
           {features.map((feature) => (

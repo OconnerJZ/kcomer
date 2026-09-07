@@ -20,7 +20,8 @@ import {
   useGetAdminBusinessFeaturesQuery,
   useUpdateAdminBusinessFeatureMutation,
 } from "../api/admin.api";
-import FeatureModeSelect, { FEATURE_MODE_LABELS, FEATURE_SOURCE_LABELS } from "./FeatureModeSelect";
+import { FEATURE_MODE_LABELS, FEATURE_SOURCE_LABELS } from "../model/featureControl";
+import FeatureModeSelect from "./FeatureModeSelect";
 
 const dataOf = (response) => response?.data ?? response;
 const errorMessage = (error) => error?.data?.message || error?.message || "No fue posible completar la operación";
