@@ -71,8 +71,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/payments",
     icon: "payments",
     section: "Operación",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Auditoría de evidencias y aclaraciones de pago.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Auditoría global de transferencias, evidencias y aclaraciones sin alterar la revisión del negocio.",
   },
   {
     id: "health",
