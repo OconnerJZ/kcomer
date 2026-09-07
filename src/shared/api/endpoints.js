@@ -20,6 +20,7 @@ export const ENDPOINTS = {
     google: `${AUTH_NAME}/google`,
   },
   admin: {
+    dashboard: `${ADMIN_NAME}/dashboard`,
     businesses: `${ADMIN_NAME}/businesses`,
   },
   businesses: {
