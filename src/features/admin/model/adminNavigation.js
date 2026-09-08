@@ -91,8 +91,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/audit",
     icon: "audit",
     section: "Sistema",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Trazabilidad de acciones administrativas sensibles.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Trazabilidad de acciones administrativas sensibles y cambios de planes.",
   },
 ]);
 
