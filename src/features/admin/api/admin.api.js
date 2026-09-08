@@ -6,6 +6,7 @@ const featureBroadTags = [
   { type: "FeatureControl", id: "CATALOG" },
   { type: "FeatureControl", id: "BUSINESSES" },
 ];
+const adminAuditTag = { type: "AdminAudit", id: "LEDGER" };
 
 const adminApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -40,6 +41,7 @@ const adminApi = api.injectEndpoints({
         { type: "Users", id: `admin-${userId}` },
         { type: "Users", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        adminAuditTag,
       ],
     }),
     updateAdminUserRole: builder.mutation({
@@ -52,6 +54,7 @@ const adminApi = api.injectEndpoints({
         { type: "Users", id: `admin-${userId}` },
         { type: "Users", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        adminAuditTag,
       ],
     }),
     getAdminBusinesses: builder.query({
@@ -81,6 +84,7 @@ const adminApi = api.injectEndpoints({
         { type: "Business", id: `admin-${businessId}` },
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        adminAuditTag,
       ],
     }),
     updateAdminBusinessVerification: builder.mutation({
@@ -93,6 +97,7 @@ const adminApi = api.injectEndpoints({
         { type: "Business", id: `admin-${businessId}` },
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
+        adminAuditTag,
       ],
     }),
     getAdminPlanSummary: builder.query({
@@ -126,6 +131,7 @@ const adminApi = api.injectEndpoints({
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
         featureBusinessTag(businessId),
+        adminAuditTag,
       ],
     }),
     grantAdminBusinessPlanTrial: builder.mutation({
@@ -141,6 +147,7 @@ const adminApi = api.injectEndpoints({
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
         featureBusinessTag(businessId),
+        adminAuditTag,
       ],
     }),
     cancelAdminBusinessPlanTrial: builder.mutation({
@@ -156,6 +163,7 @@ const adminApi = api.injectEndpoints({
         { type: "Business", id: "ADMIN_LIST" },
         { type: "Stats", id: "admin-dashboard" },
         featureBusinessTag(businessId),
+        adminAuditTag,
       ],
     }),
     getAdminFeatures: builder.query({
@@ -175,7 +183,7 @@ const adminApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: featureBroadTags,
+      invalidatesTags: [...featureBroadTags, adminAuditTag],
     }),
     updateAdminPlanFeature: builder.mutation({
       query: ({ featureKey, planCode, ...data }) => ({
@@ -183,7 +191,7 @@ const adminApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: featureBroadTags,
+      invalidatesTags: [...featureBroadTags, adminAuditTag],
     }),
     updateAdminBusinessFeature: builder.mutation({
       query: ({ featureKey, businessId, ...data }) => ({
@@ -191,7 +199,10 @@ const adminApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: (_result, _error, { businessId }) => [featureBusinessTag(businessId)],
+      invalidatesTags: (_result, _error, { businessId }) => [
+        featureBusinessTag(businessId),
+        adminAuditTag,
+      ],
     }),
   }),
   overrideExisting: false,
