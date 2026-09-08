@@ -16,7 +16,16 @@ const RegisterBusiness = lazy(() => import("@Features/owner/pages/RegisterBusine
 const OwnerDashboard = lazy(() => import("@Features/owner/pages/OwnerDashboard"));
 const BusinessInvitation = lazy(() => import("@Features/owner/pages/BusinessInvitation"));
 const SharedOrder = lazy(() => import("@Features/shared-orders/pages/SharedOrderPage"));
+const AdminShell = lazy(() => import("@Features/admin/components/AdminShell"));
+const AdminOverviewPage = lazy(() => import("@Features/admin/pages/AdminOverviewPage"));
+const AdminBusinessesPage = lazy(() => import("@Features/admin/pages/AdminBusinessesPage"));
+const AdminUsersPage = lazy(() => import("@Features/admin/pages/AdminUsersPage"));
 const AdminPlansPage = lazy(() => import("@Features/admin/pages/AdminPlansPage"));
+const AdminFeaturesPage = lazy(() => import("@Features/admin/pages/AdminFeaturesPage"));
+const AdminMarketingPage = lazy(() => import("@Features/admin/pages/AdminMarketingPage"));
+const AdminPaymentsPage = lazy(() => import("@Features/admin/pages/AdminPaymentsPage"));
+const AdminHealthPage = lazy(() => import("@Features/admin/pages/AdminHealthPage"));
+const AdminAuditPage = lazy(() => import("@Features/admin/pages/AdminAuditPage"));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -53,7 +62,20 @@ export default function AppRouter() {
               <Route key={route.path} path={route.path} element={route.isProtected ? <ProtectedRoute>{route.element}</ProtectedRoute> : route.element} />
             ))}
           </Route>
-          <Route path="/admin" element={<AdminRoute><AdminPlansPage /></AdminRoute>} />
+
+          <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="businesses" element={<AdminBusinessesPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="plans" element={<AdminPlansPage />} />
+            <Route path="features" element={<AdminFeaturesPage />} />
+            <Route path="marketing" element={<AdminMarketingPage />} />
+            <Route path="payments" element={<AdminPaymentsPage />} />
+            <Route path="health" element={<AdminHealthPage />} />
+            <Route path="audit" element={<AdminAuditPage />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Route>
+
           <Route path="/login/:from?" element={<Login />} />
           <Route path="*" element={<Navigate to="/explorar" replace />} />
         </Routes>
