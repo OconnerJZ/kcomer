@@ -81,8 +81,8 @@ export const ADMIN_MODULES = Object.freeze([
     path: "/admin/health",
     icon: "health",
     section: "Sistema",
-    status: ADMIN_MODULE_STATUS.PLANNED,
-    description: "Estado de API, base de datos, storage y realtime.",
+    status: ADMIN_MODULE_STATUS.READY,
+    description: "Diagnóstico de API, base de datos, storage y realtime desde la aplicación.",
   },
   {
     id: "audit",
