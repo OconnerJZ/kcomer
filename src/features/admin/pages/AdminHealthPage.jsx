@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Alert, Box, Button, Chip, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import { useGetAdminHealthQuery } from "../api/adminHealth.api";
@@ -30,7 +31,7 @@ function ComponentCard({ title, status, children }) {
             size="small"
             variant="outlined"
             color={status === "healthy" ? "success" : "warning"}
-            label={STATUS_LABEL[status] || status}
+            label={STATUS_LABEL[status] || status || "Sin datos"}
           />
         </Stack>
         {children}
@@ -39,7 +40,11 @@ function ComponentCard({ title, status, children }) {
   );
 }
 
-ComponentCard.propTypes = {};
+ComponentCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  status: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};
 
 export default function AdminHealthPage() {
   const query = useGetAdminHealthQuery(undefined, { pollingInterval: 30000 });
@@ -74,7 +79,7 @@ export default function AdminHealthPage() {
       </Stack>
 
       <Alert severity={data?.status === "healthy" ? "success" : "warning"}>
-        Estado general: <strong>{STATUS_LABEL[data?.status] || data?.status}</strong>. Última comprobación: {data?.checkedAt ? new Date(data.checkedAt).toLocaleString("es-MX") : "—"}.
+        Estado general: <strong>{STATUS_LABEL[data?.status] || data?.status || "Sin datos"}</strong>. Última comprobación: {data?.checkedAt ? new Date(data.checkedAt).toLocaleString("es-MX") : "—"}.
       </Alert>
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2,minmax(0,1fr))" }, gap: 2 }}>
