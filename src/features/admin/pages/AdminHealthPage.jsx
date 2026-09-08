@@ -100,6 +100,7 @@ export default function AdminHealthPage() {
         <ComponentCard title="Storage" status={components?.storage?.status}>
           <Typography variant="body2">Uploads públicos: <strong>{STATUS_LABEL[components?.storage?.details?.publicUploads] || "—"}</strong></Typography>
           <Typography variant="body2">Evidencias privadas: <strong>{STATUS_LABEL[components?.storage?.details?.privateEvidence] || "—"}</strong></Typography>
+          <Typography variant="body2">Filesystem: <strong>{components?.storage?.details?.disk ? "Disponible" : "No disponible"}</strong></Typography>
           <Typography variant="body2">Uso del filesystem: <strong>{components?.storage?.details?.disk?.usedPercent == null ? "—" : `${components.storage.details.disk.usedPercent}%`}</strong></Typography>
           <Typography variant="body2">Disponible: <strong>{formatBytes(components?.storage?.details?.disk?.availableBytes)}</strong></Typography>
         </ComponentCard>
