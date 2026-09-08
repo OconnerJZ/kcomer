@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import {
   Accordion,
@@ -47,6 +48,11 @@ function Metric({ label, value }) {
     </Paper>
   );
 }
+
+Metric.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
 
 export default function AdminAuditPage() {
   const [q, setQ] = useState("");
