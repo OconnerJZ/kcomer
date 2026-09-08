@@ -4,8 +4,9 @@ import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import { useGetAdminHealthQuery } from "../api/adminHealth.api";
 
 const formatBytes = (value) => {
-  const bytes = Number(value || 0);
-  if (!bytes) return "0 B";
+  if (value == null || Number.isNaN(Number(value))) return "—";
+  const bytes = Number(value);
+  if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return `${(bytes / (1024 ** index)).toFixed(index ? 1 : 0)} ${units[index]}`;
