@@ -20,7 +20,7 @@ const adminAuditApi = api.injectEndpoints({
   overrideExisting: false,
 });
 
-export export const {
+export const {
   useGetAdminAuditSummaryQuery,
   useGetAdminAuditEventsQuery,
 } = adminAuditApi;
