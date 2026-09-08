@@ -4,6 +4,7 @@ import { ENDPOINTS } from "@Shared/api/endpoints";
 const summaryTag = { type: "AdminMarketing", id: "SUMMARY" };
 const campaignsTag = { type: "AdminMarketing", id: "CAMPAIGNS" };
 const adsTag = { type: "AdminMarketing", id: "ADS" };
+const auditTag = { type: "AdminAudit", id: "LEDGER" };
 
 const adminMarketingApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -24,7 +25,7 @@ const adminMarketingApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: [summaryTag, campaignsTag],
+      invalidatesTags: [summaryTag, campaignsTag, auditTag],
     }),
     getAdminAds: builder.query({
       query: ({ q = "", status = "", moderation = "", limit = 50 } = {}) => ({
@@ -44,7 +45,7 @@ const adminMarketingApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: [summaryTag, adsTag],
+      invalidatesTags: [summaryTag, adsTag, auditTag],
     }),
     updateAdminAdStatus: builder.mutation({
       query: ({ adCampaignId, ...data }) => ({
@@ -52,7 +53,7 @@ const adminMarketingApi = api.injectEndpoints({
         method: "PATCH",
         data,
       }),
-      invalidatesTags: [summaryTag, adsTag],
+      invalidatesTags: [summaryTag, adsTag, auditTag],
     }),
   }),
   overrideExisting: false,
