@@ -5,7 +5,6 @@ const adminHealthApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAdminHealth: builder.query({
       query: () => ENDPOINTS.admin.health,
-      providesTags: [{ type: "Admin", id: "HEALTH" }],
     }),
   }),
   overrideExisting: false,
